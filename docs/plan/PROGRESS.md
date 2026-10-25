@@ -164,7 +164,7 @@ per phase (the phase file names it).
 - [x] N3 — Spots of a game: `posti.ini` (ad21c5e)
 - [x] N4 — Snapshots with extra spots (9e0a8b2)
 - [x] N5a — `SaveSet` without the journal, unused (36ff969)
-- [ ] N5b — Journal and recovery
+- [x] N5b — Journal and recovery (5ae0653)
 - [ ] N5c — `SaveManager` switches through `SaveSet`
 - [ ] N5d — `SaveManager` saves through `SaveSet`, and the check
 - [ ] N6 — The locator finds several spots
