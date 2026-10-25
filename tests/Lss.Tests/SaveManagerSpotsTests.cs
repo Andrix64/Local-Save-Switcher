@@ -155,6 +155,23 @@ public sealed class SaveManagerSpotsTests : IDisposable
         Assert.True(manager.HasUnsavedProgress());
     }
 
+    // Come nella 1.0: la cartella principale vuota non svuota la partita, anche se un altro posto ha file.
+    [Fact]
+    public void SavingIsRefusedWhenOnlyAnExtraSpotHasFiles()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+
+        File.Delete(Path.Combine(Game1, "slot.sav"));
+
+        Result saved = manager.SaveProgress();
+
+        Assert.False(saved.Success);
+        Assert.Equal("first", File.ReadAllText(Path.Combine(ProfileFolder("Anna"), "slot.sav")));
+    }
+
     [Fact]
     public void AFullRoundKeepsEverySpot()
     {

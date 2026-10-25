@@ -138,6 +138,22 @@ internal sealed class SaveSet
         return true;
     }
 
+    /// <summary>
+    /// true se il posto 1 (la cartella principale) non ha file di salvataggio,
+    /// anche se gli altri posti ne hanno.
+    /// </summary>
+    public bool PrimaryIsEmpty()
+    {
+        SaveSpot? primary = spots.FirstOrDefault(spot => spot.Id == 1);
+
+        if (primary is null)
+            return true;
+
+        return primary.IsWholeFolder
+            ? FileOps.HasNoSaveFiles(primary.Folder)
+            : FileOps.MatchedFiles(primary.Folder, primary.Pattern, primary.Recursive).Count == 0;
+    }
+
     /// <summary>true se nessun posto del gioco ha file di salvataggio.</summary>
     public bool GameIsEmpty()
     {
