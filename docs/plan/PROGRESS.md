@@ -186,7 +186,7 @@ per phase (the phase file names it).
 - [x] O2 — GOG Galaxy and GOG games (Windows) (253fc6c)
 - [x] O3 — Heroic Games Launcher (7df1fe1)
 - [x] O4 — Any other game, added by hand (ca23683; menu Modifica/Rimuovi e test della vista non fatti, vedi note)
-- [ ] O5 — Non-Steam games added to Steam
+- [x] O5 — Non-Steam games added to Steam (b3bdde7)
 - [ ] O6 — The same game twice
 - [ ] O7 — 👤 Checks
 
@@ -216,6 +216,14 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — O5 (Haiku), commit `b3bdde7`. `shortcuts.vdf` letto con `BinaryVdf` (nessun
+  formato non verificato: su questo PC non ci sono collegamenti, quindi il file reale non è
+  stato visto; la struttura è quella del piano, provata con un file scritto in test).
+  Il `appid` è letto come int32 e usato senza segno (`unchecked((uint)…)`), perché il piano
+  diceva "come uint" ma Steam lo scrive con segno. Avvio: `steam://rungameid/` +
+  `(appid << 32) | 0x02000000`. Le voci Heroic, EpicGamesLauncher e GalaxyClient sono
+  escluse. Lo stato "in esecuzione" usa il registro di Steam con l'ID del collegamento: non
+  verificato su un Deck. Test: `SteamShortcutsTests`.
 - 2026-10-25 — O4 (Haiku), commit `ca23683`. Fatto: `ManualGames` (gioco.ini in
   `<dati>\manual\local\<id>`), `ManualProvider` (account "Questo computer", avvio con
   l'eseguibile, su Linux niente `.exe`), pulsante "Aggiungi un gioco…" nell'intestazione
