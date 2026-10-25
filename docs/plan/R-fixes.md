@@ -27,6 +27,7 @@ What Andrix found trying phase P (2026-10-25), and the task for each:
 | 10 | "Add a game": cancelling the file choice still asks the name | R2 |
 | 11 | Settings files are `.ini`: they should be JSON | R9, R10 |
 | 12 | Old saved paths have `\` instead of `/` | R11 |
+| 13 | A full screen button in the simple mode (and back), never over the game | R7a |
 | — | **Everything that exists only for data of LSS 1.0 (or of builds before this phase) goes in one separate file**, so it can be deleted in one go when 1.0 is gone (Andrix is the only user) | R0, and R9–R11 put their migrations there |
 
 The design canvas (https://claude.ai/artifact/YEykCPUor96ApEYdzMnmRS) stays
@@ -360,6 +361,53 @@ disabled while playing.
 
 Commit: `Simple/Advanced switch in the header instead of the gear`
 
+## R7a — Full screen button in the simple mode
+
+**Asked by Andrix (2026-10-25):** a button in the simple mode that puts LSS
+in full screen; in full screen the same button takes it back. It must
+**never cover the game**.
+
+**Do.**
+
+1. A round 48 px button in the `SimpleView` header, left of the R7 switch,
+   with two outline icons (Path, 24 px, like the rest of the header):
+   "enter full screen" (four corners pointing out) and "leave full screen"
+   (four corners pointing in). Tooltip and accessible name from two new
+   keys (`FullScreenOn` "Schermo intero" / "Full screen", `FullScreenOff`
+   "Esci dallo schermo intero" / "Leave full screen").
+2. It sets the main window's `WindowState` to `FullScreen` and back to the
+   state it had before (`Normal` or `Maximized`: remember which). Use the
+   main window from the view (`TopLevel.GetTopLevel(this) as Window`) or a
+   small window service; the view model only holds `IsFullScreen`. The
+   icon follows the real `WindowState` (also when the system changes it).
+3. **F11** toggles too, and **Esc** leaves full screen (only when nothing
+   else uses Esc: not while a dialog is open).
+4. **Never over the game:** no `Topmost`, ever. When a game is started
+   from the simple mode (`SimplePlayFlow` / `MainWindowViewModel`
+   `RunSimpleAsync`, after the launch), LSS does **not** take the focus
+   back (no `Activate()`), and if it is in full screen it **minimizes**
+   itself while the game runs and comes back (full screen again, `Activate`)
+   when the game is closed and the save is done. Check on Windows that a
+   game started through Steam comes to the front. On the Steam Deck in
+   desktop mode the same; in Game Mode (gamescope) the window manager
+   decides: write in the Notes what happens there after R13.
+5. The advanced mode doesn't have the button. Switching to the advanced
+   mode (R7) leaves full screen first.
+6. Remembered: `AppSettings` gets `SchermoIntero` (in `lss.json` after R9;
+   if R9 isn't done yet, in `lss.ini` and R9 converts it): LSS starts in
+   full screen if it was left so in the simple mode. A first start or the
+   advanced mode → not full screen.
+7. `WindowFit` (fits the window in the working area on the Steam Deck)
+   must not fight with full screen: don't apply it while full screen.
+
+**Tests.** View model: the command toggles `IsFullScreen`; the setting is
+saved and read; starting a game in full screen asks the window to
+minimize, the end of the game asks to restore (use a small interface for
+the window so the test can fake it). Screenshot of the simple mode with
+the button.
+
+Commit: `Simple mode: full screen button`
+
 ## R8 — Two settings windows: the game's and LSS's
 
 **Decided with Andrix:** LSS settings are reachable in the simple mode by
@@ -525,7 +573,7 @@ Commit: `Fix old saved paths with backslashes on Linux`
 
 1. `tools/UiScreenshots`: sidebar (01), simple tiles with icon and badge
    under the chip (24), switch in both headers, both settings windows, the
-   ⋯ menu, the PIN pad on "Who's playing?". Regenerate and look at each
+   ⋯ menu, the PIN pad on "Who's playing?", the full screen button. Regenerate and look at each
    one next to the canvas.
 2. `docs/DEVELOPMENT.md`: the JSON files (names, where), `V1Compat`
    section (R0) up to date.
@@ -541,7 +589,8 @@ Commit: `Screenshots and docs for phase R`
 Andrix, **first copying the whole LSS data folder somewhere safe** on each
 machine (Windows `%LOCALAPPDATA%\LSS`, Linux `~/.local/share/LSS`):
 
-- Points 1–12 of the table above, one by one.
+- Points 1–13 of the table above, one by one (13: start a game from full
+  screen, check it comes to the front and LSS comes back after).
 - Everything still there after the JSON conversion: players and PINs,
   favourites, playthroughs and history, save spots, ignored folders,
   manual games; `.ini.precedente` files next to the new `.json`.

@@ -217,6 +217,7 @@ per phase (the phase file names it).
 - [ ] R5 — Long game names: "…" and a slow scroll
 - [ ] R6 — Simple mode tiles: badge under the chip, icon when there's no cover
 - [ ] R7 — A Simple / Advanced switch instead of ⚙
+- [ ] R7a — Full screen button in the simple mode
 - [ ] R8 — Two settings windows: the game's and LSS's
 - [ ] R9 — JSON settings files: the format and the app-wide files
 - [ ] R10 — JSON for the per-game files
