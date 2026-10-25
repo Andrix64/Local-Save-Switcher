@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Lss;
@@ -13,6 +14,9 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
 
     // Regole lette dall'ultimo FindGames: appinfo.vdf si legge una volta sola.
     private SteamAppInfo? appInfo;
+
+    // ID dei collegamenti (giochi non Steam) letti dall'ultimo FindGames.
+    private readonly HashSet<string> shortcuts = [];
 
     // Marchio: non si traduce.
     public string DisplayName => "Steam";
@@ -58,9 +62,24 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
         if (steam == null)
             return [];
 
-        IReadOnlyList<GameInfo> games = SteamLibrary.FindGames(steam, account.Folder);
+        var games = SteamLibrary.FindGames(steam, account.Folder).ToList();
 
         appInfo = SteamAppInfo.Load(steam, games.Select(game => game.Id).ToHashSet());
+
+        // Giochi non Steam aggiunti a Steam: stesso gruppo, avvio con il loro ID di collegamento.
+        shortcuts.Clear();
+
+        foreach (SteamShortcuts.Shortcut shortcut in SteamShortcuts.Read(account.Folder))
+        {
+            string id = shortcut.AppId.ToString(CultureInfo.InvariantCulture);
+
+            if (games.Any(game => game.Id == id))
+                continue;
+
+            shortcuts.Add(id);
+            games.Add(new GameInfo("steam", id, shortcut.Name, "", "", shortcut.StartDir, [],
+                SupportState.NoSaves, Source: SaveSource.None));
+        }
 
         return SaveLookup.Apply(games, this, account, platform.GetKnownFolders(), AppData.Root);
     }
@@ -125,7 +144,11 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
     {
         try
         {
-            platform.OpenSteamUri("steam://rungameid/" + game.Id);
+            string uri = shortcuts.Contains(game.Id)
+                ? SteamShortcuts.LaunchUri(uint.Parse(game.Id, CultureInfo.InvariantCulture))
+                : "steam://rungameid/" + game.Id;
+
+            platform.OpenSteamUri(uri);
             Log.Write("Avvio di " + game.Name + " tramite Steam");
             return Result.Ok(Loc.F(Strings.GameLaunching, game.Name));
         }
