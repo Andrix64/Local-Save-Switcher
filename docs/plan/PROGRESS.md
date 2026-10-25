@@ -195,7 +195,7 @@ per phase (the phase file names it).
 
 - [x] P1 — Players (57664e2)
 - [x] P2a — Owner (e375941)
-- [ ] P2b — Favourite
+- [x] P2b — Favourite (1c15ec6)
 - [ ] P2c — Existing playthroughs and export
 - [ ] P3 — Getting a game ready for a player (simple mode)
 - [ ] P4 — Mode setting and start-up
