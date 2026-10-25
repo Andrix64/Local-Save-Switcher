@@ -76,6 +76,14 @@ public sealed class GogProvider(IPlatform platform) : IGameProvider
     public bool CanLaunch(GameInfo game) => executables.GetValueOrDefault(game.Id, "") != "";
 
     /// <summary>
+    /// Il campo exe del registro, nella cartella del gioco se è relativo; "" se manca.
+    /// </summary>
+    public string ExecutableOf(GameInfo game) =>
+        executables.GetValueOrDefault(game.Id, "") is { Length: > 0 } executable
+            ? Path.Combine(game.InstallPath, executable)
+            : "";
+
+    /// <summary>
     /// Avvia l'eseguibile del gioco nella sua cartella, senza passare da GOG Galaxy.
     /// </summary>
     public Result Launch(GameInfo game)

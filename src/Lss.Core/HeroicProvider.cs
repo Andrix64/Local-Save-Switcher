@@ -14,7 +14,7 @@ public sealed class HeroicProvider(IPlatform platform) : IGameProvider
 {
     // Un gioco di Heroic con quello che serve per gestirlo.
     private sealed record Game(string Runner, string AppName, string Title, string Folder, string Prefix,
-        IReadOnlyList<SaveRule> Rules, CloudState Cloud);
+        IReadOnlyList<SaveRule> Rules, CloudState Cloud, string Executable);
 
     // Letti dall'ultimo FindGames.
     private readonly Dictionary<string, Game> games = [];
@@ -50,7 +50,7 @@ public sealed class HeroicProvider(IPlatform platform) : IGameProvider
         Dictionary<string, string> gogTitles = ReadGogTitles(config);
         var found = new List<GameInfo>();
 
-        foreach ((string runner, string appName, string title, string install) in ReadInstalled(config))
+        foreach ((string runner, string appName, string title, string install, string executable) in ReadInstalled(config))
         {
             string id = runner + "_" + appName;
 
@@ -62,7 +62,7 @@ public sealed class HeroicProvider(IPlatform platform) : IGameProvider
             (IReadOnlyList<SaveRule> rules, CloudState cloud) = RulesOf(config, runner, appName, settings);
 
             string name = title != "" ? title : gogTitles.GetValueOrDefault(appName, "");
-            games[id] = new Game(runner, appName, name, install, prefix, rules, cloud);
+            games[id] = new Game(runner, appName, name, install, prefix, rules, cloud, executable);
 
             string library = Path.GetDirectoryName(install) ?? "";
 
@@ -119,6 +119,14 @@ public sealed class HeroicProvider(IPlatform platform) : IGameProvider
     public IReadOnlyList<RootOverride> RootOverrides(GameAccount account, GameInfo game) => [];
 
     /// <summary>
+    /// Eseguibile del gioco nella sua cartella (campo executable del file di Heroic), o "".
+    /// </summary>
+    public string ExecutableOf(GameInfo game) =>
+        games.TryGetValue(game.Id, out Game? found) && found.Executable != ""
+            ? Path.Combine(found.Folder, found.Executable)
+            : "";
+
+    /// <summary>
     /// Cartella che contiene drive_c del prefisso Proton (pfx) o Wine del gioco, o "".
     /// </summary>
     public string PrefixOf(GameInfo game) => games.TryGetValue(game.Id, out Game? found) ? found.Prefix : "";
@@ -168,9 +176,9 @@ public sealed class HeroicProvider(IPlatform platform) : IGameProvider
     /// <summary>
     /// Giochi installati (runner, appName, titolo, cartella) dai file di ogni runner.
     /// </summary>
-    private static List<(string Runner, string AppName, string Title, string Install)> ReadInstalled(string config)
+    private static List<(string Runner, string AppName, string Title, string Install, string Executable)> ReadInstalled(string config)
     {
-        var result = new List<(string, string, string, string)>();
+        var result = new List<(string, string, string, string, string)>();
 
         // Legendary (Epic) e Nile (Amazon): oggetto con una voce per gioco.
         foreach ((string runner, string file) in new[]
@@ -195,7 +203,7 @@ public sealed class HeroicProvider(IPlatform platform) : IGameProvider
     }
 
     // Aggiunge un gioco letto da un file di un runner, se ha app_name e cartella.
-    private static void Add(List<(string, string, string, string)> result, string runner, JsonElement entry)
+    private static void Add(List<(string, string, string, string, string)> result, string runner, JsonElement entry)
     {
         string appName = Text(entry, "app_name") is { Length: > 0 } name ? name : Text(entry, "appName");
         string install = Text(entry, "install_path") is { Length: > 0 } path ? path : InstallPathOf(entry);
@@ -203,7 +211,18 @@ public sealed class HeroicProvider(IPlatform platform) : IGameProvider
         if (appName == "" || install == "")
             return;
 
-        result.Add((runner, appName, Text(entry, "title"), Path.TrimEndingDirectorySeparator(install)));
+        result.Add((runner, appName, Text(entry, "title"), Path.TrimEndingDirectorySeparator(install), ExecutableOf(entry)));
+    }
+
+    // Eseguibile di una voce: campo "executable", o install.executable, o "".
+    private static string ExecutableOf(JsonElement entry)
+    {
+        if (Text(entry, "executable") is { Length: > 0 } executable)
+            return executable;
+
+        return entry.TryGetProperty("install", out JsonElement install) && install.ValueKind == JsonValueKind.Object
+            ? Text(install, "executable")
+            : "";
     }
 
     // Cartella di installazione di una voce sideload (install.install_path), o "".

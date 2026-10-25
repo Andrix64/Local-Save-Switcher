@@ -120,6 +120,18 @@ public sealed class GogProviderTests : IDisposable
     }
 
     [Fact]
+    public void ExecutableIsTheRegistryExeInTheGameFolder()
+    {
+        string install = Path.Combine(Library, "Gioco");
+        AddGame("1207", "Gioco", install, "gioco.exe");
+
+        var provider = new GogProvider(platform);
+        GameInfo game = provider.FindGames(provider.FindAccounts().Single()).Single();
+
+        Assert.Equal(Path.Combine(install, "gioco.exe"), provider.ExecutableOf(game));
+    }
+
+    [Fact]
     public void GameWithoutProgramCannotBeLaunched()
     {
         string install = Path.Combine(Library, "Gioco");

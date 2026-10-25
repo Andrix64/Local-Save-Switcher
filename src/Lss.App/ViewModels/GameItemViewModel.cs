@@ -1,6 +1,9 @@
 using System.Windows.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lss.App.Services;
 
 namespace Lss.App.ViewModels;
 
@@ -9,7 +12,7 @@ namespace Lss.App.ViewModels;
 /// con più launcher, l'intestazione del gruppo. Per i giochi in Altri giochi
 /// il comando sceglie la cartella dei salvataggi a mano.
 /// </summary>
-public sealed class GameItemViewModel
+public sealed partial class GameItemViewModel : ObservableObject
 {
     /// <param name="chooseFolder">Sceglie la cartella dei salvataggi di questo gioco; null = nessuna scelta.</param>
     /// <param name="findFolder">Procedura "Trova i salvataggi" di questo gioco; null = nessuna.</param>
@@ -33,7 +36,6 @@ public sealed class GameItemViewModel
 
         ChooseFolderCommand = new AsyncRelayCommand(() => chooseFolder?.Invoke(this) ?? Task.CompletedTask);
         FindFolderCommand = new AsyncRelayCommand(() => findFolder?.Invoke(this) ?? Task.CompletedTask);
-        Icon = LoadIcon(info.IconPath);
     }
 
     public GameInfo Info { get; }
@@ -50,8 +52,9 @@ public sealed class GameItemViewModel
 
     public string Name { get; }
 
-    /// <summary>Icona 32×32, o null: al suo posto la lettera iniziale.</summary>
-    public Bitmap? Icon { get; }
+    /// <summary>Icona 64×64, o null: al suo posto la lettera iniziale. Arriva in background (LoadIconAsync).</summary>
+    [ObservableProperty]
+    private Bitmap? icon;
 
     public bool HasIcon => Icon != null;
 
@@ -72,11 +75,28 @@ public sealed class GameItemViewModel
     private static string UnsafeReason(string reason) =>
         Enum.TryParse(reason, out SafetyProblem problem) ? SaveFolderSafety.Describe(problem) : reason;
 
-    private static Bitmap? LoadIcon(string path)
-    {
-        if (path == "")
-            return null;
+    partial void OnIconChanged(Bitmap? value) => OnPropertyChanged(nameof(HasIcon));
 
+    /// <summary>
+    /// Cerca l'icona del gioco (GameIcons) fuori dalla UI: la lista si mostra subito con
+    /// la lettera, e l'icona arriva quando è pronta. dataRoot è la cartella dei dati.
+    /// </summary>
+    public async Task LoadIconAsync(string dataRoot)
+    {
+        // L'eseguibile si chiede al launcher qui, nel thread della UI.
+        string exe = Provider.ExecutableOf(Info);
+        // Dopo il disco non serve tornare nel thread della UI: il passaggio alla UI è Post.
+        string? path = await Task.Run(() => GameIcons.Ensure(Info, exe, dataRoot)).ConfigureAwait(false);
+
+        if (path is not null)
+            Dispatcher.UIThread.Post(() => ShowIcon(path));
+    }
+
+    /// <summary>Mostra il PNG dell'icona (nel thread della UI).</summary>
+    internal void ShowIcon(string path) => Icon = LoadBitmap(path);
+
+    private static Bitmap? LoadBitmap(string path)
+    {
         try
         {
             return new Bitmap(path);

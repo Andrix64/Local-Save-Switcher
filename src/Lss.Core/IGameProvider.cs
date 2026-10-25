@@ -51,6 +51,12 @@ public interface IGameProvider
     IReadOnlyList<RootOverride> RootOverrides(GameAccount account, GameInfo game);
 
     /// <summary>
+    /// Eseguibile del gioco, per la sua icona, o "" se il launcher non lo sa.
+    /// Steam non lo dà (ha le sue immagini), i collegamenti di Steam danno il loro Exe.
+    /// </summary>
+    string ExecutableOf(GameInfo game);
+
+    /// <summary>
     /// Prefisso Proton o Wine del gioco, o "" se non ne ha.
     /// </summary>
     string PrefixOf(GameInfo game);

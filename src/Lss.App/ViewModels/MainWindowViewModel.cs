@@ -171,6 +171,7 @@ public partial class MainWindowViewModel : ObservableObject
             foreach (GameInfo game in launcher.Games)
             {
                 var item = new GameItemViewModel(game, launcher.Account, launcher.Provider, ChooseFolderAsync, FindFolderAsync);
+                _ = item.LoadIconAsync(AppData.Root);
 
                 if (game.Support == SupportState.Supported)
                 {

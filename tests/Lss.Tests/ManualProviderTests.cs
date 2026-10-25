@@ -63,6 +63,18 @@ public sealed class ManualProviderTests : IDisposable
     }
 
     [Fact]
+    public void ExecutableIsTheProgramGivenForTheGame()
+    {
+        string exe = Path.Combine(folder.Root, "Giochi", "gioco.exe");
+        ManualGames.Add(AppData.Root, new ManualGame("Gioco", exe, "", ""));
+
+        var provider = new ManualProvider(platform);
+        GameInfo game = provider.FindGames(provider.FindAccounts().Single()).Single();
+
+        Assert.Equal(exe, provider.ExecutableOf(game));
+    }
+
+    [Fact]
     public void LaunchStartsTheProgramWithItsArguments()
     {
         string exe = Path.Combine(folder.Root, "Giochi", "gioco.exe");

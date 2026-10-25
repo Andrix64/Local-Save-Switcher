@@ -20,6 +20,7 @@ public sealed class FakeProvider : IGameProvider
     public List<SaveRule> Rules { get; } = [];
     public List<RootOverride> Overrides { get; } = [];
     public string Prefix { get; set; } = "";
+    public string Executable { get; set; } = "";
     public List<string> Launchers { get; } = [];
 
     public IReadOnlyList<GameAccount> FindAccounts() => Accounts;
@@ -40,5 +41,6 @@ public sealed class FakeProvider : IGameProvider
     public IReadOnlyList<SaveRule> SaveRules(GameAccount account, GameInfo game) => Rules;
     public IReadOnlyList<RootOverride> RootOverrides(GameAccount account, GameInfo game) => Overrides;
     public string PrefixOf(GameInfo game) => Prefix;
+    public string ExecutableOf(GameInfo game) => Executable;
     public IReadOnlyList<string> LauncherFolders(GameAccount account) => Launchers;
 }

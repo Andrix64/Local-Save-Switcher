@@ -31,7 +31,7 @@ public sealed class EpicProviderTests : IDisposable
     public void Dispose() => folder.Dispose();
 
     // Scrive un manifest come lo scrive il launcher, con i campi usati da LSS.
-    private void WriteItem(string file, string appName, string name, string location, bool incomplete = false) =>
+    private void WriteItem(string file, string appName, string name, string location, bool incomplete = false, string launch = "") =>
         TestFolder.Write(Path.Combine(Manifests, file), JsonSerializer.Serialize(new
         {
             AppName = appName,
@@ -40,6 +40,7 @@ public sealed class EpicProviderTests : IDisposable
             CatalogNamespace = "ns" + appName,
             CatalogItemId = "item" + appName,
             bIsIncompleteInstall = incomplete,
+            LaunchExecutable = launch,
         }));
 
     // Scrive il catalogo (base64 di un array JSON) con il CloudSaveFolder dato per ogni CatalogItemId.
@@ -112,6 +113,20 @@ public sealed class EpicProviderTests : IDisposable
         Assert.Equal(Library, game.LibraryPath);
         Assert.Equal(SupportState.NoSaves, game.Support);
         Assert.Equal(SaveSource.None, game.Source);
+    }
+
+    [Fact]
+    public void ExecutableIsLaunchExecutableInTheInstallFolder()
+    {
+        string install = Path.Combine(Library, "Fez");
+        WriteItem("a.item", "Fez", "Fez", install, launch: "FEZ.exe");
+        WriteItem("b.item", "Senza", "Senza", Path.Combine(Library, "Senza"));
+
+        var provider = new EpicProvider(platform);
+        IReadOnlyList<GameInfo> games = provider.FindGames(provider.FindAccounts().Single());
+
+        Assert.Equal(Path.Combine(install, "FEZ.exe"), provider.ExecutableOf(games.Single(game => game.Id == "Fez")));
+        Assert.Equal("", provider.ExecutableOf(games.Single(game => game.Id == "Senza")));
     }
 
     [Fact]

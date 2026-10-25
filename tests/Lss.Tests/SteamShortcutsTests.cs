@@ -22,7 +22,7 @@ public sealed class SteamShortcutsTests : IDisposable
     public void Dispose() => folder.Dispose();
 
     // Scrive shortcuts.vdf come lo scrive Steam: due voci, la seconda è Heroic (da escludere).
-    private void WriteShortcuts(int appId = -1, string exe = "\"/games/gioco.sh\"")
+    private void WriteShortcuts(int appId = -1, string exe = "\"/games/gioco.sh\"", string icon = "")
     {
         using var stream = new MemoryStream();
         using (var writer = new BinaryWriter(stream))
@@ -35,6 +35,10 @@ public sealed class SteamShortcutsTests : IDisposable
             Str(writer, "AppName", "Gioco");
             Str(writer, "Exe", exe);
             Str(writer, "StartDir", "\"/games/\"");
+
+            if (icon != "")
+                Str(writer, "icon", icon);
+
             writer.Write((byte)0x08);
 
             writer.Write((byte)0x00);
@@ -96,6 +100,21 @@ public sealed class SteamShortcutsTests : IDisposable
     public void LaunchAddressUsesTheShortcutIdInTheHighBits()
     {
         Assert.Equal("steam://rungameid/" + ((4294967295UL << 32) | 0x02000000UL), SteamShortcuts.LaunchUri(uint.MaxValue));
+    }
+
+    [Fact]
+    public void ShortcutGivesItsExecutableAndItsIcon()
+    {
+        string icon = Path.Combine(folder.Root, "icona.png");
+        TestFolder.Write(icon, "immagine");
+        WriteShortcuts(icon: "\"" + icon + "\"");
+
+        var provider = new SteamProvider(platform);
+        var account = new GameAccount("steam", "111", "", Account, null);
+        GameInfo game = provider.FindGames(account).Single(g => g.Name == "Gioco");
+
+        Assert.Equal("/games/gioco.sh", provider.ExecutableOf(game));
+        Assert.Equal(icon, game.IconPath);
     }
 
     [Fact]

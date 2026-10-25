@@ -59,7 +59,7 @@ public enum SaveSource
 /// <param name="InstallPath">Cartella del gioco installato, o "" se non è installato.</param>
 /// <param name="Spots">Posti dove il gioco salva (vuoti se non c'è ancora una cartella). Il primo è la cartella userdata/IDAccount/AppID, se c'è.</param>
 /// <param name="Support">Se LSS può gestirlo.</param>
-/// <param name="IconPath">Icona 32×32, o "" se non c'è.</param>
+/// <param name="IconPath">Icona del launcher (immagine, o .exe per un collegamento Steam), o "" se non c'è.</param>
 /// <param name="CoverPath">Copertina 300×450, o "" se non c'è.</param>
 /// <param name="Source">Da dove viene la cartella dei salvataggi.</param>
 /// <param name="Reason">Motivo per il log, in italiano; non si mostra così com'è.</param>

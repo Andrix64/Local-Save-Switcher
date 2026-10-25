@@ -12,7 +12,7 @@ public sealed class EpicProvider(IPlatform platform) : IGameProvider
 {
     // Un gioco installato, come lo scrive il launcher in un file .item.
     private sealed record Item(string AppName, string Name, string InstallLocation, string CatalogNamespace,
-        string CatalogItemId);
+        string CatalogItemId, string LaunchExecutable);
 
     // Letti dall'ultimo FindGames, come fa SteamProvider con appinfo.vdf.
     private readonly Dictionary<string, Item> items = [];
@@ -88,6 +88,14 @@ public sealed class EpicProvider(IPlatform platform) : IGameProvider
     }
 
     public bool CanLaunch(GameInfo game) => items.ContainsKey(game.Id);
+
+    /// <summary>
+    /// LaunchExecutable del manifest, nella cartella d'installazione (es. "FEZ.exe").
+    /// </summary>
+    public string ExecutableOf(GameInfo game) =>
+        items.TryGetValue(game.Id, out Item? item) && item.LaunchExecutable != ""
+            ? Path.Combine(item.InstallLocation, item.LaunchExecutable)
+            : "";
 
     /// <summary>
     /// Avvia il gioco con l'indirizzo di Epic Games Launcher (che si apre da solo se è chiuso).
@@ -191,7 +199,8 @@ public sealed class EpicProvider(IPlatform platform) : IGameProvider
                 if (appName == "" || name == "" || location == "")
                     continue;
 
-                result.Add(new Item(appName, name, location, Text(root, "CatalogNamespace"), Text(root, "CatalogItemId")));
+                result.Add(new Item(appName, name, location, Text(root, "CatalogNamespace"), Text(root, "CatalogItemId"),
+                    Text(root, "LaunchExecutable")));
             }
             catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
             {

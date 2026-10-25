@@ -66,6 +66,11 @@ public sealed class ManualProvider(IPlatform platform) : IGameProvider
 
     public bool CanLaunch(GameInfo game) => games.TryGetValue(game.Id, out ManualGame? found) && found.Exe != "" && !WindowsProgramOnLinux(found.Exe);
 
+    /// <summary>
+    /// L'eseguibile dato per il gioco, o "".
+    /// </summary>
+    public string ExecutableOf(GameInfo game) => games.TryGetValue(game.Id, out ManualGame? found) ? found.Exe : "";
+
     public Result Launch(GameInfo game)
     {
         if (!CanLaunch(game))

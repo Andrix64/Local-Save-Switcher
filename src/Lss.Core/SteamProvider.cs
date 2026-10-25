@@ -15,8 +15,8 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
     // Regole lette dall'ultimo FindGames: appinfo.vdf si legge una volta sola.
     private SteamAppInfo? appInfo;
 
-    // ID dei collegamenti (giochi non Steam) letti dall'ultimo FindGames.
-    private readonly HashSet<string> shortcuts = [];
+    // ID dei collegamenti (giochi non Steam) letti dall'ultimo FindGames, con il loro eseguibile.
+    private readonly Dictionary<string, string> shortcuts = [];
 
     // Marchio: non si traduce.
     public string DisplayName => "Steam";
@@ -76,9 +76,9 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
             if (games.Any(game => game.Id == id))
                 continue;
 
-            shortcuts.Add(id);
+            shortcuts[id] = shortcut.Exe;
             games.Add(new GameInfo("steam", id, shortcut.Name, "", "", shortcut.StartDir, [],
-                SupportState.NoSaves, Source: SaveSource.None));
+                SupportState.NoSaves, IconPath: shortcut.Icon, Source: SaveSource.None));
         }
 
         return SaveLookup.Apply(games, this, account, platform.GetKnownFolders(), AppData.Root);
@@ -138,13 +138,18 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
     public bool CanLaunch(GameInfo game) => true;
 
     /// <summary>
+    /// L'eseguibile di un collegamento non Steam; "" per i giochi Steam (hanno le loro immagini).
+    /// </summary>
+    public string ExecutableOf(GameInfo game) => shortcuts.GetValueOrDefault(game.Id, "");
+
+    /// <summary>
     /// Avvia il gioco tramite Steam (che si apre da solo se è chiuso).
     /// </summary>
     public Result Launch(GameInfo game)
     {
         try
         {
-            string uri = shortcuts.Contains(game.Id)
+            string uri = shortcuts.ContainsKey(game.Id)
                 ? SteamShortcuts.LaunchUri(uint.Parse(game.Id, CultureInfo.InvariantCulture))
                 : "steam://rungameid/" + game.Id;
 

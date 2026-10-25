@@ -13,7 +13,9 @@ internal static class SteamShortcuts
     /// <param name="AppId">ID Steam del collegamento, senza segno (il file può avere un int32 negativo).</param>
     /// <param name="Name">Nome del gioco.</param>
     /// <param name="StartDir">Cartella di avvio, senza virgolette.</param>
-    public sealed record Shortcut(uint AppId, string Name, string StartDir);
+    /// <param name="Exe">Eseguibile, senza virgolette.</param>
+    /// <param name="Icon">Icona (un'immagine o un .exe), senza virgolette; "" se non c'è.</param>
+    public sealed record Shortcut(uint AppId, string Name, string StartDir, string Exe, string Icon);
 
     // Eseguibili di launcher che hanno già la loro voce (nome senza .exe, minuscolo).
     private static readonly string[] Launchers = ["heroic", "epicgameslauncher", "galaxyclient"];
@@ -50,7 +52,8 @@ internal static class SteamShortcuts
                 if (!long.TryParse(Text(node, "appid"), NumberStyles.Integer, CultureInfo.InvariantCulture, out long appId))
                     continue;
 
-                shortcuts.Add(new Shortcut(unchecked((uint)appId), Text(node, "AppName"), Text(node, "StartDir").Trim('"')));
+                shortcuts.Add(new Shortcut(unchecked((uint)appId), Text(node, "AppName"), Text(node, "StartDir").Trim('"'),
+                    exe, Text(node, "icon").Trim('"')));
             }
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException)

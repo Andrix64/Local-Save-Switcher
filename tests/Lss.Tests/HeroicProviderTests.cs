@@ -61,6 +61,20 @@ public sealed class HeroicProviderTests : IDisposable
     }
 
     [Fact]
+    public void ExecutableIsTheExecutableFieldInTheGameFolder()
+    {
+        string install = Path.Combine(Games, "Hades");
+        Directory.CreateDirectory(install);
+        WriteJson(Path.Combine(Config, "legendaryConfig", "legendary", "installed.json"),
+            new Dictionary<string, object> { ["Hades"] = new { app_name = "Hades", title = "Hades", install_path = install, executable = "Hades.exe" } });
+
+        var provider = new HeroicProvider(platform);
+        GameInfo game = provider.FindGames(provider.FindAccounts().Single()).Single();
+
+        Assert.Equal(Path.Combine(install, "Hades.exe"), provider.ExecutableOf(game));
+    }
+
+    [Fact]
     public void GogGamesGetTheirTitleFromTheStoreCache()
     {
         string install = Path.Combine(Games, "gioco");
