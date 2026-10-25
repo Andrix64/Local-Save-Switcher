@@ -101,6 +101,26 @@ public sealed class SessionScanTests : IDisposable
         Assert.Equal("*.sav", suggestion.Pattern);
     }
 
+    // "Non sono salvataggi" su file sparsi: scarta la proposta, non la cartella del gioco.
+    [Fact]
+    public void ADismissedLooseFileSuggestionDoesNotComeBackButTheFolderIsStillSearched()
+    {
+        DateTime start = DateTime.UtcNow.AddMinutes(-1);
+        TestFolder.Write(Path.Combine(Install, "slot1.sav"), "x");
+        TestFolder.Write(Path.Combine(Install, "slot2.sav"), "y");
+        TestFolder.Write(Path.Combine(Install, "slot3.sav"), "z");
+        Run(Spots(), start);
+
+        SessionScan.Dismiss(folder.Data, Install, "*.sav");
+
+        Assert.Empty(SessionScan.Pending(folder.Data));
+        Assert.DoesNotContain(Run(Spots(), start), s => s.Pattern == "*.sav");
+        Assert.Empty(new IgnoredFolders(Lss).ForGame(folder.Data));
+
+        TestFolder.Write(Path.Combine(Install, "a.dat"), "1");
+        Assert.Contains(Run(Spots(), start), s => s.Folder == Install && s.Pattern == "a.dat");
+    }
+
     [Fact]
     public void SuggestionsStayUntilForgotten()
     {

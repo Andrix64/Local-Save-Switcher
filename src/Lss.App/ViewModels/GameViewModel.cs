@@ -334,6 +334,15 @@ public partial class GameViewModel : ObservableObject
     /// </summary>
     public void IgnoreSuggestion(SpotSuggestion suggestion, bool forAll)
     {
+        // File sparsi nella cartella del gioco: si scarta la proposta, non la cartella
+        // (ignorarla toglierebbe dalla ricerca tutta l'installazione).
+        if (suggestion.Pattern != "")
+        {
+            SessionScan.Dismiss(Manager.DataFolder, suggestion.Folder, suggestion.Pattern);
+            PendingSuggestions = SessionScan.Pending(Manager.DataFolder).Count;
+            return;
+        }
+
         var ignored = new IgnoredFolders(AppData.Root);
 
         if (forAll)

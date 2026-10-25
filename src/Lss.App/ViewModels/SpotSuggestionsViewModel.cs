@@ -110,6 +110,12 @@ public sealed partial class SpotSuggestionItem : ObservableObject
 
     public string IgnoreForAllText => Strings.IgnoreForAll;
 
+    /// <summary>
+    /// "Per tutti i giochi" solo per una cartella intera: per i file sparsi la cartella
+    /// è quella del gioco, e ignorarla per tutti toglierebbe le installazioni di ogni gioco.
+    /// </summary>
+    public bool CanIgnoreForAll => Suggestion.Pattern == "";
+
     public string LaterText => Strings.SuggestionLater;
 
     /// <summary>Se la scelta "Solo per questo gioco / Per tutti i giochi" è aperta.</summary>

@@ -23,6 +23,8 @@ internal static class SessionScan
 
     private const string FileName = "proposte.ini";
     private const string Key = "Proposta.";
+    // Proposte di file sparsi scartate ("Non sono salvataggi"): cartella|maschera. Non tornano.
+    private const string DismissedKey = "Scartata.";
     private const int LooseGroupMin = 3;
     private static readonly TimeSpan TimeLimit = TimeSpan.FromSeconds(90);
     private static readonly string[] SaveExtensions = [".sav", ".save", ".dat", ".sl2", ".slot"];
@@ -61,17 +63,19 @@ internal static class SessionScan
         fresh.AddRange(LooseSuggestions(game, context, launcherFolders, lssDataRoot, files));
 
         var pending = Pending(dataFolder).ToList();
+        IReadOnlyList<(string Folder, string Pattern)> dismissed = Dismissed(dataFolder);
 
         foreach (SpotSuggestion suggestion in fresh)
         {
             bool already = pending.Any(other => Same(other.Folder, suggestion.Folder) && other.Pattern == suggestion.Pattern);
             bool isSpot = known.Any(folder => Same(folder, suggestion.Folder) && suggestion.Pattern == "");
+            bool isDismissed = dismissed.Any(item => Same(item.Folder, suggestion.Folder) && item.Pattern == suggestion.Pattern);
 
-            if (!already && !isSpot)
+            if (!already && !isSpot && !isDismissed)
                 pending.Add(suggestion);
         }
 
-        Store(dataFolder, pending);
+        Store(dataFolder, pending, dismissed);
 
         return pending;
     }
@@ -85,9 +89,45 @@ internal static class SessionScan
         int removed = pending.RemoveAll(suggestion => Same(suggestion.Folder, folder) && suggestion.Pattern == pattern);
 
         if (removed > 0)
-            Store(gameDataFolder, pending);
+            Store(gameDataFolder, pending, Dismissed(gameDataFolder));
 
         return removed > 0;
+    }
+
+    /// <summary>
+    /// Scarta una proposta di file sparsi per questo gioco: non torna più. La cartella
+    /// (quella del gioco) non viene ignorata, così altre proposte lì restano possibili.
+    /// </summary>
+    public static void Dismiss(string gameDataFolder, string folder, string pattern)
+    {
+        var pending = Pending(gameDataFolder).ToList();
+        pending.RemoveAll(suggestion => Same(suggestion.Folder, folder) && suggestion.Pattern == pattern);
+
+        var dismissed = Dismissed(gameDataFolder).ToList();
+
+        if (!dismissed.Any(item => Same(item.Folder, folder) && item.Pattern == pattern))
+            dismissed.Add((folder, pattern));
+
+        Store(gameDataFolder, pending, dismissed);
+    }
+
+    /// <summary>Le proposte di file sparsi scartate, come cartella e maschera.</summary>
+    public static IReadOnlyList<(string Folder, string Pattern)> Dismissed(string gameDataFolder)
+    {
+        var result = new List<(string, string)>();
+
+        foreach ((string name, string value) in IniFile.Read(Path.Combine(gameDataFolder, FileName)))
+        {
+            if (!name.StartsWith(DismissedKey, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            string[] parts = value.Split('|');
+
+            if (parts.Length == 2)
+                result.Add((parts[0], parts[1]));
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -141,13 +181,14 @@ internal static class SessionScan
         string.Join(";", reasons.Select(reason => string.Join(":", reason.Kind.ToString(),
             reason.Points.ToString(CultureInfo.InvariantCulture), reason.Detail.Replace('|', ' ').Replace(';', ' '))));
 
-    private static void Store(string gameDataFolder, IReadOnlyList<SpotSuggestion> suggestions)
+    private static void Store(string gameDataFolder, IReadOnlyList<SpotSuggestion> suggestions,
+        IReadOnlyList<(string Folder, string Pattern)> dismissed)
     {
         string path = Path.Combine(gameDataFolder, FileName);
 
         try
         {
-            if (suggestions.Count == 0)
+            if (suggestions.Count == 0 && dismissed.Count == 0)
             {
                 if (File.Exists(path))
                     File.Delete(path);
@@ -160,7 +201,9 @@ internal static class SessionScan
                 string.Join("|", suggestion.Folder, suggestion.Pattern,
                     suggestion.Score.ToString(CultureInfo.InvariantCulture),
                     suggestion.FoundUtc.ToString("O", CultureInfo.InvariantCulture),
-                    WriteReasons(suggestion.Reasons))));
+                    WriteReasons(suggestion.Reasons))))
+                .Concat(dismissed.Select((item, index) => new KeyValuePair<string, string>(
+                    DismissedKey + index.ToString(CultureInfo.InvariantCulture), item.Folder + "|" + item.Pattern)));
 
             IniFile.Write(path, values);
         }

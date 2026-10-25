@@ -40,6 +40,27 @@ public sealed class SpotSuggestionsViewModelTests : IDisposable
 
     private GameViewModel Game() => new(folder.CreateManager("L"), dialogs);
 
+    // File sparsi: "per tutti i giochi" non c'è, e "non sono salvataggi" non ignora la cartella.
+    [Fact]
+    public void LooseFilesCanOnlyBeDismissedForThisGame()
+    {
+        TestFolder.Write(Path.Combine(Extra, "a.sav"), "x");
+        IniFile.Write(Path.Combine(folder.Data, "proposte.ini"),
+        [
+            new("Proposta.0", string.Join("|", Extra, "*.sav", "9", DateTime.UtcNow.ToString("O"), "")),
+        ]);
+        GameViewModel game = Game();
+        var vm = new SpotSuggestionsViewModel(game, SessionScan.Pending(folder.Data));
+
+        SpotSuggestionItem item = Assert.Single(vm.Items);
+        Assert.False(item.CanIgnoreForAll);
+
+        game.IgnoreSuggestion(item.Suggestion, forAll: false);
+
+        Assert.Empty(new IgnoredFolders(folder.Data).ForGame(game.Manager.DataFolder));
+        Assert.Contains((Extra, "*.sav"), SessionScan.Dismissed(game.Manager.DataFolder));
+    }
+
     [Fact]
     public void TheReasonsAreShownWithTheSuggestion()
     {
