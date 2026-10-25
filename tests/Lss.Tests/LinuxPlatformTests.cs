@@ -150,6 +150,52 @@ public sealed class LinuxPlatformTests : IDisposable
     }
 
     /// <summary>registry.vdf con il gioco 105600 e un RunningAppID dato.</summary>
+    [Fact]
+    public void CmdlineMatchesLinuxPath()
+    {
+        byte[] cmdline = Encoding.UTF8.GetBytes("wine\0/home/a/Games/Control/Control.exe\0-nointro\0");
+
+        Assert.True(LinuxPlatform.CmdlineMatches(cmdline, "/home/a/Games/Control"));
+    }
+
+    [Fact]
+    public void CmdlineMatchesWineWindowsPath()
+    {
+        byte[] cmdline = Encoding.UTF8.GetBytes("wine\0Z:\\home\\a\\Games\\Control\\Control.exe\0");
+
+        Assert.True(LinuxPlatform.CmdlineMatches(cmdline, "/home/a/Games/Control"));
+    }
+
+    [Fact]
+    public void CmdlineDoesNotMatchAnotherFolder()
+    {
+        // "Control" non deve trovare "Control Ultimate": manca il "/" dopo il nome.
+        byte[] cmdline = Encoding.UTF8.GetBytes("wine\0Z:\\home\\a\\Games\\Control Ultimate\\Control.exe\0");
+
+        Assert.False(LinuxPlatform.CmdlineMatches(cmdline, "/home/a/Games/Control"));
+        Assert.False(LinuxPlatform.CmdlineMatches(cmdline, ""));
+    }
+
+    [Fact]
+    public void FindProcessesUnderEmptyFolderFindsNothing()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        Assert.Empty(new LinuxPlatform().FindProcessesUnder(folder.Root));
+        Assert.Empty(new LinuxPlatform().FindProcessesUnder(""));
+    }
+
+    [Fact]
+    public void RegistryIsNullOnLinux()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        var platform = new LinuxPlatform();
+
+        Assert.Null(platform.ReadRegistryString(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "SteamPath"));
+        Assert.Empty(platform.RegistrySubKeys(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve"));
+    }
+
     private static string Registry(string runningAppId, string running) => $$"""
         "Registry"
         {

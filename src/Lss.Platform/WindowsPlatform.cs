@@ -51,7 +51,7 @@ public sealed class WindowsPlatform : IPlatform
     /// Steam segna comunque il gioco come aperto.
     /// </summary>
     public bool IsGameRunning(GameInfo game) =>
-        SteamSaysRunning(game.Id) || FindGameProcesses(game).Count > 0;
+        SteamSaysRunning(game.Id) || FindProcessesUnder(game.InstallPath).Count > 0;
 
     /// <summary>
     /// Steam scrive nel registro quale gioco è in esecuzione: RunningAppID per
@@ -78,17 +78,17 @@ public sealed class WindowsPlatform : IPlatform
     }
 
     /// <summary>
-    /// Processi che girano dalla cartella di installazione del gioco, con la
-    /// data di avvio se si legge. Nessun processo se il gioco non è installato.
+    /// Processi che girano dalla cartella indicata, con la data di avvio se si
+    /// legge. Nessun processo se la cartella è "".
     /// </summary>
-    private List<(int Id, DateTime? Start)> FindGameProcesses(GameInfo game)
+    public IReadOnlyList<(int Id, DateTime? Start)> FindProcessesUnder(string folder)
     {
         var found = new List<(int Id, DateTime? Start)>();
 
-        if (game.InstallPath == "")
+        if (folder == "")
             return found;
 
-        string prefix = Path.GetFullPath(game.InstallPath).TrimEnd('\\') + "\\";
+        string prefix = Path.GetFullPath(folder).TrimEnd('\\') + "\\";
 
         lock (processLock)
         {
@@ -154,7 +154,7 @@ public sealed class WindowsPlatform : IPlatform
     /// Quando è partito il gioco in esecuzione, se si riesce a leggerlo.
     /// </summary>
     public DateTime? GameStartTime(GameInfo game) =>
-        FindGameProcesses(game).Select(p => p.Start).Min();
+        FindProcessesUnder(game.InstallPath).Select(p => p.Start).Min();
 
     /// <summary>
     /// Con Steam aperto, Steam Cloud può risincronizzare i salvataggi
@@ -165,7 +165,11 @@ public sealed class WindowsPlatform : IPlatform
         return IsProcessRunning("steam");
     }
 
-    private static bool IsProcessRunning(string name)
+    /// <summary>
+    /// true se c'è un processo con quel nome, anche di un altro utente:
+    /// Process.GetProcessesByName non filtra per utente.
+    /// </summary>
+    public bool IsProcessRunning(string name)
     {
         Process[] processes = Process.GetProcessesByName(name);
 
@@ -175,9 +179,85 @@ public sealed class WindowsPlatform : IPlatform
         return processes.Length > 0;
     }
 
-    public void OpenSteamUri(string uri)
+    public void OpenSteamUri(string uri) => OpenUri(uri);
+
+    public void OpenUri(string uri)
     {
         Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true })?.Dispose();
+    }
+
+    /// <summary>
+    /// Avvia un programma. false se non parte (file mancante, non eseguibile).
+    /// </summary>
+    public bool StartProgram(string exe, string arguments, string workingDir)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(exe, arguments) { WorkingDirectory = workingDir, UseShellExecute = true })?.Dispose();
+            return true;
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Valore stringa del registro, o null se la chiave o il valore non ci sono.
+    /// </summary>
+    public string? ReadRegistryString(string key, string name)
+    {
+        try
+        {
+            using RegistryKey? found = OpenRegistryKey(key);
+
+            return found?.GetValue(name) as string;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Nomi delle sottochiavi di una chiave del registro, o lista vuota.
+    /// </summary>
+    public IReadOnlyList<string> RegistrySubKeys(string key)
+    {
+        try
+        {
+            using RegistryKey? found = OpenRegistryKey(key);
+
+            return found?.GetSubKeyNames() ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Apre una chiave da un percorso completo, come
+    /// HKEY_LOCAL_MACHINE\SOFTWARE\...; null se la radice non è riconosciuta.
+    /// </summary>
+    private static RegistryKey? OpenRegistryKey(string key)
+    {
+        int slash = key.IndexOf('\\');
+
+        if (slash < 0)
+            return null;
+
+        RegistryKey? root = key[..slash] switch
+        {
+            "HKEY_LOCAL_MACHINE" => Registry.LocalMachine,
+            "HKEY_CURRENT_USER" => Registry.CurrentUser,
+            "HKEY_CLASSES_ROOT" => Registry.ClassesRoot,
+            "HKEY_USERS" => Registry.Users,
+            "HKEY_CURRENT_CONFIG" => Registry.CurrentConfig,
+            _ => null
+        };
+
+        return root?.OpenSubKey(key[(slash + 1)..]);
     }
 
     public IDisposable? AcquireSingleInstance()

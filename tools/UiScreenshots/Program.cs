@@ -192,6 +192,12 @@ internal sealed class FakePlatform : IPlatform
     public DateTime? GameStartTime(GameInfo game) => null;
     public bool IsSteamRunning() => false;
     public void OpenSteamUri(string uri) { }
+    public void OpenUri(string uri) { }
+    public IReadOnlyList<(int Id, DateTime? Start)> FindProcessesUnder(string folder) => [];
+    public bool StartProgram(string exe, string arguments, string workingDir) => false;
+    public bool IsProcessRunning(string name) => false;
+    public string? ReadRegistryString(string key, string name) => null;
+    public IReadOnlyList<string> RegistrySubKeys(string key) => [];
     public IDisposable? AcquireSingleInstance() => new MemoryStream();
 }
 

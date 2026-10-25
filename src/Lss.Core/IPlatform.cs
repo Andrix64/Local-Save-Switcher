@@ -24,6 +24,24 @@ public interface IPlatform
     /// <summary>Apre un indirizzo steam:// (Steam si apre da solo se è chiuso).</summary>
     void OpenSteamUri(string uri);
 
+    /// <summary>Apre un indirizzo con il programma registrato (steam://, com.epicgames.launcher://, heroic://...).</summary>
+    void OpenUri(string uri);
+
+    /// <summary>Processi il cui eseguibile è dentro la cartella, con l'ora di avvio se nota.</summary>
+    IReadOnlyList<(int Id, DateTime? Start)> FindProcessesUnder(string folder);
+
+    /// <summary>Avvia un programma. false se non parte.</summary>
+    bool StartProgram(string exe, string arguments, string workingDir);
+
+    /// <summary>true se c'è un processo con quel nome di file (senza .exe).</summary>
+    bool IsProcessRunning(string name);
+
+    /// <summary>Valore stringa del registro di Windows, null altrove o se manca.</summary>
+    string? ReadRegistryString(string key, string name);
+
+    /// <summary>Sottochiavi di una chiave del registro di Windows, vuoto altrove.</summary>
+    IReadOnlyList<string> RegistrySubKeys(string key);
+
     /// <summary>
     /// Prende il diritto di essere l'unica istanza dell'app. null se un'altra
     /// istanza è già aperta; altrimenti un oggetto da tenere fino alla chiusura.
