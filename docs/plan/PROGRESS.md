@@ -184,7 +184,7 @@ per phase (the phase file names it).
 
 - [x] O1 — Epic Games Launcher (Windows) (67d1031)
 - [x] O2 — GOG Galaxy and GOG games (Windows) (253fc6c)
-- [ ] O3 — Heroic Games Launcher
+- [x] O3 — Heroic Games Launcher (7df1fe1)
 - [ ] O4 — Any other game, added by hand
 - [ ] O5 — Non-Steam games added to Steam
 - [ ] O6 — The same game twice
@@ -216,6 +216,24 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — O3 (Haiku), commit `7df1fe1`. **Nessun formato di Heroic verificato**: Heroic
+  non è installato su questo PC (`%APPDATA%\heroic` e `~/.config/heroic` assenti). Una ricerca
+  web (sola verifica, non un file) non ha confermato né l'indirizzo di avvio né `gogSaves` /
+  `installed.json`; il piano è seguito così com'è scritto. Per questo:
+  - `CanLaunch` è **false** (regola del piano per l'indirizzo non confermato): i giochi
+    Heroic si avviano da Heroic (`StartFromHeroic`).
+  - Il nome dei giochi GOG da `store_cache/gog_library.json` e il file `sideload_apps/library.json`
+    sono letti in modo tollerante (array, o oggetto con `games`); non verificati.
+  - Amazon (Nile): stesso formato di Legendary, non verificato.
+  - Modifica di `SavePathResolver`: la radice `Absolute` (L6 la rimandava a questa fase) è ora
+    supportata: la regola è la cartella intera, solo se esiste.
+  - Decisioni: id del gioco = `runner_appName` (un app name può esistere in più runner);
+    prefisso = cartella con `drive_c` (`pfx/drive_c` per Proton, altrimenti la cartella `winePrefix`);
+    metadato Epic da `legendaryConfig/legendary/metadata/<app>.json`.
+  - `PrefixIsPerGame` del piano non è calcolato (l'interfaccia `PrefixOf` non lo passa; in
+    `SaveLookup` è `prefix != ""`).
+  - Test cambiato di proposito: `SteamProviderTests.ProvidersHaveSteamFirst` (ora quattro launcher).
+  - Linux (`lss-ci`, `--tests-only`, su `7df1fe1`): 569 verdi.
 - 2026-10-25 — O2 (Haiku), commit `253fc6c`. Il registro GOG
   (`HKLM\SOFTWARE\WOW6432Node\GOG.com\Games`) **non è stato verificato**: su questo PC la
   chiave non esiste (GOG non installato), quindi il formato (`path`, `gameName`, `exe`) è
