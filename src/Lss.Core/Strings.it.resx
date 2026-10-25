@@ -306,6 +306,13 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="ZipFileType" xml:space="preserve"><value>Partita di {0}</value></data>
   <data name="UnknownGameName" xml:space="preserve"><value>App {0}</value></data>
   <data name="GameNotSupported" xml:space="preserve"><value>{0} non tiene i salvataggi nella cartella userdata di Steam: LSS non può gestirlo.</value></data>
+  <data name="SaveFolderNoLongerSafe" xml:space="preserve"><value>La cartella dei salvataggi di {0} non si può più usare in sicurezza: {1}</value></data>
+  <data name="SafetyMissing" xml:space="preserve"><value>la cartella non esiste.</value></data>
+  <data name="SafetyEmpty" xml:space="preserve"><value>la cartella è vuota.</value></data>
+  <data name="SafetyProtected" xml:space="preserve"><value>è una cartella di sistema, di un launcher o del gioco, non dei salvataggi.</value></data>
+  <data name="SafetyTooBig" xml:space="preserve"><value>la cartella è troppo grande per dei salvataggi (oltre 2 GB o 20.000 file).</value></data>
+  <data name="SafetyInsideLss" xml:space="preserve"><value>la cartella è dentro i dati di LSS.</value></data>
+  <data name="SafetyUnreadable" xml:space="preserve"><value>la cartella non si legge.</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>Questa partita è di {0}, non di {1}.</value></data>
   <data name="GamesCaption" xml:space="preserve"><value>GIOCHI</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Altri giochi</value></data>

@@ -306,6 +306,13 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="ZipFileType" xml:space="preserve"><value>{0} playthrough</value></data>
   <data name="UnknownGameName" xml:space="preserve"><value>App {0}</value></data>
   <data name="GameNotSupported" xml:space="preserve"><value>{0} doesn't keep its saves in Steam's userdata folder: LSS can't manage it.</value></data>
+  <data name="SaveFolderNoLongerSafe" xml:space="preserve"><value>The save folder of {0} can no longer be used safely: {1}</value></data>
+  <data name="SafetyMissing" xml:space="preserve"><value>the folder doesn't exist.</value></data>
+  <data name="SafetyEmpty" xml:space="preserve"><value>the folder is empty.</value></data>
+  <data name="SafetyProtected" xml:space="preserve"><value>it is a system, launcher or game folder, not a save folder.</value></data>
+  <data name="SafetyTooBig" xml:space="preserve"><value>the folder is too big for a save folder (over 2 GB or 20,000 files).</value></data>
+  <data name="SafetyInsideLss" xml:space="preserve"><value>the folder is inside LSS's own data.</value></data>
+  <data name="SafetyUnreadable" xml:space="preserve"><value>the folder can't be read.</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>This playthrough is from {0}, not from {1}.</value></data>
   <data name="GamesCaption" xml:space="preserve"><value>GAMES</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Other games</value></data>

@@ -49,4 +49,15 @@ public interface IGameProvider
     /// Sostituzioni di radici (rootoverrides) per il gioco. Vuoto se non ce ne sono.
     /// </summary>
     IReadOnlyList<RootOverride> RootOverrides(GameAccount account, GameInfo game);
+
+    /// <summary>
+    /// Prefisso Proton o Wine del gioco, o "" se non ne ha.
+    /// </summary>
+    string PrefixOf(GameInfo game);
+
+    /// <summary>
+    /// Cartelle del launcher che una cartella dei salvataggi non può essere
+    /// (installazione, librerie, dati): vedi SaveFolderSafety.
+    /// </summary>
+    IReadOnlyList<string> LauncherFolders(GameAccount account);
 }

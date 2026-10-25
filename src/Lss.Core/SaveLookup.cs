@@ -9,28 +9,17 @@ internal static class SaveLookup
 {
     /// <summary>
     /// Applica SaveLocator a ogni gioco e registra quelli trovati fuori da userdata.
-    /// prefixOf dà il prefisso Proton (o Wine) del gioco, o "" se non ce n'è.
     /// Dopo il controllo, l'ordine dei giochi è quello di prima.
     /// </summary>
     public static IReadOnlyList<GameInfo> Apply(IReadOnlyList<GameInfo> games, IGameProvider provider,
-        GameAccount account, KnownFolders folders, IReadOnlyList<string> launcherFolders, string lssDataRoot,
-        Func<GameInfo, string> prefixOf)
+        GameAccount account, KnownFolders folders, string lssDataRoot)
     {
+        IReadOnlyList<string> launchers = provider.LauncherFolders(account);
         var result = new List<GameInfo>(games.Count);
 
         foreach (GameInfo game in games)
         {
-            string prefix = prefixOf(game);
-
-            var context = new SaveContext(
-                folders,
-                prefix,
-                PrefixIsPerGame: prefix != "",
-                game.InstallPath,
-                account.Id,
-                IgnoreCase: OperatingSystem.IsLinux());
-
-            // Cartella della scelta: AppData\LSS\<launcher>\<account>\<gioco> (vedi SaveManager.Open).
+            // Cartella della scelta: <dati LSS>\<launcher>\<account>\<gioco> (vedi SaveManager.Open).
             var settings = new GameSaveSettings(Path.Combine(lssDataRoot, provider.Id, account.Id, game.Id));
             settings.Load();
 
@@ -38,8 +27,8 @@ internal static class SaveLookup
                 game,
                 provider.SaveRules(account, game),
                 provider.RootOverrides(account, game),
-                context,
-                launcherFolders,
+                ContextFor(provider, account, game, folders),
+                launchers,
                 lssDataRoot,
                 settings.Folder,
                 settings.Origin);
@@ -58,5 +47,23 @@ internal static class SaveLookup
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Contesto per trasformare le regole del gioco in cartelle: cartelle
+    /// dell'utente, prefisso, cartella di installazione, account.
+    /// </summary>
+    public static SaveContext ContextFor(IGameProvider provider, GameAccount account, GameInfo game,
+        KnownFolders folders)
+    {
+        string prefix = provider.PrefixOf(game);
+
+        return new SaveContext(
+            folders,
+            prefix,
+            PrefixIsPerGame: prefix != "",
+            game.InstallPath,
+            account.Id,
+            IgnoreCase: OperatingSystem.IsLinux());
     }
 }

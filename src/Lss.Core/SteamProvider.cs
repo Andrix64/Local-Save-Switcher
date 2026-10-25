@@ -62,16 +62,24 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
 
         appInfo = SteamAppInfo.Load(steam, games.Select(game => game.Id).ToHashSet());
 
-        return SaveLookup.Apply(games, this, account, platform.GetKnownFolders(), LauncherFolders(steam),
-            AppData.Root, game => SteamLibrary.FindProtonPrefix(steam, game));
+        return SaveLookup.Apply(games, this, account, platform.GetKnownFolders(), AppData.Root);
     }
+
+    /// <summary>
+    /// Prefisso Proton del gioco, nella libreria del gioco o in un'altra.
+    /// </summary>
+    public string PrefixOf(GameInfo game) =>
+        FindRoot() is { } steam ? SteamLibrary.FindProtonPrefix(steam, game) : "";
 
     /// <summary>
     /// Cartelle di Steam che LSS non deve mai sostituire per intero: la
     /// installazione, le librerie e le loro cartelle di Steam.
     /// </summary>
-    private static IReadOnlyList<string> LauncherFolders(string steamRoot)
+    public IReadOnlyList<string> LauncherFolders(GameAccount account)
     {
+        if (FindRoot() is not { } steamRoot)
+            return [];
+
         var folders = new List<string>
         {
             steamRoot,

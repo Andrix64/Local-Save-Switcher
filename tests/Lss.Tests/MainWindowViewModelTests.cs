@@ -6,6 +6,7 @@ namespace Lss.Tests;
 /// Finestra principale con più launcher: intestazioni dei gruppi e account di
 /// ogni gioco. Usa una cartella dei dati di prova, non quella vera.
 /// </summary>
+[Collection("AppData")]
 public sealed class MainWindowViewModelTests : IDisposable
 {
     private readonly TestFolder folder = new();

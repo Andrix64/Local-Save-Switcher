@@ -75,12 +75,16 @@ public sealed partial class SaveManager
     /// <param name="basePath">Cartella dei dati del gioco per un account (…\LSS\IDAccount\AppID).</param>
     /// <param name="game">Gioco gestito; se manca è Control con savePath.</param>
     /// <param name="provider">Launcher del gioco; se manca è Steam.</param>
-    internal SaveManager(string savePath, string basePath, string accountName = "", GameInfo? game = null, IGameProvider? provider = null)
+    /// <param name="account">Account del gioco; se manca si ricava da savePath (solo Control, in userdata).</param>
+    internal SaveManager(string savePath, string basePath, string accountName = "", GameInfo? game = null,
+        IGameProvider? provider = null, GameAccount? account = null)
     {
         Game = game ?? GameInfo.Control(savePath);
         this.provider = provider ?? new SteamProvider(Platform.Current);
+
+        // Una cartella dei salvataggi fuori da userdata non sta sotto l'account: va preso quello dato.
         string accountFolder = Path.GetDirectoryName(savePath) ?? "";
-        Account = new GameAccount(this.provider.Id, Path.GetFileName(accountFolder), accountName, accountFolder, null);
+        Account = account ?? new GameAccount(this.provider.Id, Path.GetFileName(accountFolder), accountName, accountFolder, null);
         SavePath = savePath;
         AccountName = accountName;
         ProfilesPath = Path.Combine(basePath, "Profili");
@@ -163,7 +167,8 @@ public sealed partial class SaveManager
                 Path.Combine(appData, account.Provider, account.Id, GameInfo.ControlAppId),
                 account.Name,
                 game,
-                new SteamProvider(Platform.Current)));
+                new SteamProvider(Platform.Current),
+                account));
         }
         catch (Exception ex)
         {
@@ -181,16 +186,53 @@ public sealed partial class SaveManager
 
         try
         {
+            if (game.Source != SaveSource.Userdata)
+            {
+                RecoverSaveFolder(game.SaveFolder);
+
+                // Il controllo si ripete ad ogni apertura: la cartella può essere cambiata da quando è stata trovata.
+                IGameProvider launcher = provider ?? new SteamProvider(Platform.Current);
+                SafetyProblem problem = SaveFolderSafety.Check(
+                    game.SaveFolder,
+                    SaveLookup.ContextFor(launcher, account, game, Platform.Current.GetKnownFolders()),
+                    launcher.LauncherFolders(account),
+                    dataRoot);
+
+                if (problem != SafetyProblem.None)
+                {
+                    return Result<SaveManager>.Fail(Loc.F(Strings.SaveFolderNoLongerSafe, game.Name,
+                        SaveFolderSafety.Describe(problem)));
+                }
+            }
+
             return Result<SaveManager>.Ok(new SaveManager(
                 game.SaveFolder,
                 Path.Combine(dataRoot, account.Provider, account.Id, game.Id),
                 account.Name,
                 game,
-                provider));
+                provider,
+                account));
         }
         catch (Exception ex)
         {
             return Result<SaveManager>.Fail(Loc.F(Strings.InitError, ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Rimette a posto una cartella dei salvataggi lasciata a metà da una
+    /// sostituzione interrotta. Un errore si registra e basta.
+    /// </summary>
+    private static void RecoverSaveFolder(string saveFolder)
+    {
+        try
+        {
+            if (FileOps.RecoverInterruptedReplace(saveFolder))
+                Log.Write("Recuperata una sostituzione interrotta: " + saveFolder);
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Recupero di " + saveFolder, ex);
         }
     }
 

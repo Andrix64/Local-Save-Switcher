@@ -42,6 +42,20 @@ internal static class SaveFolderSafety
         Check(folder, context, launcherFolders, lssDataRoot, MaxBytes, MaxFiles);
 
     /// <summary>
+    /// Motivo del problema, in italiano, per il messaggio all'utente.
+    /// </summary>
+    public static string Describe(SafetyProblem problem) => problem switch
+    {
+        SafetyProblem.Missing => Strings.SafetyMissing,
+        SafetyProblem.Empty => Strings.SafetyEmpty,
+        SafetyProblem.ProtectedFolder => Strings.SafetyProtected,
+        SafetyProblem.TooBig => Strings.SafetyTooBig,
+        SafetyProblem.InsideLssData => Strings.SafetyInsideLss,
+        SafetyProblem.Unreadable => Strings.SafetyUnreadable,
+        _ => "",
+    };
+
+    /// <summary>
     /// Come Check, con i limiti dati (i test usano limiti piccoli).
     /// </summary>
     internal static SafetyProblem Check(string folder, SaveContext context,

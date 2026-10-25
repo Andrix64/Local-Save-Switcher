@@ -6,6 +6,8 @@ namespace Lss.Tests;
 /// SaveLookup attraverso SteamProvider.FindGames: regole di appinfo.vdf,
 /// prefisso Proton, cartella scelta. Dati finti in una cartella temporanea.
 /// </summary>
+// Collection: cambia AppData.Root, come MainWindowViewModelTests: niente test in parallelo.
+[Collection("AppData")]
 public sealed class SaveLookupTests : IDisposable
 {
     private readonly TestFolder folder = new();
