@@ -182,7 +182,7 @@ per phase (the phase file names it).
 
 ### Phase O — Other launchers and any game ([O-launchers.md](O-launchers.md))
 
-- [ ] O1 — Epic Games Launcher (Windows)
+- [x] O1 — Epic Games Launcher (Windows) (67d1031)
 - [ ] O2 — GOG Galaxy and GOG games (Windows)
 - [ ] O3 — Heroic Games Launcher
 - [ ] O4 — Any other game, added by hand
@@ -216,6 +216,29 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — O1 (Haiku), commit `67d1031`. Formati controllati su file veri (PC di
+  Andrix, sola lettura):
+  - `Data\Catalog\catcache.bin`: **verificato**. È testo base64 di un array JSON; ogni voce
+    ha `id` e `customAttributes.CloudSaveFolder.value`. Su 145 valori trovati i token sono
+    `{AppData}`, `{UserDir}`, `{UserProfile}`, `{UserSavedGames}`, `{InstallDir}`, `{EpicID}`
+    e `{EpicId}`, scritti anche in minuscolo (`{appdata}`, `{userdir}`): il riconoscimento
+    dei token non distingue le maiuscole. Qui `{AppData}` è **AppData\Local**: i valori
+    `{appdata}/../locallow/...` e `{appdata}/../roaming/...` lo confermano (da memoria, non
+    verificato: Satisfactory salva in Local). Coincide con il piano.
+  - `Data\Manifests\*.item`: **non verificato**. Su questo PC la cartella c'è ma non ha
+    file `.item` (solo `Pending`): il formato dei campi è quello del piano.
+  - Cosa non è nel piano: `{../locallow}` e `{../roaming}` dopo `{AppData}` diventano
+    `WinAppDataLocalLow` / `WinAppDataRoaming` (senza, quei giochi non si trovavano). Un
+    altro `..` → nessuna regola, nel log.
+  - `DisplayName` = "Epic Games". Il lancio (`com.epicgames.launcher://apps/...`) usa
+    l'elenco di `FindGames`: un gioco non più nei manifest non si avvia (messaggio nuovo
+    `EpicItemMissing`, `LaunchFailedVia` per i testi non di Steam).
+  - Testi del cloud fuori da Steam (`GameViewModel`): barra, conferma e aiuto usano i
+    testi generici; l'avviso non compare se il cloud è "non noto" (per Epic vuol dire
+    nessuna cartella cloud). Il pulsante "Come si fa" per gli altri launcher mostra il
+    testo generico, non la guida di Steam.
+  - Test cambiato di proposito: `SteamProviderTests.ProvidersHaveSteamFirst` (ora due
+    launcher). `FakePlatform` ha processi, registro e programmi avviati impostabili.
 - 2026-10-25 — Review of phase N (Opus), merged from `v2-review`:
   `de476eb` an extra spot whose folder is missing on disk (SD card out,
   folder deleted) is left as it is: before, saving progress emptied its copy
