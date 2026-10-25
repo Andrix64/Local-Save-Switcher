@@ -199,7 +199,7 @@ per phase (the phase file names it).
 - [x] P2c — Existing playthroughs and export (3553e24)
 - [x] P3 — Getting a game ready for a player (simple mode) (badb747)
 - [ ] P4 — Mode setting and start-up
-- [ ] P4a — Optional PIN for admins
+- [x] P4a — Optional PIN for admins (8e81077)
 - [ ] P5 — Advanced mode: playthroughs grouped by player
 - [ ] P5a — Deleted playthroughs: kept until deleted for good
 - [ ] P6 — Simple view: players and games
@@ -223,6 +223,19 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P4a (Haiku): PIN facoltativo per gli admin. `People.SetPin` / `RemovePin` /
+  `CheckPin`: PBKDF2-SHA256, 100 000 iterazioni, sale di 16 byte, hash di 32, in `persone.ini`
+  come `<id>.Pin=<sale>:<hash>` (mai in chiaro). Un utente non ha PIN; diventare utente toglie il
+  PIN; togliere una persona toglie il suo. `Person.HasPin`. Confronto a tempo costante
+  (`FixedTimeEquals`). Nell'interfaccia: `PinPadViewModel` (cinque errori di fila → 30 s di attesa,
+  contatore in memoria, si riparte al riavvio; il tempo è un orologio iniettato per i test) e la
+  finestra "Chi sei?" apre il tastierino per un admin con PIN (cifre e tastiera). Test:
+  `PinTests` (8), `PinPadViewModelTests` (7). Test Windows: 685 verdi, 0 warning.
+  - Non fatto (sono di P5/P6): "Imposta/Cambia/Togli PIN" nella finestra Giocatori (P5); il
+    cambio o la rimozione del proprio PIN che chiede il PIN attuale (P5); la domanda "Imposta PIN"
+    dei testi del piano non ha ancora una finestra.
+  - Dal canvas `AdminPin`: la finestra ha il titolo "Chi sei?", le due scelte, il tastierino 3×4 con
+    "⌫", "Annulla". Fatto così; la pallina per la cifra è un testo "●○○○".
 - 2026-10-25 — Fase P, P4 **parte 2** (Haiku), commit `ea821d8`: finestra di primo avvio con le
   due scelte (`ModeChoiceWindow`, chiamata in `App.StartAsync` solo se `lss.ini` non c'era; chiusa
   senza scelta = avanzata), e view model + finestra "Chi sei?" (`AdminPickerViewModel`,
