@@ -223,6 +223,18 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P4 **parte 2** (Haiku), commit `ea821d8`: finestra di primo avvio con le
+  due scelte (`ModeChoiceWindow`, chiamata in `App.StartAsync` solo se `lss.ini` non c'era; chiusa
+  senza scelta = avanzata), e view model + finestra "Chi sei?" (`AdminPickerViewModel`,
+  `AdminPickerWindow`: solo gli amministratori, un utente è rifiutato). Test: `AdminPickerViewModelTests`
+  (4). Test Windows: 667 verdi, 0 warning.
+  - Deviazione: il `FirstRunWindow` del piano (G11) qui è la finestra del primo nome della partita
+    di un gioco; la scelta di modalità è quindi una finestra nuova.
+  - **Ancora da fare in P4** (P4 non spuntato): il pulsante "Modalità semplice" nell'intestazione e
+    la commutazione della finestra principale (la vista semplice è P6); "Chi sei?" non è ancora
+    collegata (la usano P5 e P6/P7). Il PIN è P4a.
+  - Schede del canvas lette: `FirstRun` (fatta), `Main` (è la vista semplice "Chi gioca?", P6),
+    `AdminPin` (P4a), `Settings` (ha "Passa alla modalità semplice": P4, da collegare).
 - 2026-10-25 — Fase P, P4 **parziale** (Haiku): committata solo la parte di core
   (`AppSettings.Mode` in `lss.ini`, chiave `Modalita`; `FirstStart` = il file non c'era).
   Test: `AppSettingsTests` (3 nuovi). **Non fatto, P4 non è spuntato**: la finestra di prima
