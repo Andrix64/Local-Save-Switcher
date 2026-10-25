@@ -26,6 +26,19 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
+    /// Quando una persona ha giocato per ultima a questo gioco, o null se mai.
+    /// </summary>
+    public DateTime? LastPlayedOf(string personId)
+    {
+        string text = IniFile.Read(FavouritesPath).GetValueOrDefault(personId + LastPlayedSuffix, "");
+
+        return DateTime.TryParseExact(text, InfoDateFormat, CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out DateTime last)
+            ? last
+            : null;
+    }
+
+    /// <summary>
     /// Sceglie la partita preferita di una persona. Deve essere una sua partita.
     /// </summary>
     public Result SetFavourite(string personId, string profileName)

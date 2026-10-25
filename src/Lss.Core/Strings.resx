@@ -515,4 +515,8 @@ LSS will look at what changed on the disk.</value></data>
   <data name="PurgeVerb" xml:space="preserve"><value>Delete for good</value></data>
   <data name="Purged" xml:space="preserve"><value>Playthrough deleted for good.</value></data>
   <data name="DeletedPlayTime" xml:space="preserve"><value>play time {0}</value></data>
+  <data name="PlayerNameCaption" xml:space="preserve"><value>Player's name</value></data>
+  <data name="SimpleLastPlay" xml:space="preserve"><value>Last played {0}</value></data>
+  <data name="SimpleNeedsSetup" xml:space="preserve"><value>Needs setting up</value></data>
+  <data name="SimpleCloudLabel" xml:space="preserve"><value>Ask an admin</value></data>
 </root>

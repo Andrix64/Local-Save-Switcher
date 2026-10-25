@@ -12,7 +12,7 @@ public sealed record Person(string Id, string Name, string Color, bool IsAdmin, 
 /// Le persone di LSS, in persone.ini. Non lancia mai eccezioni in lettura:
 /// un file rotto diventa una persona sola, quella del sistema.
 /// </summary>
-internal sealed class People
+public sealed class People
 {
     /// <summary>
     /// Colori dei giocatori: bianco sopra con almeno 4,5:1 di contrasto.

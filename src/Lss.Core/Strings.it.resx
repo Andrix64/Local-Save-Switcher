@@ -515,4 +515,8 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="PurgeVerb" xml:space="preserve"><value>Elimina per sempre</value></data>
   <data name="Purged" xml:space="preserve"><value>Partita eliminata per sempre.</value></data>
   <data name="DeletedPlayTime" xml:space="preserve"><value>tempo di gioco {0}</value></data>
+  <data name="PlayerNameCaption" xml:space="preserve"><value>Nome del giocatore</value></data>
+  <data name="SimpleLastPlay" xml:space="preserve"><value>Ultima partita: {0}</value></data>
+  <data name="SimpleNeedsSetup" xml:space="preserve"><value>Da sistemare</value></data>
+  <data name="SimpleCloudLabel" xml:space="preserve"><value>Chiedi a un admin</value></data>
 </root>

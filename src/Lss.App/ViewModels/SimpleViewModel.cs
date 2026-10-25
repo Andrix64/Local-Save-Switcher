@@ -1,0 +1,226 @@
+using System.Collections.ObjectModel;
+using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Lss.App.Services;
+
+namespace Lss.App.ViewModels;
+
+/// <summary>
+/// Un gioco nella modalità semplice: copertina (o piastrella generata), stato e
+/// ultima partita del giocatore attuale.
+/// </summary>
+public sealed record SimpleGameTile(
+    GameItemViewModel Item,
+    string Name,
+    string Launcher,
+    string? CoverPath,
+    string Initials,
+    IBrush TileBrush,
+    bool Ready,
+    bool Running,
+    string LastPlayText,
+    string? CloudText);
+
+/// <summary>
+/// Modalità semplice: "Chi gioca?" (le persone), poi i giochi del giocatore. Un
+/// gioco pronto si gioca con la sua partita preferita (P7). Un gioco non pronto,
+/// o aggiungere un gioco o una persona, chiede un amministratore.
+/// </summary>
+public sealed partial class SimpleViewModel : ObservableObject
+{
+    private readonly People people;
+    private readonly IDialogService dialogs;
+    private readonly IReadOnlyList<GameItemViewModel> games;
+    private readonly Func<GameItemViewModel, SaveManager?> managerOf;
+    private readonly Func<GameItemViewModel, Task> setUp;
+    private readonly Func<GameItemViewModel, Task> play;
+    private readonly Func<Task> addGame;
+
+    /// <param name="setUp">Procedura di ricerca dei salvataggi per un gioco non pronto.</param>
+    /// <param name="play">Gioca un gioco pronto (P7).</param>
+    /// <param name="addGame">Aggiunge un gioco a mano.</param>
+    internal SimpleViewModel(People people, IDialogService dialogs, IReadOnlyList<GameItemViewModel> games,
+        Func<GameItemViewModel, SaveManager?> managerOf, Func<GameItemViewModel, Task> setUp,
+        Func<GameItemViewModel, Task> play, Func<Task> addGame)
+    {
+        this.people = people;
+        this.dialogs = dialogs;
+        this.games = games;
+        this.managerOf = managerOf;
+        this.setUp = setUp;
+        this.play = play;
+        this.addGame = addGame;
+
+        Refresh();
+    }
+
+    /// <summary>Le persone, nell'ordine di People: le piastrelle della prima pagina.</summary>
+    public ObservableCollection<PersonTile> Players { get; } = [];
+
+    /// <summary>I giochi del giocatore attuale, dal più recente.</summary>
+    public ObservableCollection<SimpleGameTile> Games { get; } = [];
+
+    /// <summary>Il giocatore attuale, o null sulla prima pagina.</summary>
+    public Person? Current { get; private set; }
+
+    /// <summary>true sulla pagina dei giochi.</summary>
+    public bool OnGamesPage => Current != null;
+
+    public string CurrentName => Current?.Name ?? "";
+
+    /// <summary>Ricostruisce le persone e, se c'è, i giochi del giocatore attuale.</summary>
+    public void Refresh()
+    {
+        Current = Current == null ? null : people.Find(Current.Id);
+
+        Players.Clear();
+
+        foreach (Person person in people.All)
+        {
+            Players.Add(new PersonTile(person, Initial(person.Name),
+                new SolidColorBrush(Color.Parse(person.Color))));
+        }
+
+        Games.Clear();
+
+        if (Current != null)
+        {
+            foreach (SimpleGameTile tile in BuildGames(Current))
+                Games.Add(tile);
+        }
+
+        OnPropertyChanged(nameof(OnGamesPage));
+        OnPropertyChanged(nameof(CurrentName));
+    }
+
+    /// <summary>Chi gioca: si va alla pagina dei giochi di quella persona.</summary>
+    public void SelectPlayer(Person person)
+    {
+        Current = people.Find(person.Id);
+        Refresh();
+    }
+
+    /// <summary>"Cambia giocatore": si torna alla prima pagina.</summary>
+    public void ChangePlayer()
+    {
+        Current = null;
+        Refresh();
+    }
+
+    /// <summary>Un gioco: si gioca se è pronto, altrimenti si sistema (con un admin).</summary>
+    public async Task ActivateAsync(SimpleGameTile tile)
+    {
+        if (tile.Running)
+            return;
+
+        if (!tile.Ready)
+        {
+            if (!await EnsureAdminAsync())
+                return;
+
+            await setUp(tile.Item);
+        }
+        else
+        {
+            await play(tile.Item);
+        }
+
+        Refresh();
+    }
+
+    /// <summary>"Aggiungi una persona": un admin, poi il nome. La nuova persona è un utente.</summary>
+    [RelayCommand]
+    private async Task AddPlayerAsync()
+    {
+        Person? admin = await dialogs.ChooseAdminAsync(people);
+
+        if (admin == null)
+            return;
+
+        string? name = await dialogs.PromptAsync(Strings.AddPlayer, Strings.PlayerNameCaption, Strings.PlayerNameCaption,
+            Strings.AddPlayer);
+
+        if (name != null)
+            people.Add(name);
+
+        Refresh();
+    }
+
+    /// <summary>"Aggiungi un gioco": un admin, poi la procedura di aggiunta.</summary>
+    [RelayCommand]
+    private async Task AddGameAsync()
+    {
+        if (!await EnsureAdminAsync())
+            return;
+
+        await addGame();
+        Refresh();
+    }
+
+    /// <summary>
+    /// Chi autorizza: il giocatore attuale se è admin, altrimenti un admin scelto
+    /// (con il suo PIN). True se c'è un'autorizzazione.
+    /// </summary>
+    public async Task<bool> EnsureAdminAsync()
+    {
+        if (Current?.IsAdmin == true)
+            return true;
+
+        return await dialogs.ChooseAdminAsync(people) != null;
+    }
+
+    private List<SimpleGameTile> BuildGames(Person player)
+    {
+        var built = new List<(SimpleGameTile Tile, DateTime? Last)>();
+
+        foreach (GameItemViewModel item in games)
+        {
+            // I giochi con i salvataggi non riconosciuti (Unsafe) non si mostrano.
+            if (item.Info.Support == SupportState.Unsafe)
+                continue;
+
+            SaveManager? manager = managerOf(item);
+            DateTime? last = manager?.LastPlayedOf(player.Id);
+            bool running = manager?.IsGameRunning() ?? false;
+
+            string? cloud = manager != null && manager.GetCloudState() == CloudState.Enabled &&
+                            !manager.State.CloudAllowedInSimple
+                ? Strings.SimpleCloudLabel
+                : null;
+
+            var tile = new SimpleGameTile(
+                item,
+                item.Name,
+                item.Info.Provider,
+                item.Info.CoverPath == "" ? null : item.Info.CoverPath,
+                Initials(item.Name),
+                new SolidColorBrush(Color.Parse(People.Palette[Stable(item.Name) % People.Palette.Count])),
+                item.Info.Support == SupportState.Supported,
+                running,
+                last is DateTime when ? Loc.F(Strings.SimpleLastPlay, when.ToString("d")) : "",
+                cloud);
+
+            built.Add((tile, last));
+        }
+
+        return built
+            .OrderByDescending(entry => entry.Last ?? DateTime.MinValue)
+            .ThenBy(entry => entry.Tile.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(entry => entry.Tile)
+            .ToList();
+    }
+
+    private static string Initial(string name) =>
+        name.Length > 0 ? char.ToUpperInvariant(name[0]).ToString() : "?";
+
+    // Due lettere per la piastrella generata: le iniziali delle prime due parole.
+    private static string Initials(string name)
+    {
+        string[] words = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return string.Concat(words.Take(2).Select(word => char.ToUpperInvariant(word[0])));
+    }
+
+    // Lo stesso nome dà sempre lo stesso colore, anche tra un avvio e l'altro.
+    private static int Stable(string text) => text.Sum(character => (int)character);
+}

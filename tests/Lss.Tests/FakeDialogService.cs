@@ -30,6 +30,24 @@ public sealed class FakeDialogService : IDialogService
         return Task.FromResult(ChosenPerson);
     }
 
+    /// <summary>L'admin che l'utente sceglie nella finestra "Chi sei?" (null = annulla).</summary>
+    public Person? ChosenAdmin { get; set; }
+
+    public Task<Person?> ChooseAdminAsync(People people)
+    {
+        Calls.Add("Admin");
+        return Task.FromResult(ChosenAdmin);
+    }
+
+    /// <summary>Il testo che l'utente scrive nella finestra di richiesta (null = annulla).</summary>
+    public string? PromptAnswer { get; set; }
+
+    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm)
+    {
+        Calls.Add("Prompt: " + title);
+        return Task.FromResult(PromptAnswer);
+    }
+
     public Task<bool> InformAsync(string heading, string text, InfoKind kind, string? actionText = null)
     {
         Calls.Add("Inform: " + heading);
