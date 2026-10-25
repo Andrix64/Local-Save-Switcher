@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Lss.App.ViewModels;
 
 namespace Lss.App.Services;
 
@@ -14,6 +15,9 @@ public interface IDialogService
     /// <summary>Domanda con il verbo sul pulsante: true se l'utente conferma.</summary>
     Task<bool> ConfirmAsync(string heading, string text, string verb, bool destructive = false, InfoKind kind = InfoKind.Warning);
 
+    /// <summary>Scelta tra più azioni (la prima è la principale) e Annulla: l'indice scelto, -1 se si annulla.</summary>
+    Task<int> ChooseAsync(string heading, string text, IReadOnlyList<string> options, InfoKind kind = InfoKind.Warning);
+
     /// <summary>Mostra una finestra modale e restituisce il suo risultato.</summary>
     Task<T?> ShowAsync<T>(Window dialog);
 
@@ -25,6 +29,9 @@ public interface IDialogService
 
     /// <summary>Chiede un testo (un nome), partendo da initial: il testo, o null se si annulla.</summary>
     Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "");
+
+    /// <summary>"Rimuovere …?": a chi dare le partite (o eliminarle); null se si annulla.</summary>
+    Task<RemovalChoice?> ChooseRemovalAsync(Person person, IReadOnlyList<Person> others);
 
     /// <summary>"PIN di …": imposta o cambia il PIN di un admin. true se è salvato.</summary>
     Task<bool> SetPinAsync(People people, Person admin);

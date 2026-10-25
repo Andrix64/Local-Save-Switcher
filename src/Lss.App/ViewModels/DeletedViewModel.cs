@@ -36,6 +36,14 @@ public sealed class DeletedItemViewModel
     public IBrush? OwnerBrush { get; }
 
     public string Details { get; }
+
+    /// <summary>"Andrea · eliminata il … · tempo di gioco …", sotto il nome.</summary>
+    public string Line => OwnerText + "  ·  " + Details;
+
+    /// <summary>La persona non c'è più: il pallino è grigio con "?".</summary>
+    public IBrush CircleBrush => OwnerBrush ?? new SolidColorBrush(Color.Parse("#4A4A50"));
+
+    public string CircleInitial => OwnerInitial == "" ? "?" : OwnerInitial;
 }
 
 /// <summary>
@@ -64,6 +72,9 @@ public partial class DeletedViewModel : ObservableObject
     public bool Changed { get; private set; }
 
     public string Title => Strings.DeletedTitle;
+
+    /// <summary>"Partite eliminate · Control", in cima alla finestra.</summary>
+    public string Heading => Strings.DeletedTitle + " · " + manager.Game.Name;
 
     public string EmptyText => Strings.NoDeleted;
 

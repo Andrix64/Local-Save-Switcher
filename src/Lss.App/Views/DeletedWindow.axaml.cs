@@ -43,6 +43,25 @@ public partial class DeletedWindow : Window
 
     private void Close_Click(object? sender, RoutedEventArgs e) => Close();
 
+    // I pulsanti della riga scelgono la partita, poi fanno come quelli in fondo.
+    private async void Recover_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: DeletedItemViewModel item } && !ViewModel.Busy)
+        {
+            ViewModel.Selected = item;
+            await ViewModel.RecoverCommand.ExecuteAsync(null);
+        }
+    }
+
+    private async void Purge_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: DeletedItemViewModel item } && !ViewModel.Busy)
+        {
+            ViewModel.Selected = item;
+            await ViewModel.PurgeCommand.ExecuteAsync(null);
+        }
+    }
+
     // Doppio clic su una partita: la recupera, come in WinForms.
     private async void List_DoubleTapped(object? sender, TappedEventArgs e)
     {

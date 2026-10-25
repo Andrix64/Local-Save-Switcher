@@ -88,7 +88,7 @@ public sealed class PlayersViewModelTests : IDisposable
     public async Task RemovingDeletesThePlaythroughsWhenAskedTo()
     {
         People people = People();
-        var dialogs = new FakeDialogService { ConfirmAnswer = true };
+        var dialogs = new FakeDialogService { RemovalAnswer = new RemovalChoice(null) };
         PlayersViewModel model = Model(people, dialogs);
 
         Result result = await model.RemoveAsync(people.Find(User)!);
@@ -101,7 +101,7 @@ public sealed class PlayersViewModelTests : IDisposable
     public async Task RemovingGivesThePlaythroughsToTheChosenPlayer()
     {
         People people = People();
-        var dialogs = new FakeDialogService { ConfirmAnswer = false, ChosenPerson = people.Find(Admin) };
+        var dialogs = new FakeDialogService { RemovalAnswer = new RemovalChoice(Admin) };
         PlayersViewModel model = Model(people, dialogs);
 
         Result result = await model.RemoveAsync(people.Find(User)!);
@@ -114,7 +114,7 @@ public sealed class PlayersViewModelTests : IDisposable
     public async Task CancelingTheRemovalChangesNothing()
     {
         People people = People();
-        var dialogs = new FakeDialogService { ConfirmAnswer = false, ChosenPerson = null };
+        var dialogs = new FakeDialogService { RemovalAnswer = null };
         PlayersViewModel model = Model(people, dialogs);
 
         await model.RemoveAsync(people.Find(User)!);

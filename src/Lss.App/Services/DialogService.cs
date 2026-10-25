@@ -16,6 +16,9 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
     public async Task<bool> ConfirmAsync(string heading, string text, string verb, bool destructive = false, InfoKind kind = InfoKind.Warning) =>
         await ShowAsync<bool>(MessageWindow.Confirm(heading, text, verb, destructive, kind));
 
+    public async Task<int> ChooseAsync(string heading, string text, IReadOnlyList<string> options, InfoKind kind = InfoKind.Warning) =>
+        await ShowAsync<int?>(MessageWindow.Choose(heading, text, options, kind)) ?? -1;
+
     public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null) =>
         ShowAsync<Person>(new PlayerChoiceWindow(new PlayerChoiceViewModel(title, text, people, cancelText)));
 
@@ -24,6 +27,9 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
 
     public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "") =>
         ShowAsync<string>(new TextPromptWindow(new TextPromptViewModel(title, caption, initial, hint, 30, confirm)));
+
+    public Task<RemovalChoice?> ChooseRemovalAsync(Person person, IReadOnlyList<Person> others) =>
+        ShowAsync<RemovalChoice>(new RemovePlayerWindow(new RemovePlayerViewModel(person, others)));
 
     public async Task<bool> SetPinAsync(People people, Person admin) =>
         await ShowAsync<bool>(new SetPinWindow(new SetPinViewModel(people, admin)));

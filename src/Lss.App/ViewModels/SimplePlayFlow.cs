@@ -94,17 +94,18 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people)
         {
             string admins = string.Join(", ", people.Admins.Select(admin => admin.Name));
 
-            bool askAdmin = await dialogs.InformAsync(item.Name,
+            bool askAdmin = await dialogs.InformAsync(Loc.F(Strings.SimpleCloudBlockedHeading, item.Name),
                 Loc.F(Strings.SimpleCloudBlocked, item.Name, admins), InfoKind.Warning, Strings.SimpleAdminHere);
 
             if (!askAdmin || await dialogs.ChooseAdminAsync(people) == null)
                 return false;
         }
 
-        // Un admin decide: consentire il gioco, o giocarlo solo questa volta.
-        string text = Loc.F(Strings.SimpleCloudAdminText, item.Name);
+        // Un admin decide, in una domanda sola: consentire il gioco, o giocarlo solo questa volta.
+        int choice = await dialogs.ChooseAsync(Strings.SimpleCloudAdminHeading,
+            Loc.F(Strings.SimpleCloudAdminText, item.Name), [Strings.SimpleCloudAllow, Strings.SimpleCloudOnce]);
 
-        if (await dialogs.ConfirmAsync(item.Name, text, Strings.SimpleCloudAllow, kind: InfoKind.Warning))
+        if (choice == 0)
         {
             Result allowed = manager.SetCloudAllowedInSimple(true);
 
@@ -117,7 +118,7 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people)
             return true;
         }
 
-        return await dialogs.ConfirmAsync(item.Name, text, Strings.SimpleCloudOnce, kind: InfoKind.Warning);
+        return choice == 1;
     }
 
     // Aspetta che il gioco parta (al massimo due minuti), poi che si chiuda.

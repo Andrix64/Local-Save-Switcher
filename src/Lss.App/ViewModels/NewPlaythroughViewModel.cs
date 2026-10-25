@@ -70,6 +70,12 @@ public partial class NewPlaythroughViewModel : ObservableObject
 
     public string Title => IsRename ? Strings.RenameProfileTitle : Strings.NewProfileTitle;
 
+    /// <summary>Il nome del gioco, per il titolo dentro la finestra ("" se non si sa).</summary>
+    public string GameName { get; init; } = "";
+
+    /// <summary>"Nuova partita di Control": il titolo in cima alla finestra.</summary>
+    public string Heading => IsRename || GameName == "" ? Title : Loc.F(Strings.NewProfileTitleFor, GameName);
+
     public string CreateText => IsRename ? Strings.Rename : Strings.Create;
 
     // Il pulsante "partita vuota" della coppia di scelte: l'opposto di CopyCurrentSaves.

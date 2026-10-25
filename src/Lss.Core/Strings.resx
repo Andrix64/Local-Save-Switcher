@@ -508,9 +508,6 @@ LSS will look at what changed on the disk.</value></data>
   <data name="ImportPlayerPick" xml:space="preserve"><value>Whose playthrough is it?</value></data>
   <data name="PlaythroughPlayer" xml:space="preserve"><value>Player</value></data>
   <data name="RemovePlayerText" xml:space="preserve"><value>What about the playthroughs of {0}?</value></data>
-  <data name="DeleteThemText" xml:space="preserve"><value>Deleted playthroughs can be recovered from the deleted playthroughs.</value></data>
-  <data name="DeleteThemVerb" xml:space="preserve"><value>Delete them</value></data>
-  <data name="GiveToText" xml:space="preserve"><value>Give them to:</value></data>
   <data name="PlayersButton" xml:space="preserve"><value>Players…</value></data>
   <data name="PlayersTitle" xml:space="preserve"><value>Players</value></data>
   <data name="AddPlayer" xml:space="preserve"><value>Add player</value></data>
@@ -580,4 +577,11 @@ LSS will look at what changed on the disk.</value></data>
   <data name="MoveUp" xml:space="preserve"><value>Move up</value></data>
   <data name="MoveDown" xml:space="preserve"><value>Move down</value></data>
   <data name="RemovePlayerMenu" xml:space="preserve"><value>Remove…</value></data>
+  <data name="SimpleCloudBlockedHeading" xml:space="preserve"><value>{0} needs an admin</value></data>
+  <data name="SimpleCloudAdminHeading" xml:space="preserve"><value>Online saves are on</value></data>
+  <data name="RemovePlayerTitle" xml:space="preserve"><value>Remove {0}?</value></data>
+  <data name="RemovePlayerGiveTo" xml:space="preserve"><value>Give them to:</value></data>
+  <data name="RemovePlayerDelete" xml:space="preserve"><value>Delete them (they can be recovered from the deleted playthroughs)</value></data>
+  <data name="RemovePlayerVerb" xml:space="preserve"><value>Remove {0}</value></data>
+  <data name="NewProfileTitleFor" xml:space="preserve"><value>New playthrough of {0}</value></data>
 </root>

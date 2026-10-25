@@ -121,7 +121,7 @@ internal static class Program
         Shot(MessageWindow.Inform(Strings.TitleOperationFailed, error,
             InfoKind.Warning, Strings.OpenBackup), "03-inform-error");
 
-        Shot(new NewPlaythroughWindow(new NewPlaythroughViewModel(_ => false)), "04-new-playthrough");
+        Shot(new NewPlaythroughWindow(new NewPlaythroughViewModel(_ => false, players: manager.Players?.All) { GameName = control.Name }), "04-new-playthrough");
         Shot(new NewPlaythroughWindow(new NewPlaythroughViewModel(_ => false, first)), "05-rename");
 
         Shot(new TextPromptWindow(new TextPromptViewModel(Strings.NoteTitle,
@@ -387,11 +387,7 @@ internal static class Program
 
         Shot(new PlayersWindow(new PlayersViewModel(people, dialogs, (_, _) => Result.Ok(""))), "29-players");
 
-        Shot(MessageWindow.Confirm(Loc.F(Strings.RemovePlayerText, claraPerson.Name), Strings.DeleteThemText,
-            Strings.DeleteThemVerb, destructive: true, InfoKind.Warning), "30-remove-confirm");
-
-        Shot(new PlayerChoiceWindow(new PlayerChoiceViewModel(
-            Loc.F(Strings.RemovePlayerText, claraPerson.Name), Strings.GiveToText, [andreaPerson])), "31-remove-give");
+        Shot(new RemovePlayerWindow(new RemovePlayerViewModel(claraPerson, [andreaPerson])), "30-remove-player");
 
         Shot(new ModeChoiceWindow(), "32-mode-choice");
 
@@ -405,6 +401,9 @@ internal static class Program
         Shot(new AdminPickerWindow(picker), "34-admin-pin");
 
         Shot(new SetPinWindow(new SetPinViewModel(people, claraPerson) { NewPin = "1234", Again = "12" }), "35-set-pin");
+
+        Shot(MessageWindow.Choose(Strings.SimpleCloudAdminHeading, Loc.F(Strings.SimpleCloudAdminText, control.Name),
+            [Strings.SimpleCloudAllow, Strings.SimpleCloudOnce], InfoKind.Warning), "36-cloud-admin");
     }
 
     private static void Shot(Window window, string name)
@@ -461,6 +460,8 @@ internal sealed class NoDialogs : IDialogService
     public Task<Person?> ChooseAdminAsync(People people) => Task.FromResult<Person?>(null);
     public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "") => Task.FromResult<string?>(null);
     public Task<bool> SetPinAsync(People people, Person admin) => Task.FromResult(false);
+    public Task<int> ChooseAsync(string heading, string text, IReadOnlyList<string> options, InfoKind kind = InfoKind.Warning) => Task.FromResult(-1);
+    public Task<RemovalChoice?> ChooseRemovalAsync(Person person, IReadOnlyList<Person> others) => Task.FromResult<RemovalChoice?>(null);
     public Task<string?> PickZipToSaveAsync(string title, string suggestedName, string filterName) => Task.FromResult<string?>(null);
     public Task<string?> PickZipToOpenAsync(string title, string filterName) => Task.FromResult<string?>(null);
     public Task<string?> PickConfigToSaveAsync(string title, string suggestedName) => Task.FromResult<string?>(null);

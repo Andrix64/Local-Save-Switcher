@@ -508,9 +508,6 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="ImportPlayerPick" xml:space="preserve"><value>Di chi è questa partita?</value></data>
   <data name="PlaythroughPlayer" xml:space="preserve"><value>Giocatore</value></data>
   <data name="RemovePlayerText" xml:space="preserve"><value>Cosa succede alle partite di {0}?</value></data>
-  <data name="DeleteThemText" xml:space="preserve"><value>Le partite eliminate si possono ancora recuperare dalle partite eliminate.</value></data>
-  <data name="DeleteThemVerb" xml:space="preserve"><value>Elimina le partite</value></data>
-  <data name="GiveToText" xml:space="preserve"><value>Dai le partite a:</value></data>
   <data name="PlayersButton" xml:space="preserve"><value>Giocatori…</value></data>
   <data name="PlayersTitle" xml:space="preserve"><value>Giocatori</value></data>
   <data name="AddPlayer" xml:space="preserve"><value>Aggiungi giocatore</value></data>
@@ -580,4 +577,11 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="MoveUp" xml:space="preserve"><value>Sposta su</value></data>
   <data name="MoveDown" xml:space="preserve"><value>Sposta giù</value></data>
   <data name="RemovePlayerMenu" xml:space="preserve"><value>Rimuovi…</value></data>
+  <data name="SimpleCloudBlockedHeading" xml:space="preserve"><value>{0} ha bisogno di un admin</value></data>
+  <data name="SimpleCloudAdminHeading" xml:space="preserve"><value>Salvataggi online attivi</value></data>
+  <data name="RemovePlayerTitle" xml:space="preserve"><value>Rimuovere {0}?</value></data>
+  <data name="RemovePlayerGiveTo" xml:space="preserve"><value>Dalle a:</value></data>
+  <data name="RemovePlayerDelete" xml:space="preserve"><value>Eliminale (si possono recuperare dalle partite eliminate)</value></data>
+  <data name="RemovePlayerVerb" xml:space="preserve"><value>Rimuovi {0}</value></data>
+  <data name="NewProfileTitleFor" xml:space="preserve"><value>Nuova partita di {0}</value></data>
 </root>

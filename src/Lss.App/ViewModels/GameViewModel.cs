@@ -693,7 +693,10 @@ public partial class GameViewModel : ObservableObject
         var window = new NewPlaythroughWindow(new NewPlaythroughViewModel(
             name => Manager.ProfileExists(SaveManager.ProfileFolderName(name)),
             players: Manager.Players?.All,
-            defaultPlayerId: defaultOwner == "" ? Manager.DefaultOwnerId : defaultOwner));
+            defaultPlayerId: defaultOwner == "" ? Manager.DefaultOwnerId : defaultOwner)
+        {
+            GameName = Manager.Game.Name,
+        });
 
         NewPlaythroughResult? choice = await dialogs.ShowAsync<NewPlaythroughResult>(window);
 

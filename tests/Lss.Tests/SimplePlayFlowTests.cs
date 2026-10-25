@@ -54,7 +54,7 @@ public sealed class SimplePlayFlowTests : IDisposable
     public async Task AnAdminAllowsACloudGameAndTheConsentIsWritten()
     {
         var (manager, people, provider) = Setup(new FakeProvider { Cloud = CloudState.Enabled });
-        var dialogs = new FakeDialogService { ConfirmAnswer = true };
+        var dialogs = new FakeDialogService { ChooseAnswer = 0 };
         var flow = new SimplePlayFlow(dialogs, people);
 
         PlaySession? session = await flow.StartAsync(manager, Item(provider), people.Find(TestFolder.Owner)!, Ready);
@@ -68,7 +68,7 @@ public sealed class SimplePlayFlowTests : IDisposable
     public async Task CancelingTheAdminQuestionStartsNothing()
     {
         var (manager, people, provider) = Setup(new FakeProvider { Cloud = CloudState.Enabled });
-        var dialogs = new FakeDialogService { ConfirmAnswer = false };
+        var dialogs = new FakeDialogService { ChooseAnswer = -1 };
         var flow = new SimplePlayFlow(dialogs, people);
 
         PlaySession? session = await flow.StartAsync(manager, Item(provider), people.Find(TestFolder.Owner)!, Ready);
@@ -145,5 +145,19 @@ public sealed class SimplePlayFlowTests : IDisposable
 
         Assert.True(done.Success, done.Message);
         Assert.NotNull(manager.GetInfo("Profilo_Mario").LastSession);
+    }
+
+    [Fact]
+    public async Task OnlyThisTimeStartsTheGameWithoutWritingTheConsent()
+    {
+        var (manager, people, provider) = Setup(new FakeProvider { Cloud = CloudState.Enabled });
+        var dialogs = new FakeDialogService { ChooseAnswer = 1 };
+        var flow = new SimplePlayFlow(dialogs, people);
+
+        PlaySession? session = await flow.StartAsync(manager, Item(provider), people.Find(TestFolder.Owner)!, Ready);
+
+        Assert.NotNull(session);
+        Assert.Single(provider.Launched);
+        Assert.False(manager.State.CloudAllowedInSimple);
     }
 }

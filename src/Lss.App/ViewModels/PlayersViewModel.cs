@@ -146,28 +146,18 @@ public sealed partial class PlayersViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Rimozione in due passi: prima la scelta "Elimina le sue partite", poi (se si
-    /// dice no) a chi darle. Annullando, non cambia nulla.
+    /// "Rimuovere …?": una domanda sola, dare le partite a qualcuno o eliminarle.
+    /// Annullando, non cambia nulla.
     /// </summary>
     public async Task<Result> RemoveAsync(Person person)
     {
         if (people.All.Count == 1)
             return Done(Result.Fail(Strings.LastPlayer));
 
-        bool delete = await dialogs.ConfirmAsync(
-            Loc.F(Strings.RemovePlayerText, person.Name),
-            Strings.DeleteThemText,
-            Strings.DeleteThemVerb,
-            destructive: true);
-
-        if (delete)
-            return Done(removePlayer(person, null));
-
         IReadOnlyList<Person> others = people.All.Where(other => other.Id != person.Id).ToList();
-        Person? giveTo = await dialogs.ChoosePersonAsync(Loc.F(Strings.RemovePlayerText, person.Name),
-            Strings.GiveToText, others);
+        RemovalChoice? choice = await dialogs.ChooseRemovalAsync(person, others);
 
-        return giveTo == null ? Result.Ok("") : Done(removePlayer(person, giveTo.Id));
+        return choice == null ? Result.Ok("") : Done(removePlayer(person, choice.GiveTo));
     }
 
     // Ogni modifica aggiorna le righe; un errore resta in Message.

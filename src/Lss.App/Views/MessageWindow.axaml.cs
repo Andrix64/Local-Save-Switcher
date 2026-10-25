@@ -58,6 +58,27 @@ public partial class MessageWindow : Window
         return window;
     }
 
+    /// <summary>
+    /// Scelta tra più azioni: la prima è il pulsante principale, le altre secondarie,
+    /// poi "Annulla". Il risultato è l'indice dell'azione; Annulla dà -1.
+    /// </summary>
+    public static MessageWindow Choose(string heading, string text, IReadOnlyList<string> options, InfoKind kind)
+    {
+        var window = new MessageWindow(heading, text, kind);
+        window.ButtonRow.Orientation = Avalonia.Layout.Orientation.Vertical;
+        window.ButtonRow.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+
+        for (int index = 0; index < options.Count; index++)
+            window.AddButton(options[index], index == 0 ? "primary" : "secondary", result: index, isDefault: index == 0);
+
+        window.AddButton(Strings.Cancel, "secondary", result: -1, isCancel: true);
+
+        foreach (Control button in window.ButtonRow.Children)
+            button.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+
+        return window;
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         base.OnKeyDown(e);
@@ -70,7 +91,7 @@ public partial class MessageWindow : Window
         }
     }
 
-    private void AddButton(string label, string style, bool result, bool isDefault = false, bool isCancel = false)
+    private void AddButton(string label, string style, object result, bool isDefault = false, bool isCancel = false)
     {
         var button = new Button
         {

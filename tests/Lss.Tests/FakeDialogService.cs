@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Lss.App.Services;
+using Lss.App.ViewModels;
 
 namespace Lss.Tests;
 
@@ -46,6 +47,24 @@ public sealed class FakeDialogService : IDialogService
     {
         Calls.Add("Prompt: " + title);
         return Task.FromResult(PromptAnswer);
+    }
+
+    /// <summary>La scelta in "Rimuovere …?" (null = annulla).</summary>
+    public RemovalChoice? RemovalAnswer { get; set; }
+
+    public Task<RemovalChoice?> ChooseRemovalAsync(Person person, IReadOnlyList<Person> others)
+    {
+        Calls.Add("Remove: " + person.Name);
+        return Task.FromResult(RemovalAnswer);
+    }
+
+    /// <summary>L'azione scelta in ChooseAsync (-1 = annulla).</summary>
+    public int ChooseAnswer { get; set; } = -1;
+
+    public Task<int> ChooseAsync(string heading, string text, IReadOnlyList<string> options, InfoKind kind = InfoKind.Warning)
+    {
+        Calls.Add("Choose action: " + heading);
+        return Task.FromResult(ChooseAnswer);
     }
 
     /// <summary>Il PIN che l'utente scrive in "PIN di …" (null = annulla).</summary>
