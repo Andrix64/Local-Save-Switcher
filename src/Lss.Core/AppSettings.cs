@@ -10,6 +10,13 @@ internal sealed class AppSettings
     private const string AccountKey = "UltimoAccount";
     private const string GameKey = "UltimoGioco";
     private const string LookKey = "CercaDopoPartita";
+    private const string ModeKey = "Modalita";
+
+    /// <summary>Modalità semplice (chi gioca sceglie il gioco).</summary>
+    public const string SimpleMode = "semplice";
+
+    /// <summary>Modalità avanzata (tutto, come in 1.0).</summary>
+    public const string AdvancedMode = "avanzata";
 
     private readonly string path;
 
@@ -18,6 +25,15 @@ internal sealed class AppSettings
 
     /// <summary>Dopo una partita cerca altre cartelle dei salvataggi (CercaDopoPartita).</summary>
     public bool LookAfterPlaying { get; set; } = true;
+
+    /// <summary>Modalita: <see cref="SimpleMode"/> o <see cref="AdvancedMode"/>. Senza chiave è avanzata.</summary>
+    public string Mode { get; set; } = AdvancedMode;
+
+    /// <summary>
+    /// true se lss.ini non c'era: alla prima partenza si chiede la modalità.
+    /// Chi ha già lss.ini (1.0) resta in avanzata senza domande.
+    /// </summary>
+    public bool FirstStart { get; private set; }
 
     public AppSettings(string path)
     {
@@ -36,6 +52,8 @@ internal sealed class AppSettings
     /// </summary>
     public void Load()
     {
+        FirstStart = !File.Exists(path);
+
         try
         {
             Dictionary<string, string> values = IniFile.Read(path);
@@ -43,6 +61,7 @@ internal sealed class AppSettings
             LastAccount = values.GetValueOrDefault(AccountKey, "");
             LastGame = values.GetValueOrDefault(GameKey, "");
             LookAfterPlaying = values.GetValueOrDefault(LookKey, "1") != "0";
+            Mode = values.GetValueOrDefault(ModeKey, AdvancedMode) == SimpleMode ? SimpleMode : AdvancedMode;
         }
         catch (Exception ex)
         {
@@ -61,7 +80,8 @@ internal sealed class AppSettings
             [
                 new(AccountKey, LastAccount),
                 new(GameKey, LastGame),
-                new(LookKey, LookAfterPlaying ? "1" : "0")
+                new(LookKey, LookAfterPlaying ? "1" : "0"),
+                new(ModeKey, Mode)
             ]);
         }
         catch (Exception ex)

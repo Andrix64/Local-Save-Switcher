@@ -218,6 +218,18 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fase P, P3 fatta (Haiku, decisione dall'autore del piano, opzione b): commit
+  `badb747` (tick `23944ba`). Test Windows: 660 verdi. Nel commit e in `P-simple-mode.md`
+  (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
+  Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
+  preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P4 **parziale** (Haiku): committata solo la parte di core
+  (`AppSettings.Mode` in `lss.ini`, chiave `Modalita`; `FirstStart` = il file non c'era).
+  Test: `AppSettingsTests` (3 nuovi). **Non fatto, P4 non è spuntato**: la finestra di prima
+  partenza con le due scelte, il pulsante "Modalità semplice/avanzata" nell'intestazione,
+  la finestra "Chi sei?" (`AdminPickerWindow`) e la vista semplice nella finestra principale
+  (che dipende da P6). Per queste bisogna leggere le schede `FirstRun`, `Main`, `Advanced`
+  e `Settings` del canvas e `P6`/`P7`: fatto a parte, in un turno dedicato.
 - 2026-10-25 — **Fase P, P3 ferma (Haiku): da decidere con Andrix.** P3 (`SimplePlay`), passo 4
   del piano: "salvataggi di nessuno (`WhoseSaves` = null) → `AdoptGameSaves(UniqueName(
   Strings.SavesBeforeLss), player)` **e non preferita**". Ma la regola "Rules" dice che una

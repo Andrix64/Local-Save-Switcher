@@ -51,4 +51,37 @@ public sealed class AppSettingsTests : IDisposable
         Assert.Equal("", settings.LastAccount);
         Assert.Equal("", settings.LastGame);
     }
+
+    [Fact]
+    public void ModeRoundTrip()
+    {
+        new AppSettings(IniPath) { Mode = AppSettings.SimpleMode }.Save();
+
+        var read = new AppSettings(IniPath);
+        read.Load();
+
+        Assert.Equal(AppSettings.SimpleMode, read.Mode);
+    }
+
+    [Fact]
+    public void ExistingFileWithoutModeIsAdvancedAndNotAsked()
+    {
+        TestFolder.Write(IniPath, "UltimoAccount=111\n");
+
+        var settings = new AppSettings(IniPath);
+        settings.Load();
+
+        Assert.Equal(AppSettings.AdvancedMode, settings.Mode);
+        Assert.False(settings.FirstStart);
+    }
+
+    [Fact]
+    public void MissingFileAsksTheModeOnFirstStart()
+    {
+        var settings = new AppSettings(IniPath);
+        settings.Load();
+
+        Assert.True(settings.FirstStart);
+        Assert.Equal(AppSettings.AdvancedMode, settings.Mode);
+    }
 }
