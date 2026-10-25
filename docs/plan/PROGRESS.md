@@ -154,7 +154,7 @@ per phase (the phase file names it).
 - [x] M3b — Folders that are never saves (ce2ed78; Linux 353 tests on lss-ci)
 - [x] M4 — The wizard (ce24576; Windows 373 tests)
 - [x] M5 — Learning a game that already has playthroughs (3413df7; Windows 376 tests)
-- [ ] M6 — Screenshots
+- [x] M6 — Screenshots (a78b9cd; Windows 376 tests)
 - [ ] M7 — 👤 Real check
 
 ### Phase N — Several save folders, look after every session ([N-several-folders.md](N-several-folders.md))
