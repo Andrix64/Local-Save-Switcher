@@ -7,7 +7,9 @@ namespace Lss.Tests;
 public sealed class SaveFinderChangedTests : IDisposable
 {
     private readonly TestFolder folder = new();
-    private readonly DateTime since = new(2026, 10, 25, 12, 0, 0, DateTimeKind.Utc);
+    // Nel futuro: su Linux la data di creazione è quella del cambio di stato, cioè adesso,
+    // e così resta sempre prima di since. Le date dei file si impostano dal test.
+    private readonly DateTime since = DateTime.UtcNow.AddDays(1);
 
     public void Dispose() => folder.Dispose();
 
@@ -18,7 +20,6 @@ public sealed class SaveFinderChangedTests : IDisposable
         string path = Path.Combine(Root, relative);
         TestFolder.Write(path, "x");
         File.SetLastWriteTimeUtc(path, written);
-        File.SetCreationTimeUtc(path, written.AddDays(-30));
         return path;
     }
 
@@ -42,6 +43,9 @@ public sealed class SaveFinderChangedTests : IDisposable
     [Fact]
     public void FileCreatedAfterTheStartIsFoundEvenIfWrittenBefore()
     {
+        // Su Linux la data di creazione non si imposta: il caso si prova solo su Windows.
+        if (!OperatingSystem.IsWindows()) return;
+
         string path = Write("made.sav", since.AddHours(-1));
         File.SetCreationTimeUtc(path, since.AddSeconds(1));
 
