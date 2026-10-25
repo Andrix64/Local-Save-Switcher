@@ -42,7 +42,7 @@ public partial class AdminPickerWindow : Window
         ViewModel.Choose(tile.Person);
 
         if (ViewModel.Chosen != null)
-            Close();
+            Close(ViewModel.Chosen);
     }
 
     private void Digit_Click(object? sender, RoutedEventArgs e)
@@ -53,7 +53,14 @@ public partial class AdminPickerWindow : Window
 
     private void Back_Click(object? sender, RoutedEventArgs e) => ViewModel.Pad?.Back();
 
-    private void CancelPin_Click(object? sender, RoutedEventArgs e) => ViewModel.CancelPin();
+    // Con solo il PIN da chiedere, annullarlo chiude la finestra; altrimenti si torna alla scelta.
+    private void CancelPin_Click(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel.OnlyPin)
+            Close(null);
+        else
+            ViewModel.CancelPin();
+    }
 
     // Annulla dalla scelta: nessuno è scelto.
     private void Cancel_Click(object? sender, RoutedEventArgs e) => Close();
@@ -75,7 +82,7 @@ public partial class AdminPickerWindow : Window
         ViewModel.Pad?.Press(digit);
 
         if (ViewModel.CompletePin())
-            Close();
+            Close(ViewModel.Chosen);
     }
 
     private static string? KeyDigit(Key key) => key switch

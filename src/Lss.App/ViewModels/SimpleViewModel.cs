@@ -281,7 +281,7 @@ public sealed partial class SimpleViewModel : ObservableObject
     [RelayCommand]
     private async Task AddPlayerAsync()
     {
-        Person? admin = await dialogs.ChooseAdminAsync(people);
+        Person? admin = await dialogs.ChooseAdminAsync(people, Current);
 
         if (admin == null)
             return;
@@ -307,16 +307,11 @@ public sealed partial class SimpleViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Chi autorizza: il giocatore attuale se è admin, altrimenti un admin scelto
-    /// (con il suo PIN). True se c'è un'autorizzazione.
+    /// Chi autorizza: il giocatore attuale se è admin (solo il suo PIN, se ce l'ha),
+    /// altrimenti un admin. True se c'è un'autorizzazione.
     /// </summary>
-    public async Task<bool> EnsureAdminAsync()
-    {
-        if (Current?.IsAdmin == true)
-            return true;
-
-        return await dialogs.ChooseAdminAsync(people) != null;
-    }
+    public async Task<bool> EnsureAdminAsync() =>
+        await dialogs.ChooseAdminAsync(people, Current) != null;
 
     private List<SimpleGameTile> BuildGames(Person player)
     {

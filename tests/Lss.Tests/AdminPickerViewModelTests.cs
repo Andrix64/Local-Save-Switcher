@@ -65,4 +65,47 @@ public sealed class AdminPickerViewModelTests : IDisposable
 
         Assert.Null(picker.Chosen);
     }
+
+    // Il bug segnalato: un admin senza PIN non deve passare da "Chi sei?".
+    [Fact]
+    public void ACurrentAdminWithoutPinIsAuthorisedWithoutAWindow()
+    {
+        People people = People();
+
+        Assert.Equal(Admin, AdminPickerViewModel.WithoutWindow(people, people.Find(Admin))?.Id);
+    }
+
+    [Fact]
+    public void TheOnlyAdminIsKnownWhenNobodyIsPlayingButAUserMustChoose()
+    {
+        People people = People();
+
+        Assert.Equal(Admin, AdminPickerViewModel.KnownAdmin(people, null)?.Id);
+        Assert.Null(AdminPickerViewModel.KnownAdmin(people, people.Find(User)));
+    }
+
+    [Fact]
+    public void WithTwoAdminsAUserMustChoose()
+    {
+        People people = People();
+        people.SetAdmin(User, true);
+
+        Assert.Null(AdminPickerViewModel.KnownAdmin(people, null));
+        Assert.Equal(User, AdminPickerViewModel.KnownAdmin(people, people.Find(User))?.Id);
+    }
+
+    [Fact]
+    public void AKnownAdminWithPinGetsOnlyThePad()
+    {
+        People people = People();
+        people.SetPin(Admin, "1234");
+
+        Assert.Null(AdminPickerViewModel.WithoutWindow(people, people.Find(Admin)));
+
+        var picker = new AdminPickerViewModel(people, AdminPickerViewModel.KnownAdmin(people, people.Find(Admin)));
+
+        Assert.True(picker.OnlyPin);
+        Assert.True(picker.PadOpen);
+        Assert.Null(picker.Chosen);
+    }
 }

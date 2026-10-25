@@ -111,7 +111,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (people == null)
             return;
 
-        Person? admin = await dialogs.ChooseAdminAsync(people);
+        Person? admin = await dialogs.ChooseAdminAsync(people, Simple?.Current);
 
         if (admin == null)
             return;

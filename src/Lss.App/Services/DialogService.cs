@@ -22,8 +22,14 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
     public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null) =>
         ShowAsync<Person>(new PlayerChoiceWindow(new PlayerChoiceViewModel(title, text, people, cancelText)));
 
-    public Task<Person?> ChooseAdminAsync(People people) =>
-        ShowAsync<Person>(new AdminPickerWindow(new AdminPickerViewModel(people)));
+    public async Task<Person?> ChooseAdminAsync(People people, Person? current = null)
+    {
+        if (AdminPickerViewModel.WithoutWindow(people, current) is Person admin)
+            return admin;
+
+        return await ShowAsync<Person>(new AdminPickerWindow(
+            new AdminPickerViewModel(people, AdminPickerViewModel.KnownAdmin(people, current))));
+    }
 
     public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "") =>
         ShowAsync<string>(new TextPromptWindow(new TextPromptViewModel(title, caption, initial, hint, 30, confirm)));

@@ -24,8 +24,11 @@ public interface IDialogService
     /// <summary>Sceglie una persona tra quelle date: la persona, o null se si annulla.</summary>
     Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null);
 
-    /// <summary>Chi è l'amministratore che autorizza: l'admin scelto (con PIN se ce l'ha), o null.</summary>
-    Task<Person?> ChooseAdminAsync(People people);
+    /// <summary>
+    /// Chi è l'amministratore che autorizza: l'admin scelto (con PIN se ce l'ha), o null. Se
+    /// l'admin è già noto (chi gioca è admin, o c'è un solo admin) non si chiede "Chi sei?": solo il PIN, se c'è.
+    /// </summary>
+    Task<Person?> ChooseAdminAsync(People people, Person? current = null);
 
     /// <summary>Chiede un testo (un nome), partendo da initial: il testo, o null se si annulla.</summary>
     Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "");

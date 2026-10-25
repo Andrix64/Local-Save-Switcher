@@ -15,17 +15,46 @@ public partial class AdminPickerViewModel : ObservableObject
 {
     private readonly People people;
 
-    internal AdminPickerViewModel(People people)
+    /// <param name="known">L'admin già noto (KnownAdmin): niente scelta, solo il suo tastierino.</param>
+    internal AdminPickerViewModel(People people, Person? known = null)
     {
         this.people = people;
 
-        Tiles = people.Admins
+        Tiles = (known != null ? [known] : people.Admins)
             .Select(person => new PersonTile(
                 person,
                 person.Name.Length > 0 ? char.ToUpperInvariant(person.Name[0]).ToString() : "?",
                 new SolidColorBrush(Color.Parse(person.Color))))
             .ToList();
+
+        OnlyPin = known != null;
+
+        if (known != null)
+            Choose(known);
     }
+
+    /// <summary>
+    /// L'admin che autorizza senza chiedere "Chi sei?": chi gioca, se è admin;
+    /// senza nessun giocatore scelto, l'unico admin se ce n'è uno solo. Un utente
+    /// che gioca deve far scegliere un admin. Null se va scelto.
+    /// </summary>
+    public static Person? KnownAdmin(People people, Person? current)
+    {
+        if (current != null)
+            return people.Find(current.Id) is { IsAdmin: true } admin ? admin : null;
+
+        return people.Admins.Count == 1 ? people.Admins[0] : null;
+    }
+
+    /// <summary>
+    /// Autorizza senza finestra: l'admin noto e senza PIN. Null se serve la
+    /// finestra (scelta tra più admin, o il PIN).
+    /// </summary>
+    public static Person? WithoutWindow(People people, Person? current) =>
+        KnownAdmin(people, current) is { HasPin: false } admin ? admin : null;
+
+    /// <summary>true se si chiede solo il PIN dell'admin noto: annullarlo chiude tutto.</summary>
+    public bool OnlyPin { get; }
 
     public IReadOnlyList<PersonTile> Tiles { get; }
 

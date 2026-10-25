@@ -34,8 +34,12 @@ public sealed class FakeDialogService : IDialogService
     /// <summary>L'admin che l'utente sceglie nella finestra "Chi sei?" (null = annulla).</summary>
     public Person? ChosenAdmin { get; set; }
 
-    public Task<Person?> ChooseAdminAsync(People people)
+    // Come il servizio vero: un admin noto e senza PIN non apre la finestra.
+    public Task<Person?> ChooseAdminAsync(People people, Person? current = null)
     {
+        if (AdminPickerViewModel.WithoutWindow(people, current) is Person known)
+            return Task.FromResult<Person?>(known);
+
         Calls.Add("Admin");
         return Task.FromResult(ChosenAdmin);
     }

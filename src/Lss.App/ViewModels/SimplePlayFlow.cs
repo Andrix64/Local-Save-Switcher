@@ -97,9 +97,13 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people)
             bool askAdmin = await dialogs.InformAsync(Loc.F(Strings.SimpleCloudBlockedHeading, item.Name),
                 Loc.F(Strings.SimpleCloudBlocked, item.Name, admins), InfoKind.Warning, Strings.SimpleAdminHere);
 
-            if (!askAdmin || await dialogs.ChooseAdminAsync(people) == null)
+            if (!askAdmin)
                 return false;
         }
+
+        // Chi gioca, se è admin, mette solo il suo PIN (se ce l'ha); altrimenti si sceglie un admin.
+        if (await dialogs.ChooseAdminAsync(people, player) == null)
+            return false;
 
         // Un admin decide, in una domanda sola: consentire il gioco, o giocarlo solo questa volta.
         int choice = await dialogs.ChooseAsync(Strings.SimpleCloudAdminHeading,
