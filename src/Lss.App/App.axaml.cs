@@ -164,6 +164,7 @@ public partial class App : Application
 
         var closed = new TaskCompletionSource();
         window.Closed += (_, _) => closed.TrySetResult();
+        window.Opened += (_, _) => WindowFit.Apply(window);
         window.Show();
 
         await closed.Task;

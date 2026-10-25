@@ -16,8 +16,11 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
         await ShowAsync<bool>(MessageWindow.Confirm(heading, text, verb, destructive, kind));
 
     // Serve una finestra padre: senza, il dialogo non sarebbe modale.
-    public async Task<T?> ShowAsync<T>(Window dialog) =>
-        await dialog.ShowDialog<T?>(owner() ?? throw new InvalidOperationException("Nessuna finestra principale."));
+    public async Task<T?> ShowAsync<T>(Window dialog)
+    {
+        dialog.Opened += (_, _) => WindowFit.Apply(dialog);
+        return await dialog.ShowDialog<T?>(owner() ?? throw new InvalidOperationException("Nessuna finestra principale."));
+    }
 
     public async Task<string?> PickZipToSaveAsync(string title, string suggestedName, string filterName)
     {
