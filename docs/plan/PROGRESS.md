@@ -200,7 +200,7 @@ per phase (the phase file names it).
 - [x] P3 — Getting a game ready for a player (simple mode) (badb747)
 - [ ] P4 — Mode setting and start-up
 - [x] P4a — Optional PIN for admins (8e81077)
-- [ ] P5 — Advanced mode: playthroughs grouped by player
+- [x] P5 — Advanced mode: playthroughs grouped by player (88b01ee)
 - [ ] P5a — Deleted playthroughs: kept until deleted for good
 - [ ] P6 — Simple view: players and games
 - [ ] P7 — Simple mode: play, and the "My games" menu
@@ -223,6 +223,28 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P5 **completata** (Haiku), commit `b52a089` … `88b01ee` (tick nel commit
+  successivo). Test Windows: 712 verdi, 0 warning. Deviazioni dal piano, in ordine di importanza:
+  - Recupero di una partita eliminata: **nessuna domanda** (il piano diceva "chiede alla persona
+    quando il proprietario non esiste più"). Come da indicazione di Andrix: va alla persona di prima se
+    esiste ancora, altrimenti al primo amministratore (`RecoveryOwnerOf`), come le partite di prima di 2.0.
+  - Rimozione di una persona: prima una conferma "Elimina le partite" (rossa), poi, se si dice no, la
+    scelta "Dai le partite a:". Annullando la scelta non cambia nulla. Il piano non diceva due passi:
+    serve perché la finestra di conferma ha due pulsanti.
+  - Cloud "Consenti anche in modalità semplice": sulla barra del cloud, non nella finestra di avviso
+    (quella ha una sola coppia di pulsanti). `CloudConsentito` in `stato.ini`.
+  - Blocco "Cartelle dei salvataggi (n)": lo stato aperto/chiuso è statico: vale per tutti i giochi
+    finché l'app è aperta, ma le altre finestre aperte non si aggiornano da sole (si aggiornano alla
+    prossima selezione del gioco).
+  - Una sola lista di persone per tutti i giochi (`MainWindowViewModel`), così nomi e colori sono gli
+    stessi ovunque. Togliere una persona tocca le partite di ogni gioco che si apre; un gioco che non si
+    apre viene saltato (nel log).
+  - Scelta del giocatore all'importazione e nella nuova partita: con una sola persona non si chiede.
+  - Colore: passa al successivo della tavolozza (un pulsante), non un selettore.
+  - Non verificato a schermo: le finestre Giocatori, Dai a…, e il blocco delle cartelle (le prove sono
+    sui view model; i file XAML compilano). Da vedere con P8.
+  - Non fatto in P5 e spostato in P5a: l'intestazione "proprietario" nella finestra delle partite
+    eliminate.
 - 2026-10-25 — Fase P, P5 **parziale** (Haiku): fatto (non spuntato, mancano sotto):
   - Partite per persona (`GameViewModel.PlayerGroups`, `PlayerGroup`): nell'ordine delle persone,
     la preferita per prima, poi dalla più recente; le persone senza partite del gioco non compaiono.
