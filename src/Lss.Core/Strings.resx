@@ -314,6 +314,11 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SafetyInsideLss" xml:space="preserve"><value>the folder is inside LSS's own data.</value></data>
   <data name="SafetyUnreadable" xml:space="preserve"><value>the folder can't be read.</value></data>
   <data name="SafetyBadPattern" xml:space="preserve"><value>the file pattern is too broad or names program or game files.</value></data>
+  <data name="ReasonBeforeAddingSpot" xml:space="preserve"><value>Before adding a save folder</value></data>
+  <data name="SpotAdded" xml:space="preserve"><value>Save folder added.</value></data>
+  <data name="SpotRemoved" xml:space="preserve"><value>Save folder removed. The copies in the playthroughs are kept.</value></data>
+  <data name="SpotNotFound" xml:space="preserve"><value>LSS did not add this save folder.</value></data>
+  <data name="SpotBadName" xml:space="preserve"><value>LSS can't use a folder whose path contains "|".</value></data>
   <data name="SupportNotFound" xml:space="preserve"><value>No save folder yet: start the game once and save.</value></data>
   <data name="SupportUnsure" xml:space="preserve"><value>This game saves in too many places for LSS. You can choose its folders yourself.</value></data>
   <data name="SupportUnsafe" xml:space="preserve"><value>The save folder found can't be used safely: {0}</value></data>

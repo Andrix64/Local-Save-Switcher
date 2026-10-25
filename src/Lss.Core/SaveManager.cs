@@ -50,7 +50,7 @@ public sealed partial class SaveManager
     private const string RenameSuffix = ".rinomina";
 
     public string SavePath { get; }
-    public GameInfo Game { get; }
+    public GameInfo Game { get; private set; }
     public string ProfilesPath { get; }
     public string BackupPath { get; }
     public string SavestatePath { get; }
@@ -80,10 +80,13 @@ public sealed partial class SaveManager
     /// I posti dei salvataggi del gioco: si cambiano e si salvano tutti insieme.
     /// SavePath è il posto 1.
     /// </summary>
-    private readonly SaveSet saves;
+    private SaveSet saves;
 
     // Journal del cambio di salvataggi, nella cartella dati del gioco.
     private readonly string switchJournal;
+
+    // Cartella dati del gioco (per un account): qui stanno posti.ini e cambio.ini.
+    private readonly string dataFolder;
 
     /// <summary>
     /// true se all'apertura è stato rimesso a posto un cambio di salvataggi
@@ -108,6 +111,7 @@ public sealed partial class SaveManager
         SavePath = savePath;
         saves = new SaveSet(Game.Spots.Count > 0 ? Game.Spots : GameInfo.SpotsOf(savePath, SaveSource.Userdata));
         switchJournal = Path.Combine(basePath, "cambio.ini");
+        dataFolder = basePath;
         AccountName = accountName;
         ProfilesPath = Path.Combine(basePath, "Profili");
         BackupPath = Path.Combine(basePath, "Backup");
@@ -1126,6 +1130,7 @@ public sealed partial class SaveManager
         return reason switch
         {
             "Prima_salvataggio" => Strings.ReasonBeforeSavingOld,
+            "Prima_nuovo_posto" => Strings.ReasonBeforeAddingSpot,
             "Prima_creazione" => Strings.ReasonBeforeCreating,
             RestoreBackupName => Strings.ReasonBeforeRestoring,
             _ => reason.Replace('_', ' ')

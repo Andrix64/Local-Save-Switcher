@@ -186,4 +186,92 @@ public sealed class SaveManagerSpotsTests : IDisposable
         Assert.True(manager.DeleteProfile("Profilo_Bea").Success);
         Assert.False(Directory.Exists(ProfileFolder("Bea")));
     }
+
+    private string NewSpot => Path.Combine(folder.Root, "newspot");
+
+    private SaveSpot NewSpotSpec() => new(0, NewSpot, "", true, NewSpot, SaveSource.Chosen);
+
+    private string Extra(int id) => Path.Combine(".lss-posizioni", id.ToString());
+
+    [Fact]
+    public void AddingASpotCopiesItIntoTheActivePlaythroughAndTheOthers()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+        TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
+
+        Assert.True(manager.AddSpot(NewSpotSpec(), NewSpotFill.CopyCurrent).Success);
+
+        int id = manager.Game.Spots.Single(spot => spot.Folder == NewSpot).Id;
+        Assert.Equal("new", File.ReadAllText(Path.Combine(ProfileFolder("Anna"), Extra(id), "n.sav")));
+        Assert.Equal("new", File.ReadAllText(Path.Combine(ProfileFolder("Bea"), Extra(id), "n.sav")));
+    }
+
+    [Fact]
+    public void AnotherPlaythroughStartsEmptyWhenAsked()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+        TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
+
+        Assert.True(manager.AddSpot(NewSpotSpec(), NewSpotFill.Empty).Success);
+
+        int id = manager.Game.Spots.Single(spot => spot.Folder == NewSpot).Id;
+        Assert.Equal("new", File.ReadAllText(Path.Combine(ProfileFolder("Anna"), Extra(id), "n.sav")));
+        Assert.True(Directory.Exists(Path.Combine(ProfileFolder("Bea"), Extra(id))));
+        Assert.Empty(Directory.GetFiles(Path.Combine(ProfileFolder("Bea"), Extra(id)), "*", SearchOption.AllDirectories));
+    }
+
+    [Fact]
+    public void AddingASpotWhileTheGameRunsIsRefused()
+    {
+        var provider = new FakeProvider { Running = true };
+        var manager = new SaveManager(Game1, folder.Data, "", Game(), provider);
+        TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
+
+        Assert.False(manager.AddSpot(NewSpotSpec(), NewSpotFill.CopyCurrent).Success);
+        Assert.DoesNotContain(manager.Game.Spots, spot => spot.Folder == NewSpot);
+    }
+
+    [Fact]
+    public void AFailureInTheMiddleLeavesNoSpotFoldersBehind()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+        TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
+
+        // Il nuovo posto avrà id 4 (dopo i tre del gioco): nella seconda partita non si può creare la sua cartella.
+        TestFolder.Write(Path.Combine(ProfileFolder("Bea"), Extra(4)), "in the way");
+
+        Assert.False(manager.AddSpot(NewSpotSpec(), NewSpotFill.CopyCurrent).Success);
+
+        Assert.False(Directory.Exists(Path.Combine(ProfileFolder("Anna"), Extra(4))));
+        Assert.DoesNotContain(manager.Game.Spots, spot => spot.Folder == NewSpot);
+    }
+
+    [Fact]
+    public void RemovingASpotKeepsTheCopiesInThePlaythroughs()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+        TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
+        Assert.True(manager.AddSpot(NewSpotSpec(), NewSpotFill.CopyCurrent).Success);
+        int id = manager.Game.Spots.Single(spot => spot.Folder == NewSpot).Id;
+
+        Assert.True(manager.RemoveSpot(id).Success);
+
+        Assert.DoesNotContain(manager.Game.Spots, spot => spot.Id == id);
+        Assert.Equal("new", File.ReadAllText(Path.Combine(ProfileFolder("Anna"), Extra(id), "n.sav")));
+    }
 }

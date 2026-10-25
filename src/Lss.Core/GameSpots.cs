@@ -103,6 +103,14 @@ internal sealed class GameSpots
         next = Math.Max(next, 2);
     }
 
+    /// <summary>
+    /// Fa in modo che i prossimi id siano dopo id (gli id dei posti del gioco già noti).
+    /// </summary>
+    public void ReserveIdsAbove(int id)
+    {
+        next = Math.Max(next, id + 1);
+    }
+
     /// <summary>Toglie un posto. Il suo id non torna più in uso.</summary>
     public void Remove(int id)
     {
@@ -139,12 +147,11 @@ internal sealed class GameSpots
     /// Scrive posti.ini: le chiavi di questa classe e quelle di altre classi.
     /// Senza nulla da ricordare elimina il file.
     /// </summary>
-    public void Save()
+    public bool Save()
     {
         IEnumerable<KeyValuePair<string, string>> others = IniFile.Read(file)
             .Where(pair => !IsOwned(pair.Key));
-
-        Write(others.ToList());
+        return Write(others.ToList());
     }
 
     private void ReadValue(string key, string value)

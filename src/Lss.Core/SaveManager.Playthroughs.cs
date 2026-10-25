@@ -15,6 +15,7 @@ public static class BackupKind
     public const string Restore = "ripristino";
     public const string Create = "creazione";
     public const string Delete = "eliminazione";
+    public const string NewSpot = "nuovo posto";
 }
 
 /// <summary>
