@@ -196,7 +196,7 @@ per phase (the phase file names it).
 - [x] P1 — Players (57664e2)
 - [x] P2a — Owner (e375941)
 - [x] P2b — Favourite (1c15ec6)
-- [ ] P2c — Existing playthroughs and export
+- [x] P2c — Existing playthroughs and export (3553e24)
 - [ ] P3 — Getting a game ready for a player (simple mode)
 - [ ] P4 — Mode setting and start-up
 - [ ] P4a — Optional PIN for admins
@@ -218,6 +218,47 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — **Fase P, P3 ferma (Haiku): da decidere con Andrix.** P3 (`SimplePlay`), passo 4
+  del piano: "salvataggi di nessuno (`WhoseSaves` = null) → `AdoptGameSaves(UniqueName(
+  Strings.SavesBeforeLss), player)` **e non preferita**". Ma la regola "Rules" dice che una
+  persona con almeno una partita di un gioco ha **sempre** una preferita, e in quel ramo la
+  partita adottata è l'unica del gioco, quindi del giocatore attuale. Con la regola
+  implementata in P2b (dopo ogni operazione la preferita si ricalcola) diventa preferita da
+  sola. Le scelte possibili: (a) come scritto nel passo, ma con la preferita cancellata a mano
+  (`preferite.ini` non ha un "nessuna" stabile: al prossimo ricalcolo torna); (b) la partita
+  "Prima di LSS" diventa preferita del giocatore attuale, come dice la regola (**consigliato**);
+  (c) la partita va a un proprietario fittizio "Prima di LSS" (una persona in più, senza ruolo).
+  Non implementato P3: sospeso in attesa della scelta. Tutto il resto (P4–P8) dipende da P3 in
+  ordine, quindi non iniziato.
+- 2026-10-25 — Fase P, P1–P2c (Haiku), commit su `v2`: P1 `57664e2`/`c063eb9`, P2a
+  `e375941`/`2559b6c`, P2b `1c15ec6`/`23918aa`, P2c `3553e24`. Test
+  Windows: 651 verdi, 0 warning (prima di P: 612). Linux (`lss-ci`, `--tests-only`, `3553e24`): 651 verdi.
+  - Deviazioni dal piano e scelte da sapere:
+    - P2a: il piano dice "un proprietario esistente". `SaveManager` ha la proprietà interna
+      `Players` (l'elenco di `People`), impostata da `Open` e `Initialize`. Senza elenco (test,
+      `new SaveManager(…)` diretto) basta un id non vuoto. `DefaultOwnerId` è il primo giocatore
+      e dà "" senza elenco: in quel caso la creazione fallisce con `PlayerNotFound`.
+    - P2a, test: ogni chiamata di `CreateProfile`/`AdoptGameSaves`/`ImportProfile`/
+      `RecoverDeletedProfile` ha ora l'argomento del proprietario (`TestFolder.Owner`), come da
+      piano. `TestFolder.CreateManager` carica un `persone.ini` con una sola persona (quella
+      `Owner`, amministratore). `ExternalSavesTests` usa `manager.DefaultOwnerId` perché apre il
+      gestore con `Open`. Nessuna asserzione cambiata.
+    - P2b, preferite: non c'è un caso per caso. Dopo ogni operazione riuscita (creazione, import,
+      recupero, rinomina, eliminazione, cambio proprietario) `RepairFavourites` tiene la preferita
+      se è ancora valida, altrimenti prende la partita giocata per ultima (`LastSession`, poi nome).
+      Una rinomina la segue. "Ultima" (`<persona>.Ultima`) si scrive all'attivazione e a fine
+      sessione: il piano non diceva quando.
+    - P2b: `SetFavourite` con un'altra persona dà il messaggio nuovo `NotYourPlaythrough`.
+    - P2b, rischio: se la partita recuperata non riesce a scrivere le sue informazioni, resta
+      senza proprietario (solo nel log). Il recupero non rifà il controllo di P2c, perché
+      `ProprietariOk` è già a 1. Da sistemare con P5a/P5.
+    - P2c: `ProprietariOk=1` in `stato.ini` si scrive solo quando è vero (i `stato.ini` vecchi non
+      cambiano). `AssignExistingPlaythroughs` gira a `Open` e `Initialize`. Senza persone non
+      segna nulla, quindi riprova alla prossima apertura.
+    - P2c, export: `partita.ini` ha `Giocatore` (id, già scritto da P2a con le informazioni) e
+      `NomeGiocatore` (il nome, letto solo da chi guarda il file). L'import li ignora, il
+      proprietario è quello scelto.
+    - Nessun test del 1.0 è cambiato nelle asserzioni (vedi sopra per le chiamate).
 - 2026-10-25 — O8 (Haiku), commit `d4c8ef4` (`ExeIcon`, con test) e `9751449` (`ExecutableOf`,
   `GameIcons`, vista, test). Test Windows: 612 verdi, 0 errori, 0 warning (prima di O8: 584).
   Linux (`lss-ci`, `--tests-only`, commit `9751449`): 612 verdi.
