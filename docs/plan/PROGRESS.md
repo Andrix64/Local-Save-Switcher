@@ -109,7 +109,7 @@ hash after it. 👤 = done by Andrix, skip it. Rules in [README.md](README.md).
 - [x] J5 — 👤 First beta (2026-10-24: tag `v1.0.0-beta.1` at `4805f83`, all five CI jobs green, published as pre-release with `gh`; Windows exe not signed yet)
 - [x] J6 — 👤 SignPath: closed (application sent 2026-10-24, refused 2026-10-25; decision: release without code signing, `9395e93`)
 - [x] J7 — Further betas: skipped (they were only for the signed exe)
-- [ ] J8 — 1.0.0
+- [x] J8 — 1.0.0 (2026-10-25: tag `v1.0.0` at `85a86fe`, all five CI jobs green, published as latest release "LSS 1.0.0" without code signing; the 0.9.0 release is no longer on GitHub, so no "Continued as LSS" line)
 
 ## Notes
 
