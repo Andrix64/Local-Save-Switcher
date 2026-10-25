@@ -24,7 +24,7 @@ public sealed class FakeDialogService : IDialogService
     /// <summary>La persona che l'utente sceglie nel dialogo di scelta (null = annulla).</summary>
     public Person? ChosenPerson { get; set; }
 
-    public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people)
+    public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null)
     {
         Calls.Add("Choose: " + title);
         return Task.FromResult(ChosenPerson);

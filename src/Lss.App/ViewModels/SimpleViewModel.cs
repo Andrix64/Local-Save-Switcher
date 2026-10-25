@@ -145,6 +145,61 @@ public sealed partial class SimpleViewModel : ObservableObject
     [RelayCommand]
     private void GoBack() => ChangePlayer();
 
+    /// <summary>La partita in corso dalla modalità semplice (il pannello "Buon divertimento"), o null.</summary>
+    [ObservableProperty]
+    private PlaySession? playing;
+
+    /// <summary>Messaggio dell'ultima partita salvata (il posto del toast).</summary>
+    [ObservableProperty]
+    private string message = "";
+
+    public bool IsPlaying => Playing != null;
+
+    public string PlayingText => Playing == null ? "" : Loc.F(Strings.SimpleHaveFun, Playing.Player.Name, Playing.Item.Name);
+
+    public string StartYourselfText => Playing is { Launched: false } session
+        ? Loc.F(Strings.SimpleStartYourself, session.Item.Name)
+        : "";
+
+    /// <summary>Il pulsante "Ho finito di giocare" serve solo se il launcher non sa dire quando il gioco si chiude.</summary>
+    public bool ShowFinishButton => Playing is { CanDetect: false };
+
+    public string FinishText => Strings.SimpleFinished;
+
+    private TaskCompletionSource? finishing;
+
+    partial void OnPlayingChanged(PlaySession? value)
+    {
+        OnPropertyChanged(nameof(IsPlaying));
+        OnPropertyChanged(nameof(PlayingText));
+        OnPropertyChanged(nameof(StartYourselfText));
+        OnPropertyChanged(nameof(ShowFinishButton));
+    }
+
+    /// <summary>Mostra il pannello della partita. Il Task finisce quando l'utente preme "Ho finito".</summary>
+    public Task BeginPlaying(PlaySession session)
+    {
+        finishing = new TaskCompletionSource();
+        Playing = session;
+        return finishing.Task;
+    }
+
+    /// <summary>Chiude il pannello e torna alle copertine.</summary>
+    public void EndPlaying()
+    {
+        Playing = null;
+        finishing = null;
+        Refresh();
+    }
+
+    [RelayCommand]
+    private void FinishPlaying() => finishing?.TrySetResult();
+
+    /// <summary>"Le mie partite" su una copertina: si apre il menu (con il MainWindowViewModel).</summary>
+    public Func<GameItemViewModel, Task>? MyGames { get; set; }
+
+    public Task OpenMyGamesAsync(SimpleGameTile tile) => MyGames?.Invoke(tile.Item) ?? Task.CompletedTask;
+
     /// <summary>Un gioco: si gioca se è pronto, altrimenti si sistema (con un admin).</summary>
     public async Task ActivateAsync(SimpleGameTile tile)
     {

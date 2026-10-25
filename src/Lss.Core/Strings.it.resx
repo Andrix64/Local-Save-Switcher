@@ -526,4 +526,20 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="SimpleAddPlayer" xml:space="preserve"><value>Aggiungi giocatore</value></data>
   <data name="SimpleAddGame" xml:space="preserve"><value>Aggiungi un gioco</value></data>
   <data name="SimplePlaying" xml:space="preserve"><value>In gioco</value></data>
+  <data name="SimpleMyGames" xml:space="preserve"><value>Le mie partite</value></data>
+  <data name="SimpleMyGamesTitle" xml:space="preserve"><value>Le tue partite di {0}</value></data>
+  <data name="SimpleFavourite" xml:space="preserve"><value>Quella che giochi</value></data>
+  <data name="SimpleNewGame" xml:space="preserve"><value>Inizia una nuova partita</value></data>
+  <data name="SimpleHaveFun" xml:space="preserve"><value>Buon divertimento, {0}! Quando chiudi {1}, LSS salva la tua partita.</value></data>
+  <data name="SimpleStartYourself" xml:space="preserve"><value>Ora avvia {0} come al solito. Quando hai finito, torna qui.</value></data>
+  <data name="SimpleFinished" xml:space="preserve"><value>Ho finito di giocare</value></data>
+  <data name="SimpleSaved" xml:space="preserve"><value>{0} salvato per {1}</value></data>
+  <data name="SimpleCloudBlocked" xml:space="preserve"><value>{0} tiene una copia dei salvataggi online e potrebbe riportare la partita di un altro. Chiedi a un admin ({1}) di spegnere i salvataggi online o di consentire questo gioco.</value></data>
+  <data name="SimpleAdminHere" xml:space="preserve"><value>C'è un admin</value></data>
+  <data name="SimpleCloudAdminText" xml:space="preserve"><value>I salvataggi online sono attivi per {0}: il launcher potrebbe riportare i salvataggi di un altro giocatore. Spegnerli è più sicuro.</value></data>
+  <data name="SimpleCloudAllow" xml:space="preserve"><value>Consenti questo gioco</value></data>
+  <data name="SimpleCloudOnce" xml:space="preserve"><value>Gioca solo questa volta</value></data>
+  <data name="SimpleWhoseSaves" xml:space="preserve"><value>C'è già una partita salvata di {0} su questo computer. Di chi è?</value></data>
+  <data name="SimpleDontKnow" xml:space="preserve"><value>Non lo so — la metto da parte</value></data>
+  <data name="SimpleAskForHelp" xml:space="preserve"><value>Chiedi a chi ha installato LSS di guardarla.</value></data>
 </root>

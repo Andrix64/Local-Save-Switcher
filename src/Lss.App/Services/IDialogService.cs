@@ -18,7 +18,7 @@ public interface IDialogService
     Task<T?> ShowAsync<T>(Window dialog);
 
     /// <summary>Sceglie una persona tra quelle date: la persona, o null se si annulla.</summary>
-    Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people);
+    Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null);
 
     /// <summary>Chi è l'amministratore che autorizza: l'admin scelto (con PIN se ce l'ha), o null.</summary>
     Task<Person?> ChooseAdminAsync(People people);

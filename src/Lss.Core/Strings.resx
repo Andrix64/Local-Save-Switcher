@@ -526,4 +526,20 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SimpleAddPlayer" xml:space="preserve"><value>Add player</value></data>
   <data name="SimpleAddGame" xml:space="preserve"><value>Add a game</value></data>
   <data name="SimplePlaying" xml:space="preserve"><value>Playing</value></data>
+  <data name="SimpleMyGames" xml:space="preserve"><value>My games</value></data>
+  <data name="SimpleMyGamesTitle" xml:space="preserve"><value>Your games of {0}</value></data>
+  <data name="SimpleFavourite" xml:space="preserve"><value>The one you play</value></data>
+  <data name="SimpleNewGame" xml:space="preserve"><value>Start a new game</value></data>
+  <data name="SimpleHaveFun" xml:space="preserve"><value>Have fun, {0}! When you close {1}, LSS saves your game.</value></data>
+  <data name="SimpleStartYourself" xml:space="preserve"><value>Now start {0} as usual. When you have finished, come back here.</value></data>
+  <data name="SimpleFinished" xml:space="preserve"><value>I've finished playing</value></data>
+  <data name="SimpleSaved" xml:space="preserve"><value>{0} saved for {1}</value></data>
+  <data name="SimpleCloudBlocked" xml:space="preserve"><value>{0} keeps a copy of the saves online, and it may bring back someone else's game. Ask an admin ({1}) to turn the cloud saves off or to allow this game.</value></data>
+  <data name="SimpleAdminHere" xml:space="preserve"><value>An admin is here</value></data>
+  <data name="SimpleCloudAdminText" xml:space="preserve"><value>Cloud saves are on for {0}: the launcher may bring back the saves of another player. Turning them off is safer.</value></data>
+  <data name="SimpleCloudAllow" xml:space="preserve"><value>Allow this game</value></data>
+  <data name="SimpleCloudOnce" xml:space="preserve"><value>Play only this time</value></data>
+  <data name="SimpleWhoseSaves" xml:space="preserve"><value>There is already a saved game of {0} on this computer. Whose is it?</value></data>
+  <data name="SimpleDontKnow" xml:space="preserve"><value>I don't know — keep it aside</value></data>
+  <data name="SimpleAskForHelp" xml:space="preserve"><value>Ask whoever set up LSS to look at it.</value></data>
 </root>

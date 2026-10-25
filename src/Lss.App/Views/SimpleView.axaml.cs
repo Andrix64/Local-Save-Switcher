@@ -21,6 +21,12 @@ public partial class SimpleView : UserControl
             ViewModel?.SelectPlayer(tile.Person);
     }
 
+    private void MyGames_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: SimpleGameTile tile } && ViewModel != null)
+            _ = ViewModel.OpenMyGamesAsync(tile);
+    }
+
     private void Game_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: SimpleGameTile tile } && ViewModel != null)

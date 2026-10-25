@@ -270,6 +270,12 @@ public partial class GameViewModel : ObservableObject
     /// Cerca altre cartelle dei salvataggi in background, con priorità bassa. Si ferma
     /// se il gioco riparte (vedi OnGameState).
     /// </summary>
+    /// <summary>
+    /// Dopo una partita dalla modalità semplice: la stessa ricerca di cartelle, senza domande
+    /// (propone solo, con l'avviso).
+    /// </summary>
+    public void ScanAfterSession(DateTime startedLocal) => StartLookAfterSession(startedLocal);
+
     private void StartLookAfterSession(DateTime startedLocal)
     {
         if (Settings?.LookAfterPlaying == false)

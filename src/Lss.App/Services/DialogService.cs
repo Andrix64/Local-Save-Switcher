@@ -16,8 +16,8 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
     public async Task<bool> ConfirmAsync(string heading, string text, string verb, bool destructive = false, InfoKind kind = InfoKind.Warning) =>
         await ShowAsync<bool>(MessageWindow.Confirm(heading, text, verb, destructive, kind));
 
-    public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people) =>
-        ShowAsync<Person>(new PlayerChoiceWindow(new PlayerChoiceViewModel(title, text, people)));
+    public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null) =>
+        ShowAsync<Person>(new PlayerChoiceWindow(new PlayerChoiceViewModel(title, text, people, cancelText)));
 
     public Task<Person?> ChooseAdminAsync(People people) =>
         ShowAsync<Person>(new AdminPickerWindow(new AdminPickerViewModel(people)));

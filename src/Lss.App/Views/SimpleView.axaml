@@ -69,6 +69,16 @@
           <TextBlock Text="{Binding CurrentName}" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
         </StackPanel>
 
+        <!-- Il pannello della partita in corso: si chiude da solo, o con il pulsante se il launcher non lo sa dire -->
+        <Border Classes="card" Padding="18" IsVisible="{Binding IsPlaying}">
+          <StackPanel Spacing="12">
+            <TextBlock Text="{Binding PlayingText}" FontSize="18" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding StartYourselfText}" TextWrapping="Wrap" />
+            <Button Classes="primary" Content="{Binding FinishText}" Command="{Binding FinishPlayingCommand}"
+                    IsVisible="{Binding ShowFinishButton}" HorizontalAlignment="Left" />
+          </StackPanel>
+        </Border>
+
         <ItemsControl ItemsSource="{Binding Games}">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
@@ -87,6 +97,16 @@
                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                   </Grid>
+                </Button>
+                <!-- ⋯: le partite della persona per questo gioco (Le mie partite) -->
+                <Button Classes="more" Width="44" Height="44" Tag="{Binding}" Click="MyGames_Click"
+                        HorizontalAlignment="Left"
+                        AutomationProperties.Name="{loc:Str SimpleMyGames}" ToolTip.Tip="{loc:Str SimpleMyGames}">
+                  <StackPanel Orientation="Horizontal" Spacing="3" HorizontalAlignment="Center">
+                    <Ellipse />
+                    <Ellipse />
+                    <Ellipse />
+                  </StackPanel>
                 </Button>
                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock Classes="small" Text="{Binding Launcher}" />

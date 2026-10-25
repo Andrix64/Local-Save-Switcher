@@ -18,6 +18,9 @@ public partial class MainWindowViewModel : ObservableObject
     // Le persone di LSS: una sola lista per tutti i giochi, così una modifica vale ovunque.
     private readonly People? people;
 
+    // Il giro di una partita dalla modalità semplice (null senza persone).
+    private readonly SimplePlayFlow? simpleFlow;
+
     // Account e giochi di ogni launcher, come li ha letti l'avvio (o l'ultima ricarica).
     private IReadOnlyList<LauncherGames> launchers;
 
@@ -63,7 +66,10 @@ public partial class MainWindowViewModel : ObservableObject
                 () => AddGameAsync())
             {
                 ToAdvanced = SwitchToAdvancedAsync,
+                MyGames = OpenMyGamesAsync,
             };
+
+            simpleFlow = new SimplePlayFlow(dialogs, people);
         }
         SelectedGame = Games.FirstOrDefault(g => AppSettings.Refers(settings.LastGame, g.Info.Provider, g.Info.Id)) ?? Games.FirstOrDefault();
     }
@@ -134,8 +140,66 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    // Giocare dalla modalità semplice: arriva con P7 (mai fatto finora, così la vista non avvia nulla).
-    private static Task PlaySimpleAsync(GameItemViewModel item) => Task.CompletedTask;
+    /// <summary>Gioca un gioco pronto con la partita preferita di chi gioca.</summary>
+    private Task PlaySimpleAsync(GameItemViewModel item) =>
+        RunSimpleAsync(item, (manager, player) => SimplePlay.PrepareAsync(manager, people!, player, new SimpleQuestions(dialogs)));
+
+    /// <summary>"Le mie partite": si sceglie una partita (o una nuova) e si gioca.</summary>
+    private async Task OpenMyGamesAsync(GameItemViewModel item)
+    {
+        if (Simple?.Current is not Person player)
+            return;
+
+        SaveManager? manager = ManagerOrNull(item);
+
+        if (manager == null)
+            return;
+
+        MyGamesChoice? choice = await dialogs.ShowAsync<MyGamesChoice>(
+            new MyGamesWindow(new MyGamesViewModel(manager, player)));
+
+        if (choice == null)
+            return;
+
+        string? profile = choice.ProfileName;
+
+        await RunSimpleAsync(item, profile == null
+            ? (m, p) => SimplePlay.PrepareNewAsync(m, p)
+            : (m, p) => SimplePlay.PrepareWithAsync(m, p, profile));
+    }
+
+    /// <summary>
+    /// Il giro di una partita: prepara, avvia, mostra il pannello, aspetta la fine, salva.
+    /// Chi gioca è quello scelto nella vista semplice.
+    /// </summary>
+    private async Task RunSimpleAsync(GameItemViewModel item, Func<SaveManager, Person, Task<Result>> prepare)
+    {
+        if (Simple is not { } simple || simple.Current is not { } player || simpleFlow == null)
+            return;
+
+        SaveManager? manager = ManagerOrNull(item);
+
+        if (manager == null)
+            return;
+
+        PlaySession? session = await simpleFlow.StartAsync(manager, item, player, () => prepare(manager, player));
+
+        if (session == null)
+        {
+            simple.Refresh();
+            return;
+        }
+
+        Task finished = simple.BeginPlaying(session);
+        await simpleFlow.WaitForEndAsync(session, finished);
+
+        Result done = await simpleFlow.FinishAsync(session);
+        simple.EndPlaying();
+        simple.Message = done.Message;
+
+        // Come nella modalità avanzata: dopo la partita si cercano altre cartelle dei salvataggi.
+        GameFor(item).ScanAfterSession(session.Started);
+    }
 
     // Senza gioco gestibile si mostra il messaggio al suo posto.
     [ObservableProperty]

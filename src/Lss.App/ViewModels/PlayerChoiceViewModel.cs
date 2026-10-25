@@ -6,10 +6,11 @@ namespace Lss.App.ViewModels;
 /// </summary>
 public sealed class PlayerChoiceViewModel
 {
-    internal PlayerChoiceViewModel(string title, string text, IReadOnlyList<Person> people)
+    internal PlayerChoiceViewModel(string title, string text, IReadOnlyList<Person> people, string? cancelText = null)
     {
         Title = title;
         Text = text;
+        CancelText = cancelText ?? Strings.CancelChoice;
         Tiles = people
             .Select(person => new PersonTile(
                 person,
@@ -24,7 +25,7 @@ public sealed class PlayerChoiceViewModel
 
     public IReadOnlyList<PersonTile> Tiles { get; }
 
-    public string CancelText => Strings.CancelChoice;
+    public string CancelText { get; }
 
     /// <summary>La persona scelta, o null.</summary>
     public Person? Chosen { get; private set; }

@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.MyGamesWindow"
+        x:DataType="vm:MyGamesViewModel"
+        Title="Local Save Switcher"
+        Width="520" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="26,22,26,22" Spacing="14">
+
+    <TextBlock Classes="title" Text="{Binding Title}" FontSize="20" TextWrapping="Wrap" />
+
+    <ItemsControl ItemsSource="{Binding Rows}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:MyGameRow">
+          <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" MinHeight="56" Padding="14,10"
+                  Margin="0,0,0,8" Tag="{Binding}" Click="Row_Click">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Grid.Column="0" Spacing="2">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                <TextBlock Classes="small" Text="{Binding LastText}" />
+              </StackPanel>
+              <TextBlock Grid.Column="1" Text="★" FontSize="18" VerticalAlignment="Center"
+                         IsVisible="{Binding IsFavourite}" />
+            </Grid>
+          </Button>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <Button Classes="primary" Content="{Binding NewText}" HorizontalAlignment="Stretch" MinHeight="48" Click="New_Click" />
+    <Button Classes="link" Content="{loc:Str CancelChoice}" IsCancel="True" HorizontalAlignment="Left" Click="Cancel_Click" />
+
+  </StackPanel>
+
+</Window>
