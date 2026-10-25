@@ -17,6 +17,9 @@ public interface IDialogService
     /// <summary>Mostra una finestra modale e restituisce il suo risultato.</summary>
     Task<T?> ShowAsync<T>(Window dialog);
 
+    /// <summary>Sceglie una persona tra quelle date: la persona, o null se si annulla.</summary>
+    Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people);
+
     Task<string?> PickZipToSaveAsync(string title, string suggestedName, string filterName);
 
     Task<string?> PickZipToOpenAsync(string title, string filterName);

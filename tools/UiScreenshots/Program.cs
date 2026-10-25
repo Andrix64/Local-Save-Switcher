@@ -379,6 +379,7 @@ internal sealed class NoDialogs : IDialogService
     public Task<bool> InformAsync(string heading, string text, InfoKind kind, string? actionText = null) => Task.FromResult(false);
     public Task<bool> ConfirmAsync(string heading, string text, string verb, bool destructive = false, InfoKind kind = InfoKind.Warning) => Task.FromResult(false);
     public Task<T?> ShowAsync<T>(Window dialog) => Task.FromResult(default(T));
+    public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people) => Task.FromResult<Person?>(null);
     public Task<string?> PickZipToSaveAsync(string title, string suggestedName, string filterName) => Task.FromResult<string?>(null);
     public Task<string?> PickZipToOpenAsync(string title, string filterName) => Task.FromResult<string?>(null);
     public Task<string?> PickConfigToSaveAsync(string title, string suggestedName) => Task.FromResult<string?>(null);

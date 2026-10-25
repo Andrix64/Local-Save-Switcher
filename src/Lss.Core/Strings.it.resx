@@ -490,4 +490,10 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="CloudAllowSimple" xml:space="preserve"><value>Consenti anche in modalità semplice</value></data>
   <data name="CloudAllowedSimple" xml:space="preserve"><value>Consentito in modalità semplice anche con le copie online attive.</value></data>
   <data name="CloudAllowUndo" xml:space="preserve"><value>Annulla</value></data>
+  <data name="CancelChoice" xml:space="preserve"><value>Annulla</value></data>
+  <data name="GiveToMenu" xml:space="preserve"><value>Dai a…</value></data>
+  <data name="GiveToPick" xml:space="preserve"><value>A chi va "{0}"?</value></data>
+  <data name="NoOtherPlayer" xml:space="preserve"><value>Non c'è un altro giocatore a cui darla. Aggiungine prima uno.</value></data>
+  <data name="ImportPlayerPick" xml:space="preserve"><value>Di chi è questa partita?</value></data>
+  <data name="PlaythroughPlayer" xml:space="preserve"><value>Giocatore</value></data>
 </root>

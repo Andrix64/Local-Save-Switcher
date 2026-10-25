@@ -36,7 +36,7 @@ public partial class AdminPickerWindow : Window
 
     private void Tile_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is not Button { Tag: AdminTile tile })
+        if (sender is not Button { Tag: PersonTile tile })
             return;
 
         ViewModel.Choose(tile.Person);

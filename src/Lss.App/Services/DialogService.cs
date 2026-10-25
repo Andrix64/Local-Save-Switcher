@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Lss.App.ViewModels;
 using Lss.App.Views;
 
 namespace Lss.App.Services;
@@ -14,6 +15,9 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
 
     public async Task<bool> ConfirmAsync(string heading, string text, string verb, bool destructive = false, InfoKind kind = InfoKind.Warning) =>
         await ShowAsync<bool>(MessageWindow.Confirm(heading, text, verb, destructive, kind));
+
+    public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people) =>
+        ShowAsync<Person>(new PlayerChoiceWindow(new PlayerChoiceViewModel(title, text, people)));
 
     // Serve una finestra padre: senza, il dialogo non sarebbe modale.
     public async Task<T?> ShowAsync<T>(Window dialog)

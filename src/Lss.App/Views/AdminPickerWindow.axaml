@@ -23,7 +23,7 @@
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:AdminTile">
+          <DataTemplate x:DataType="vm:PersonTile">
             <Button Margin="0,0,16,16" Padding="18,14" MinWidth="130" MinHeight="44"
                     HorizontalContentAlignment="Center" Tag="{Binding}" Click="Tile_Click">
               <StackPanel Spacing="10" HorizontalAlignment="Center">

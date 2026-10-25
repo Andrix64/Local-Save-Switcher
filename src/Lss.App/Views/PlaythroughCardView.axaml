@@ -56,6 +56,7 @@
               <MenuItem Header="{loc:Str RenameMenu}" Command="{Binding RenameCommand}" />
               <MenuItem Header="{loc:Str EditNote}" Command="{Binding EditNoteCommand}" />
               <MenuItem Header="{loc:Str ExportMenu}" Command="{Binding ExportCommand}" />
+              <MenuItem Header="{loc:Str GiveToMenu}" Command="{Binding GiveToMenuCommand}" />
               <Separator />
               <MenuItem Header="{loc:Str DeletePlaythroughMenu}" Command="{Binding DeleteCommand}"
                         IsEnabled="{Binding CanDelete}" />
@@ -84,6 +85,7 @@
               <MenuItem Header="{loc:Str RenameMenu}" Command="{Binding RenameCommand}" />
               <MenuItem Header="{loc:Str EditNote}" Command="{Binding EditNoteCommand}" />
               <MenuItem Header="{loc:Str ExportMenu}" Command="{Binding ExportCommand}" />
+              <MenuItem Header="{loc:Str GiveToMenu}" Command="{Binding GiveToMenuCommand}" />
               <Separator />
               <MenuItem Header="{loc:Str DeletePlaythroughMenu}" Command="{Binding DeleteCommand}"
                         IsEnabled="{Binding CanDelete}" ToolTip.Tip="{loc:Str ActiveCannotBeDeleted}" />

@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace Lss.App.ViewModels;
 
 /// <summary>Una persona nella scelta "Chi sei?": iniziale sul suo colore.</summary>
-public sealed record AdminTile(Person Person, string Initial, IBrush Brush);
+public sealed record PersonTile(Person Person, string Initial, IBrush Brush);
 
 /// <summary>
 /// "Chi sei?": si sceglie un amministratore. Solo gli admin compaiono, e
@@ -20,14 +20,14 @@ public partial class AdminPickerViewModel : ObservableObject
         this.people = people;
 
         Tiles = people.Admins
-            .Select(person => new AdminTile(
+            .Select(person => new PersonTile(
                 person,
                 person.Name.Length > 0 ? char.ToUpperInvariant(person.Name[0]).ToString() : "?",
                 new SolidColorBrush(Color.Parse(person.Color))))
             .ToList();
     }
 
-    public IReadOnlyList<AdminTile> Tiles { get; }
+    public IReadOnlyList<PersonTile> Tiles { get; }
 
     public string Title => Strings.AdminPickerTitle;
 

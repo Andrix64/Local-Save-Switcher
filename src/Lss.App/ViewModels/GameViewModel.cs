@@ -623,11 +623,17 @@ public partial class GameViewModel : ObservableObject
         if (path == null)
             return;
 
+        // Il proprietario si sceglie qui: con una sola persona è lei, senza domande.
+        Person? owner = await PickPlayerAsync(Strings.ImportPlayerPick);
+
+        if (owner == null)
+            return;
+
         string imported = "";
 
         Result result = await RunBusyAsync(Strings.BusyImporting, () =>
         {
-            Result<string> import = Manager.ImportProfile(path, Manager.DefaultOwnerId);
+            Result<string> import = Manager.ImportProfile(path, owner.Id);
 
             if (!import.Success)
                 return Result.Fail(import.Message);
@@ -740,6 +746,42 @@ public partial class GameViewModel : ObservableObject
 
         if (!result.Success)
             await ShowResult(result);
+    }
+
+    /// <summary>
+    /// "Dai a…" di una scheda: si sceglie un'altra persona e la partita le va.
+    /// </summary>
+    public async Task GiveToMenuAsync(string profile)
+    {
+        if (IsBusy || Manager.Players == null)
+            return;
+
+        string owner = Manager.GetInfo(profile).Owner;
+        IReadOnlyList<Person> others = Manager.Players.All.Where(person => person.Id != owner).ToList();
+
+        if (others.Count == 0)
+        {
+            Toast.Show(InfoKind.Info, Strings.NoOtherPlayer);
+            return;
+        }
+
+        Person? chosen = await dialogs.ChoosePersonAsync(
+            Loc.F(Strings.GiveToPick, SaveManager.ProfileDisplayName(profile)), "", others);
+
+        if (chosen != null)
+            await GiveToAsync(profile, chosen.Id);
+    }
+
+    /// <summary>Chi è il proprietario di una partita nuova o importata: con una sola persona è lei,
+    /// altrimenti si chiede. Null se si annulla.</summary>
+    private async Task<Person?> PickPlayerAsync(string question)
+    {
+        IReadOnlyList<Person> people = Manager.Players?.All ?? [];
+
+        if (people.Count <= 1)
+            return people.FirstOrDefault();
+
+        return await dialogs.ChoosePersonAsync(question, "", people);
     }
 
     // Il blocco delle cartelle dei salvataggi parte chiuso. Com'è lasciato resta per tutti i

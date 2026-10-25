@@ -89,4 +89,7 @@ public partial class PlaythroughViewModel : ObservableObject
 
     [RelayCommand]
     private Task SetFavouriteAsync() => game.SetFavouriteAsync(this);
+
+    [RelayCommand]
+    private Task GiveToMenuAsync() => game.GiveToMenuAsync(ProfileName);
 }

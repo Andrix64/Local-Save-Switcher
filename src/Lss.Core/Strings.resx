@@ -490,4 +490,10 @@ LSS will look at what changed on the disk.</value></data>
   <data name="CloudAllowSimple" xml:space="preserve"><value>Allow in simple mode anyway</value></data>
   <data name="CloudAllowedSimple" xml:space="preserve"><value>Allowed in simple mode even with cloud saves on.</value></data>
   <data name="CloudAllowUndo" xml:space="preserve"><value>Undo</value></data>
+  <data name="CancelChoice" xml:space="preserve"><value>Cancel</value></data>
+  <data name="GiveToMenu" xml:space="preserve"><value>Give to…</value></data>
+  <data name="GiveToPick" xml:space="preserve"><value>Who gets "{0}"?</value></data>
+  <data name="NoOtherPlayer" xml:space="preserve"><value>There is no other player to give it to. Add a player first.</value></data>
+  <data name="ImportPlayerPick" xml:space="preserve"><value>Whose playthrough is it?</value></data>
+  <data name="PlaythroughPlayer" xml:space="preserve"><value>Player</value></data>
 </root>
