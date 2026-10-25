@@ -42,6 +42,10 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
    merged into `main` and closed. For new work, create a branch from
    `main` named after it (for example `beta-2` or `fix-history-scroll`)
    unless the session brief names one. Never commit on `main`.
+   **The 2.0 plan (phases K–Q) is done on the branch `v2`**, created from
+   `main` after 1.0.0: every task of K–Q is committed on `v2` (the branch
+   names in the phase files are not used). `v2` goes into `main` only when
+   Andrix decides 2.0 ships.
    **Never push**, never create tags, never create releases: Andrix does
    that.
 3. **Before every commit** run, from the repository root:
