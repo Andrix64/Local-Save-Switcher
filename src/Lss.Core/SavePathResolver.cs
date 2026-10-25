@@ -120,6 +120,71 @@ internal static class SavePathResolver
     }
 
     /// <summary>
+    /// Percorso portabile di una cartella: la radice tra graffe ({WinAppDataLocal}/Discord)
+    /// se la cartella sta sotto una radice di questo sistema, altrimenti il percorso intero.
+    /// Vale per ogni gioco, anche in un altro prefisso.
+    /// </summary>
+    internal static string ToPortable(string folder, SaveContext context)
+    {
+        string bestRoot = "";
+        string bestFolder = "";
+
+        foreach (string root in KnownRoots)
+        {
+            string rootFolder = RootFolder(root, context);
+
+            if (rootFolder == "" || rootFolder.Length <= bestFolder.Length)
+                continue;
+
+            if (IsSameOrInside(folder, rootFolder, context))
+            {
+                bestRoot = root;
+                bestFolder = rootFolder;
+            }
+        }
+
+        if (bestRoot == "")
+            return folder;
+
+        string rest = folder[bestFolder.Length..].TrimStart('/', '\\');
+
+        return rest == "" ? "{" + bestRoot + "}" : "{" + bestRoot + "}/" + rest.Replace('\\', '/');
+    }
+
+    /// <summary>
+    /// Percorso di un percorso portabile in questo sistema e per questo gioco, o
+    /// null se la radice non esiste qui (per esempio Documents su Linux senza prefisso).
+    /// </summary>
+    internal static string? FromPortable(string portable, SaveContext context)
+    {
+        if (!portable.StartsWith('{'))
+            return portable;
+
+        int close = portable.IndexOf('}');
+
+        if (close < 0)
+            return null;
+
+        string folder = RootFolder(portable[1..close], context);
+
+        if (folder == "")
+            return null;
+
+        string rest = portable[(close + 1)..].TrimStart('/', '\\');
+
+        return rest == "" ? folder : Path.Combine(folder, rest);
+    }
+
+    private static bool IsSameOrInside(string folder, string root, SaveContext context)
+    {
+        StringComparison comparison = CaseInsensitive(context) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        string trimmed = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        return string.Equals(folder, trimmed, comparison)
+            || folder.StartsWith(trimmed + Path.DirectorySeparatorChar, comparison);
+    }
+
+    /// <summary>
     /// Percorsi che esistono per la regola: cartelle (pattern "*" ricorsivo) o
     /// file che corrispondono. Vuoto se la regola non vale su questo sistema,
     /// se la radice non esiste o se il percorso non è valido.

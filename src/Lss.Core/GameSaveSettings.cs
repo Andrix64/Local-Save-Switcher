@@ -36,13 +36,16 @@ internal sealed class GameSaveSettings
     }
 
     /// <summary>
-    /// Scrive cartella.ini. Con Folder "" elimina il file.
+    /// Scrive cartella.ini. Con Folder "" elimina il file, se non ha altre chiavi.
+    /// Le altre chiavi (cartelle ignorate, cartelle extra) restano com'erano.
     /// </summary>
     public void Save()
     {
         try
         {
-            if (Folder == "")
+            List<KeyValuePair<string, string>> others = OtherValues();
+
+            if (Folder == "" && others.Count == 0)
             {
                 if (File.Exists(file))
                     File.Delete(file);
@@ -50,13 +53,30 @@ internal sealed class GameSaveSettings
                 return;
             }
 
-            string origin = Origin == SaveSource.Learned ? "imparata" : "scelta";
+            var values = new List<KeyValuePair<string, string>>();
 
-            IniFile.Write(file, [new(FolderKey, Folder), new(OriginKey, origin)]);
+            if (Folder != "")
+            {
+                string origin = Origin == SaveSource.Learned ? "imparata" : "scelta";
+
+                values.Add(new(FolderKey, Folder));
+                values.Add(new(OriginKey, origin));
+            }
+
+            values.AddRange(others);
+            IniFile.Write(file, values);
         }
         catch (Exception ex)
         {
             Log.Write("cartella.ini non salvato: " + file, ex);
         }
     }
+
+    /// <summary>
+    /// Le chiavi del file diverse da cartella e origine, come sono adesso nel file.
+    /// </summary>
+    private List<KeyValuePair<string, string>> OtherValues() =>
+        IniFile.Read(file)
+            .Where(pair => pair.Key != FolderKey && pair.Key != OriginKey)
+            .ToList();
 }
