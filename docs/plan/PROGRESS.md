@@ -178,7 +178,7 @@ per phase (the phase file names it).
 - [x] N11 — Look after every session (interface) (306d572)
 - [x] N12 — Screenshots (faa21c5)
 - [x] N13 — Docs for developers (d708e11)
-- [ ] N14 — 👤 Checks
+- [x] N14 — 👤 Checks (2026-10-25, Andrix: checked)
 
 ### Phase O — Other launchers and any game ([O-launchers.md](O-launchers.md))
 
@@ -189,7 +189,7 @@ per phase (the phase file names it).
 - [x] O5 — Non-Steam games added to Steam (b3bdde7)
 - [x] O6 — The same game twice (cb3f550)
 - [x] O8 — An icon for every game (d4c8ef4, 9751449)
-- [ ] O7 — 👤 Checks
+- [x] O7 — 👤 Checks (2026-10-25, Andrix: checked)
 
 ### Phase P — Players, favourites and the two modes ([P-simple-mode.md](P-simple-mode.md))
 
