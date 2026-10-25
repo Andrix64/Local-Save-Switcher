@@ -153,7 +153,7 @@ per phase (the phase file names it).
 - [x] M3 — Candidates and their score (1ef5152; Windows 345 tests before M3b)
 - [x] M3b — Folders that are never saves (ce2ed78; Linux 353 tests on lss-ci)
 - [x] M4 — The wizard (ce24576; Windows 373 tests)
-- [ ] M5 — Learning a game that already has playthroughs
+- [x] M5 — Learning a game that already has playthroughs (3413df7; Windows 376 tests)
 - [ ] M6 — Screenshots
 - [ ] M7 — 👤 Real check
 
