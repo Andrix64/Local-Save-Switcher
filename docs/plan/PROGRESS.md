@@ -188,6 +188,7 @@ per phase (the phase file names it).
 - [x] O4 — Any other game, added by hand (ca23683; menu Modifica/Rimuovi e test della vista non fatti, vedi note)
 - [x] O5 — Non-Steam games added to Steam (b3bdde7)
 - [x] O6 — The same game twice (cb3f550)
+- [ ] O8 — An icon for every game
 - [ ] O7 — 👤 Checks
 
 ### Phase P — Players, favourites and the two modes ([P-simple-mode.md](P-simple-mode.md))
