@@ -216,7 +216,7 @@ public sealed class PlaythroughTests : IDisposable
         Assert.Empty(control.GetProfiles());
     }
 
-    private static GameInfo OtherGame => new("123450", "Test", "", "", "", SupportState.Supported);
+    private static GameInfo OtherGame => new("steam", "123450", "Test", "", "", "", "", SupportState.Supported);
 
     private static string ReadEntry(ZipArchive archive, string name)
     {
@@ -291,7 +291,7 @@ public sealed class PlaythroughTests : IDisposable
     [Fact]
     public void SharedFiles_EmptyForOtherGames()
     {
-        var game = new GameInfo("123450", "Test", "", "", folder.Game, SupportState.Supported);
+        var game = new GameInfo("steam", "123450", "Test", "", "", "", folder.Game, SupportState.Supported);
         var manager = new SaveManager(folder.Game, folder.Data, "", game);
 
         Assert.Empty(manager.SharedFiles);
@@ -312,7 +312,7 @@ public sealed class PlaythroughTests : IDisposable
     [Fact]
     public void SharedFiles_SeveralFilesKeptAcrossActivation()
     {
-        var game = new GameInfo("123450", "Test", "", "", folder.Game, SupportState.Supported);
+        var game = new GameInfo("steam", "123450", "Test", "", "", "", folder.Game, SupportState.Supported);
         SaveManager manager = new(folder.Game, folder.Data, "", game);
         manager.State.SharedFiles = new[] { "remote/a.cfg", "b.ini" };
         manager.State.SharePreferences = true;

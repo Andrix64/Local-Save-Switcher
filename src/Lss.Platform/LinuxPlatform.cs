@@ -64,7 +64,7 @@ public sealed class LinuxPlatform : IPlatform
     /// processo gioca con quel gioco (vedi FindGameProcesses).
     /// </summary>
     public bool IsGameRunning(GameInfo game) =>
-        RegistryFiles(Home).Any(file => RegistryFileSaysRunning(file, game.AppId))
+        RegistryFiles(Home).Any(file => RegistryFileSaysRunning(file, game.Id))
         || FindGameProcesses(game).Count > 0;
 
     /// <summary>
@@ -94,7 +94,7 @@ public sealed class LinuxPlatform : IPlatform
 
                 if (!processMatches.TryGetValue(pid, out bool matches))
                 {
-                    matches = IsGameProcess(pid, game.AppId, installPrefix);
+                    matches = IsGameProcess(pid, game.Id, installPrefix);
                     processMatches[pid] = matches;
                 }
 

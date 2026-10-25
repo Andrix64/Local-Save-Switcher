@@ -141,7 +141,7 @@ public sealed partial class SaveManager
             // Dalle librerie di Steam, se Control è installato: con la cartella
             // di installazione il gioco aperto si riconosce anche dai processi.
             GameInfo game = SteamLibrary.FindGames(steam, account.Folder)
-                .FirstOrDefault(g => g.AppId == GameInfo.ControlAppId) ?? GameInfo.Control(savePath);
+                .FirstOrDefault(g => g.Id == GameInfo.ControlAppId) ?? GameInfo.Control(savePath);
 
             return Result<SaveManager>.Ok(new SaveManager(
                 savePath,
@@ -167,7 +167,7 @@ public sealed partial class SaveManager
         {
             return Result<SaveManager>.Ok(new SaveManager(
                 game.SaveFolder,
-                Path.Combine(dataRoot, account.Id, game.AppId),
+                Path.Combine(dataRoot, account.Id, game.Id),
                 account.Name,
                 game));
         }
@@ -472,7 +472,7 @@ public sealed partial class SaveManager
             if (!File.Exists(config))
                 return CloudState.Enabled;
 
-            string? value = Vdf.Find(Vdf.Parse(File.ReadAllText(config)), "apps", Game.AppId, "cloudenabled");
+            string? value = Vdf.Find(Vdf.Parse(File.ReadAllText(config)), "apps", Game.Id, "cloudenabled");
 
             return value == "0" ? CloudState.Disabled : CloudState.Enabled;
         }

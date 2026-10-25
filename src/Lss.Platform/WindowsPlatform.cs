@@ -51,7 +51,7 @@ public sealed class WindowsPlatform : IPlatform
     /// Steam segna comunque il gioco come aperto.
     /// </summary>
     public bool IsGameRunning(GameInfo game) =>
-        SteamSaysRunning(game.AppId) || FindGameProcesses(game).Count > 0;
+        SteamSaysRunning(game.Id) || FindGameProcesses(game).Count > 0;
 
     /// <summary>
     /// Steam scrive nel registro quale gioco è in esecuzione: RunningAppID per

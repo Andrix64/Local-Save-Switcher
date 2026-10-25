@@ -79,8 +79,8 @@ internal static class Program
         Write(Path.Combine(account, "814380", "remotecache.vdf"), "cache");
 
         var steamAccount = new GameAccount("steam", "111", "Andrix", account, DateTime.Now);
-        var control = new GameInfo(GameInfo.ControlAppId, "Control Ultimate Edition", "", "", controlSaves, SupportState.Supported);
-        var sekiro = new GameInfo("814380", "Sekiro™: Shadows Die Twice", "", "", Path.Combine(account, "814380"), SupportState.SavesElsewhere);
+        var control = new GameInfo("steam", GameInfo.ControlAppId, "Control Ultimate Edition", "", "", "", controlSaves, SupportState.Supported);
+        var sekiro = new GameInfo("steam", "814380", "Sekiro™: Shadows Die Twice", "", "", "", Path.Combine(account, "814380"), SupportState.SavesElsewhere);
 
         // Dati finti nella lingua delle immagini: quelle in inglese finiscono nel README.
         bool english = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
@@ -141,7 +141,7 @@ internal static class Program
 
         // Come su uno Steam Deck: nessun gioco gestibile, tanti giochi Proton che salvano altrove.
         GameInfo Elsewhere(string id, string name) =>
-            new(id, name, "", "", Path.Combine(account, id), SupportState.SavesElsewhere);
+            new("steam", id, name, "", "", "", Path.Combine(account, id), SupportState.SavesElsewhere);
 
         var noSupported = new MainWindow
         {

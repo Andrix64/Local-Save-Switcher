@@ -186,11 +186,19 @@ internal static class SteamLibrary
                 ?? Loc.F(Strings.UnknownGameName, appId);
             (string icon, string cover) = FindImages(steamRoot, appId);
 
+            string installDir = manifest?.InstallDir ?? "";
+            string library = manifest?.Library ?? "";
+            string installPath = installDir != "" && library != ""
+                ? Path.Combine(library, "steamapps", "common", installDir)
+                : "";
+
             games.Add(new GameInfo(
+                "steam",
                 appId,
                 name,
-                manifest?.InstallDir ?? "",
-                manifest?.Library ?? "",
+                installDir,
+                library,
+                installPath,
                 dir,
                 GetSupport(dir),
                 icon,

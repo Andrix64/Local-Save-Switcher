@@ -442,7 +442,7 @@ public sealed partial class SaveManager
     /// <summary>
     /// File da tenere uguali in tutte le partite, relativi a SavePath.
     /// </summary>
-    public IReadOnlyList<string> SharedFiles => State.SharedFiles ?? GameDefaults.SharedFiles(Game.AppId);
+    public IReadOnlyList<string> SharedFiles => State.SharedFiles ?? GameDefaults.SharedFiles(Game.Id);
 
     /// <summary>
     /// Copia le opzioni condivise che il gioco ha adesso nella cartella di una
@@ -569,7 +569,7 @@ public sealed partial class SaveManager
             var values = new List<KeyValuePair<string, string>>
             {
                 new("Formato", "2"),
-                new("AppId", Game.AppId),
+                new("AppId", Game.Id),
                 new("Gioco", Game.Name),
                 new("Nome", ProfileDisplayName(profileName))
             };
@@ -638,7 +638,7 @@ public sealed partial class SaveManager
 
             (string appId, string gameName) = LegacyMigration.ExportedGame(values);
 
-            if (appId != Game.AppId)
+            if (appId != Game.Id)
                 return Result<string>.Fail(Loc.F(Strings.ImportOtherGame, gameName, Game.Name));
 
             string name = UniqueName(values.GetValueOrDefault("Nome", "").Trim());
@@ -694,7 +694,7 @@ public sealed partial class SaveManager
     {
         try
         {
-            Platform.Current.OpenSteamUri("steam://rungameid/" + Game.AppId);
+            Platform.Current.OpenSteamUri("steam://rungameid/" + Game.Id);
             Log.Write("Avvio di " + Game.Name + " tramite Steam");
             return Result.Ok(Loc.F(Strings.GameLaunching, Game.Name));
         }

@@ -45,12 +45,12 @@ public partial class MainWindowViewModel : ObservableObject
         // I giochi già usati restano controllati anche quando non sono selezionati.
         foreach (GameItemViewModel item in Games)
         {
-            if (File.Exists(Path.Combine(AppData.Root, account.Id, item.Info.AppId, "stato.ini")))
+            if (File.Exists(Path.Combine(AppData.Root, account.Id, item.Info.Id, "stato.ini")))
                 GameFor(item.Info);
         }
 
         Monitor = new GameMonitor(() => gameModels.Values);
-        SelectedGame = Games.FirstOrDefault(g => g.Info.AppId == settings.LastGame) ?? Games.FirstOrDefault();
+        SelectedGame = Games.FirstOrDefault(g => g.Info.Id == settings.LastGame) ?? Games.FirstOrDefault();
     }
 
     public ObservableCollection<GameItemViewModel> Games { get; } = [];
@@ -97,11 +97,11 @@ public partial class MainWindowViewModel : ObservableObject
 
         GameViewModel game = GameFor(value.Info);
         CurrentGame = game;
-        settings.LastGame = value.Info.AppId;
+        settings.LastGame = value.Info.Id;
         settings.Save();
 
         // Alla prima selezione di un gioco (quelle prima dell'apertura le fa OnOpenedAsync).
-        if (checkedGames.Add(value.Info.AppId) && opened)
+        if (checkedGames.Add(value.Info.Id) && opened)
             _ = OpenGameAsync(game);
     }
 
@@ -133,7 +133,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private GameViewModel GameFor(GameInfo game)
     {
-        if (gameModels.TryGetValue(game.AppId, out GameViewModel? existing))
+        if (gameModels.TryGetValue(game.Id, out GameViewModel? existing))
             return existing;
 
         Result<SaveManager> open = SaveManager.Open(AppData.Root, account, game);
@@ -144,7 +144,7 @@ public partial class MainWindowViewModel : ObservableObject
         var created = new GameViewModel(open.Value!, dialogs);
         created.Refresh();
 
-        gameModels[game.AppId] = created;
+        gameModels[game.Id] = created;
         return created;
     }
 }

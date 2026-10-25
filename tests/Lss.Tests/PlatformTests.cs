@@ -21,7 +21,7 @@ public sealed class PlatformTests : IDisposable
     [Fact]
     public void LaunchGame_UsesTheGameAppId()
     {
-        var game = new GameInfo("123450", "Test", "", "", folder.Game, SupportState.Supported);
+        var game = new GameInfo("steam", "123450", "Test", "", "", "", folder.Game, SupportState.Supported);
         var manager = new SaveManager(folder.Game, folder.Data, "", game);
 
         Result result = manager.LaunchGame();
