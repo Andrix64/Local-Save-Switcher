@@ -61,6 +61,57 @@ public sealed class SaveSetTests : IDisposable
         Assert.False(ThreeSpots().GameEquals(Snapshot));
     }
 
+    // Scheda SD tolta o cartella cancellata: salvare i progressi non deve svuotare la copia.
+    [Fact]
+    public void SavingWithAnExtraSpotMissingOnDiskKeepsItsCopy()
+    {
+        FillGame();
+        ThreeSpots().CopyGameTo(Snapshot);
+        Directory.Delete(Game2, true);
+        TestFolder.Write(Path.Combine(Game1, "slot.sav"), "one, later");
+
+        ThreeSpots().ReplaceSnapshotFromGame(Snapshot);
+
+        Assert.Equal("one, later", File.ReadAllText(Path.Combine(Snapshot, "slot.sav")));
+        Assert.Equal("two", File.ReadAllText(Path.Combine(Extra(2), "settings.ini")));
+        Assert.True(ThreeSpots().GameEquals(Snapshot));
+    }
+
+    [Fact]
+    public void BackupAndSwitchWorkWithAnExtraSpotMissingOnDisk()
+    {
+        FillGame();
+        ThreeSpots().CopyGameTo(Snapshot);
+        Directory.Delete(Game2, true);
+
+        ThreeSpots().CopyGameTo(Backup);
+        Assert.False(Directory.Exists(Path.Combine(Backup, ".lss-posizioni", "2")));
+
+        TestFolder.Write(Path.Combine(Game1, "slot.sav"), "changed");
+        ThreeSpots().ReplaceGameFrom(Snapshot, Backup, Journal);
+
+        Assert.Equal("one", File.ReadAllText(Path.Combine(Game1, "slot.sav")));
+        Assert.Equal("two", File.ReadAllText(Path.Combine(Game2, "settings.ini")));
+        Assert.False(File.Exists(Journal));
+    }
+
+    [Fact]
+    public void RecoveryLeavesAnExtraSpotThatWasNotInTheBackup()
+    {
+        FillGame();
+        ThreeSpots().CopyGameTo(Snapshot);
+        Directory.Delete(Game2, true);
+        ThreeSpots().CopyGameTo(Backup);
+        TestFolder.Write(Path.Combine(Game2, "settings.ini"), "two");
+        IniFile.Write(Journal, [new("Snapshot", Snapshot), new("Backup", Backup), new("Posti", "1,2,3"), new("Fatti", "1,2")]);
+
+        bool recovered = ThreeSpots().RecoverInterrupted(Journal, null);
+
+        Assert.True(recovered);
+        Assert.False(File.Exists(Journal));
+        Assert.Equal("two", File.ReadAllText(Path.Combine(Game2, "settings.ini")));
+    }
+
     [Fact]
     public void GameEqualsIgnoresAnExtraSpotMissingFromTheSnapshot()
     {

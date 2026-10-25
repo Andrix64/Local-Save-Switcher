@@ -27,11 +27,18 @@ internal sealed class SaveSet
         this.spots = spots.OrderBy(spot => spot.Id).ToList();
     }
 
-    /// <summary>Copia tutti i posti del gioco nello snapshot, e controlla la copia.</summary>
+    /// <summary>
+    /// Copia tutti i posti del gioco nello snapshot, e controlla la copia. Un posto
+    /// extra la cui cartella non c'è (scheda SD tolta, cartella cancellata) non si
+    /// copia: nello snapshot resta assente, quindi "lasciato com'è".
+    /// </summary>
     public void CopyGameTo(string snapshot)
     {
         foreach (SaveSpot spot in spots)
         {
+            if (IsMissingExtra(spot))
+                continue;
+
             string target = SnapshotFolder(snapshot, spot);
 
             if (spot.IsWholeFolder)
@@ -81,11 +88,18 @@ internal sealed class SaveSet
         File.Delete(journal);
     }
 
-    /// <summary>Rende lo snapshot identico al gioco, posto per posto.</summary>
+    /// <summary>
+    /// Rende lo snapshot identico al gioco, posto per posto. Un posto extra la cui
+    /// cartella non c'è non tocca lo snapshot: altrimenti salvare i progressi
+    /// svuoterebbe la copia della partita.
+    /// </summary>
     public void ReplaceSnapshotFromGame(string snapshot)
     {
         foreach (SaveSpot spot in spots)
         {
+            if (IsMissingExtra(spot))
+                continue;
+
             string target = SnapshotFolder(snapshot, spot);
 
             if (spot.IsWholeFolder)
@@ -110,7 +124,7 @@ internal sealed class SaveSet
         {
             string source = SnapshotFolder(snapshot, spot);
 
-            if (spot.Id != 1 && !Directory.Exists(source))
+            if (spot.Id != 1 && (!Directory.Exists(source) || !Directory.Exists(spot.Folder)))
                 continue;
 
             bool equal = spot.IsWholeFolder
@@ -186,14 +200,21 @@ internal sealed class SaveSet
     }
 
     /// <summary>
-    /// Rimette i posti dati dal backup. Se la cartella di un posto nel backup non
-    /// c'è, lancia un'eccezione: il journal deve restare.
+    /// Rimette i posti dati dal backup. Se manca il backup del posto 1, lancia
+    /// un'eccezione: il journal deve restare. Un posto extra assente dal backup
+    /// non c'era nel gioco quando il backup è stato fatto: si lascia com'è.
     /// </summary>
     private void RestoreFromBackup(IEnumerable<SaveSpot> restore, string backup)
     {
         foreach (SaveSpot spot in restore)
         {
             string source = backup == "" ? "" : SnapshotFolder(backup, spot);
+
+            if (spot.Id != 1 && backup != "" && Directory.Exists(backup) && !Directory.Exists(source))
+            {
+                Log.Write("Posto " + spot.Id + " assente dal backup, lasciato com'è: " + spot.Folder);
+                continue;
+            }
 
             if (source == "" || !Directory.Exists(source))
                 throw new IOException("Backup mancante per il posto " + spot.Id + ": " + source);
@@ -215,6 +236,18 @@ internal sealed class SaveSet
             new(PlannedKey, IdList(planned)),
             new(DoneKey, IdList(done)),
         ]);
+    }
+
+    /// <summary>
+    /// true per un posto extra la cui cartella nel gioco non c'è: si registra nel log.
+    /// </summary>
+    private static bool IsMissingExtra(SaveSpot spot)
+    {
+        if (spot.Id == 1 || Directory.Exists(spot.Folder))
+            return false;
+
+        Log.Write("Posto " + spot.Id + " non trovato sul disco, lasciato com'è: " + spot.Folder);
+        return true;
     }
 
     private static string IdList(IEnumerable<SaveSpot> spots) =>
