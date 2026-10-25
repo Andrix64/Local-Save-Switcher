@@ -69,6 +69,9 @@ internal static class TestSetup
     {
         Platform.Current = Fake;
         Log.FilePath = Path.Combine(Path.GetTempPath(), "csm_test_log.txt");
+
+        // I test non leggono né scrivono i dati veri di LSS (cartella.ini, lss.ini).
+        AppData.Root = Path.Combine(Path.GetTempPath(), "csm_test_data_" + Guid.NewGuid().ToString("N"));
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("it-IT");
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("it-IT");
     }

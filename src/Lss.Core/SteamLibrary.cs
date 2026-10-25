@@ -113,6 +113,33 @@ internal static class SteamLibrary
     }
 
     /// <summary>
+    /// Prefisso Proton del gioco (steamapps/compatdata/AppID/pfx), cercato prima
+    /// nella libreria del gioco e poi in tutte le altre. "" su Windows o se non c'è.
+    /// </summary>
+    public static string FindProtonPrefix(string steamRoot, GameInfo game)
+    {
+        if (OperatingSystem.IsWindows())
+            return "";
+
+        var libraries = new List<string>();
+
+        if (game.LibraryPath != "")
+            libraries.Add(game.LibraryPath);
+
+        libraries.AddRange(LibraryFolders(steamRoot));
+
+        foreach (string library in libraries)
+        {
+            string prefix = Path.Combine(library, "steamapps", "compatdata", game.Id, "pfx");
+
+            if (Directory.Exists(prefix))
+                return prefix;
+        }
+
+        return "";
+    }
+
+    /// <summary>
     /// Icona (32×32) e copertina (300×450) del gioco dalla cache di Steam.
     /// "" se non ci sono.
     /// </summary>

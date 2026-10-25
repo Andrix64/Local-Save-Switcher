@@ -28,7 +28,7 @@ public sealed class SteamAppInfoTests : IDisposable
     /// <summary>
     /// Chiave del VDF: testo terminato da 0 (v28) o indice nella tabella (v29).
     /// </summary>
-    private static void Key(BinaryWriter writer, List<string>? table, string key)
+    internal static void Key(BinaryWriter writer, List<string>? table, string key)
     {
         if (table == null)
         {
@@ -42,7 +42,7 @@ public sealed class SteamAppInfoTests : IDisposable
         writer.Write(table.IndexOf(key));
     }
 
-    private static void Text(BinaryWriter writer, string text)
+    internal static void Text(BinaryWriter writer, string text)
     {
         writer.Write(Encoding.UTF8.GetBytes(text));
         writer.Write((byte)0);
@@ -52,7 +52,7 @@ public sealed class SteamAppInfoTests : IDisposable
     /// Un blocco VDF binario con il contenuto scritto da write (il blocco
     /// chiude da sé: "08" dopo il contenuto).
     /// </summary>
-    private static void Block(BinaryWriter writer, List<string>? table, string key, Action<BinaryWriter> write)
+    internal static void Block(BinaryWriter writer, List<string>? table, string key, Action<BinaryWriter> write)
     {
         writer.Write((byte)0x00);
         Key(writer, table, key);
@@ -60,7 +60,7 @@ public sealed class SteamAppInfoTests : IDisposable
         writer.Write((byte)0x08);
     }
 
-    private static void Value(BinaryWriter writer, List<string>? table, string key, string value)
+    internal static void Value(BinaryWriter writer, List<string>? table, string key, string value)
     {
         writer.Write((byte)0x01);
         Key(writer, table, key);
