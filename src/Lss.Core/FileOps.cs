@@ -201,6 +201,207 @@ internal static class FileOps
         return recovered;
     }
 
+    /// <summary>
+    /// File di folder che corrispondono al pattern (maschere separate da ";"): solo
+    /// il primo livello, o tutti i livelli se recursive. Il pattern vale sul nome
+    /// del file. Il file di Steam Cloud al primo livello e i file temporanei
+    /// (.nuovo, .vecchio) non contano. Un pattern vuoto non corrisponde a niente.
+    /// </summary>
+    public static IReadOnlyList<string> MatchedFiles(string folder, string pattern, bool recursive)
+    {
+        if (pattern == "" || !Directory.Exists(folder))
+            return [];
+
+        SearchOption option = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        var result = new List<string>();
+
+        foreach (string file in Directory.GetFiles(folder, "*", option))
+        {
+            string relative = Path.GetRelativePath(folder, file);
+            string name = Path.GetFileName(file);
+
+            if (IsSkipped(relative) || IsTemporary(name))
+                continue;
+
+            if (Matches(pattern, name))
+                result.Add(file);
+        }
+
+        return result.Order(StringComparer.Ordinal).ToList();
+    }
+
+    /// <summary>
+    /// Copia in destination solo i file corrispondenti (con la loro posizione
+    /// nelle sottocartelle) e controlla byte per byte ogni copia.
+    /// </summary>
+    public static void CopyMatchedVerified(string folder, string pattern, bool recursive, string destination)
+    {
+        IReadOnlyList<string> files = MatchedFiles(folder, pattern, recursive);
+        Directory.CreateDirectory(destination);
+
+        foreach (string file in files)
+        {
+            string copy = Path.Combine(destination, Path.GetRelativePath(folder, file));
+            Directory.CreateDirectory(Path.GetDirectoryName(copy)!);
+            File.Copy(file, copy, true);
+        }
+
+        foreach (string file in files)
+        {
+            string copy = Path.Combine(destination, Path.GetRelativePath(folder, file));
+
+            if (!File.Exists(copy) || !FilesAreEqual(file, copy))
+                throw new IOException("La copia non coincide con l'originale: " + copy);
+        }
+    }
+
+    /// <summary>
+    /// Rende i file corrispondenti di folder identici a quelli di source: copia
+    /// ognuno come .nuovo accanto all'originale, verifica tutte le copie, poi le
+    /// sostituisce e infine elimina i corrispondenti che source non ha. Gli altri
+    /// file di folder non vengono toccati.
+    /// </summary>
+    public static void ReplaceMatched(string source, string folder, string pattern, bool recursive)
+    {
+        Dictionary<string, string> wanted = MatchedByName(source, pattern, recursive);
+        IReadOnlyList<string> existing = MatchedFiles(folder, pattern, recursive);
+        var temps = new List<(string Temp, string Target)>();
+
+        try
+        {
+            foreach ((string name, string file) in wanted)
+            {
+                string target = Path.Combine(folder, name);
+                string temp = target + TempSuffix;
+
+                Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+                File.Copy(file, temp, true);
+                temps.Add((temp, target));
+
+                if (!FilesAreEqual(file, temp))
+                    throw new IOException("La copia non coincide con l'originale: " + temp);
+            }
+        }
+        catch
+        {
+            foreach ((string temp, _) in temps)
+                TryDeleteFile(temp);
+
+            throw;
+        }
+
+        foreach ((string temp, string target) in temps)
+            File.Move(temp, target, true);
+
+        foreach (string file in existing)
+        {
+            string relative = Path.GetRelativePath(folder, file);
+
+            if (!wanted.ContainsKey(relative))
+                File.Delete(file);
+        }
+    }
+
+    /// <summary>
+    /// true se i file corrispondenti di folder sono gli stessi (nomi e contenuto)
+    /// di quelli di snapshot.
+    /// </summary>
+    public static bool MatchedEqual(string folder, string pattern, bool recursive, string snapshot)
+    {
+        Dictionary<string, string> mine = MatchedByName(folder, pattern, recursive);
+        Dictionary<string, string> theirs = MatchedByName(snapshot, pattern, recursive);
+
+        if (mine.Count != theirs.Count)
+            return false;
+
+        foreach ((string name, string file) in mine)
+        {
+            if (!theirs.TryGetValue(name, out string? other) || !FilesAreEqual(file, other))
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Rimette a posto i file .nuovo lasciati da una ReplaceMatched interrotta:
+    /// l'originale non viene mai tolto prima della sostituzione, quindi basta
+    /// eliminare la copia. Se ne trova, ritorna true.
+    /// </summary>
+    public static bool RecoverInterruptedMatched(string folder, string pattern, bool recursive)
+    {
+        if (!Directory.Exists(folder))
+            return false;
+
+        SearchOption option = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        bool recovered = false;
+
+        foreach (string temp in Directory.GetFiles(folder, "*" + TempSuffix, option))
+        {
+            string original = temp[..^TempSuffix.Length];
+
+            if (!Matches(pattern, Path.GetFileName(original)))
+                continue;
+
+            File.Delete(temp);
+            recovered = true;
+        }
+
+        return recovered;
+    }
+
+    /// <summary>
+    /// I file corrispondenti di folder, con il nome relativo (chiave) e il percorso.
+    /// </summary>
+    private static Dictionary<string, string> MatchedByName(string folder, string pattern, bool recursive)
+    {
+        var result = new Dictionary<string, string>(NameComparer());
+
+        foreach (string file in MatchedFiles(folder, pattern, recursive))
+            result[Path.GetRelativePath(folder, file)] = file;
+
+        return result;
+    }
+
+    /// <summary>
+    /// Confronto dei nomi relativi: senza maiuscole su Windows.
+    /// </summary>
+    private static StringComparer NameComparer() =>
+        OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+
+    /// <summary>
+    /// true se il nome corrisponde a una delle maschere del pattern. Senza maiuscole su Windows.
+    /// </summary>
+    private static bool Matches(string pattern, string name) =>
+        pattern.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Any(mask => Glob.IsMatch(mask, name, OperatingSystem.IsWindows()));
+
+    /// <summary>
+    /// true se il percorso relativo non è un file da confrontare: il file di Steam
+    /// Cloud al primo livello.
+    /// </summary>
+    private static bool IsSkipped(string relative) =>
+        string.Equals(relative, SteamCacheFile, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// true se il nome è un file temporaneo di una sostituzione (.nuovo o .vecchio).
+    /// </summary>
+    private static bool IsTemporary(string name) =>
+        name.EndsWith(TempSuffix, StringComparison.Ordinal) || name.EndsWith(OldSuffix, StringComparison.Ordinal);
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (IOException)
+        {
+            // Resta un file .nuovo: RecoverInterruptedMatched lo elimina alla prossima operazione.
+        }
+    }
+
     private static void Verify(string source, string destination)
     {
         if (!FoldersAreEqual(source, destination))

@@ -158,4 +158,81 @@ public sealed class SaveFolderSafetyTests : IDisposable
 
         Assert.Equal(SafetyProblem.ProtectedFolder, Check(link));
     }
+
+    private SafetyProblem CheckPattern(string path, string pattern, string prefix = "", IReadOnlyList<string>? launchers = null) =>
+        SaveFolderSafety.CheckPattern(path, pattern, true, Context(prefix), launchers ?? [],
+            Path.Combine(folder.Root, "lssdata"));
+
+    [Fact]
+    public void PatternInsideDocumentsIsAccepted()
+    {
+        Save(Path.Combine(Documents, "Game"));
+
+        Assert.Equal(SafetyProblem.None, CheckPattern(Path.Combine(Documents, "Game"), "*.sav"));
+    }
+
+    [Fact]
+    public void PatternInAParentOfALauncherIsRefused()
+    {
+        string steam = Path.Combine(Home, "Steam");
+        Save(Path.Combine(steam, "x"));
+
+        Assert.Equal(SafetyProblem.ProtectedFolder, CheckPattern(Home, "*.sav", launchers: [steam]));
+    }
+
+    [Theory]
+    [InlineData("*")]
+    [InlineData("*.*")]
+    [InlineData("??")]
+    [InlineData("*.exe")]
+    [InlineData("*.DLL")]
+    [InlineData("*.pak;*.sig")]
+    [InlineData("a/b.sav")]
+    [InlineData("")]
+    [InlineData("*.sav;")]
+    public void RefusedPatternsAreRefused(string pattern)
+    {
+        Save(Path.Combine(Install, "x"));
+
+        Assert.False(SaveFolderSafety.PatternIsAllowed(pattern));
+        Assert.Equal(SafetyProblem.BadPattern, CheckPattern(Install, pattern));
+    }
+
+    [Theory]
+    [InlineData("*.sav")]
+    [InlineData("slot?.dat")]
+    [InlineData("*.sav;slot?.dat")]
+    [InlineData("save_*")]
+    public void UsualPatternsAreAccepted(string pattern)
+    {
+        Assert.True(SaveFolderSafety.PatternIsAllowed(pattern));
+    }
+
+    [Fact]
+    public void PatternWithNoMatchingFileIsEmpty()
+    {
+        TestFolder.Write(Path.Combine(Install, "notes.txt"), "x");
+
+        Assert.Equal(SafetyProblem.Empty, CheckPattern(Install, "*.sav"));
+    }
+
+    [Fact]
+    public void PatternWithTooManyFilesIsTooBig()
+    {
+        for (int i = 0; i < 3; i++)
+            TestFolder.Write(Path.Combine(Install, "saves", $"s{i}.sav"), "x");
+
+        Assert.Equal(SafetyProblem.TooBig,
+            SaveFolderSafety.CheckPattern(Install, "*.sav", true, Context(), [],
+                Path.Combine(folder.Root, "lssdata"), maxBytes: long.MaxValue, maxFiles: 2));
+    }
+
+    [Fact]
+    public void PatternInsideTheLssDataIsRefused()
+    {
+        TestFolder.Write(Path.Combine(LssData, "x", "a.sav"), "x");
+
+        Assert.Equal(SafetyProblem.InsideLssData,
+            SaveFolderSafety.CheckPattern(Path.Combine(LssData, "x"), "*.sav", true, Context(), [], LssData));
+    }
 }

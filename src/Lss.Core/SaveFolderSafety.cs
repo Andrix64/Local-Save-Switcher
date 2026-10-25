@@ -22,7 +22,10 @@ internal enum SafetyProblem
     InsideLssData,
 
     /// <summary>Non si riesce a leggere il contenuto (permessi, errori di disco).</summary>
-    Unreadable
+    Unreadable,
+
+    /// <summary>Il pattern dei file non si può usare (troppo generico, programmi, percorsi).</summary>
+    BadPattern
 }
 
 /// <summary>
@@ -35,6 +38,9 @@ internal static class SaveFolderSafety
 {
     public const long MaxBytes = 2L * 1024 * 1024 * 1024; // 2 GB
     public const int MaxFiles = 20_000;
+
+    /// <summary>File corrispondenti a un pattern di un posto: più di così il pattern è troppo largo.</summary>
+    public const int MaxPatternFiles = 2_000;
 
     /// <summary>Se la cartella si può sostituire per intero cambiando partita.</summary>
     public static SafetyProblem Check(string folder, SaveContext context,
@@ -52,8 +58,41 @@ internal static class SaveFolderSafety
         SafetyProblem.TooBig => Strings.SafetyTooBig,
         SafetyProblem.InsideLssData => Strings.SafetyInsideLss,
         SafetyProblem.Unreadable => Strings.SafetyUnreadable,
+        SafetyProblem.BadPattern => Strings.SafetyBadPattern,
         _ => "",
     };
+
+    /// <summary>
+    /// Se un pattern di file (maschere separate da ";") si può usare per un posto
+    /// dei salvataggi: niente pattern troppo generici, senza lettere, con
+    /// estensioni di programmi o dati di gioco, o con separatori di cartella.
+    /// </summary>
+    public static bool PatternIsAllowed(string pattern)
+    {
+        string[] masks = pattern.Split(';');
+
+        return masks.Length > 0 && masks.All(MaskIsAllowed);
+    }
+
+    private static bool MaskIsAllowed(string mask)
+    {
+        if (mask == "" || mask.Contains('/') || mask.Contains('\\'))
+            return false;
+
+        // Senza * e ? resta il nome: "*", "*.*", "??" o "." non dicono quali file.
+        string literal = mask.Replace("*", "").Replace("?", "");
+
+        if (literal.Trim('.') == "")
+            return false;
+
+        return !RefusedExtensions.Any(extension => mask.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>Estensioni che un pattern dei salvataggi non può avere.</summary>
+    private static readonly string[] RefusedExtensions =
+    [
+        ".exe", ".dll", ".so", ".pak", ".pck", ".assets", ".bundle", ".ucas", ".utoc", ".sig", ".lnk", ".desktop"
+    ];
 
     /// <summary>
     /// Come Check, con i limiti dati (i test usano limiti piccoli).
@@ -198,6 +237,81 @@ internal static class SaveFolderSafety
     /// </summary>
     private static bool CaseInsensitive(SaveContext context) =>
         context.IgnoreCase || OperatingSystem.IsWindows();
+
+    /// <summary>
+    /// Come Check, per un posto con un pattern di file. Una cartella protetta
+    /// dell'utente (Documents, AppData) va bene: si toccano solo i file che
+    /// corrispondono. Non si accettano la radice, i launcher, il prefisso e i
+    /// dati di LSS. I limiti contano solo i file corrispondenti.
+    /// </summary>
+    public static SafetyProblem CheckPattern(string folder, string pattern, bool recursive,
+        SaveContext context, IReadOnlyList<string> launcherFolders, string lssDataRoot) =>
+        CheckPattern(folder, pattern, recursive, context, launcherFolders, lssDataRoot, MaxBytes, MaxPatternFiles);
+
+    /// <summary>
+    /// Come CheckPattern, con i limiti dati (i test usano limiti piccoli).
+    /// </summary>
+    internal static SafetyProblem CheckPattern(string folder, string pattern, bool recursive,
+        SaveContext context, IReadOnlyList<string> launcherFolders, string lssDataRoot, long maxBytes, int maxFiles)
+    {
+        if (!PatternIsAllowed(pattern))
+            return SafetyProblem.BadPattern;
+
+        if (!Directory.Exists(folder))
+            return SafetyProblem.Missing;
+
+        string absolute = Path.GetFullPath(folder);
+
+        if (absolute == Path.GetPathRoot(absolute))
+            return SafetyProblem.ProtectedFolder;
+
+        StringComparison comparison = CaseInsensitive(context)
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+        string full = Normalize(folder);
+
+        IEnumerable<string> forbidden = launcherFolders.Append(context.PrefixPath)
+            .Where(path => path != "")
+            .Select(Normalize)
+            .Where(path => path != "");
+
+        if (forbidden.Any(path => IsSameOrParent(full, path, comparison)))
+            return SafetyProblem.ProtectedFolder;
+
+        if (lssDataRoot != "" && IsSameOrInside(full, Normalize(lssDataRoot), comparison))
+            return SafetyProblem.InsideLssData;
+
+        return CheckMatchedFiles(folder, pattern, recursive, maxBytes, maxFiles);
+    }
+
+    /// <summary>
+    /// Conta i file corrispondenti al pattern; si ferma appena supera i limiti.
+    /// </summary>
+    private static SafetyProblem CheckMatchedFiles(string folder, string pattern, bool recursive,
+        long maxBytes, int maxFiles)
+    {
+        int count = 0;
+        long bytes = 0;
+
+        try
+        {
+            foreach (string file in FileOps.MatchedFiles(folder, pattern, recursive))
+            {
+                count++;
+                bytes += new FileInfo(file).Length;
+
+                if (count > maxFiles || bytes > maxBytes)
+                    return SafetyProblem.TooBig;
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Write("Cartella dei salvataggi non leggibile: " + folder, ex);
+            return SafetyProblem.Unreadable;
+        }
+
+        return count == 0 ? SafetyProblem.Empty : SafetyProblem.None;
+    }
 
     /// <summary>
     /// Conta i file a qualsiasi livello; si ferma appena supera i limiti.
