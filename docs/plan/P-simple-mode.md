@@ -246,9 +246,14 @@ internal static class SimplePlay
    - the game has **no playthroughs at all** and its folders have saves
      (`!GameSavesAreEmpty()`) → `WhoseSavesAsync`: a player P →
      `AdoptGameSaves(UniqueName(P.Name), P)` (P's favourite); null →
-     `AdoptGameSaves(UniqueName(Strings.SavesBeforeLss), player)` and
-     **not** favourite. If the adopted saves are not the current player's,
-     continue with step 5;
+     `AdoptGameSaves(UniqueName(Strings.SavesBeforeLss), player)` (the
+     player's, aside: the favourite rule makes it theirs, see step 5).
+     Then step 5 always runs for the current player, unless the adopted
+     saves were the current player's own: then they are the favourite and
+     nothing else is created. Decided on 2026-10-25 by the plan's author, because the
+     "Rules" say that a player with a playthrough always has a favourite:
+     the new playthrough is then the favourite of the current player
+     (`SetFavourite` explicitly), and the "Before LSS" one stays aside;
    - otherwise → step 5.
 5. New playthrough: `CreateProfile(UniqueName(player.Name), copyCurrentSaves: false, player)`,
    favourite, `ActivateProfile`.

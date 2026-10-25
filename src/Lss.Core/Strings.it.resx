@@ -461,4 +461,6 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="LastAdmin" xml:space="preserve"><value>Deve restare almeno un amministratore.</value></data>
   <data name="PlayerDefaultName" xml:space="preserve"><value>Giocatore 1</value></data>
   <data name="NotYourPlaythrough" xml:space="preserve"><value>Questa partita appartiene a un altro giocatore.</value></data>
+  <data name="SimpleCloseGame" xml:space="preserve"><value>{0} è già aperto. Chiudilo prima.</value></data>
+  <data name="SavesBeforeLss" xml:space="preserve"><value>Prima di LSS</value></data>
 </root>

@@ -461,4 +461,6 @@ LSS will look at what changed on the disk.</value></data>
   <data name="LastAdmin" xml:space="preserve"><value>There must be at least one admin.</value></data>
   <data name="PlayerDefaultName" xml:space="preserve"><value>Player 1</value></data>
   <data name="NotYourPlaythrough" xml:space="preserve"><value>This playthrough belongs to another player.</value></data>
+  <data name="SimpleCloseGame" xml:space="preserve"><value>{0} is already open. Close it first.</value></data>
+  <data name="SavesBeforeLss" xml:space="preserve"><value>Before LSS</value></data>
 </root>
