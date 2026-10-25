@@ -11,8 +11,10 @@ public sealed class FakePlatform : IPlatform
     public DateTime? StartTime { get; set; }
     public bool SteamRunning { get; set; }
     public List<string> OpenedUris { get; } = [];
+    public KnownFolders Folders { get; set; } = new("", "", "", "", "", "", "", "", "", "", "");
 
     public IReadOnlyList<string> FindSteamRoots() => SteamRoots;
+    public KnownFolders GetKnownFolders() => Folders;
     public bool IsGameRunning(GameInfo game) => GameRunning;
     public DateTime? GameStartTime(GameInfo game) => StartTime;
     public bool IsSteamRunning() => SteamRunning;

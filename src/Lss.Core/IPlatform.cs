@@ -13,6 +13,11 @@ public interface IPlatform
     /// </summary>
     IReadOnlyList<string> FindSteamRoots();
 
+    /// <summary>
+    /// Cartelle dell'utente usate per trovare i salvataggi (vedi KnownFolders).
+    /// </summary>
+    KnownFolders GetKnownFolders();
+
     /// <summary>true se il gioco è aperto (nel dubbio true).</summary>
     bool IsGameRunning(GameInfo game);
 

@@ -45,6 +45,28 @@ public sealed class WindowsPlatform : IPlatform
     }
 
     /// <summary>
+    /// Cartelle dell'utente di Windows. Le cartelle che Windows non ha (quelle
+    /// XDG) sono "".
+    /// </summary>
+    public KnownFolders GetKnownFolders()
+    {
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        return new KnownFolders(
+            Home: home,
+            AppData: Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            LocalAppData: Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            LocalAppDataLow: Path.Combine(home, "AppData", "LocalLow"),
+            Documents: Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            SavedGames: Path.Combine(home, "Saved Games"),
+            Public: Environment.GetEnvironmentVariable("PUBLIC") ?? "",
+            ProgramData: Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            XdgData: "",
+            XdgConfig: "",
+            UserName: Environment.UserName);
+    }
+
+    /// <summary>
     /// true se Steam segna il gioco come aperto, o se un processo gira dalla
     /// cartella di installazione. I processi di cui non si legge il percorso
     /// (per esempio avviati come amministratore) sono ignorati: per quelli

@@ -188,6 +188,7 @@ internal static class Program
 internal sealed class FakePlatform : IPlatform
 {
     public IReadOnlyList<string> FindSteamRoots() => [];
+    public KnownFolders GetKnownFolders() => new("", "", "", "", "", "", "", "", "", "", "");
     public bool IsGameRunning(GameInfo game) => false;
     public DateTime? GameStartTime(GameInfo game) => null;
     public bool IsSteamRunning() => false;

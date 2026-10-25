@@ -196,6 +196,58 @@ public sealed class LinuxPlatformTests : IDisposable
         Assert.Empty(platform.RegistrySubKeys(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve"));
     }
 
+    [Fact]
+    public void KnownFoldersDefaultXdgWithoutVariables()
+    {
+        string home = Path.Combine(folder.Root, "home");
+
+        KnownFolders folders = LinuxPlatform.KnownFoldersFor(home, null, null, "andrix");
+
+        Assert.Equal(home, folders.Home);
+        Assert.Equal(Path.Combine(home, ".local", "share"), folders.XdgData);
+        Assert.Equal(Path.Combine(home, ".config"), folders.XdgConfig);
+        Assert.Equal("andrix", folders.UserName);
+        Assert.Equal("", folders.Documents);
+        Assert.Equal("", folders.AppData);
+    }
+
+    [Fact]
+    public void KnownFoldersUseAbsoluteXdgVariables()
+    {
+        string home = Path.Combine(folder.Root, "home");
+        string data = Path.Combine(folder.Root, "dati");
+        string config = Path.Combine(folder.Root, "config");
+
+        KnownFolders folders = LinuxPlatform.KnownFoldersFor(home, data, config, "andrix");
+
+        Assert.Equal(data, folders.XdgData);
+        Assert.Equal(config, folders.XdgConfig);
+    }
+
+    [Fact]
+    public void KnownFoldersIgnoreRelativeAndEmptyXdgVariables()
+    {
+        string home = Path.Combine(folder.Root, "home");
+
+        KnownFolders folders = LinuxPlatform.KnownFoldersFor(home, "dati/lss", "", "andrix");
+
+        Assert.Equal(Path.Combine(home, ".local", "share"), folders.XdgData);
+        Assert.Equal(Path.Combine(home, ".config"), folders.XdgConfig);
+    }
+
+    [Fact]
+    public void DocumentsOnlyWhenTheFolderExists()
+    {
+        string home = Path.Combine(folder.Root, "home");
+        Directory.CreateDirectory(home);
+
+        Assert.Equal("", LinuxPlatform.KnownFoldersFor(home, null, null, "andrix").Documents);
+
+        Directory.CreateDirectory(Path.Combine(home, "Documents"));
+
+        Assert.Equal(Path.Combine(home, "Documents"), LinuxPlatform.KnownFoldersFor(home, null, null, "andrix").Documents);
+    }
+
     private static string Registry(string runningAppId, string running) => $$"""
         "Registry"
         {

@@ -21,6 +21,41 @@ public sealed class LinuxPlatform : IPlatform
     private static string Home => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
     /// <summary>
+    /// Cartelle dell'utente di Linux, da variabili XDG e cartella personale.
+    /// </summary>
+    public KnownFolders GetKnownFolders() => KnownFoldersFor(
+        Home,
+        Environment.GetEnvironmentVariable("XDG_DATA_HOME"),
+        Environment.GetEnvironmentVariable("XDG_CONFIG_HOME"),
+        Environment.UserName);
+
+    /// <summary>
+    /// Cartelle dell'utente sotto <paramref name="home"/>. Documents c'è solo se
+    /// la cartella esiste. Un valore XDG vuoto o relativo vale come non
+    /// impostato (lo dice la specifica XDG), quindi si usa il predefinito.
+    /// </summary>
+    internal static KnownFolders KnownFoldersFor(string home, string? xdgData, string? xdgConfig, string userName)
+    {
+        string documents = Path.Combine(home, "Documents");
+
+        return new KnownFolders(
+            Home: home,
+            AppData: "",
+            LocalAppData: "",
+            LocalAppDataLow: "",
+            Documents: Directory.Exists(documents) ? documents : "",
+            SavedGames: "",
+            Public: "",
+            ProgramData: "",
+            XdgData: AbsoluteOr(xdgData, Path.Combine(home, ".local", "share")),
+            XdgConfig: AbsoluteOr(xdgConfig, Path.Combine(home, ".config")),
+            UserName: userName);
+    }
+
+    private static string AbsoluteOr(string? value, string fallback) =>
+        value is { Length: > 0 } && Path.IsPathRooted(value) ? value : fallback;
+
+    /// <summary>
     /// Cartelle di Steam sotto <paramref name="home"/>, in ordine: normale,
     /// Flatpak, Snap. Solo quelle con userdata, senza doppioni dovuti ai
     /// collegamenti (~/.steam/steam punta a quella normale).
