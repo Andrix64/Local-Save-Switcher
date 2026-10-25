@@ -216,6 +216,18 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fase K: stop su K6 (Haiku). K5 committato (`24931b1`, tick
+  `103da6f`) con la modifica di una sola asserzione, come concordato
+  (`Open_UsesAccountAndGameFolder` ora si aspetta `steam\111\123450\Profili`).
+  K6 non è iniziato nel codice: il test `PlaythroughTests` (riga 167)
+  controlla `Formato=2` nel `partita.ini` esportato, e K6 lo porta a 3 con il
+  launcher registrato. Il test non passa invariato, quindi mi fermo come
+  per K5, ma senza la conferma scritta della modifica. Proposta: asserire
+  `Formato=3` e `Provider=steam` (in più, accanto ad `AppId`), e l'import
+  accetta anche il formato 2 come `steam`. K7 non iniziato: il comportamento di
+  avvio va scritto qui prima di codificarlo. Fine fase (controllo Linux) non
+  eseguito: la fase non è finita.
+
 - 2026-10-25 — Fase K: stop su K5 (Haiku). K1–K4d sono committati su `v2`
   (ticks sopra). K5 non è committato: il test
   `SaveManagerTests.Open_UsesAccountAndGameFolder` si aspetta
