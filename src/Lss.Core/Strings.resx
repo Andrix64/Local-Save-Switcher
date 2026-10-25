@@ -444,4 +444,5 @@ LSS will look at what changed on the disk.</value></data>
   <data name="CloudBarGeneric" xml:space="preserve"><value>{0} keeps a copy of the saves online. Turn it off for this game in {1}.</value></data>
   <data name="GogExeMissing" xml:space="preserve"><value>GOG doesn&apos;t say which program starts this game.</value></data>
   <data name="ProgramNotStarted" xml:space="preserve"><value>The program didn&apos;t start.</value></data>
+  <data name="StartFromHeroic" xml:space="preserve"><value>Start the game from Heroic: LSS can&apos;t start it from here yet.</value></data>
 </root>

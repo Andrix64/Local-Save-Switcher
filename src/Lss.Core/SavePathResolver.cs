@@ -42,7 +42,7 @@ internal static class SavePathResolver
     private static readonly HashSet<string> KnownRoots =
     [
         "gameinstall", "WinMyDocuments", "WinAppDataRoaming", "WinAppDataLocal", "WinAppDataLocalLow",
-        "WinSavedGames", "WinUserProfile", "LinuxHome", "LinuxXdgDataHome", "LinuxXdgConfigHome"
+        "WinSavedGames", "WinUserProfile", "LinuxHome", "LinuxXdgDataHome", "LinuxXdgConfigHome", "Absolute"
     ];
 
     /// <summary>
@@ -306,6 +306,10 @@ internal static class SavePathResolver
             return [];
 
         (string root, string path) = ApplyOverride(rule, overrides, context);
+
+        // Absolute (Heroic, gogSaves): il percorso è già la cartella intera.
+        if (root == "Absolute")
+            return Path.IsPathRooted(path) && Directory.Exists(path) ? [path] : [];
 
         if (!KnownRoots.Contains(root))
         {

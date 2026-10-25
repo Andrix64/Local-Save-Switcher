@@ -444,4 +444,5 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="CloudBarGeneric" xml:space="preserve"><value>{0} conserva una copia dei salvataggi online. Disattivalo per questo gioco in {1}.</value></data>
   <data name="GogExeMissing" xml:space="preserve"><value>GOG non dice quale programma avvia questo gioco.</value></data>
   <data name="ProgramNotStarted" xml:space="preserve"><value>Il programma non si è avviato.</value></data>
+  <data name="StartFromHeroic" xml:space="preserve"><value>Avvia il gioco da Heroic: LSS per ora non può avviarlo da qui.</value></data>
 </root>
