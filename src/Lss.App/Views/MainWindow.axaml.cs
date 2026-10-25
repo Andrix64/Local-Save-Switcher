@@ -1,5 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
+using Avalonia.Threading;
 using Lss.App.Services;
 using Lss.App.ViewModels;
 
@@ -19,6 +22,56 @@ public partial class MainWindow : Window
         base.OnOpened(e);
         ViewModel.Monitor.Start();
         _ = ViewModel.OnOpenedAsync();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == WindowStateProperty && OperatingSystem.IsLinux()
+            && WindowState == WindowState.Maximized)
+        {
+            Dispatcher.UIThread.Post(KeepInsideWorkingArea, DispatcherPriority.Background);
+        }
+    }
+
+    /// <summary>
+    /// Su Linux (Steam Deck in modalità desktop) Avalonia ingrandisce la finestra a tutto
+    /// lo schermo, sotto la barra delle applicazioni, mentre le altre app si fermano sopra.
+    /// Se la finestra ingrandita esce dall'area di lavoro, la si riporta dentro come
+    /// finestra normale grande quanto l'area.
+    /// </summary>
+    private void KeepInsideWorkingArea()
+    {
+        if (WindowState != WindowState.Maximized)
+            return;
+
+        Screen? screen = Screens.ScreenFromWindow(this);
+
+        if (screen is null)
+            return;
+
+        PixelRect work = screen.WorkingArea;
+        double scale = screen.Scaling;
+        Size frame = FrameSize ?? ClientSize;
+        double frameHeight = frame.Height * scale;
+        double frameWidth = frame.Width * scale;
+
+        Log.Write($"Finestra ingrandita: cornice {frameWidth:0}x{frameHeight:0} in {Position}, " +
+                  $"area di lavoro {work}, schermo {screen.Bounds}, scala {scale}");
+
+        if (work == screen.Bounds || (frameHeight <= work.Height + 1 && frameWidth <= work.Width + 1))
+            return;
+
+        double decorationWidth = frame.Width - ClientSize.Width;
+        double decorationHeight = frame.Height - ClientSize.Height;
+
+        WindowState = WindowState.Normal;
+        Position = work.Position;
+        Width = Math.Max(MinWidth, work.Width / scale - decorationWidth);
+        Height = Math.Max(MinHeight, work.Height / scale - decorationHeight);
+
+        Log.Write($"Finestra riportata nell'area di lavoro: {Width:0}x{Height:0} in {Position}");
     }
 
     // Non interrompere una copia a metà.
