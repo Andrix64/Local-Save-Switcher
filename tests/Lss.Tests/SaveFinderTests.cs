@@ -196,4 +196,133 @@ public sealed class SaveFinderTests : IDisposable
 
         Assert.Empty(roots);
     }
+
+    // ---- M3: candidati e punteggio ----
+
+    private static ChangedFile Created(string path, SearchRoot root)
+    {
+        TestFolder.Write(path, "x");
+        return new ChangedFile(path, 1, DateTime.UtcNow, root);
+    }
+
+    private static SaveCandidate? Top(IReadOnlyList<SaveCandidate> candidates) => candidates.FirstOrDefault();
+
+    private static int Points(SaveCandidate candidate, ScoreReasonKind kind) =>
+        candidate.Reasons.Where(r => r.Kind == kind).Sum(r => r.Points);
+
+    [Fact]
+    public void DocumentsGameIsRaisedToTheGameFolder()
+    {
+        string documents = Path.Combine(Home, "Documents");
+        string game = Path.Combine(documents, "My Games", "Hollow Knight");
+        var root = new SearchRoot(documents, 6, false);
+        var files = new List<ChangedFile>
+        {
+            Created(Path.Combine(game, "Saves", "user1.dat"), root),
+            Created(Path.Combine(game, "Saves", "user2.dat"), root),
+        };
+
+        IReadOnlyList<SaveCandidate> candidates = SaveFinder.Rank(files, Context(Folders(Home, documents: documents)),
+            "Hollow Knight", [], "", []);
+
+        SaveCandidate top = Assert.Single(candidates);
+        Assert.Equal(game, top.Folder);
+        Assert.Equal(6, Points(top, ScoreReasonKind.GameName));
+        Assert.Equal(3, Points(top, ScoreReasonKind.SaveLikeFile));
+        Assert.Equal(2, Points(top, ScoreReasonKind.ChangedFiles));
+        Assert.Equal(3, Points(top, ScoreReasonKind.SaveLikePath));
+    }
+
+    [Fact]
+    public void ProtonGameFolderWinsOverTheBrowserInTheSamePrefix()
+    {
+        string prefix = Path.Combine(folder.Root, "pfx");
+        string user = Path.Combine(prefix, "drive_c", "users", "steamuser");
+        string local = Path.Combine(user, "AppData", "Local");
+        var root = new SearchRoot(user, 7, true);
+        var files = new List<ChangedFile>
+        {
+            Created(Path.Combine(local, "Hollow Knight", "user1.dat"), root),
+            Created(Path.Combine(local, "BraveSoftware", "Brave-Browser", "Default", "Cookies.dat"), root),
+            Created(Path.Combine(local, "BraveSoftware", "Brave-Browser", "Default", "History.dat"), root),
+        };
+
+        IReadOnlyList<SaveCandidate> candidates = SaveFinder.Rank(files,
+            Context(Folders(Home, user: "steamuser"), prefix, perGame: true), "Hollow Knight", [], "", []);
+
+        Assert.Equal(Path.Combine(local, "Hollow Knight"), candidates[0].Folder);
+        Assert.Contains(candidates, c => c.Folder == Path.Combine(local, "BraveSoftware", "Brave-Browser", "Default")
+            && c.Score < candidates[0].Score);
+    }
+
+    [Fact]
+    public void OnlySettingsChangedGivesALowScore()
+    {
+        string documents = Path.Combine(Home, "Documents");
+        var root = new SearchRoot(documents, 6, false);
+        var files = new List<ChangedFile>
+        {
+            Created(Path.Combine(documents, "Hollow Knight", "settings.ini"), root),
+        };
+
+        SaveCandidate top = Assert.Single(SaveFinder.Rank(files, Context(Folders(Home, documents: documents)),
+            "Hollow Knight", [], "", []));
+
+        Assert.True(top.Score < 6);
+        Assert.Equal(-4, Points(top, ScoreReasonKind.OnlySettings));
+    }
+
+    [Fact]
+    public void SaveFolderInsideTheInstallFolderIsProposed()
+    {
+        string install = Path.Combine(folder.Root, "lib", "Game");
+        string saves = Path.Combine(install, "saves");
+        var root = new SearchRoot(install, 8, true);
+        var files = new List<ChangedFile> { Created(Path.Combine(saves, "slot1.sav"), root) };
+
+        SaveCandidate top = Assert.Single(SaveFinder.Rank(files, Context(Folders(Home), install: install),
+            "Game", [], "", []));
+
+        Assert.Equal(saves, top.Folder);
+        Assert.Equal(5, Points(top, ScoreReasonKind.GameOwned));
+        Assert.Equal(2, Points(top, ScoreReasonKind.SaveLikePath));
+    }
+
+    [Fact]
+    public void ProtectedFolderIsDropped()
+    {
+        string documents = Path.Combine(Home, "Documents");
+        var root = new SearchRoot(documents, 6, false);
+        var files = new List<ChangedFile> { Created(Path.Combine(documents, "Hollow Knight.sav"), root) };
+
+        Assert.Empty(SaveFinder.Rank(files, Context(Folders(Home, documents: documents)), "Hollow Knight", [], "", []));
+    }
+
+    [Fact]
+    public void NothingChangedGivesNoCandidates()
+    {
+        Assert.Empty(SaveFinder.Rank([], Context(Folders(Home)), "Hollow Knight", [], "", []));
+    }
+
+    [Fact]
+    public void FilesInAKnownSaveFolderAreNotProposedAgain()
+    {
+        string documents = Path.Combine(Home, "Documents");
+        string game = Path.Combine(documents, "My Games", "Hollow Knight");
+        var root = new SearchRoot(documents, 6, false);
+        var files = new List<ChangedFile> { Created(Path.Combine(game, "Saves", "user1.dat"), root) };
+
+        Assert.Empty(SaveFinder.Rank(files, Context(Folders(Home, documents: documents)), "Hollow Knight", [], "",
+            [game]));
+    }
+
+    [Fact]
+    public void AnotherProgramIsDropped()
+    {
+        string documents = Path.Combine(Home, "Documents");
+        var root = new SearchRoot(documents, 6, false);
+        var files = new List<ChangedFile> { Created(Path.Combine(documents, "Random", "x.sav"), root) };
+
+        Assert.Empty(SaveFinder.Rank(files, Context(Folders(Home, documents: documents)), "Hollow Knight", [], "", []));
+    }
 }

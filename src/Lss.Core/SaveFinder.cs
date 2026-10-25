@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Lss;
 
@@ -15,6 +17,23 @@ public sealed record SearchRoot(string Folder, int MaxDepth, bool GameOwned);
 /// <param name="Root">Cartella di ricerca in cui è stato trovato.</param>
 public sealed record ChangedFile(string Path, long Size, DateTime WrittenUtc, SearchRoot Root);
 
+/// <summary>Perché una cartella ha preso (o perso) punti: mostrato all'utente.</summary>
+public enum ScoreReasonKind { GameName, GameOwned, SaveLikeFile, ChangedFiles, SaveLikePath, OnlySettings, OtherProgram }
+
+/// <summary>Una voce del punteggio, con il dettaglio da mostrare (nome trovato, file, numero).</summary>
+/// <param name="Kind">Che cosa ha dato o tolto punti.</param>
+/// <param name="Points">Punti: positivi o negativi.</param>
+/// <param name="Detail">Nome della cartella, nome del file o numero, secondo il tipo.</param>
+public sealed record ScoreReason(ScoreReasonKind Kind, int Points, string Detail);
+
+/// <summary>Cartella proposta come cartella dei salvataggi.</summary>
+/// <param name="Folder">Cartella da sostituire per intero cambiando partita.</param>
+/// <param name="Score">Somma dei punti dei motivi.</param>
+/// <param name="Files">File cambiati dentro la cartella.</param>
+/// <param name="Reasons">Perché ha preso (o perso) punti.</param>
+public sealed record SaveCandidate(string Folder, int Score, IReadOnlyList<ChangedFile> Files,
+    IReadOnlyList<ScoreReason> Reasons);
+
 /// <summary>
 /// Trova la cartella dei salvataggi di un gioco guardando i file cambiati
 /// sul disco mentre il gioco era aperto (fase M). Legge soltanto.
@@ -23,6 +42,40 @@ internal static partial class SaveFinder
 {
     // Profondità per le cartelle che sono del gioco: installazione, userdata, prefisso.
     private const int GameDepth = 8;
+
+    // Pesi del punteggio (Rank): da tarare con i test reali, fase M7.
+    private const int GameNamePoints = 6;
+    private const int GameOwnedPoints = 5;
+    private const int SaveLikeFilePoints = 3;
+    private const int ChangedFilePoints = 1;
+    private const int ChangedFilesMaxPoints = 3;
+    private const int SaveWordPoints = 2;
+    private const int SaveWordsPoints = 3;
+    private const int SettingsOnlyPoints = -4;
+    private const int OtherProgramPoints = -6;
+    private const int MinScore = 3;
+    private const int MaxCandidates = 5;
+    private const int MinTokenLength = 3;
+
+    private static readonly HashSet<string> SaveExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".sav", ".save", ".sl2", ".ess", ".dat", ".bin", ".slot"
+    };
+
+    private static readonly string[] SaveWords = ["save", "slot", "profile", "progress", "player", "world"];
+
+    private static readonly HashSet<string> SettingsExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".ini", ".cfg", ".xml", ".json"
+    };
+
+    private static readonly string[] SettingsWords = ["config", "setting", "option", "prefs"];
+
+    // Nomi tipici di una cartella di salvataggi, dopo Normalize.
+    private static readonly HashSet<string> SaveFolderWords =
+    [
+        "saves", "save", "savegames", "savedgames", "saved", "savedata", "savefiles", "profiles", "mygames"
+    ];
 
     /// <summary>
     /// Cartelle in cui un gioco può salvare, senza doppioni né cartelle una dentro
@@ -176,6 +229,249 @@ internal static partial class SaveFinder
     /// </summary>
     private static string Full(string path) =>
         Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+    /// <summary>
+    /// Cartelle proposte come cartella dei salvataggi, in ordine di punteggio.
+    /// knownFolders sono le cartelle che il gioco ha già: i file dentro non si
+    /// propongono di nuovo. ignoredFolders sono le cartelle segnate come "non di
+    /// salvataggi" (IgnoredFolders.Folders): i file dentro si tolgono. Le cartelle
+    /// che non passano SaveFolderSafety, o con meno di MinScore punti, non compaiono.
+    /// </summary>
+    public static IReadOnlyList<SaveCandidate> Rank(IReadOnlyList<ChangedFile> files, SaveContext context,
+        string gameName, IReadOnlyList<string> launcherFolders, string lssDataRoot,
+        IReadOnlyList<string> knownFolders, IReadOnlyList<string>? ignoredFolders = null)
+    {
+        StringComparison comparison = Comparison(context);
+        IReadOnlyList<string> tokens = GameTokens(gameName, Path.GetFileName(context.InstallPath));
+        IReadOnlyList<string> ignored = ignoredFolders ?? [];
+        IReadOnlyList<ChangedFile> kept = files
+            .Where(file => !ignored.Any(folder => string.Equals(file.Path, folder, comparison) || IsInside(file.Path, folder, comparison)))
+            .ToList();
+        var candidates = new List<SaveCandidate>();
+
+        foreach (Proposal proposal in Propose(kept, knownFolders, tokens, comparison))
+        {
+            if (SaveFolderSafety.Check(proposal.Folder, context, launcherFolders, lssDataRoot) != SafetyProblem.None)
+                continue;
+
+            SaveCandidate candidate = Score(proposal, tokens, comparison);
+
+            if (candidate.Score >= MinScore)
+                candidates.Add(candidate);
+        }
+
+        return candidates
+            .OrderByDescending(candidate => candidate.Score)
+            .ThenByDescending(candidate => candidate.Files.Max(file => file.WrittenUtc))
+            .Take(MaxCandidates)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Minuscole, e solo lettere e cifre: "Hollow Knight™" diventa "hollowknight".
+    /// </summary>
+    internal static string Normalize(string text) => NotLetterOrDigit().Replace(text.ToLowerInvariant(), "");
+
+    [GeneratedRegex("[^\\p{L}\\p{N}]+")]
+    private static partial Regex NotLetterOrDigit();
+
+    /// <summary>
+    /// Parole del nome del gioco e della cartella di installazione, di almeno tre
+    /// caratteri, più il nome intero normalizzato.
+    /// </summary>
+    internal static IReadOnlyList<string> GameTokens(string gameName, string installDir)
+    {
+        var tokens = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (string text in new[] { gameName, installDir })
+        {
+            string whole = Normalize(text);
+
+            if (whole.Length >= MinTokenLength)
+                tokens.Add(whole);
+
+            foreach (string word in NotLetterOrDigit().Split(text.ToLowerInvariant()))
+            {
+                if (word.Length >= MinTokenLength)
+                    tokens.Add(word);
+            }
+        }
+
+        return tokens.ToList();
+    }
+
+    /// <summary>
+    /// true se il nome contiene una parola del gioco (dopo Normalize).
+    /// </summary>
+    private static bool MatchesToken(string name, IReadOnlyList<string> tokens)
+    {
+        string normal = Normalize(name);
+
+        return tokens.Any(token => normal.Contains(token, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Cartella proposta: i file cambiati dentro, e la radice in cui sono stati trovati.
+    /// </summary>
+    private sealed record Proposal(string Folder, SearchRoot Root, List<ChangedFile> Files);
+
+    /// <summary>
+    /// Raggruppa i file per cartella madre, la alza alla cartella del gioco, e
+    /// unisce quelle una dentro l'altra.
+    /// </summary>
+    private static IReadOnlyList<Proposal> Propose(IReadOnlyList<ChangedFile> files,
+        IReadOnlyList<string> knownFolders, IReadOnlyList<string> tokens, StringComparison comparison)
+    {
+        var raised = new List<Proposal>();
+
+        IEnumerable<ChangedFile> fresh = files.Where(file =>
+            !knownFolders.Any(known => string.Equals(file.Path, known, comparison) || IsInside(file.Path, known, comparison)));
+
+        foreach (IGrouping<string, ChangedFile> group in fresh.GroupBy(file => Path.GetDirectoryName(file.Path) ?? ""))
+        {
+            SearchRoot root = group.First().Root;
+            string folder = Raise(group.Key, root, tokens, comparison);
+
+            raised.Add(new Proposal(folder, root, group.ToList()));
+        }
+
+        var result = new List<Proposal>();
+
+        foreach (Proposal proposal in raised.OrderBy(p => p.Folder.Length))
+        {
+            // Una cartella del gioco dentro una che non lo è resta a parte (vedi SaveFinder.Roots).
+            int outer = result.FindIndex(kept =>
+                string.Equals(kept.Folder, proposal.Folder, comparison)
+                || (IsInside(proposal.Folder, kept.Folder, comparison)
+                    && (!proposal.Root.GameOwned || kept.Root.GameOwned)));
+
+            if (outer >= 0)
+                result[outer].Files.AddRange(proposal.Files);
+            else
+                result.Add(proposal);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Sale dalla cartella madre verso la radice e prende la più alta il cui nome
+    /// contiene una parola del gioco; senza, resta la cartella madre.
+    /// </summary>
+    private static string Raise(string parent, SearchRoot root, IReadOnlyList<string> tokens,
+        StringComparison comparison)
+    {
+        string best = parent;
+
+        for (string current = parent; IsInside(current, root.Folder, comparison);
+             current = Path.GetDirectoryName(current) ?? root.Folder)
+        {
+            if (MatchesToken(Path.GetFileName(current), tokens))
+                best = current;
+        }
+
+        return best;
+    }
+
+    /// <summary>
+    /// Punteggio di una cartella proposta, con i motivi (vedi Rank).
+    /// </summary>
+    private static SaveCandidate Score(Proposal proposal, IReadOnlyList<string> tokens, StringComparison comparison)
+    {
+        var reasons = new List<ScoreReason>();
+        string named = NamedFolder(proposal.Folder, proposal.Root.Folder, tokens, comparison);
+
+        if (named != "")
+            reasons.Add(new ScoreReason(ScoreReasonKind.GameName, GameNamePoints, named));
+
+        if (proposal.Root.GameOwned)
+            reasons.Add(new ScoreReason(ScoreReasonKind.GameOwned, GameOwnedPoints, ""));
+
+        string saveFile = proposal.Files.Select(file => Path.GetFileName(file.Path)).FirstOrDefault(IsSaveLike) ?? "";
+
+        if (saveFile != "")
+            reasons.Add(new ScoreReason(ScoreReasonKind.SaveLikeFile, SaveLikeFilePoints, saveFile));
+
+        int changed = Math.Min(proposal.Files.Count * ChangedFilePoints, ChangedFilesMaxPoints);
+        reasons.Add(new ScoreReason(ScoreReasonKind.ChangedFiles, changed,
+            proposal.Files.Count.ToString(CultureInfo.InvariantCulture)));
+
+        List<string> words = proposal.Files
+            .SelectMany(file => FoldersBetween(file.Path, proposal.Root.Folder, comparison))
+            .Where(name => SaveFolderWords.Contains(Normalize(name)))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (words.Count > 0)
+        {
+            int points = words.Count > 1 ? SaveWordsPoints : SaveWordPoints;
+            reasons.Add(new ScoreReason(ScoreReasonKind.SaveLikePath, points, string.Join(", ", words)));
+        }
+
+        if (proposal.Files.All(file => IsSettingsLike(file.Path)))
+        {
+            reasons.Add(new ScoreReason(ScoreReasonKind.OnlySettings, SettingsOnlyPoints,
+                proposal.Files.Count.ToString(CultureInfo.InvariantCulture)));
+        }
+
+        if (!proposal.Root.GameOwned && named == "")
+            reasons.Add(new ScoreReason(ScoreReasonKind.OtherProgram, OtherProgramPoints, ""));
+
+        return new SaveCandidate(proposal.Folder, reasons.Sum(reason => reason.Points), proposal.Files, reasons);
+    }
+
+    /// <summary>
+    /// Nome della prima cartella, dalla proposta verso la radice (esclusa), che
+    /// contiene una parola del gioco; "" se nessuna.
+    /// </summary>
+    private static string NamedFolder(string folder, string root, IReadOnlyList<string> tokens,
+        StringComparison comparison)
+    {
+        for (string current = folder; IsInside(current, root, comparison);
+             current = Path.GetDirectoryName(current) ?? root)
+        {
+            string name = Path.GetFileName(current);
+
+            if (MatchesToken(name, tokens))
+                return name;
+        }
+
+        return "";
+    }
+
+    /// <summary>
+    /// Nomi delle cartelle tra il file e la radice (esclusa): dalla cartella madre in su.
+    /// </summary>
+    private static IEnumerable<string> FoldersBetween(string file, string root, StringComparison comparison)
+    {
+        for (string current = Path.GetDirectoryName(file) ?? ""; IsInside(current, root, comparison);
+             current = Path.GetDirectoryName(current) ?? root)
+        {
+            yield return Path.GetFileName(current);
+        }
+    }
+
+    /// <summary>
+    /// true se il nome ha un'estensione o una parola da salvataggio.
+    /// </summary>
+    private static bool IsSaveLike(string name)
+    {
+        string lower = name.ToLowerInvariant();
+
+        return SaveExtensions.Contains(Path.GetExtension(lower))
+            || SaveWords.Any(word => lower.Contains(word, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// true se il file è un'impostazione: estensione da configurazione e nome che lo dice.
+    /// </summary>
+    private static bool IsSettingsLike(string file)
+    {
+        string name = Path.GetFileName(file).ToLowerInvariant();
+
+        return SettingsExtensions.Contains(Path.GetExtension(name))
+            && SettingsWords.Any(word => name.Contains(word, StringComparison.Ordinal));
+    }
 
     /// <summary>
     /// File cambiati dopo sinceUtc nelle cartelle date, senza entrare nelle
