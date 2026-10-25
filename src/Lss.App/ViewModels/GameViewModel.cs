@@ -211,42 +211,12 @@ public partial class GameViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Esporta la configurazione dei salvataggi di questo gioco in un file da condividere:
-    /// si mostra cosa c'è dentro, poi si chiede dove salvarlo.
+    /// Esporta la configurazione dei salvataggi di questo gioco: la finestra mostra
+    /// cosa c'è dentro, con le note, e scrive il file solo se si preme Salva.
     /// </summary>
     [RelayCommand]
-    private async Task ExportConfigAsync()
-    {
-        string json = Manager.ExportConfigJson("", out IReadOnlyList<string> skipped);
-        var text = new System.Text.StringBuilder(Strings.ConfigPreviewText);
-
-        foreach (SaveSpot spot in Manager.Game.Spots.Where(spot => !skipped.Contains(spot.Folder)))
-            text.Append("\n").Append(spot.IsWholeFolder ? spot.PortablePath : spot.PortablePath + " (" + spot.Pattern + ")");
-
-        if (skipped.Count > 0)
-            text.Append("\n").Append(Loc.F(Strings.ConfigSpotSkipped, string.Join(", ", skipped)));
-
-        if (!await dialogs.ConfirmAsync(Loc.F(Strings.ConfigPreviewTitle, Manager.Game.Name), text.ToString(),
-                Strings.ExportConfig, kind: InfoKind.Info))
-            return;
-
-        string platform = OperatingSystem.IsLinux() ? "Linux" : "Windows";
-        string suggested = string.Concat($"{Manager.Game.Name} - {platform}.lss-config.json"
-            .Where(character => !Path.GetInvalidFileNameChars().Contains(character)));
-        string? path = await dialogs.PickConfigToSaveAsync(Loc.F(Strings.ConfigPreviewTitle, Manager.Game.Name), suggested);
-
-        if (path == null)
-            return;
-
-        try
-        {
-            File.WriteAllText(path, json);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            await dialogs.InformAsync(Strings.TitleOperationFailed, ex.Message, InfoKind.Warning);
-        }
-    }
+    private async Task ExportConfigAsync() =>
+        await dialogs.ShowAsync<bool>(new ExportConfigWindow(new ExportConfigViewModel(Manager, dialogs)));
 
     /// <summary>Dopo una partita si cercano altre cartelle dei salvataggi (impostazione CercaDopoPartita).</summary>
     public bool LookAfterPlaying { get; set; } = true;
