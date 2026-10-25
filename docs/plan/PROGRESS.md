@@ -216,6 +216,47 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — K6 (Haiku), approved by the coordinating session: export
+  `Formato=3` with `Provider`; import accepts formats 1 and 2 as Steam and
+  refuses a zip of another launcher or game. Test changes (only the ones
+  K6 makes on purpose): `Export_WritesFormat2WithGame` is now
+  `Export_WritesFormat3WithGameAndProvider` (`Formato=3`, `Provider=steam`);
+  new tests `Import_Format2IsSteam`, `Import_OtherLauncherIsRefused`.
+  Commit `9a4d94a`, tick `59ffc7d`.
+- 2026-10-25 — K7, comportamento scelto PRIMA di scrivere il codice (Haiku):
+  - Avvio: App chiede a ogni provider (`Providers.All`) i suoi account.
+    I controlli di Steam (cartella e userdata non trovate, `RecoverAllGameFolders`)
+    restano come oggi, perché sono di Steam; resteranno finché c'è Steam solo.
+  - Per ogni provider con account: se ne ha uno, si usa senza domande; se ne ha
+    più, si apre `AccountWindow` di quel provider, con il nome del launcher nel
+    titolo. Annullare salta quel launcher. Se alla fine non si è scelto nulla:
+    se c'era stato un annullo si esce in silenzio (come oggi), altrimenti
+    `NoAccountWithGames`.
+  - Ultimo account: `lss.ini` come oggi, con `AppSettings.Refers` per provider.
+  - Giochi: `provider.FindGames(account)` per ogni account scelto, nell'ordine
+    dei provider.
+  - Finestra principale: un solo elenco. Con più di un launcher, un'intestazione
+    col nome del launcher sopra il primo gioco di ciascun launcher, nell'elenco
+    dei giochi gestiti e in quello degli altri giochi. Con un solo launcher
+    nessuna intestazione: come oggi.
+  - Deviazione dal piano: "Altri giochi" resta un solo riquadro, non uno per
+    launcher; le voci portano l'intestazione del launcher.
+  - Intestazione della finestra: i nomi degli account scelti, separati da " · ".
+  - Testi con "Steam" (`Strings.resx`), esito:
+    - Cambiati (il nome del launcher è un parametro): `CaptionSteamAccount` →
+      `CaptionLauncherAccount`; `AccountIntroAny` con `{0}`; `SettingAbout`
+      "Steam account: {0}" → "Account: {0}".
+    - Tenuti (descrivono un meccanismo di Steam): `SteamNotFound`,
+      `UserDataNotFound`, `NoAccountWithGames`, `LaunchFailed`, `CloudBarText`,
+      `CloudBarTitle`, `CloudConfirmHeading`, `CloudConfirmMaybe`, `CloudConfirmOn`,
+      `CloudHelpHeading`, `CloudHelpText`, `FirstRunAccount`, `FirstRunCloudOff`,
+      `FirstRunCloudOn`, `FirstRunCloudUnknown`, `GameNotSupported`,
+      `SupportSavesElsewhere`, `NoSupportedGames`, `OnlyUserdataNotice`.
+      `AccountIntro` non è usato da nessuno: lo lascio com'è.
+  - Test: `MainWindowViewModelTests` (intestazioni solo con più launcher, account
+    di ogni gioco). Test cambiati: nessuno, salvo quelli che controllano il testo
+    cambiato, da dire nel commit.
+
 - 2026-10-25 — Fase K: stop su K6 (Haiku). K5 committato (`24931b1`, tick
   `103da6f`) con la modifica di una sola asserzione, come concordato
   (`Open_UsesAccountAndGameFolder` ora si aspetta `steam\111\123450\Profili`).
