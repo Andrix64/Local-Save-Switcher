@@ -8,9 +8,18 @@ namespace Lss;
 /// manca nello snapshot viene lasciato com'è (vedi GameEquals e ReplaceGameFrom):
 /// uno snapshot fatto prima del posto non lo perde.
 /// I file condivisi (E4) stanno solo nel posto 1: lo gestisce SaveManager.
+/// Il cambio di salvataggi (ReplaceGameFrom) scrive un journal (cambio.ini)
+/// prima di toccare qualcosa: se il computer si spegne a metà, RecoverInterrupted
+/// riporta i posti come erano prima, dal backup.
 /// </summary>
 internal sealed class SaveSet
 {
+    // Chiavi del journal (cambio.ini).
+    private const string SnapshotKey = "Snapshot";
+    private const string BackupKey = "Backup";
+    private const string PlannedKey = "Posti";
+    private const string DoneKey = "Fatti";
+
     private readonly IReadOnlyList<SaveSpot> spots;
 
     public SaveSet(IReadOnlyList<SaveSpot> spots)
@@ -34,22 +43,38 @@ internal sealed class SaveSet
 
     /// <summary>
     /// Rende ogni posto del gioco identico allo snapshot. Un posto extra assente
-    /// nello snapshot non si tocca.
+    /// nello snapshot non si tocca. Prima scrive il journal in journal; se un
+    /// posto fallisce rimette a posto quelli già fatti dal backup, elimina il
+    /// journal e rilancia l'errore. A fine riuscita elimina il journal.
     /// </summary>
     public void ReplaceGameFrom(string snapshot, string backup, string journal)
     {
-        foreach (SaveSpot spot in spots)
+        IReadOnlyList<SaveSpot> planned = spots
+            .Where(spot => Directory.Exists(SnapshotFolder(snapshot, spot)))
+            .ToList();
+
+        WriteJournal(journal, snapshot, backup, planned, []);
+
+        var done = new List<SaveSpot>();
+
+        try
         {
-            string source = SnapshotFolder(snapshot, spot);
-
-            if (!Directory.Exists(source))
-                continue;
-
-            if (spot.IsWholeFolder)
-                FileOps.ReplaceFolder(source, spot.Folder);
-            else
-                FileOps.ReplaceMatched(source, spot.Folder, spot.Pattern, spot.Recursive);
+            foreach (SaveSpot spot in planned)
+            {
+                ReplaceSpot(spot, SnapshotFolder(snapshot, spot));
+                done.Add(spot);
+                WriteJournal(journal, snapshot, backup, planned, done);
+            }
         }
+        catch
+        {
+            // Se il ripristino fallisce, il journal resta: il prossimo avvio riprova.
+            RestoreFromBackup(done, backup);
+            File.Delete(journal);
+            throw;
+        }
+
+        File.Delete(journal);
     }
 
     /// <summary>Rende lo snapshot identico al gioco, posto per posto.</summary>
@@ -104,12 +129,89 @@ internal sealed class SaveSet
     }
 
     /// <summary>
-    /// Rimette a posto i posti dopo uno scambio interrotto. Ancora vuoto: lo
-    /// scambio con il journal arriva con N5b.
+    /// Rimette a posto i posti dopo un cambio interrotto (per esempio da uno
+    /// spegnimento). Senza journal non fa nulla. Altrimenti sistema gli avanzi di
+    /// ogni posto, riporta dal backup i posti scritti nel journal ed elimina il
+    /// journal. Ritorna true se ha ripristinato o sistemato qualcosa.
     /// </summary>
-    public void RecoverInterrupted(string journal, string? backup)
+    public bool RecoverInterrupted(string journal, string? backup)
     {
+        if (!File.Exists(journal))
+            return false;
+
+        Dictionary<string, string> values = IniFile.Read(journal);
+        string recordedBackup = backup ?? values.GetValueOrDefault(BackupKey) ?? "";
+        bool recovered = false;
+
+        foreach (SaveSpot spot in spots)
+        {
+            recovered |= spot.IsWholeFolder
+                ? FileOps.RecoverInterruptedReplace(spot.Folder)
+                : FileOps.RecoverInterruptedMatched(spot.Folder, spot.Pattern, spot.Recursive);
+        }
+
+        IReadOnlyList<int> planned = IdsOf(values.GetValueOrDefault(PlannedKey) ?? "")
+            .Union(IdsOf(values.GetValueOrDefault(DoneKey) ?? "")).ToList();
+        List<SaveSpot> toRestore = spots.Where(spot => planned.Contains(spot.Id)).ToList();
+
+        RestoreFromBackup(toRestore, recordedBackup);
+        File.Delete(journal);
+
+        Log.Write("Cambio di salvataggi interrotto: posti rimessi come prima da " + recordedBackup);
+
+        return recovered || toRestore.Count > 0;
     }
+
+    /// <summary>
+    /// Sostituisce un posto del gioco con quello dello snapshot (come ReplaceGameFrom).
+    /// </summary>
+    private static void ReplaceSpot(SaveSpot spot, string source)
+    {
+        if (spot.IsWholeFolder)
+            FileOps.ReplaceFolder(source, spot.Folder);
+        else
+            FileOps.ReplaceMatched(source, spot.Folder, spot.Pattern, spot.Recursive);
+    }
+
+    /// <summary>
+    /// Rimette i posti dati dal backup. Se la cartella di un posto nel backup non
+    /// c'è, lancia un'eccezione: il journal deve restare.
+    /// </summary>
+    private void RestoreFromBackup(IEnumerable<SaveSpot> restore, string backup)
+    {
+        foreach (SaveSpot spot in restore)
+        {
+            string source = backup == "" ? "" : SnapshotFolder(backup, spot);
+
+            if (source == "" || !Directory.Exists(source))
+                throw new IOException("Backup mancante per il posto " + spot.Id + ": " + source);
+
+            ReplaceSpot(spot, source);
+        }
+    }
+
+    /// <summary>
+    /// Scrive il journal: lo snapshot, il backup, i posti previsti e quelli già fatti.
+    /// </summary>
+    private static void WriteJournal(string journal, string snapshot, string backup,
+        IEnumerable<SaveSpot> planned, IEnumerable<SaveSpot> done)
+    {
+        IniFile.Write(journal,
+        [
+            new(SnapshotKey, snapshot),
+            new(BackupKey, backup),
+            new(PlannedKey, IdList(planned)),
+            new(DoneKey, IdList(done)),
+        ]);
+    }
+
+    private static string IdList(IEnumerable<SaveSpot> spots) =>
+        string.Join(",", spots.Select(spot => spot.Id.ToString(CultureInfo.InvariantCulture)));
+
+    private static IEnumerable<int> IdsOf(string list) =>
+        list.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(text => int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out int id) ? id : -1)
+            .Where(id => id > 0);
 
     /// <summary>
     /// La cartella di un posto nello snapshot: il posto 1 è la cima, gli altri

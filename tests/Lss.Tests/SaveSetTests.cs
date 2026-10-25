@@ -14,6 +14,8 @@ public sealed class SaveSetTests : IDisposable
     private string Game2 => Path.Combine(folder.Root, "game2");
     private string Game3 => Path.Combine(folder.Root, "game3");
     private string Snapshot => Path.Combine(folder.Root, "snapshot");
+    private string Backup => Path.Combine(folder.Root, "backup");
+    private string Journal => Path.Combine(folder.Root, "cambio.ini");
     private string Extra(int id) => Path.Combine(Snapshot, ".lss-posizioni", id.ToString());
 
     private SaveSet ThreeSpots() => new(
@@ -94,7 +96,7 @@ public sealed class SaveSetTests : IDisposable
         TestFolder.Write(Path.Combine(Game3, "new.sav"), "new");
         TestFolder.Write(Path.Combine(Game3, "config.ini"), "changed too");
 
-        ThreeSpots().ReplaceGameFrom(Snapshot, backup: "", journal: "");
+        ThreeSpots().ReplaceGameFrom(Snapshot, backup: Backup, journal: Journal);
 
         Assert.Equal("one", File.ReadAllText(Path.Combine(Game1, "slot.sav")));
         Assert.Equal("two", File.ReadAllText(Path.Combine(Game2, "settings.ini")));
@@ -111,7 +113,7 @@ public sealed class SaveSetTests : IDisposable
         Directory.Delete(Extra(3), true);
         TestFolder.Write(Path.Combine(Game3, "slot.sav"), "changed");
 
-        ThreeSpots().ReplaceGameFrom(Snapshot, backup: "", journal: "");
+        ThreeSpots().ReplaceGameFrom(Snapshot, backup: Backup, journal: Journal);
 
         Assert.Equal("changed", File.ReadAllText(Path.Combine(Game3, "slot.sav")));
     }
@@ -124,7 +126,7 @@ public sealed class SaveSetTests : IDisposable
         Directory.Delete(Extra(3), true);
         Directory.CreateDirectory(Extra(3));
 
-        ThreeSpots().ReplaceGameFrom(Snapshot, backup: "", journal: "");
+        ThreeSpots().ReplaceGameFrom(Snapshot, backup: Backup, journal: Journal);
 
         Assert.Empty(Directory.GetFiles(Game3, "*.sav", SearchOption.AllDirectories));
         Assert.True(File.Exists(Path.Combine(Game3, "config.ini")));
@@ -159,10 +161,79 @@ public sealed class SaveSetTests : IDisposable
         Assert.True(FileOps.FoldersAreEqual(Snapshot, viaFileOps));
 
         TestFolder.Write(Path.Combine(Game1, "slot.sav"), "changed");
-        single.ReplaceGameFrom(Snapshot, backup: "", journal: "");
+        single.ReplaceGameFrom(Snapshot, backup: Backup, journal: Journal);
 
         Assert.True(FileOps.FoldersAreEqual(Game1, Snapshot));
         Assert.True(single.GameEquals(Snapshot));
         Assert.False(single.GameIsEmpty());
+    }
+
+    [Fact]
+    public void FailureOnThirdSpotPutsTheFirstTwoBackFromTheBackup()
+    {
+        FillGame();
+        ThreeSpots().CopyGameTo(Snapshot);
+        TestFolder.Write(Path.Combine(Snapshot, "slot.sav"), "target");
+        TestFolder.Write(Path.Combine(Extra(2), "settings.ini"), "target");
+        TestFolder.Write(Path.Combine(Extra(3), "slot.sav"), "target");
+        ThreeSpots().CopyGameTo(Backup);
+
+        // Il terzo posto non si può scrivere: una cartella con il nome della copia.
+        Directory.CreateDirectory(Path.Combine(Game3, "slot.sav.nuovo"));
+
+        Assert.ThrowsAny<Exception>(() => ThreeSpots().ReplaceGameFrom(Snapshot, Backup, Journal));
+
+        Assert.Equal("one", File.ReadAllText(Path.Combine(Game1, "slot.sav")));
+        Assert.Equal("two", File.ReadAllText(Path.Combine(Game2, "settings.ini")));
+        Assert.False(File.Exists(Journal));
+    }
+
+    [Fact]
+    public void InterruptedSwitchIsUndoneByRecoverInterrupted()
+    {
+        FillGame();
+        ThreeSpots().CopyGameTo(Backup);
+
+        // Cambio a metà: il posto 1 è già cambiato, il posto 2 è tra i due spostamenti.
+        TestFolder.Write(Path.Combine(Game1, "slot.sav"), "switched");
+        Directory.Move(Game2, Game2 + FileOps.OldSuffix);
+        File.WriteAllLines(Journal,
+        [
+            "Snapshot=" + Snapshot,
+            "Backup=" + Backup,
+            "Posti=1,2,3",
+            "Fatti=1",
+        ]);
+
+        bool restored = ThreeSpots().RecoverInterrupted(Journal, Backup);
+
+        Assert.True(restored);
+        Assert.Equal("one", File.ReadAllText(Path.Combine(Game1, "slot.sav")));
+        Assert.Equal("two", File.ReadAllText(Path.Combine(Game2, "settings.ini")));
+        Assert.Equal("three", File.ReadAllText(Path.Combine(Game3, "slot.sav")));
+        Assert.False(File.Exists(Journal));
+    }
+
+    [Fact]
+    public void WithoutAJournalNothingHappens()
+    {
+        FillGame();
+        TestFolder.Write(Path.Combine(Game1, "slot.sav"), "kept");
+
+        Assert.False(ThreeSpots().RecoverInterrupted(Journal, Backup));
+        Assert.Equal("kept", File.ReadAllText(Path.Combine(Game1, "slot.sav")));
+    }
+
+    [Fact]
+    public void SuccessfulSwitchLeavesNoJournal()
+    {
+        FillGame();
+        ThreeSpots().CopyGameTo(Snapshot);
+        TestFolder.Write(Path.Combine(Game1, "slot.sav"), "changed");
+
+        ThreeSpots().ReplaceGameFrom(Snapshot, Backup, Journal);
+
+        Assert.Equal("one", File.ReadAllText(Path.Combine(Game1, "slot.sav")));
+        Assert.False(File.Exists(Journal));
     }
 }
