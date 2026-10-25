@@ -487,4 +487,7 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="GiveToBusy" xml:space="preserve"><value>Cambio il giocatore...</value></data>
   <data name="SaveFoldersCount" xml:space="preserve"><value>Cartelle dei salvataggi ({0})</value></data>
   <data name="FavouriteTooltip" xml:space="preserve"><value>Preferita: quella usata nella modalità semplice</value></data>
+  <data name="CloudAllowSimple" xml:space="preserve"><value>Consenti anche in modalità semplice</value></data>
+  <data name="CloudAllowedSimple" xml:space="preserve"><value>Consentito in modalità semplice anche con le copie online attive.</value></data>
+  <data name="CloudAllowUndo" xml:space="preserve"><value>Annulla</value></data>
 </root>

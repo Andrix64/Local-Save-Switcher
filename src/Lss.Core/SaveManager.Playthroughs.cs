@@ -528,6 +528,27 @@ public sealed partial class SaveManager
         return result;
     }
 
+    /// <summary>
+    /// Consenti (o togli) le copie online anche in modalità semplice, per questo gioco.
+    /// Non lancia eccezioni: l'esito è nel Result.
+    /// </summary>
+    public Result SetCloudAllowedInSimple(bool allowed)
+    {
+        bool before = State.CloudAllowedInSimple;
+        State.CloudAllowedInSimple = allowed;
+
+        try
+        {
+            State.Save();
+            return Log.Write($"Modalità semplice con cloud per {Game.Name}: {allowed}", Result.Ok(""));
+        }
+        catch (Exception ex)
+        {
+            State.CloudAllowedInSimple = before;
+            return Log.Write("Consenso cloud di " + Game.Name, Result.Fail(Loc.F(Strings.ErrorWithMessage, ex.Message)));
+        }
+    }
+
     // OPZIONI CONDIVISE
 
     /// <summary>

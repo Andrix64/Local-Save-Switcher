@@ -46,6 +46,12 @@ public sealed class AppState
     /// </summary>
     public bool OwnersAssigned { get; set; }
 
+    /// <summary>
+    /// Il gioco con le copie online attive può andare in modalità semplice (CloudConsentito).
+    /// Lo decide un amministratore; senza, la modalità semplice non lo fa partire.
+    /// </summary>
+    public bool CloudAllowedInSimple { get; set; }
+
     public AppState(string path)
     {
         this.path = path;
@@ -62,6 +68,7 @@ public sealed class AppState
         SharePreferences = false;
         SharedFiles = null;
         OwnersAssigned = false;
+        CloudAllowedInSimple = false;
 
         if (!File.Exists(path))
             return;
@@ -106,6 +113,10 @@ public sealed class AppState
                     SharePreferences = value == "1";
                     break;
 
+                case "CloudConsentito":
+                    CloudAllowedInSimple = value == "1";
+                    break;
+
                 case "ProprietariOk":
                     OwnersAssigned = value == "1";
                     break;
@@ -142,6 +153,9 @@ public sealed class AppState
 
             if (OwnersAssigned)
                 writer.WriteLine("ProprietariOk=1");
+
+            if (CloudAllowedInSimple)
+                writer.WriteLine("CloudConsentito=1");
 
             writer.Flush();
             stream.Flush(flushToDisk: true);

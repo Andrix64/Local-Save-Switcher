@@ -487,4 +487,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="GiveToBusy" xml:space="preserve"><value>Changing the player...</value></data>
   <data name="SaveFoldersCount" xml:space="preserve"><value>Save folders ({0})</value></data>
   <data name="FavouriteTooltip" xml:space="preserve"><value>Favourite: the one used in simple mode</value></data>
+  <data name="CloudAllowSimple" xml:space="preserve"><value>Allow in simple mode anyway</value></data>
+  <data name="CloudAllowedSimple" xml:space="preserve"><value>Allowed in simple mode even with cloud saves on.</value></data>
+  <data name="CloudAllowUndo" xml:space="preserve"><value>Undo</value></data>
 </root>

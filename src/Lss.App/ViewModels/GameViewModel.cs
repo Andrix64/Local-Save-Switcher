@@ -765,6 +765,24 @@ public partial class GameViewModel : ObservableObject
     [RelayCommand]
     private void ToggleSaveFolders() => SaveFoldersOpen = !SaveFoldersOpen;
 
+    /// <summary>Un admin ha consentito che questo gioco (con le copie online) vada in modalità semplice.</summary>
+    public bool CloudAllowedInSimple => Manager.State.CloudAllowedInSimple;
+
+    [RelayCommand]
+    private void AllowCloudInSimple() => SetCloudAllowedInSimple(true);
+
+    [RelayCommand]
+    private void UndoAllowCloudInSimple() => SetCloudAllowedInSimple(false);
+
+    private void SetCloudAllowedInSimple(bool allowed)
+    {
+        Result result = Manager.SetCloudAllowedInSimple(allowed);
+        OnPropertyChanged(nameof(CloudAllowedInSimple));
+
+        if (!result.Success)
+            Toast.Show(InfoKind.Error, result.Message);
+    }
+
     public async Task RenameAsync(string profile)
     {
         var window = new NewPlaythroughWindow(new NewPlaythroughViewModel(
