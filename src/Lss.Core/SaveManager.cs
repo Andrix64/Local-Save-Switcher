@@ -199,6 +199,8 @@ public sealed partial class SaveManager
                 Players = LoadPeople(appData)
             };
 
+            manager.AssignExistingPlaythroughs();
+
             return Result<SaveManager>.Ok(manager);
         }
         catch (Exception ex)
@@ -261,6 +263,7 @@ public sealed partial class SaveManager
             };
 
             manager.RecoverInterruptedSwitch();
+            manager.AssignExistingPlaythroughs();
 
             return Result<SaveManager>.Ok(manager);
         }

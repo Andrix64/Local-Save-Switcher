@@ -109,6 +109,50 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
+    /// Partite fatte prima delle persone: senza proprietario le dà al primo
+    /// amministratore, e a ogni persona senza preferita dà la partita attiva (o
+    /// quella salvata per ultima). Si fa una volta per gioco (ProprietariOk in
+    /// stato.ini); se fallisce, la volta dopo riprova. Non lancia eccezioni.
+    /// </summary>
+    internal void AssignExistingPlaythroughs()
+    {
+        Person? first = Players?.Admins.FirstOrDefault();
+
+        if (State.OwnersAssigned || first == null)
+            return;
+
+        try
+        {
+            foreach (string profile in GetProfiles().Where(profile => GetInfo(profile).Owner == ""))
+            {
+                WriteOwner(profile, first.Id);
+                Log.Write($"Partita {profile} senza persona: data a {first.Name}");
+            }
+
+            foreach (Person person in Players!.All.Where(person => FavouriteOf(person.Id) == null))
+            {
+                List<string> mine = GetProfilesOf(person.Id).ToList();
+
+                if (mine.Count == 0)
+                    continue;
+
+                string chosen = mine.FirstOrDefault(profile => profile == State.ActiveProfile)
+                                ?? mine.MaxBy(profile => GetProfileLastModified(profile) ?? DateTime.MinValue)!;
+
+                SetFavourite(person.Id, chosen);
+            }
+
+            State.OwnersAssigned = true;
+            State.Save();
+            Log.Write("Partite esistenti: persone e preferite assegnate");
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Partite esistenti non assegnate alle persone", ex);
+        }
+    }
+
+    /// <summary>
     /// Segna la data dell'ultima partita giocata dalla persona a cui appartiene la partita.
     /// Non lancia eccezioni.
     /// </summary>

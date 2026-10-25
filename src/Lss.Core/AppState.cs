@@ -41,6 +41,11 @@ public sealed class AppState
     /// </summary>
     public IReadOnlyList<string>? SharedFiles { get; set; }
 
+    /// <summary>
+    /// Le partite fatte prima delle persone hanno un proprietario (ProprietariOk in stato.ini).
+    /// </summary>
+    public bool OwnersAssigned { get; set; }
+
     public AppState(string path)
     {
         this.path = path;
@@ -56,6 +61,7 @@ public sealed class AppState
         SaveOnGameExit = true;
         SharePreferences = false;
         SharedFiles = null;
+        OwnersAssigned = false;
 
         if (!File.Exists(path))
             return;
@@ -100,6 +106,10 @@ public sealed class AppState
                     SharePreferences = value == "1";
                     break;
 
+                case "ProprietariOk":
+                    OwnersAssigned = value == "1";
+                    break;
+
                 case "FileCondivisi":
                     SharedFiles = value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                     break;
@@ -129,6 +139,9 @@ public sealed class AppState
 
             if (SharedFiles != null)
                 writer.WriteLine("FileCondivisi=" + Format(string.Join("|", SharedFiles)));
+
+            if (OwnersAssigned)
+                writer.WriteLine("ProprietariOk=1");
 
             writer.Flush();
             stream.Flush(flushToDisk: true);

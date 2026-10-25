@@ -652,7 +652,12 @@ public sealed partial class SaveManager
                 new("Gioco", Game.Name),
                 new("Nome", ProfileDisplayName(profileName))
             };
-            values.AddRange(FormatInfo(GetInfo(profileName)));
+            PlaythroughInfo exported = GetInfo(profileName);
+            values.AddRange(FormatInfo(exported));
+
+            // Giocatore è l'id della persona sul PC di partenza: al momento di importare si sceglie
+            // un'altra persona. NomeGiocatore serve solo a leggere il file.
+            values.Add(new("NomeGiocatore", Players?.Find(exported.Owner)?.Name ?? ""));
             IniFile.Write(Path.Combine(temp, ExportInfoFile), values);
 
             // I posti del gioco, per abbinarli all'importazione (formato 4).
