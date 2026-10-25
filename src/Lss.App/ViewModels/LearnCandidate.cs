@@ -92,7 +92,7 @@ public sealed partial class LearnCandidate : ObservableObject
     public ICommand IgnoreForAllCommand { get; }
 
     /// <summary>Il testo di un motivo, con il punto preso o tolto davanti.</summary>
-    private static string ReasonLine(ScoreReason reason)
+    internal static string ReasonLine(ScoreReason reason)
     {
         string text = reason.Kind switch
         {

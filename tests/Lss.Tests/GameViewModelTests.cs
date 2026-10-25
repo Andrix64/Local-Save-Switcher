@@ -117,42 +117,6 @@ public sealed class GameViewModelTests : IDisposable
         Assert.DoesNotContain(after.Spots, spot => spot.Id == 2);
     }
 
-    private void SuggestOnce(string folderPath)
-    {
-        IniFile.Write(Path.Combine(folder.Data, "proposte.ini"),
-        [
-            new("Proposta.0", string.Join("|", folderPath, "", "9", DateTime.UtcNow.ToString("O"))),
-        ]);
-    }
-
-    [Fact]
-    public async Task ReviewAddsASuggestedFolderAndForgetsIt()
-    {
-        string extra = Path.Combine(folder.Root, "extra");
-        TestFolder.Write(Path.Combine(extra, "a.sav"), "x");
-        SuggestOnce(extra);
-        var vm = new GameViewModel(folder.CreateManager("L"), dialogs);
-        dialogs.ConfirmAnswer = true;
-
-        await vm.ReviewSuggestionsAsync();
-
-        Assert.Contains(vm.Manager.Game.Spots, spot => spot.Folder == extra);
-        Assert.Equal(0, vm.PendingSuggestions);
-    }
-
-    [Fact]
-    public async Task LaterKeepsTheSuggestion()
-    {
-        SuggestOnce(Path.Combine(folder.Root, "extra"));
-        var vm = new GameViewModel(folder.CreateManager("L"), dialogs);
-        dialogs.ConfirmAnswer = false;
-
-        await vm.ReviewSuggestionsAsync();
-
-        Assert.Equal(1, vm.PendingSuggestions);
-        Assert.Single(SessionScan.Pending(folder.Data));
-    }
-
     [Fact]
     public async Task AnImportedSpotInAGameWithPlaythroughsAsksCopyOrEmpty()
     {

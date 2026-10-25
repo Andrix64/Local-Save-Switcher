@@ -299,50 +299,49 @@ public partial class GameViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Le proposte, una alla volta: si aggiungono ai posti, oppure non sono salvataggi
-    /// (per questo gioco o per tutti), oppure si lasciano per dopo.
+    /// Tutte le proposte in una finestra: ognuna si aggiunge ai posti, si segna come non
+    /// salvataggi (per questo gioco o per tutti), oppure si lascia per dopo (N11).
     /// </summary>
     public async Task ReviewSuggestionsAsync()
     {
-        string heading = Loc.F(Strings.SuggestionsTitle, Manager.Game.Name);
+        var model = new SpotSuggestionsViewModel(this, SessionScan.Pending(Manager.DataFolder));
 
-        foreach (SpotSuggestion suggestion in SessionScan.Pending(Manager.DataFolder).ToList())
-        {
-            string what = suggestion.Pattern == ""
-                ? suggestion.Folder
-                : Loc.F(Strings.SpotFiles, suggestion.Folder, suggestion.Pattern);
+        await dialogs.ShowAsync<bool>(new SpotSuggestionsWindow(model));
 
-            if (await dialogs.ConfirmAsync(heading, what, Strings.SuggestionAdd, kind: InfoKind.Info))
-            {
-                var spot = new SaveSpot(0, suggestion.Folder, suggestion.Pattern, true,
-                    Manager.PortableFolder(suggestion.Folder), SaveSource.Learned);
-                Result added = Manager.AddSpot(spot, NewSpotFill.CopyCurrent);
+        PendingSuggestions = SessionScan.Pending(Manager.DataFolder).Count;
+    }
 
-                if (added.Success)
-                    SessionScan.Forget(Manager.DataFolder, suggestion.Folder, suggestion.Pattern);
-                else
-                    await dialogs.InformAsync(Strings.TitleOperationFailed, added.Message, InfoKind.Warning);
-            }
-            else if (await dialogs.ConfirmAsync(heading, what, Strings.SuggestionNotSaves, destructive: true, kind: InfoKind.Info))
-            {
-                bool forGame = await dialogs.ConfirmAsync(heading, what, Loc.F(Strings.IgnoreForGame, Manager.Game.Name),
-                    kind: InfoKind.Info);
-                bool forAll = !forGame && await dialogs.ConfirmAsync(heading, what, Strings.IgnoreForAll, kind: InfoKind.Info);
+    /// <summary>
+    /// Aggiunge una proposta ai posti, con la scelta di copia o vuoto per le altre partite
+    /// (come Aggiungi un'altra cartella). true se è stata aggiunta: allora non è più proposta.
+    /// </summary>
+    public async Task<bool> AddSuggestionAsync(SpotSuggestion suggestion)
+    {
+        var spot = new SaveSpot(0, suggestion.Folder, suggestion.Pattern, true,
+            Manager.PortableFolder(suggestion.Folder), SaveSource.Learned);
 
-                if (!forGame && !forAll)
-                    continue;
+        if (!await AddSpotWithChoiceAsync(spot))
+            return false;
 
-                var ignored = new IgnoredFolders(AppData.Root);
+        SessionScan.Forget(Manager.DataFolder, suggestion.Folder, suggestion.Pattern);
+        PendingSuggestions = SessionScan.Pending(Manager.DataFolder).Count;
 
-                if (forAll)
-                    ignored.AddGlobal(Manager.PortableFolder(suggestion.Folder));
-                else
-                    ignored.AddForGame(Manager.DataFolder, suggestion.Folder);
+        return true;
+    }
 
-                SessionScan.Forget(Manager.DataFolder, suggestion.Folder, suggestion.Pattern);
-            }
-        }
+    /// <summary>
+    /// La proposta non sono salvataggi: per questo gioco, o per tutti i giochi. Non torna più.
+    /// </summary>
+    public void IgnoreSuggestion(SpotSuggestion suggestion, bool forAll)
+    {
+        var ignored = new IgnoredFolders(AppData.Root);
 
+        if (forAll)
+            ignored.AddGlobal(Manager.PortableFolder(suggestion.Folder));
+        else
+            ignored.AddForGame(Manager.DataFolder, suggestion.Folder);
+
+        SessionScan.Forget(Manager.DataFolder, suggestion.Folder, suggestion.Pattern);
         PendingSuggestions = SessionScan.Pending(Manager.DataFolder).Count;
     }
 

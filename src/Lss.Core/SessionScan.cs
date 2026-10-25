@@ -6,7 +6,7 @@ namespace Lss;
 /// <param name="Folder">Cartella (per i file sparsi nella cartella del gioco, la cartella del gioco).</param>
 /// <param name="Pattern">"" per una cartella intera, o le maschere dei file.</param>
 /// <param name="Score">Punteggio (per i file sparsi, la soglia minima).</param>
-/// <param name="Reasons">Perché: calcolati al momento della ricerca; quelli salvati non li hanno.</param>
+/// <param name="Reasons">Perché: restano in proposte.ini insieme alla proposta, così la finestra li mostra.</param>
 /// <param name="FoundUtc">Quando è stata trovata.</param>
 public sealed record SpotSuggestion(string Folder, string Pattern, int Score, IReadOnlyList<ScoreReason> Reasons,
     DateTime FoundUtc);
@@ -90,7 +90,10 @@ internal static class SessionScan
         return removed > 0;
     }
 
-    /// <summary>Le proposte salvate in proposte.ini (senza motivi: si ricalcolano quando si mostrano).</summary>
+    /// <summary>
+    /// Le proposte salvate in proposte.ini, con i loro motivi. Una riga senza motivi
+    /// (com'era prima) resta valida.
+    /// </summary>
     public static IReadOnlyList<SpotSuggestion> Pending(string gameDataFolder)
     {
         var result = new List<SpotSuggestion>();
@@ -102,15 +105,41 @@ internal static class SessionScan
 
             string[] parts = value.Split('|');
 
-            if (parts.Length != 4 || !int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int score))
+            if (parts.Length is < 4 or > 5 || !int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int score))
                 continue;
 
             DateTime.TryParse(parts[3], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime found);
-            result.Add(new SpotSuggestion(parts[0], parts[1], score, [], found));
+            IReadOnlyList<ScoreReason> reasons = parts.Length == 5 ? ReadReasons(parts[4]) : [];
+            result.Add(new SpotSuggestion(parts[0], parts[1], score, reasons, found));
         }
 
         return result;
     }
+
+    /// <summary>I motivi salvati, come "tipo:punti:dettaglio" separati da ";". Quelli non letti si saltano.</summary>
+    private static IReadOnlyList<ScoreReason> ReadReasons(string text)
+    {
+        var reasons = new List<ScoreReason>();
+
+        foreach (string item in text.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            string[] fields = item.Split(':', 3);
+
+            if (fields.Length == 3
+                && Enum.TryParse(fields[0], out ScoreReasonKind kind)
+                && int.TryParse(fields[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int points))
+            {
+                reasons.Add(new ScoreReason(kind, points, fields[2]));
+            }
+        }
+
+        return reasons;
+    }
+
+    /// <summary>I motivi da salvare: "|" e ";" nel dettaglio diventano spazi, per non rompere la riga.</summary>
+    private static string WriteReasons(IReadOnlyList<ScoreReason> reasons) =>
+        string.Join(";", reasons.Select(reason => string.Join(":", reason.Kind.ToString(),
+            reason.Points.ToString(CultureInfo.InvariantCulture), reason.Detail.Replace('|', ' ').Replace(';', ' '))));
 
     private static void Store(string gameDataFolder, IReadOnlyList<SpotSuggestion> suggestions)
     {
@@ -130,7 +159,8 @@ internal static class SessionScan
                 Key + index.ToString(CultureInfo.InvariantCulture),
                 string.Join("|", suggestion.Folder, suggestion.Pattern,
                     suggestion.Score.ToString(CultureInfo.InvariantCulture),
-                    suggestion.FoundUtc.ToString("O", CultureInfo.InvariantCulture))));
+                    suggestion.FoundUtc.ToString("O", CultureInfo.InvariantCulture),
+                    WriteReasons(suggestion.Reasons))));
 
             IniFile.Write(path, values);
         }

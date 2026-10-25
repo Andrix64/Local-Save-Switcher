@@ -113,4 +113,19 @@ public sealed class SessionScanTests : IDisposable
         Assert.True(SessionScan.Forget(folder.Data, Path.Combine(Documents, "Hollow Knight"), ""));
         Assert.Empty(SessionScan.Pending(folder.Data));
     }
+
+    [Fact]
+    public void SavedSuggestionsKeepTheirReasons()
+    {
+        DateTime start = DateTime.UtcNow.AddMinutes(-1);
+        TestFolder.Write(Path.Combine(Documents, "Hollow Knight", "slot1.sav"), "x");
+        TestFolder.Write(Path.Combine(Documents, "Hollow Knight", "slot2.sav"), "y");
+        SpotSuggestion found = Assert.Single(Run(Spots(), start));
+
+        SpotSuggestion saved = Assert.Single(SessionScan.Pending(folder.Data));
+
+        Assert.NotEmpty(found.Reasons);
+        Assert.Equal(found.Reasons.Select(reason => (reason.Kind, reason.Points, reason.Detail)),
+            saved.Reasons.Select(reason => (reason.Kind, reason.Points, reason.Detail)));
+    }
 }
