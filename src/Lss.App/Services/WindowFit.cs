@@ -13,6 +13,9 @@ namespace Lss.App.Services;
 /// </summary>
 internal static class WindowFit
 {
+    // Altezza minima della cornice (barra del titolo e bordi) che si conta, in punti.
+    private const double MinTitleBar = 40;
+
     /// <summary>Da chiamare quando la finestra è aperta (serve la cornice).</summary>
     public static void Apply(Window window)
     {
@@ -23,8 +26,12 @@ internal static class WindowFit
 
         Size client = window.ClientSize;
         Size frame = window.FrameSize ?? client;
-        double availableWidth = screen.WorkingArea.Width / screen.Scaling - (frame.Width - client.Width);
-        double availableHeight = screen.WorkingArea.Height / screen.Scaling - (frame.Height - client.Height);
+        // All'apertura la cornice a volte non è ancora nota (FrameSize uguale al contenuto):
+        // allora si conta una barra del titolo, altrimenti la finestra sfora di quella.
+        double decorationWidth = Math.Max(frame.Width - client.Width, 0);
+        double decorationHeight = frame.Height - client.Height < MinTitleBar ? MinTitleBar : frame.Height - client.Height;
+        double availableWidth = screen.WorkingArea.Width / screen.Scaling - decorationWidth;
+        double availableHeight = screen.WorkingArea.Height / screen.Scaling - decorationHeight;
 
         bool fits = availableWidth >= window.MinWidth && availableHeight >= window.MinHeight
                     && availableWidth >= client.Width && availableHeight >= client.Height;
