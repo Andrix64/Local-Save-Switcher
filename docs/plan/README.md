@@ -23,6 +23,13 @@ what to write, how to check it and what to commit.
 | `H-linux.md` | Phase H — Linux support. |
 | `I-packaging.md` | Phase I — packages and GitHub Actions. |
 | `J-docs-release.md` | Phase J — documentation, beta and release. |
+| `K-launchers-core.md` | Phase K — several launchers in the core (`IGameProvider`, Steam the first). |
+| `L-save-locations.md` | Phase L — save folders outside `userdata` (Proton / Steam Deck, Documents, AppData) from what Steam itself knows (Auto-Cloud rules). |
+| `M-learn-saves.md` | Phase M — find a game's save folder from what changed on the disk, with the reasons shown. |
+| `N-several-folders.md` | Phase N — games with saves in several folders or loose files; a look after every session for folders not detected yet. |
+| `O-launchers.md` | Phase O — Epic, GOG, Heroic, non-Steam shortcuts, any game added by hand. |
+| `P-simple-mode.md` | Phase P — players and favourites; simple mode (pick who's playing, click a game) and advanced mode grouped by player. |
+| `Q-release.md` | Phase Q — docs and release of 2.0, and what comes later. |
 
 Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 
@@ -110,6 +117,59 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 - No new NuGet packages except those named in a task, with the exact
   version given.
 
+## The 2.0 plan (phases K–Q)
+
+What Andrix asked for (2026-10-24):
+
+1. LSS opens and lists **the games found on the PC**: Steam, Epic, GOG
+   (on Linux and Steam Deck through Heroic), plus **any other game** added
+   by hand.
+2. **Steam, Epic and GOG games** (also through Proton, Wine or Heroic)
+   are found **automatically** from what the launchers themselves keep on
+   the PC (Steam `userdata` and Auto-Cloud rules, Epic cloud-save folders,
+   Heroic's GOG cloud locations); no list from third parties. **Every other game** uses the search. If the saves are not
+   found at once, LSS asks the user to **start the game, save and quit**,
+   and proposes the save folder from **what changed on the disk**
+   meanwhile, explaining why. After
+   **every** game session it looks again, so a save folder that was missed
+   is found and proposed later.
+3. Games that save in **several folders** are fully supported. An admin can
+   **export the save configuration** of a game (where it saves, for that
+   system) to a file and share it; others **import** it and the game is
+   ready without the search.
+4. **Every playthrough belongs to a player** (Andrea, Clara), and each
+   player has one **favourite** playthrough per game (★). A **simple mode**
+   usable by anyone: pick who's playing, click a game cover, play; it
+   always uses the player's favourite, and a separate **My games** menu
+   switches to another of their playthroughs. The **advanced mode** is
+   today's app, with the playthroughs grouped by player. Every player is a
+   **user** (can only play) or an **admin** (advanced mode, adding players
+   and games, allowing a game with cloud saves), with an optional 4-digit
+   PIN.
+
+Order of the phases, each needs the ones before:
+
+| Phase | What | Why in this order |
+|---|---|---|
+| K | Launchers in the core | everything after it is per launcher |
+| L | Known save locations (Steam Deck / Proton first) | most games are found here without asking |
+| M | Learn the save folder from the disk | for the games the launchers know nothing about |
+| N | Several save folders per game, scan after every session | changes how a playthrough is stored: before the launchers and the simple mode build on it |
+| O | Epic, GOG, Heroic, any game | they rely on L, M and N for their saves |
+| P | Players, favourites, simple mode | needs games of every launcher with known saves |
+| Q | Docs and 2.0 release | |
+
+The Steam Deck works after L (games with Steam Auto-Cloud rules) and M
+(the others).
+
+No AI anywhere (decision of 2026-10-24): folders are found by rules and
+scores that can be explained and tested, and the user always confirms.
+
+**Decided with Andrix (2026-10-24):** 1.0 ships as it is today (Steam
+`userdata` games, Windows and Linux desktop; on the Steam Deck most games
+are listed under *Other games*). This plan is **2.0**. Phase K starts from
+`main` after 1.0.0 is tagged.
+
 ## Decisions already taken
 
 | Topic | Decision |
@@ -118,7 +178,9 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 | Repository | `Andrix64/Local-Save-Switcher` (rename done by Andrix, task J1). |
 | Exe | `LSS.exe` on Windows, `lss` on Linux. Namespace `Lss`. |
 | Versions | `1.0.0-beta.N` for tests, then `1.0.0`. |
-| Supported games | Games with files in `userdata/<AccountID>/<AppID>/` other than `remotecache.vdf` at the top level. Others are shown as not supported. |
+| Supported games | Until phase L: games with files in `userdata/<AccountID>/<AppID>/` other than `remotecache.vdf` at the top level; others are shown as not supported. From phase L: any game whose save folder passes `SaveFolderSafety` (found in `userdata`, from the launcher's rules, learned from the disk or chosen by hand). From phase N: up to 8 save spots per game (folders or loose files), switched together. |
+| Save locations | Only from the launchers' own data on the PC (Steam `appinfo.vdf` Auto-Cloud rules, Epic `CloudSaveFolder`, Heroic `gogSaves`), then the search on the disk. **No Ludusavi manifest or other third-party list** (decision of 2026-10-24). No network access from the app. |
+| Players and modes | Every playthrough has a player (owner); one favourite per player and game. Players are users or admins (at least one admin; optional 4-digit PIN for admins). Simple mode (player → game cover, always the favourite, "My games" menu to switch) and advanced mode (today's app, playthroughs grouped by player), phase P. Existing users start in advanced; their playthroughs go to a first player named after the OS user. |
 | Systems | Windows 10/11 x64; Linux x64 (Ubuntu 22.04+, Debian 12+, Fedora 40+, openSUSE, Arch and derivatives, SteamOS desktop mode). |
 | UI | Avalonia **12.1.4**, CommunityToolkit.Mvvm **8.4.2**, MVVM, compiled bindings. |
 | Data folder | `Environment.SpecialFolder.LocalApplicationData` + `LSS` (Windows `%LOCALAPPDATA%\LSS`, Linux `~/.local/share/LSS`). Until phase F it stays `ControlSaveManager`. |
