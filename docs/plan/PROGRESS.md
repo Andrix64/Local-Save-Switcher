@@ -124,7 +124,7 @@ per phase (the phase file names it).
 - [x] K4a — The interface, unused (a82f1bc)
 - [x] K4b — Accounts and games through the provider (e71c853)
 - [x] K4c — Running, launch and cloud through the provider (1562655)
-- [ ] K4d — Clean-up and check
+- [x] K4d — Clean-up and check (69fd782)
 - [ ] K5 — Data folder per provider
 - [ ] K6 — Export format 3
 - [ ] K7 — Start-up and games list for several providers
