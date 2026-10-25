@@ -272,6 +272,32 @@ public sealed class FileOpsTests : IDisposable
     }
 
     [Fact]
+    public void CopyFolderVerifiedCarriesTheExtraSpots()
+    {
+        TestFolder.Write(Path.Combine(Source, "a.sav"), "x");
+        TestFolder.Write(Path.Combine(Source, FileOps.ExtraSpotsFolder, "2", "b.sav"), "extra");
+
+        FileOps.CopyFolderVerified(Source, Destination);
+
+        Assert.Equal("extra", File.ReadAllText(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav")));
+    }
+
+    [Fact]
+    public void ReplaceFolderWithCarryTakesTheExtraSpotsOfTheSource()
+    {
+        TestFolder.Write(Path.Combine(Source, "a.sav"), "x");
+        TestFolder.Write(Path.Combine(Source, FileOps.ExtraSpotsFolder, "2", "b.sav"), "new");
+        TestFolder.Write(Path.Combine(Destination, "a.sav"), "old");
+        TestFolder.Write(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav"), "old");
+        TestFolder.Write(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "3", "c.sav"), "gone");
+
+        FileOps.ReplaceFolder(Source, Destination, carryExtraSpots: true);
+
+        Assert.Equal("new", File.ReadAllText(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav")));
+        Assert.False(File.Exists(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "3", "c.sav")));
+    }
+
+    [Fact]
     public void EqualityAndEmptinessIgnoreTheExtraSpots()
     {
         TestFolder.Write(Path.Combine(Source, "a.sav"), "same");

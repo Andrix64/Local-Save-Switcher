@@ -21,15 +21,21 @@ internal static class FileOps
     public const string TempSuffix = ".nuovo";
     public const string OldSuffix = ".vecchio";
 
+    /// <summary>
+    /// Copia tutta la cartella, posti extra compresi (da uno snapshot a un altro).
+    /// </summary>
     public static void CopyFolder(string source, string destination)
     {
         if (!Directory.Exists(source))
             throw new DirectoryNotFoundException("Cartella non trovata: " + source);
 
-        CopyFolder(source, destination, topLevel: true);
+        CopyFolder(source, destination, topLevel: true, carryExtraSpots: true);
     }
 
-    private static void CopyFolder(string source, string destination, bool topLevel)
+    /// <param name="carryExtraSpots">
+    /// false: i posti extra di source non si copiano (la copia va nel gioco).
+    /// </param>
+    private static void CopyFolder(string source, string destination, bool topLevel, bool carryExtraSpots)
     {
         Directory.CreateDirectory(destination);
 
@@ -45,25 +51,31 @@ internal static class FileOps
 
         foreach (string dir in Directory.GetDirectories(source))
         {
-            if (IsExtraSpots(Path.GetFileName(dir), topLevel))
+            string name = Path.GetFileName(dir);
+
+            if (!carryExtraSpots && IsExtraSpots(name, topLevel))
                 continue;
 
-            CopyFolder(dir, Path.Combine(destination, Path.GetFileName(dir)), topLevel: false);
+            CopyFolder(dir, Path.Combine(destination, name), topLevel: false, carryExtraSpots);
         }
     }
 
     /// <summary>
     /// Rende destination identica a source, cancellando ciò che manca in source.
+    /// I posti extra di destination non si toccano.
     /// </summary>
     public static void MirrorFolder(string source, string destination)
     {
         if (!Directory.Exists(source))
             throw new DirectoryNotFoundException("Cartella non trovata: " + source);
 
-        MirrorFolder(source, destination, topLevel: true);
+        MirrorFolder(source, destination, topLevel: true, carryExtraSpots: false);
     }
 
-    private static void MirrorFolder(string source, string destination, bool topLevel)
+    /// <param name="carryExtraSpots">
+    /// false: i posti extra non si copiano né si cancellano (sono di destination).
+    /// </param>
+    private static void MirrorFolder(string source, string destination, bool topLevel, bool carryExtraSpots)
     {
         Directory.CreateDirectory(destination);
 
@@ -84,7 +96,7 @@ internal static class FileOps
         {
             string name = Path.GetFileName(dir);
 
-            if (IsExtraSpots(name, topLevel))
+            if (!carryExtraSpots && IsExtraSpots(name, topLevel))
                 continue;
 
             if (!Directory.Exists(Path.Combine(source, name)))
@@ -105,10 +117,12 @@ internal static class FileOps
         // Sincronizza le sottocartelle.
         foreach (string dir in Directory.GetDirectories(source))
         {
-            if (IsExtraSpots(Path.GetFileName(dir), topLevel))
+            string name = Path.GetFileName(dir);
+
+            if (!carryExtraSpots && IsExtraSpots(name, topLevel))
                 continue;
 
-            MirrorFolder(dir, Path.Combine(destination, Path.GetFileName(dir)), topLevel: false);
+            MirrorFolder(dir, Path.Combine(destination, name), topLevel: false, carryExtraSpots);
         }
     }
 
@@ -118,7 +132,7 @@ internal static class FileOps
     public static void CopyFolderVerified(string source, string destination)
     {
         CopyFolder(source, destination);
-        Verify(source, destination);
+        Verify(source, destination, carryExtraSpots: true);
     }
 
     /// <summary>
@@ -127,7 +141,12 @@ internal static class FileOps
     /// cartelle. Se qualcosa va storto prima dello scambio, destination resta
     /// com'era. Il file di Steam Cloud di destination viene conservato.
     /// </summary>
-    public static void ReplaceFolder(string source, string destination)
+    /// <param name="carryExtraSpots">
+    /// false (il caso del gioco): i posti extra di source non entrano in destination,
+    /// e quelli di destination restano. true (da uno snapshot a un altro): i posti
+    /// extra di source sostituiscono quelli di destination.
+    /// </param>
+    public static void ReplaceFolder(string source, string destination, bool carryExtraSpots = false)
     {
         string temp = destination + TempSuffix;
         string old = destination + OldSuffix;
@@ -139,12 +158,12 @@ internal static class FileOps
 
         try
         {
-            CopyFolder(source, temp);
+            CopyFolder(source, temp, topLevel: true, carryExtraSpots);
 
             if (Directory.Exists(destination))
-                CopyKeptFromDestination(destination, temp);
+                CopyKeptFromDestination(destination, temp, carryExtraSpots);
 
-            Verify(source, temp);
+            Verify(source, temp, carryExtraSpots);
 
             if (!Directory.Exists(destination))
             {
@@ -160,8 +179,8 @@ internal static class FileOps
             {
                 // Cartella in uso (per esempio da Steam): copia diretta dalla
                 // copia già verificata.
-                MirrorFolder(temp, destination);
-                Verify(source, destination);
+                MirrorFolder(temp, destination, topLevel: true, carryExtraSpots);
+                Verify(source, destination, carryExtraSpots);
                 return;
             }
 
@@ -428,17 +447,24 @@ internal static class FileOps
         }
     }
 
-    private static void Verify(string source, string destination)
+    private static void Verify(string source, string destination, bool carryExtraSpots = false)
     {
         if (!FoldersAreEqual(source, destination))
             throw new IOException("La copia non coincide con l'originale: " + destination);
+
+        string extra = Path.Combine(source, ExtraSpotsFolder);
+
+        if (carryExtraSpots && Directory.Exists(extra)
+            && !FoldersAreEqual(extra, Path.Combine(destination, ExtraSpotsFolder)))
+            throw new IOException("La copia dei posti extra non coincide: " + destination);
     }
 
     /// <summary>
     /// Copia nella destinazione ciò che la sostituzione non tocca: il file di
-    /// Steam Cloud e la cartella dei posti extra di source, se ci sono.
+    /// Steam Cloud di source e, se i posti extra non si portano, la cartella dei
+    /// posti extra di source.
     /// </summary>
-    private static void CopyKeptFromDestination(string source, string destination)
+    private static void CopyKeptFromDestination(string source, string destination, bool carryExtraSpots)
     {
         string cache = Path.Combine(source, SteamCacheFile);
 
@@ -447,7 +473,7 @@ internal static class FileOps
 
         string extra = Path.Combine(source, ExtraSpotsFolder);
 
-        if (Directory.Exists(extra))
+        if (!carryExtraSpots && Directory.Exists(extra))
             CopyAll(extra, Path.Combine(destination, ExtraSpotsFolder));
     }
 
