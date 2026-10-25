@@ -50,6 +50,12 @@ internal static class SaveFolderSafety
         if (!Directory.Exists(folder))
             return SafetyProblem.Missing;
 
+        // La radice di un disco (C:\, /) non si sostituisce mai.
+        string absolute = Path.GetFullPath(folder);
+
+        if (absolute == Path.GetPathRoot(absolute))
+            return SafetyProblem.ProtectedFolder;
+
         StringComparison comparison = CaseInsensitive(context)
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
@@ -66,15 +72,11 @@ internal static class SaveFolderSafety
 
     /// <summary>
     /// true se la cartella è uguale a una cartella protetta o ne è un genitore
-    /// (un genitore contiene la cartella protetta: sostituirlo sarebbe peggio),
-    /// o è la radice di un disco.
+    /// (un genitore contiene la cartella protetta: sostituirlo sarebbe peggio).
     /// </summary>
     private static bool IsProtected(string full, SaveContext context, IReadOnlyList<string> launcherFolders,
         StringComparison comparison)
     {
-        if (string.Equals(full, Normalize(Path.GetPathRoot(full) ?? ""), comparison))
-            return true;
-
         return ProtectedPaths(context, launcherFolders)
             .Any(protectedPath => IsSameOrParent(full, protectedPath, comparison));
     }
