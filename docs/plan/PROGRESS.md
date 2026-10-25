@@ -177,7 +177,7 @@ per phase (the phase file names it).
 - [x] N10 — Look after every session (core) (ac0a8dc)
 - [x] N11 — Look after every session (interface) (306d572)
 - [x] N12 — Screenshots (faa21c5)
-- [ ] N13 — Docs for developers
+- [x] N13 — Docs for developers (d708e11)
 - [ ] N14 — 👤 Checks
 
 ### Phase O — Other launchers and any game ([O-launchers.md](O-launchers.md))
