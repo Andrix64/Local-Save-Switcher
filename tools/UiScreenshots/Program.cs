@@ -140,6 +140,23 @@ internal static class Program
 
         Shot(new DeletedWindow(new DeletedViewModel(manager, dialogs)), "11-deleted");
 
+        // Partita con tre posti: la cartella principale, una cartella extra e i file con maschera.
+        string extraSaves = Path.Combine(account, "extra");
+        string looseSaves = Path.Combine(account, "loose");
+        Directory.CreateDirectory(extraSaves);
+        Directory.CreateDirectory(looseSaves);
+        File.WriteAllText(Path.Combine(extraSaves, "settings.ini"), "x");
+        File.WriteAllText(Path.Combine(looseSaves, "slot1.sav"), "x");
+        File.WriteAllText(Path.Combine(looseSaves, "slot2.sav"), "x");
+        var spotted = new GameInfo("steam", GameInfo.ControlAppId, "Control Ultimate Edition", "", "", "", [
+            new SaveSpot(1, controlSaves, "", true, controlSaves, SaveSource.Userdata),
+            new SaveSpot(2, extraSaves, "", true, extraSaves, SaveSource.Learned),
+            new SaveSpot(3, looseSaves, "*.sav", false, looseSaves, SaveSource.Learned),
+        ], SupportState.Supported);
+        var spottedManager = new SaveManager(controlSaves, Path.Combine(AppData.Root, "steam", "111", GameInfo.ControlAppId), "", spotted);
+        Shot(new Window { Width = 640, Height = 560, Content = new GameView { DataContext = new GameViewModel(spottedManager, dialogs) } },
+            "19-game-spots");
+
         // Come su uno Steam Deck: nessun gioco gestibile, tanti giochi Proton che salvano altrove.
         GameInfo Elsewhere(string id, string name) =>
             new("steam", id, name, "", "", "", GameInfo.SpotsOf(Path.Combine(account, id), SaveSource.Userdata), SupportState.SavesElsewhere);
