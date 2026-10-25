@@ -148,7 +148,7 @@ per phase (the phase file names it).
 
 ### Phase M — Learn the save folder ([M-learn-saves.md](M-learn-saves.md))
 
-- [ ] M1 — Search folders
+- [x] M1 — Search folders (1d0b994; Linux 327 tests on lss-ci)
 - [ ] M2 — Changed files
 - [ ] M3 — Candidates and their score
 - [ ] M3b — Folders that are never saves
