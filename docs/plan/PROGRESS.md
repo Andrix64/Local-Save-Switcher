@@ -216,6 +216,37 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Completate le parti semplificate di N9c e N11 (sessione dedicata
+  all'interfaccia; nessuna modifica a `SaveSet`, `FileOps`, `SaveLocator`, `SaveLookup`
+  né al cambio/salvataggio di `SaveManager`). Commit su `v2`: `8f153af` anteprima con
+  Note; `a1bc4ca` Esporta tutte (Impostazioni); `28ecb32` finestra di importazione;
+  `330231a` finestra delle proposte; `e34a584` impostazione CercaDopoPartita;
+  `d54f7ed` schermate (tool). Test Windows: 517 verdi, 0 warning. Linux
+  (`lss-ci@192.168.1.3`, `--tests-only`): 517 verdi.
+  Ancora diverso dal piano:
+    - N11, motivi: `proposte.ini` ora salva anche i motivi (quinto campo, `tipo:punti:dettaglio`
+      separati da `;`). Il piano diceva "si ricalcolano"; senza salvarli la finestra non poteva
+      mostrarli. Le righe a quattro campi restano valide (senza motivi).
+    - N11, "Non sono salvataggi" per tutti i giochi sulle proposte a file sparsi: la proposta è
+      una maschera nella cartella di installazione, ma `IgnoredFolders` ignora cartelle intere,
+      quindi per tutti i giochi si ignora **tutta** la cartella di installazione. È il
+      comportamento già presente in N11, non cambiato: da decidere con Andrix (ignorare la
+      maschera, non la cartella).
+    - N11, "Esporta tutte" sta nelle Impostazioni del gioco (la finestra è per gioco) e chiama
+      `MainWindowViewModel.ExportAllConfigsAsync`. Considera solo i giochi della colonna
+      principale (`Games`), non "Altri giochi".
+    - N9b/N9c: con partite, ogni posto importato chiede copia o vuoto come "Aggiungi un'altra
+      cartella" (`GameViewModel.AddSpotWithChoiceAsync`): `SaveConfigImport.Apply` è diventato
+      `ApplyAsync`. Un gioco del file non presente qui mostra il provider del file (es. `steam`)
+      come launcher.
+    - N11, impostazione: `GameViewModel` legge l'oggetto `AppSettings` condiviso (proprietà
+      interna `Settings`), quindi il cambio vale subito per tutti i giochi.
+    - Non coperto da test: "impostazione spenta → nessuna ricerca" (la ricerca dopo la partita è
+      un thread privato di `GameViewModel.StartLookAfterSession`, non esposto). Coperto: il
+      valore predefinito e il salvataggio in `lss.ini`.
+    - Anteprima e importazione sono finestre (`ExportConfigWindow`, `ImportConfigWindow`):
+      nessuna prova automatica delle finestre (i test usano i view model); schermate `20`–`22`
+      controllate a mano (tool `tools/UiScreenshots`, lingua `it`).
 - 2026-10-25 — Fine fase N (Haiku). N1–N13 committati su `v2` (da `97d27f2` a
   `d708e11`), ogni task con il suo tick in un commit `Progress:`. N14 non fatto (👤).
   Test Windows: 498 verdi, 0 warning (prima di N: 378). Linux (`lss-ci`,
