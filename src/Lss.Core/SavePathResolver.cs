@@ -153,9 +153,13 @@ internal static class SavePathResolver
             return [];
         }
 
-        string[] segments = resolved.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        // Steam scrive a volte "/Cartella", "/" o "'.'": sono comunque relativi alla radice.
+        string relative = resolved.Replace('\\', '/').TrimStart('/');
+        string[] segments = relative.Split('/', StringSplitOptions.RemoveEmptyEntries)
+            .Where(segment => segment != "." && segment != "'.'")
+            .ToArray();
 
-        if (Path.IsPathRooted(resolved) || segments.Any(segment => segment == ".."))
+        if (Path.IsPathRooted(relative) || segments.Any(segment => segment == ".."))
         {
             Log.Write("Percorso dei salvataggi non valido: " + path);
             return [];
@@ -166,7 +170,7 @@ internal static class SavePathResolver
             var results = new List<string>();
             string pattern = rule.Pattern == "*.*" ? "*" : rule.Pattern;
 
-            foreach (string match in FoldersNamed(folder, segments.Where(s => s != ".").ToArray(), CaseInsensitive(context)))
+            foreach (string match in FoldersNamed(folder, segments, CaseInsensitive(context)))
             {
                 if (pattern == "*" && rule.Recursive)
                     results.Add(match);

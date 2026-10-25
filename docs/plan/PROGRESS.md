@@ -229,8 +229,9 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   several spots). Most of these games become supported with N1–N6.
   Also seen: `rootoverrides` on `gameinstall` with `os = Windows` (Hotline
   Miami 2, Jotun) and paths starting with `/` or `.` (`/HotlineMiami`,
-  `'.'`): L6 must treat a leading `/`, `.` and `'.'` as "no sub-path" —
-  check it when N6 is done, with these games.
+  `'.'`): L6 rejected them as absolute paths; fixed in the commit after
+  this note (leading `/`, `.` and `'.'` are relative to the root, tests
+  in `SavePathResolverTests`).
 
 - 2026-10-25 — Fine fase L (Haiku), L1–L12 committati su `v2` (da `91e2f90` a
   `71f4d18`, tick in commit `Progress:`). L13 non fatto (👤). Test Windows: 311

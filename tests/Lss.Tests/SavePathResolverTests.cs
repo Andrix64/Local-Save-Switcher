@@ -200,6 +200,37 @@ public sealed class SavePathResolverTests : IDisposable
         Assert.Empty(found);
     }
 
+    // Percorsi come li scrive Steam: "/HotlineMiami" (Hotline Miami), "/" e "'.'".
+    [Theory]
+    [InlineData("/Game")]
+    [InlineData("Game/")]
+    [InlineData("'.'/Game")]
+    [InlineData("./Game")]
+    public void LeadingSlashAndDotAreRelativeToTheRoot(string path)
+    {
+        string saves = Path.Combine(Steamuser, "AppData", "Local", "Game");
+        Touch(Path.Combine(saves, "SaveData.sav"));
+
+        IReadOnlyList<string> found = SavePathResolver.Resolve(
+            Rule("WinAppDataLocal", path, "SaveData.sav", false), [], PrefixContext());
+
+        Assert.Equal(new[] { Path.Combine(saves, "SaveData.sav") }, found);
+    }
+
+    [Theory]
+    [InlineData("/")]
+    [InlineData("'.'")]
+    public void SlashOrQuotedDotAloneIsTheRoot(string path)
+    {
+        string root = Path.Combine(Steamuser, "AppData", "Local");
+        Touch(Path.Combine(root, "savedata.vfs"));
+
+        IReadOnlyList<string> found = SavePathResolver.Resolve(
+            Rule("WinAppDataLocal", path, "savedata.vfs", false), [], PrefixContext());
+
+        Assert.Equal(new[] { Path.Combine(root, "savedata.vfs") }, found);
+    }
+
     [Fact]
     public void ParentFolderIsRejected()
     {
