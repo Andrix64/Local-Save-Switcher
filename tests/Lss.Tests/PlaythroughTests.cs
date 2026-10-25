@@ -154,17 +154,17 @@ public sealed class PlaythroughTests : IDisposable
     }
 
     [Fact]
-    public void Export_WritesFormat3WithGameAndProvider()
+    public void Export_WritesFormat4WithGameAndProvider()
     {
         SaveManager manager = TwoPlaythroughs();
-        string zip = Path.Combine(folder.Root, "formato3.zip");
+        string zip = Path.Combine(folder.Root, "formato4.zip");
 
         Assert.True(manager.ExportProfile("Profilo_Mario", zip).Success);
 
         using ZipArchive archive = ZipFile.OpenRead(zip);
         string info = ReadEntry(archive, "partita.ini");
 
-        Assert.Contains("Formato=3", info);
+        Assert.Contains("Formato=4", info);
         Assert.Contains("Provider=steam", info);
         Assert.Contains("AppId=870780", info);
         Assert.Contains("Gioco=Control", info);

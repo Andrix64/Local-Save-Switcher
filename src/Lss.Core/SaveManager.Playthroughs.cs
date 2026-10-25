@@ -45,6 +45,9 @@ public sealed partial class SaveManager
     private const string ExportSavesFolder = "salvataggi";
     private const string ExportSavestatesFolder = "punti";
 
+    // Posti del gioco nello zip (formato 4): id = percorso portabile|maschera|ricorsiva.
+    private const string ExportSpotsFile = "posizioni.ini";
+
     /// <summary>
     /// Cartella con un file .ini per partita (nota, tempo di gioco). Sta fuori
     /// dalla cartella della partita, che viene copiata così com'è nel gioco.
@@ -570,7 +573,7 @@ public sealed partial class SaveManager
 
             var values = new List<KeyValuePair<string, string>>
             {
-                new("Formato", "3"),
+                new("Formato", "4"),
                 new("Provider", Game.Provider),
                 new("AppId", Game.Id),
                 new("Gioco", Game.Name),
@@ -578,6 +581,14 @@ public sealed partial class SaveManager
             };
             values.AddRange(FormatInfo(GetInfo(profileName)));
             IniFile.Write(Path.Combine(temp, ExportInfoFile), values);
+
+            // I posti del gioco, per abbinarli all'importazione (formato 4).
+            if (Game.Spots.Count > 0)
+            {
+                IniFile.Write(Path.Combine(temp, ExportSpotsFile), Game.Spots.Select(spot => new KeyValuePair<string, string>(
+                    spot.Id.ToString(CultureInfo.InvariantCulture),
+                    spot.PortablePath + "|" + spot.Pattern + "|" + (spot.Recursive ? "1" : "0"))));
+            }
 
             if (File.Exists(tempZip))
                 File.Delete(tempZip);
@@ -649,8 +660,26 @@ public sealed partial class SaveManager
 
             string name = UniqueName(values.GetValueOrDefault("Nome", "").Trim());
             string profileName = ProfileFolderName(name);
+            string profile = Path.Combine(ProfilesPath, profileName);
+            IReadOnlyList<string> skipped = [];
 
-            FileOps.CopyFolderVerified(saves, Path.Combine(ProfilesPath, profileName));
+            if (File.Exists(Path.Combine(temp, ExportSpotsFile)))
+            {
+                try
+                {
+                    skipped = ImportSpots(temp, saves, profile);
+                }
+                catch
+                {
+                    // Il nome è nuovo (UniqueName): la cartella a metà si può togliere.
+                    TryDeleteFolder(profile);
+                    throw;
+                }
+            }
+            else
+            {
+                FileOps.CopyFolderVerified(saves, profile);
+            }
 
             string savestates = Path.Combine(temp, ExportSavestatesFolder);
 
@@ -662,7 +691,12 @@ public sealed partial class SaveManager
             if (info != PlaythroughInfo.Empty)
                 IniFile.Write(InfoFile(profileName), FormatInfo(info));
 
-            return Result<string>.Ok(profileName);
+            if (skipped.Count == 0)
+                return Result<string>.Ok(profileName);
+
+            Log.Write("Posti non importati: " + string.Join(", ", skipped));
+
+            return new Result<string>(profileName, Loc.F(Strings.ImportSpotsSkipped, string.Join(", ", skipped)));
         }
         catch (InvalidDataException)
         {
@@ -677,6 +711,63 @@ public sealed partial class SaveManager
             TryDeleteFolder(temp);
         }
     }
+
+    /// <summary>
+    /// Copia nel profilo i posti dello zip che questo gioco ha, ognuno con il suo id di qui.
+    /// Il primo dello zip va al primo di qui; gli altri si abbinano per percorso portabile,
+    /// maschera e ricorsione. Ritorna i percorsi dei posti che non si abbinano. Senza il
+    /// primo posto l'importazione non si fa: un profilo senza cartella principale, cambiato
+    /// nel gioco, svuoterebbe la cartella principale.
+    /// </summary>
+    private List<string> ImportSpots(string temp, string saves, string profile)
+    {
+        Dictionary<string, string> zipSpots = IniFile.Read(Path.Combine(temp, ExportSpotsFile));
+        string zipExtra = Path.Combine(saves, FileOps.ExtraSpotsFolder);
+        var skipped = new List<string>();
+        bool primaryCopied = false;
+
+        foreach ((string key, string value) in zipSpots)
+        {
+            if (!int.TryParse(key, NumberStyles.None, CultureInfo.InvariantCulture, out int zipId))
+                continue;
+
+            string[] parts = value.Split('|');
+
+            if (parts.Length != 3)
+                throw new InvalidDataException("posto non valido nello zip: " + key);
+
+            string portable = parts[0];
+            string pattern = parts[1];
+            bool recursive = parts[2] == "1";
+            string source = zipId == 1 ? saves : Path.Combine(zipExtra, zipId.ToString(CultureInfo.InvariantCulture));
+
+            SaveSpot? mine = zipId == 1
+                ? Game.Spots.FirstOrDefault(spot => spot.Id == 1)
+                : Game.Spots.FirstOrDefault(spot => spot.Id != 1 && SamePortable(spot.PortablePath, portable)
+                                                    && spot.Pattern == pattern && spot.Recursive == recursive);
+
+            if (mine is null || !Directory.Exists(source))
+            {
+                skipped.Add(portable);
+                continue;
+            }
+
+            string destination = mine.Id == 1
+                ? profile
+                : Path.Combine(profile, FileOps.ExtraSpotsFolder, mine.Id.ToString(CultureInfo.InvariantCulture));
+
+            FileOps.CopyWithoutExtraSpotsVerified(source, destination);
+            primaryCopied |= mine.Id == 1;
+        }
+
+        if (!primaryCopied)
+            throw new InvalidDataException("nessun posto principale");
+
+        return skipped;
+    }
+
+    private static bool SamePortable(string first, string second) =>
+        string.Equals(first, second, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
     private static void TryDeleteFile(string path)
     {

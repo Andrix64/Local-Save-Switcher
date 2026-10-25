@@ -127,6 +127,19 @@ internal static class FileOps
     }
 
     /// <summary>
+    /// Copia source in destination senza i posti extra che source ha in .lss-posizioni,
+    /// e controlla la copia. Serve per portare un posto da uno zip o da un altro snapshot.
+    /// </summary>
+    public static void CopyWithoutExtraSpotsVerified(string source, string destination)
+    {
+        if (!Directory.Exists(source))
+            throw new DirectoryNotFoundException("Cartella non trovata: " + source);
+
+        CopyFolder(source, destination, topLevel: true, carryExtraSpots: false);
+        Verify(source, destination);
+    }
+
+    /// <summary>
     /// Copia source in destination e controlla che la copia coincida.
     /// </summary>
     public static void CopyFolderVerified(string source, string destination)

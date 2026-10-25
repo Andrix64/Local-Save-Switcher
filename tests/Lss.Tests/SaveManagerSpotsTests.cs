@@ -274,4 +274,77 @@ public sealed class SaveManagerSpotsTests : IDisposable
         Assert.DoesNotContain(manager.Game.Spots, spot => spot.Id == id);
         Assert.Equal("new", File.ReadAllText(Path.Combine(ProfileFolder("Anna"), Extra(id), "n.sav")));
     }
+
+    private string Zip => Path.Combine(folder.Root, "export.zip");
+
+    private void AssertProfile(string profile, string value)
+    {
+        Assert.Equal(value, File.ReadAllText(Path.Combine(profile, "slot.sav")));
+        Assert.Equal(value, File.ReadAllText(Path.Combine(profile, FileOps.ExtraSpotsFolder, "2", "settings.ini")));
+        Assert.Equal(value, File.ReadAllText(Path.Combine(profile, FileOps.ExtraSpotsFolder, "3", "slot.sav")));
+    }
+
+    [Fact]
+    public void ExportAndImportOnTheSamePcKeepEverySpot()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.ExportProfile("Profilo_Anna", Zip).Success);
+
+        Result<string> imported = manager.ImportProfile(Zip);
+
+        Assert.True(imported.Success);
+        AssertProfile(Path.Combine(folder.Data, "Profili", imported.Value!), "first");
+    }
+
+    [Fact]
+    public void AnotherPcMatchesTheSpotsByTheirPortablePath()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.ExportProfile("Profilo_Anna", Zip).Success);
+
+        // Un altro computer: gli stessi percorsi portabili, altre cartelle vere.
+        string other = Path.Combine(folder.Root, "pc2");
+        var pc2Game = new GameInfo("steam", "123450", "Test", "", "", "",
+            [
+                new SaveSpot(1, Path.Combine(other, "a"), "", true, Game1, SaveSource.Chosen),
+                new SaveSpot(2, Path.Combine(other, "b"), "", true, Game2, SaveSource.Chosen),
+                new SaveSpot(3, Path.Combine(other, "c"), "*.sav", true, Game3, SaveSource.Chosen),
+            ],
+            SupportState.Supported);
+        var pc2 = new SaveManager(Path.Combine(other, "a"), Path.Combine(folder.Root, "pc2-data"), "", pc2Game);
+
+        Result<string> imported = pc2.ImportProfile(Zip);
+
+        Assert.True(imported.Success);
+        Assert.Equal("", imported.Message);
+        AssertProfile(Path.Combine(folder.Root, "pc2-data", "Profili", imported.Value!), "first");
+    }
+
+    [Fact]
+    public void SpotMissingOnTheOtherPcIsSkippedAndListed()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.ExportProfile("Profilo_Anna", Zip).Success);
+
+        // Questo computer non ha il secondo posto.
+        var pc3Game = new GameInfo("steam", "123450", "Test", "", "", "",
+            [
+                new SaveSpot(1, Path.Combine(folder.Root, "pc3", "a"), "", true, Game1, SaveSource.Chosen),
+                new SaveSpot(3, Path.Combine(folder.Root, "pc3", "c"), "*.sav", true, Game3, SaveSource.Chosen),
+            ],
+            SupportState.Supported);
+        var pc3 = new SaveManager(Path.Combine(folder.Root, "pc3", "a"), Path.Combine(folder.Root, "pc3-data"), "", pc3Game);
+
+        Result<string> imported = pc3.ImportProfile(Zip);
+
+        Assert.True(imported.Success);
+        Assert.Contains(Game2, imported.Message);
+        Assert.False(Directory.Exists(Path.Combine(folder.Root, "pc3-data", "Profili", imported.Value!, FileOps.ExtraSpotsFolder, "2")));
+    }
 }
