@@ -161,7 +161,7 @@ per phase (the phase file names it).
 
 - [x] N1 — `SaveSpot` and `GameInfo.Spots` (97d27f2)
 - [x] N2 — Pattern spots in `FileOps` and `SaveFolderSafety` (e70bd25)
-- [ ] N3 — Spots of a game: `posti.ini`
+- [x] N3 — Spots of a game: `posti.ini` (ad21c5e)
 - [ ] N4 — Snapshots with extra spots
 - [ ] N5a — `SaveSet` without the journal, unused
 - [ ] N5b — Journal and recovery
