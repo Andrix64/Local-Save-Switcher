@@ -216,6 +216,49 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fase K: stop su K5 (Haiku). K1–K4d sono committati su `v2`
+  (ticks sopra). K5 non è committato: il test
+  `SaveManagerTests.Open_UsesAccountAndGameFolder` si aspetta
+  `<dati>\111\123450\Profili`, ma K5 vuole `<dati>\steam\111\123450\...`.
+  Il test non può passare invariato, quindi per la regola 4 mi fermo.
+  Codice di K5 nel worktree, non committato: `src/Lss.Core/DataLayoutMigration.cs`
+  (nuovo), `AppSettings.cs` (`Refers`), `GameAccount.cs` e `GameInfo.cs` (`Key`),
+  `SaveManager.cs` (percorsi e `LastAccount`), `App.axaml.cs`,
+  `AccountViewModel.cs`, `MainWindowViewModel.cs`; test nuovi in
+  `DataLayoutMigrationTests.cs` e in `AppSettingsTests.cs`. Risultato: 198 passano,
+  1 fallisce (quello sopra). Da decidere con Andrix: accettare che quell'asserzione
+  diventi `Path.Combine(folder.Data, "steam", "111", "123450", "Profili")` (cambia
+  cosa controlla il test, quindi serve un sì). Scelte di K5 da confermare:
+  `lss.ini` non è normalizzato in lettura (il test di andata e ritorno scrive
+  "111"); i valori senza `/` sono Steam solo dove si confrontano (`AppSettings.Refers`);
+  `DataLayoutMigration` prova `Directory.Move`, su disco diverso copia, verifica e
+  poi elimina; se la destinazione è già identica elimina l'originale (spostamento
+  interrotto), se è diversa non tocca nulla. K6 e K7 non iniziati (K7 va scritto
+  qui prima di codificarlo).
+- 2026-10-25 — K1–K4d (Haiku). Scelte fuori piano o da sapere:
+  - K1: `"steam"` come primo argomento delle chiamate `GameAccount(...)` nei test
+    e in `tools/UiScreenshots`: forzato dalla nuova firma. Confermato nella
+    sessione di coordinamento. Baseline prima della fase: 177 test (il piano
+    diceva 176).
+  - K2: `InstallPath` è dopo `LibraryPath`. Chiamate di test e UiScreenshots con
+    `"steam"` e `InstallPath` vuoto.
+  - K3: su Linux la cache per processo è tolta (eseguibile e `environ`): ogni
+    chiamata rilegge `/proc`. Su Windows la cache resta. `IsProcessRunning` non
+    filtra per utente, come prima (il commento lo dice). Lo script va chiamato
+    come `bash scripts/linux-check.sh <host> --tests-only` (il brief metteva il
+    flag prima dell'host). Copia solo HEAD: committare prima. Linux: 184 test
+    verdi su lss-ci a `5bbbfc9`.
+  - K4a: `SteamProvider.FindAccounts()` fa quello che faceva App (account con
+    giochi gestibili, altrimenti con qualsiasi gioco). Fino a K4c `GetCloudState`
+    e `Launch` in `SteamProvider` sono copie della logica di `SaveManager`.
+  - K4b–K4d: App prende la radice di Steam da `SteamProvider.FindRoot()` (il
+    controllo «Steam non trovato» è di Steam); `SaveManager.Initialize` passa
+    anch'esso da `SteamProvider`. `SaveManager` ha `Account` e un `IGameProvider`
+    opzionale (default `SteamProvider`); `IsSteamRunning` resta statico.
+  - K4d, grep: su `SaveManager*.cs`, `steam://|userdata|sharedconfig` dà solo un
+    commento. `FindSteamRoots()` è chiamato solo da `SteamProvider` (in `src` e test).
+  - Test: 177 → 184 (K3) → 191 (K4a) → 192 (K4c, K4d).
+
 - 2026-10-24 — 2.0 plan written (Opus), phases K–Q, after Andrix's
   request: LSS lists the games of Steam, Epic and GOG (Heroic on Linux /
   Steam Deck) and any game added by hand; it finds the saves by itself
