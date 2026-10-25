@@ -175,7 +175,7 @@ per phase (the phase file names it).
 - [x] N9b — Save configuration: import (c58138a)
 - [x] N9c — Save configuration: interface (4300a43)
 - [x] N10 — Look after every session (core) (ac0a8dc)
-- [ ] N11 — Look after every session (interface)
+- [x] N11 — Look after every session (interface) (306d572)
 - [ ] N12 — Screenshots
 - [ ] N13 — Docs for developers
 - [ ] N14 — 👤 Checks
