@@ -453,4 +453,11 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="AddGameCaption" xml:space="preserve"><value>NOME DEL GIOCO</value></data>
   <data name="AddGameHint" xml:space="preserve"><value>Come sarà mostrato in LSS.</value></data>
   <data name="AddGameConfirm" xml:space="preserve"><value>Aggiungi</value></data>
+  <data name="PlayerNameTaken" xml:space="preserve"><value>Esiste già un giocatore con questo nome.</value></data>
+  <data name="PlayerNotFound" xml:space="preserve"><value>Giocatore non trovato.</value></data>
+  <data name="PlayerColorInvalid" xml:space="preserve"><value>Scegli uno dei colori.</value></data>
+  <data name="PlayersNotSaved" xml:space="preserve"><value>Non è stato possibile salvare i giocatori.</value></data>
+  <data name="LastPlayer" xml:space="preserve"><value>Deve restare almeno un giocatore.</value></data>
+  <data name="LastAdmin" xml:space="preserve"><value>Deve restare almeno un amministratore.</value></data>
+  <data name="PlayerDefaultName" xml:space="preserve"><value>Giocatore 1</value></data>
 </root>

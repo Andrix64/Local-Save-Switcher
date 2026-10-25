@@ -453,4 +453,11 @@ LSS will look at what changed on the disk.</value></data>
   <data name="AddGameCaption" xml:space="preserve"><value>NAME OF THE GAME</value></data>
   <data name="AddGameHint" xml:space="preserve"><value>As it will be shown in LSS.</value></data>
   <data name="AddGameConfirm" xml:space="preserve"><value>Add</value></data>
+  <data name="PlayerNameTaken" xml:space="preserve"><value>There is already a player with this name.</value></data>
+  <data name="PlayerNotFound" xml:space="preserve"><value>Player not found.</value></data>
+  <data name="PlayerColorInvalid" xml:space="preserve"><value>Choose one of the colours.</value></data>
+  <data name="PlayersNotSaved" xml:space="preserve"><value>The players could not be saved.</value></data>
+  <data name="LastPlayer" xml:space="preserve"><value>There must be at least one player.</value></data>
+  <data name="LastAdmin" xml:space="preserve"><value>There must be at least one admin.</value></data>
+  <data name="PlayerDefaultName" xml:space="preserve"><value>Player 1</value></data>
 </root>
