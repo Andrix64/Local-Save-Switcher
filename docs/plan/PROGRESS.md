@@ -144,7 +144,7 @@ per phase (the phase file names it).
 - [x] L10 — Every provider uses the locator (8f9c563; Linux 299 tests on lss-ci)
 - [x] L11 — `SaveManager` with a folder outside `userdata` (18202c0; Linux 304 tests on lss-ci)
 - [x] L12 — Interface (advanced mode) (71f4d18; Linux 311 tests on lss-ci)
-- [ ] L13 — 👤 Steam Deck and Windows check
+- [x] L13 — 👤 Steam Deck and Windows check (2026-10-25, Andrix: checked)
 
 ### Phase M — Learn the save folder ([M-learn-saves.md](M-learn-saves.md))
 
