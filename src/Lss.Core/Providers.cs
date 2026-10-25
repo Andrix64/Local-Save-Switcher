@@ -7,5 +7,5 @@ namespace Lss;
 public static class Providers
 {
     public static IReadOnlyList<IGameProvider> All(IPlatform platform) =>
-        [new SteamProvider(platform), new EpicProvider(platform)];
+        [new SteamProvider(platform), new EpicProvider(platform), new GogProvider(platform)];
 }
