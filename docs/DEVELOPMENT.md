@@ -457,6 +457,85 @@ bash scripts/linux-check.sh user@host
 With `--tests-only` it stops after the tests. It can't replace a check with
 the real Steam and a desktop.
 
+### Save spots
+
+A game can keep its saves in several places: each place is a **spot**
+(`SaveSpot`, on disk "posto"): a whole folder (`Pattern` empty) or the files
+of a folder that match a pattern (`*.sav;slot?.dat`, `Recursive` for the
+subfolders). Spot 1 is the main one (`SaveManager.SavePath`, the top of each
+snapshot); the others are extra spots. A game has up to 8 spots
+(`SaveLocator.MaxSpots`); more than that is `Unsure`.
+
+**Snapshot layout.** A snapshot (a playthrough, a saved point, a backup) keeps
+spot 1 at its top. Spot `n` (n ≥ 2) is in `.lss-posizioni/<n>` inside the
+snapshot (`FileOps.ExtraSpotsFolder`). A game with one spot has no
+`.lss-posizioni` at all, so nothing changes for it. The folder
+`.lss-posizioni` is never copied from a snapshot into the game
+(`FileOps.ReplaceFolder` with `carryExtraSpots: false`, the default), it is kept
+when a snapshot is replaced from the game, and it is ignored by
+`FoldersAreEqual`, `HasNoSaveFiles` and the pattern functions. Copies between
+snapshots (backups, exports) carry it (`CopyFolder`).
+
+**Rule: absent = left as it is.** A spot missing from a snapshot (its folder
+`.lss-posizioni/<n>` does not exist) is not touched when the snapshot is put
+into the game, and counts as equal in `SaveSet.GameEquals`. A folder that is
+present, even empty, makes the spot identical to it (an empty folder empties
+the spot). So snapshots made before a spot existed are safe. Spot 1 must be
+present: `SaveSet.ReplaceGameFrom` refuses a snapshot without it.
+
+**The switch and its journal.** `SaveSet` (in `SaveSet.cs`) does every
+operation on all the spots: `CopyGameTo`, `ReplaceGameFrom`,
+`ReplaceSnapshotFromGame`, `GameEquals`, `GameIsEmpty`. `ReplaceGameFrom`
+writes `cambio.ini` in the game's data folder before it touches anything:
+the snapshot, the backup, the planned spot ids (`Posti=`) and the finished
+ones (`Fatti=`). On failure the finished spots are put back from the backup
+and the journal is deleted; if that fails, the journal stays. `SaveManager.Open`
+calls `SaveSet.RecoverInterrupted`: it finishes the leftovers of each spot
+(`RecoverInterruptedReplace`, `RecoverInterruptedMatched`), puts back from the
+backup the planned spots, deletes the journal and sets
+`SwitchInterruptedRestored` (shown once by the interface).
+
+**Shared files** (E4, `SharedFiles`) are relative to spot 1 only. Extra spots
+have no shared files.
+
+**`posti.ini`** (`GameSpots`, in the game's data folder) keeps the spots that
+were chosen, learned or imported, with their ids, the extra roots, the folders
+ignored for this game and the ids of the launcher spots:
+
+```
+Prossimo=5
+Posto.1=C:\Users\x\AppData\Roaming\Foo|{WinAppDataRoaming}/Foo|*.sav|1|scelta
+Posto.3=D:\Giochi\Bar|{gameinstall}|*.sav;slot?.dat|0|importata
+Launcher.{WinAppDataRoaming}/Foo||1=2
+CartelleExtra=D:\Giochi
+Ignorate.0=C:\Users\x\AppData\Local\Foo
+Aggiunta.0=2026-10-25T10:00:00.0000000Z
+```
+
+`Posto.<id>` is `cartella|percorso portabile|maschera|ricorsiva|origine`;
+origin is `scelta`, `imparata` or `importata`. Ids are never reused (`Prossimo`):
+id 1 is the main spot, the others start at 2. A path containing `|` is refused.
+The first read converts an old `cartella.ini` (L9) into spot 1 and deletes it.
+The spots found by the launchers (userdata, the Steam rules) are not written:
+they are found at every start, and `Launcher.<key>` keeps their ids.
+
+**`proposte.ini`** (`SessionScan`) keeps the folders that the look after a
+session suggested: `Proposta.<n>=cartella|maschera|punteggio|quando`. The
+reasons are not kept: they are computed again when shown.
+
+**Save configurations** (`SaveConfig`, `SaveConfigImport`) are
+`*.lss-config.json` files shared by hand. Spots are written as root plus
+relative path (`{WinAppDataLocal}`, `Discord`), so they carry no user name and
+no Steam id. A file that comes from someone else is read as untrusted
+(`SaveConfig.Read` checks the size, the counts, the roots, the paths, the
+tokens and the patterns) and each folder passes `SaveLocator.CheckSpot` before
+anything is written.
+
+**Export format 4** (`partita.ini` `Formato=4`) adds `posizioni.ini` to the
+zip: `<id>=<portable path>|<pattern>|<recursive>` for each spot. Import matches
+the zip's spot 1 to spot 1 here, and the others by portable path, pattern and
+recursive flag; the unmatched ones are listed, not imported.
+
 ### Pictures of the windows
 
 `tools/UiScreenshots` draws the windows of the Avalonia app (main window,
