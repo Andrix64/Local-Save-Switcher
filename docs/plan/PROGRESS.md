@@ -183,7 +183,7 @@ per phase (the phase file names it).
 ### Phase O — Other launchers and any game ([O-launchers.md](O-launchers.md))
 
 - [x] O1 — Epic Games Launcher (Windows) (67d1031)
-- [ ] O2 — GOG Galaxy and GOG games (Windows)
+- [x] O2 — GOG Galaxy and GOG games (Windows) (253fc6c)
 - [ ] O3 — Heroic Games Launcher
 - [ ] O4 — Any other game, added by hand
 - [ ] O5 — Non-Steam games added to Steam
@@ -216,6 +216,13 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — O2 (Haiku), commit `253fc6c`. Il registro GOG
+  (`HKLM\SOFTWARE\WOW6432Node\GOG.com\Games`) **non è stato verificato**: su questo PC la
+  chiave non esiste (GOG non installato), quindi il formato (`path`, `gameName`, `exe`) è
+  quello del piano. Giochi con cartella mancante saltati. Launch = `StartProgram(exe,"",path)`,
+  senza Galaxy; `CanLaunch` solo se c'è l'eseguibile. Nuovi testi `GogExeMissing`,
+  `ProgramNotStarted`. Nessuna regola di salvataggio: tutti i giochi GOG passano dalla ricerca
+  (test `GogGamesAlwaysUseTheSearchForTheirSaves`).
 - 2026-10-25 — O1 (Haiku), commit `67d1031`. Formati controllati su file veri (PC di
   Andrix, sola lettura):
   - `Data\Catalog\catcache.bin`: **verificato**. È testo base64 di un array JSON; ogni voce
