@@ -185,7 +185,7 @@ per phase (the phase file names it).
 - [x] O1 — Epic Games Launcher (Windows) (67d1031)
 - [x] O2 — GOG Galaxy and GOG games (Windows) (253fc6c)
 - [x] O3 — Heroic Games Launcher (7df1fe1)
-- [ ] O4 — Any other game, added by hand
+- [x] O4 — Any other game, added by hand (ca23683; menu Modifica/Rimuovi e test della vista non fatti, vedi note)
 - [ ] O5 — Non-Steam games added to Steam
 - [ ] O6 — The same game twice
 - [ ] O7 — 👤 Checks
@@ -216,6 +216,17 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — O4 (Haiku), commit `ca23683`. Fatto: `ManualGames` (gioco.ini in
+  `<dati>\manual\local\<id>`), `ManualProvider` (account "Questo computer", avvio con
+  l'eseguibile, su Linux niente `.exe`), pulsante "Aggiungi un gioco…" nell'intestazione
+  (programma facoltativo, poi nome; poi si apre la ricerca della cartella).
+  **Non fatto, da completare**: (a) il menu ⋯ con **Modifica** e **Rimuovi da LSS** (il core
+  c'è: `ManualGames.Write`/`Remove`; `Remove` sposta la cartella in `manual\eliminati`, non
+  in "partite eliminate" come dice il piano: da decidere con Andrix); (b) il nome del gioco
+  preso da `FileVersionInfo.ProductName` (ora: nome del file); (c) test del view model di
+  "Aggiungi" (`AddGameAsync` non ha test, serve un `IDialogService` finto); (d) la finestra
+  `AddGameWindow` del piano (qui si usano `PickFileAsync` e `TextPromptWindow`); (e) su Linux
+  il pulsante non è stato provato a video. Test: `ManualProviderTests`.
 - 2026-10-25 — O3 (Haiku), commit `7df1fe1`. **Nessun formato di Heroic verificato**: Heroic
   non è installato su questo PC (`%APPDATA%\heroic` e `~/.config/heroic` assenti). Una ricerca
   web (sola verifica, non un file) non ha confermato né l'indirizzo di avvio né `gogSaves` /
