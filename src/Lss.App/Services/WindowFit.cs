@@ -41,6 +41,20 @@ internal static class WindowFit
         if (client.Width <= availableWidth && client.Height <= availableHeight)
             return;
 
+        // Un dialogo grande quanto il suo contenuto (Impostazioni, Trova i salvataggi...)
+        // non ha una barra di scorrimento: accorciato, la parte bassa con i pulsanti non
+        // si raggiungerebbe più. Il contenuto va dentro una ScrollViewer.
+        if (window.SizeToContent != SizeToContent.Manual && window.Content is Control content
+            && content is not ScrollViewer)
+        {
+            window.Content = null;
+            window.Content = new ScrollViewer
+            {
+                Content = content,
+                HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
+            };
+        }
+
         window.SizeToContent = SizeToContent.Manual;
         window.Width = Math.Min(client.Width, availableWidth);
         window.Height = Math.Min(client.Height, availableHeight);
