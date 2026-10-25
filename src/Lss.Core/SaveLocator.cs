@@ -1,85 +1,208 @@
 namespace Lss;
 
 /// <summary>
-/// Cartella dei salvataggi trovata, o il motivo per cui manca.
+/// I posti dei salvataggi di un gioco trovati, con la fonte e il motivo se non si usano.
 /// Reason: per il log in italiano; per Unsafe è il nome del problema (SafetyProblem).
 /// </summary>
-public sealed record SaveLocation(string Folder, SaveSource Source, SupportState Support, string Reason,
-    bool HasOtherSaves);
+public sealed record SaveLocation(IReadOnlyList<SaveSpot> Spots, SaveSource Source, SupportState Support, string Reason)
+{
+    /// <summary>Cartella del primo posto, o "" se non ce n'è.</summary>
+    public string Folder => Spots.Count > 0 ? Spots[0].Folder : "";
+}
 
 /// <summary>
-/// Trova la cartella dei salvataggi di un gioco: prima quella scelta o
-/// imparata, poi la cartella di Steam in userdata, poi le regole del launcher.
+/// Trova i posti dei salvataggi di un gioco. Il posto 1 è la cartella scelta o
+/// imparata (se c'è: vince, come prima), altrimenti quella di Steam in userdata,
+/// altrimenti la prima trovata dalle regole del launcher. Gli altri posti trovati
+/// dalle regole e quelli aggiunti a mano (posti.ini) vanno dopo.
 /// </summary>
 internal static class SaveLocator
 {
+    /// <summary>Più posti di così LSS non li cambia insieme in modo sicuro.</summary>
+    public const int MaxSpots = 8;
+
     /// <summary>
-    /// Ordine: cartella scelta o imparata (vince sulle regole; se non passa il
-    /// controllo, Unsafe senza provare le regole); userdata di Steam; regole
-    /// del launcher (una cartella sola → supportata, altrimenti Unsure).
-    /// chosenFolder "" = nessuna scelta; chosenSource Chosen o Learned.
+    /// Posti del gioco. stored sono i posti salvati in posti.ini (scelti o imparati);
+    /// i posti trovati di un launcher ricevono un id da stored (LauncherId).
     /// </summary>
     public static SaveLocation Locate(GameInfo game, IReadOnlyList<SaveRule> rules,
         IReadOnlyList<RootOverride> overrides, SaveContext context, IReadOnlyList<string> launcherFolders,
-        string lssDataRoot, string chosenFolder, SaveSource chosenSource)
+        string lssDataRoot, GameSpots stored)
     {
-        if (chosenFolder != "")
-        {
-            SafetyProblem problem = SaveFolderSafety.Check(chosenFolder, context, launcherFolders, lssDataRoot);
+        SaveSpot? chosen = stored.Spots.FirstOrDefault(spot => spot.Id == 1);
+        var chosenExtras = stored.Spots.Where(spot => spot.Id != 1).ToList();
 
-            return problem == SafetyProblem.None
-                ? new SaveLocation(chosenFolder, chosenSource, SupportState.Supported, "", false)
-                : new SaveLocation(chosenFolder, chosenSource, SupportState.Unsafe, problem.ToString(), false);
+        // Cartella scelta a mano o imparata: vince sulle regole. Se non passa il controllo, Unsafe senza provare le altre.
+        if (chosen is not null)
+        {
+            SafetyProblem problem = CheckSpot(chosen, context, launcherFolders, lssDataRoot);
+
+            if (problem != SafetyProblem.None)
+                return new SaveLocation([chosen], chosen.Source, SupportState.Unsafe, problem.ToString());
         }
 
-        if (game.Source == SaveSource.Userdata && game.Support == SupportState.Supported)
-        {
-            bool others = rules.Any(rule => SavePathResolver.Resolve(rule, overrides, context).Count > 0);
+        (List<SaveSpot> found, bool tooWide) = FoundByRules(rules, overrides, context);
+        bool userdata = game.Source == SaveSource.Userdata && game.Support == SupportState.Supported
+                        && game.SaveFolder != "";
 
-            return new SaveLocation(game.SaveFolder, SaveSource.Userdata, SupportState.Supported, "", others);
+        if (tooWide)
+        {
+            // Una maschera "*" senza ricorsione non è un posto: se la cartella di Steam o quella scelta bastano, si ignora.
+            if (chosen is null && !userdata)
+                return new SaveLocation([], SaveSource.None, SupportState.Unsure, "più cartelle o file sparsi");
+
+            Log.Write("Maschera troppo larga ignorata per " + game.Name);
         }
 
-        if (rules.Count == 0)
-            return new SaveLocation(game.SaveFolder, game.Source, game.Support, game.Reason, game.HasOtherSaves);
+        SaveSpot? primary = chosen;
 
-        List<string> found = OutermostOnly(rules.SelectMany(rule => SavePathResolver.Resolve(rule, overrides, context)));
-
-        if (found.Count == 0)
+        if (primary is null && userdata)
         {
-            return new SaveLocation(game.SaveFolder, SaveSource.None, SupportState.NotFound,
-                "nessuna cartella trovata con le regole del launcher", false);
+            primary = new SaveSpot(1, game.SaveFolder, "", true,
+                SavePathResolver.ToPortable(game.SaveFolder, context), SaveSource.Userdata);
+        }
+        else if (primary is null && found.Count > 0)
+        {
+            primary = found[0] with { Id = 1 };
+            found = found.Skip(1).ToList();
+        }
+        else if (primary is not null && found.Count > 0)
+        {
+            Log.Write($"Cartelle trovate di {game.Name} sostituite dalla cartella scelta: {primary.Folder}");
+            found = [];
         }
 
-        if (found.Count == 1 && Directory.Exists(found[0]))
+        if (primary is null)
         {
-            SafetyProblem problem = SaveFolderSafety.Check(found[0], context, launcherFolders, lssDataRoot);
+            if (rules.Count == 0)
+                return new SaveLocation(game.Spots, game.Source, game.Support, game.Reason);
 
-            return problem == SafetyProblem.None
-                ? new SaveLocation(found[0], SaveSource.Launcher, SupportState.Supported, "regola del launcher", false)
-                : new SaveLocation(found[0], SaveSource.Launcher, SupportState.Unsafe, problem.ToString(), false);
+            return new SaveLocation([], SaveSource.None, SupportState.NotFound,
+                "nessuna cartella trovata con le regole del launcher");
         }
 
-        return new SaveLocation("", SaveSource.None, SupportState.Unsure, "più cartelle o file sparsi", false);
+        // Posti aggiunti a mano prima di quelli trovati dalle regole. Ogni posto si controlla, anche quelli che poi si sovrappongono.
+        List<SaveSpot> candidates = chosenExtras.Concat(found).ToList();
+
+        foreach (SaveSpot spot in candidates.Prepend(primary).Where(spot => spot.Source != SaveSource.Userdata))
+        {
+            SafetyProblem problem = CheckSpot(spot, context, launcherFolders, lssDataRoot);
+
+            if (problem != SafetyProblem.None)
+                return new SaveLocation([spot], spot.Source, SupportState.Unsafe, problem.ToString());
+        }
+
+        List<SaveSpot> kept = WithoutOverlaps(primary, candidates);
+
+        if (1 + kept.Count > MaxSpots)
+            return new SaveLocation([], SaveSource.None, SupportState.Unsure,
+                "più di " + MaxSpots + " posti: troppi per LSS");
+
+        var spots = new List<SaveSpot> { primary };
+
+        foreach (SaveSpot spot in kept)
+        {
+            spots.Add(spot.Id == 0 ? spot with { Id = stored.LauncherId(KeyOf(spot)) } : spot);
+        }
+
+        string reason = primary.Source == SaveSource.Launcher ? "regola del launcher" : "";
+
+        return new SaveLocation(spots.OrderBy(spot => spot.Id).ToList(), primary.Source, SupportState.Supported, reason);
     }
 
     /// <summary>
-    /// Percorsi senza doppioni, senza quelli che stanno dentro un altro
-    /// (un file dentro una cartella trovata è già coperto dalla cartella).
+    /// Se un posto si può usare: il controllo di SaveFolderSafety, per cartella o per maschera.
     /// </summary>
-    private static List<string> OutermostOnly(IEnumerable<string> paths)
-    {
-        List<string> all = paths.Distinct().OrderBy(path => path, StringComparer.Ordinal).ToList();
+    internal static SafetyProblem CheckSpot(SaveSpot spot, SaveContext context,
+        IReadOnlyList<string> launcherFolders, string lssDataRoot) =>
+        spot.IsWholeFolder
+            ? SaveFolderSafety.Check(spot.Folder, context, launcherFolders, lssDataRoot)
+            : SaveFolderSafety.CheckPattern(spot.Folder, spot.Pattern, spot.Recursive, context,
+                launcherFolders, lssDataRoot);
 
-        return all.Where(path => !all.Any(other => other != path && IsInside(path, other))).ToList();
+    /// <summary>
+    /// I posti che le regole trovano, senza doppioni. tooWide: una regola con "*" senza ricorsione.
+    /// </summary>
+    private static (List<SaveSpot> Spots, bool TooWide) FoundByRules(IReadOnlyList<SaveRule> rules,
+        IReadOnlyList<RootOverride> overrides, SaveContext context)
+    {
+        var spots = new List<SaveSpot>();
+        bool tooWide = false;
+
+        foreach (SaveRule rule in rules)
+        {
+            (IReadOnlyList<SaveSpot> found, bool wide) = SavePathResolver.ResolveSpots(rule, overrides, context);
+            tooWide |= wide;
+
+            foreach (SaveSpot spot in found)
+            {
+                bool duplicate = spots.Any(other => SameFolder(other.Folder, spot.Folder)
+                                                    && other.Pattern == spot.Pattern && other.Recursive == spot.Recursive);
+
+                if (!duplicate)
+                    spots.Add(spot);
+            }
+        }
+
+        return (spots, tooWide);
     }
 
-    private static bool IsInside(string path, string folder)
+    /// <summary>
+    /// Toglie i posti che si sovrappongono: uno dentro il posto principale, o che lo
+    /// contiene, o che sta dentro una cartella intera già tenuta. Una cartella intera
+    /// toglie quelli che stanno dentro. Il posto principale non si tocca mai.
+    /// </summary>
+    private static List<SaveSpot> WithoutOverlaps(SaveSpot primary, List<SaveSpot> candidates)
     {
-        string separator = Path.DirectorySeparatorChar.ToString();
-        StringComparison comparison = OperatingSystem.IsWindows()
-            ? StringComparison.OrdinalIgnoreCase
-            : StringComparison.Ordinal;
+        var kept = new List<SaveSpot>();
 
-        return path.StartsWith(folder.TrimEnd(Path.DirectorySeparatorChar) + separator, comparison);
+        foreach (SaveSpot candidate in candidates)
+        {
+            if (Overlaps(candidate, primary))
+            {
+                Log.Write("Posto scartato, si sovrappone al posto principale: " + candidate.Folder);
+                continue;
+            }
+
+            if (kept.Any(other => other.IsWholeFolder && SameOrInside(candidate.Folder, other.Folder)))
+            {
+                Log.Write("Posto scartato, sta dentro una cartella già usata: " + candidate.Folder);
+                continue;
+            }
+
+            if (candidate.IsWholeFolder)
+                kept.RemoveAll(other => SameOrInside(other.Folder, candidate.Folder));
+
+            kept.Add(candidate);
+        }
+
+        return kept;
     }
+
+    private static bool Overlaps(SaveSpot candidate, SaveSpot primary) =>
+        (primary.IsWholeFolder && SameOrInside(candidate.Folder, primary.Folder))
+        || (candidate.IsWholeFolder && SameOrInside(primary.Folder, candidate.Folder));
+
+    /// <summary>
+    /// Chiave con cui LauncherId ricorda l'id di un posto trovato dalle regole.
+    /// </summary>
+    private static string KeyOf(SaveSpot spot) =>
+        spot.PortablePath + "|" + spot.Pattern + "|" + (spot.Recursive ? "1" : "0");
+
+    private static bool SameFolder(string first, string second) =>
+        string.Equals(first, second, FolderComparison());
+
+    /// <summary>
+    /// true se folder è uguale a root o sta dentro root.
+    /// </summary>
+    private static bool SameOrInside(string folder, string root)
+    {
+        string trimmed = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        return string.Equals(folder, trimmed, FolderComparison())
+               || folder.StartsWith(trimmed + Path.DirectorySeparatorChar, FolderComparison());
+    }
+
+    private static StringComparison FolderComparison() =>
+        OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 }

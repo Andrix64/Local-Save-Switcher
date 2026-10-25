@@ -315,7 +315,7 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SafetyUnreadable" xml:space="preserve"><value>la cartella non si legge.</value></data>
   <data name="SafetyBadPattern" xml:space="preserve"><value>il pattern dei file è troppo generico o indica file di programmi o di gioco.</value></data>
   <data name="SupportNotFound" xml:space="preserve"><value>Nessuna cartella dei salvataggi: avvia il gioco e salva almeno una volta.</value></data>
-  <data name="SupportUnsure" xml:space="preserve"><value>I salvataggi sono in più posti: LSS non può ancora cambiarli. Puoi scegliere tu la cartella.</value></data>
+  <data name="SupportUnsure" xml:space="preserve"><value>Questo gioco salva in troppi posti per LSS. Puoi scegliere tu le cartelle.</value></data>
   <data name="SupportUnsafe" xml:space="preserve"><value>La cartella dei salvataggi trovata non si può usare in sicurezza: {0}</value></data>
   <data name="FindSaveFolder" xml:space="preserve"><value>Trova la cartella dei salvataggi…</value></data>
   <data name="ChooseSaveFolder" xml:space="preserve"><value>Scelgo io la cartella…</value></data>
@@ -329,7 +329,6 @@ Usala solo se contiene solo i salvataggi di {1}.</value></data>
   <data name="SaveFolderFromLauncher" xml:space="preserve"><value>Salvataggi: {0} (da {1})</value></data>
   <data name="SaveFolderChosen" xml:space="preserve"><value>Salvataggi: {0} (scelta da te)</value></data>
   <data name="SaveFolderLearned" xml:space="preserve"><value>Salvataggi: {0} (trovata da LSS)</value></data>
-  <data name="SomeSavesElsewhere" xml:space="preserve"><value>Questo gioco ha salvataggi anche in altre cartelle: LSS cambia solo questa.</value></data>
   <data name="SaveFolderMenu" xml:space="preserve"><value>Opzioni della cartella dei salvataggi</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>Questa partita è di {0}, non di {1}.</value></data>
   <data name="GamesCaption" xml:space="preserve"><value>GIOCHI</value></data>

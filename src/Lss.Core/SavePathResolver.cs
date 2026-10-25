@@ -228,6 +228,75 @@ internal static class SavePathResolver
     public static IReadOnlyList<string> Resolve(SaveRule rule, IReadOnlyList<RootOverride> overrides,
         SaveContext context)
     {
+        IReadOnlyList<string> folders = RuleFolders(rule, overrides, context);
+
+        try
+        {
+            var results = new List<string>();
+            string pattern = rule.Pattern == "*.*" ? "*" : rule.Pattern;
+
+            foreach (string match in folders)
+            {
+                if (pattern == "*" && rule.Recursive)
+                    results.Add(match);
+                else
+                    results.AddRange(FilesOf(match, pattern, rule.Recursive, CaseInsensitive(context)));
+            }
+
+            return results
+                .Select(Path.GetFullPath)
+                .Distinct()
+                .OrderBy(result => result, StringComparer.Ordinal)
+                .ToList();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Write("Regola dei salvataggi " + rule.Root + " non letta", ex);
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Posti che la regola trova su questo sistema, senza ancora id: una cartella
+    /// intera (maschera "*" o "*.*" ricorsiva) o, per ogni cartella trovata, un
+    /// posto con la maschera (solo se ci sono file che corrispondono). Una maschera
+    /// "*" senza ricorsione è troppo larga: TooWide, e il gioco non si può gestire.
+    /// </summary>
+    internal static (IReadOnlyList<SaveSpot> Spots, bool TooWide) ResolveSpots(SaveRule rule,
+        IReadOnlyList<RootOverride> overrides, SaveContext context)
+    {
+        string pattern = rule.Pattern == "*.*" ? "*" : rule.Pattern;
+        var spots = new List<SaveSpot>();
+        bool tooWide = false;
+
+        foreach (string folder in RuleFolders(rule, overrides, context))
+        {
+            string full = Path.GetFullPath(folder);
+
+            if (pattern == "*")
+            {
+                if (rule.Recursive)
+                    spots.Add(new SaveSpot(0, full, "", true, ToPortable(full, context), SaveSource.Launcher));
+                else
+                    tooWide = true;
+
+                continue;
+            }
+
+            if (FilesOf(full, pattern, rule.Recursive, CaseInsensitive(context)).Count > 0)
+                spots.Add(new SaveSpot(0, full, pattern, rule.Recursive, ToPortable(full, context), SaveSource.Launcher));
+        }
+
+        return (spots, tooWide);
+    }
+
+    /// <summary>
+    /// Cartelle che la regola trova: la cartella di base (radice, percorso, token,
+    /// nomi con maschera) che esiste su questo sistema. Vuoto se la regola non vale qui.
+    /// </summary>
+    private static IReadOnlyList<string> RuleFolders(SaveRule rule, IReadOnlyList<RootOverride> overrides,
+        SaveContext context)
+    {
         if (!AppliesTo(rule, context))
             return [];
 
@@ -268,22 +337,7 @@ internal static class SavePathResolver
 
         try
         {
-            var results = new List<string>();
-            string pattern = rule.Pattern == "*.*" ? "*" : rule.Pattern;
-
-            foreach (string match in FoldersNamed(folder, segments, CaseInsensitive(context)))
-            {
-                if (pattern == "*" && rule.Recursive)
-                    results.Add(match);
-                else
-                    results.AddRange(FilesOf(match, pattern, rule.Recursive, CaseInsensitive(context)));
-            }
-
-            return results
-                .Select(Path.GetFullPath)
-                .Distinct()
-                .OrderBy(result => result, StringComparer.Ordinal)
-                .ToList();
+            return FoldersNamed(folder, segments, CaseInsensitive(context));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

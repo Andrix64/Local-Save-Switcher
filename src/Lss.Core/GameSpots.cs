@@ -24,12 +24,15 @@ internal sealed class GameSpots
     private const string ScelteText = "scelta";
     private const string ImparateText = "imparata";
 
+    private const int FirstExtraId = 2;
+
     private readonly string file;
     private readonly string oldFile;
     private readonly List<SaveSpot> spots = [];
     private readonly Dictionary<string, int> launcherIds = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> extraRoots = [];
-    private int next = 1;
+    // Il posto 1 è quello principale (in cima allo snapshot): gli altri id partono da 2.
+    private int next = FirstExtraId;
 
     public GameSpots(string gameDataFolder)
     {
@@ -51,7 +54,7 @@ internal sealed class GameSpots
         spots.Clear();
         launcherIds.Clear();
         extraRoots.Clear();
-        next = 1;
+        next = FirstExtraId;
 
         if (!File.Exists(file) && File.Exists(oldFile))
         {
@@ -116,17 +119,18 @@ internal sealed class GameSpots
     }
 
     /// <summary>
-    /// Id del posto di un launcher, identificato dal suo percorso portabile.
-    /// Lo stesso percorso ha sempre lo stesso id, anche dopo un riavvio (serve
-    /// Save per ricordarlo). Il primo id libero è quello dopo gli altri.
+    /// Id del posto di un launcher, identificato dalla sua chiave (percorso portabile,
+    /// maschera, ricorsione). La stessa chiave ha sempre lo stesso id, anche dopo un
+    /// riavvio: un id nuovo si scrive subito in posti.ini.
     /// </summary>
-    public int LauncherId(string portable)
+    public int LauncherId(string key)
     {
-        if (launcherIds.TryGetValue(portable, out int id))
+        if (launcherIds.TryGetValue(key, out int id))
             return id;
 
         id = next++;
-        launcherIds[portable] = id;
+        launcherIds[key] = id;
+        Save();
 
         return id;
     }

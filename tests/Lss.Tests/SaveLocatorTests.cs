@@ -33,9 +33,23 @@ public sealed class SaveLocatorTests : IDisposable
         SaveSource source = SaveSource.None) =>
         new("steam", "123450", "Test", "", "", "", GameInfo.SpotsOf(saveFolder, source), support, "", "", source);
 
+    /// <summary>
+    /// Posti salvati di un gioco (posti.ini in una cartella dati vuota): con una cartella scelta, il posto 1.
+    /// </summary>
+    private GameSpots Stored(string chosen, SaveSource chosenSource)
+    {
+        var stored = new GameSpots(Path.Combine(folder.Root, "gamedata"));
+        stored.Load();
+
+        if (chosen != "")
+            stored.SetPrimary(chosen, chosenSource);
+
+        return stored;
+    }
+
     private SaveLocation Run(GameInfo game, IReadOnlyList<SaveRule> rules, string chosen = "",
         SaveSource chosenSource = SaveSource.Chosen) =>
-        SaveLocator.Locate(game, rules, [], Context(), [], LssData, chosen, chosenSource);
+        SaveLocator.Locate(game, rules, [], Context(), [], LssData, Stored(chosen, chosenSource));
 
     [Fact]
     public void OneFolderIsSupported()
@@ -48,7 +62,6 @@ public sealed class SaveLocatorTests : IDisposable
         Assert.Equal(saves, found.Folder);
         Assert.Equal(SaveSource.Launcher, found.Source);
         Assert.Equal(SupportState.Supported, found.Support);
-        Assert.False(found.HasOtherSaves);
     }
 
     [Fact]
@@ -67,28 +80,120 @@ public sealed class SaveLocatorTests : IDisposable
     }
 
     [Fact]
-    public void TwoFoldersAreUnsure()
+    public void TwoFoldersAreTwoSpots()
     {
-        Touch(Path.Combine(Steamuser, "AppData", "Local", "Game", "a", "x.sav"));
-        Touch(Path.Combine(Steamuser, "AppData", "Local", "Game", "b", "y.sav"));
+        string a = Path.Combine(Steamuser, "AppData", "Local", "Game", "a");
+        string b = Path.Combine(Steamuser, "AppData", "Local", "Game", "b");
+        Touch(Path.Combine(a, "x.sav"));
+        Touch(Path.Combine(b, "y.sav"));
 
         SaveLocation found = Run(Game(), [
             Rule("WinAppDataLocal", "Game/a"),
             Rule("WinAppDataLocal", "Game/b")
         ]);
 
-        Assert.Equal(SupportState.Unsure, found.Support);
-        Assert.Equal("", found.Folder);
+        Assert.Equal(SupportState.Supported, found.Support);
+        Assert.Equal(a, found.Folder);
+        Assert.Equal([1, 2], found.Spots.Select(spot => spot.Id).ToArray());
+        Assert.Equal(b, found.Spots[1].Folder);
     }
 
     [Fact]
-    public void OnlyFilesAreUnsure()
+    public void OnlyFilesAreAPatternSpot()
     {
-        Touch(Path.Combine(Steamuser, "AppData", "Local", "Game", "a.sav"));
+        string local = Path.Combine(Steamuser, "AppData", "Local", "Game");
+        Touch(Path.Combine(local, "a.sav"));
 
         SaveLocation found = Run(Game(), [Rule("WinAppDataLocal", "Game", "*.sav", recursive: false)]);
 
+        Assert.Equal(SupportState.Supported, found.Support);
+        SaveSpot spot = Assert.Single(found.Spots);
+        Assert.Equal(local, spot.Folder);
+        Assert.Equal("*.sav", spot.Pattern);
+        Assert.False(spot.Recursive);
+    }
+
+    [Fact]
+    public void TooWideMaskWithoutRecursionIsUnsure()
+    {
+        Touch(Path.Combine(Steamuser, "AppData", "Local", "Game", "a.sav"));
+
+        SaveLocation found = Run(Game(), [Rule("WinAppDataLocal", "Game", "*", recursive: false)]);
+
         Assert.Equal(SupportState.Unsure, found.Support);
+        Assert.Empty(found.Spots);
+    }
+
+    [Fact]
+    public void SteamUserdataGameIgnoresAWideMask()
+    {
+        string userdata = Path.Combine(folder.Root, "userdata", "111", "123450");
+        Touch(Path.Combine(userdata, "remote", "a.sav"));
+        Touch(Path.Combine(Steamuser, "Documents", "Game", "b.sav"));
+
+        SaveLocation found = Run(Game(userdata, SupportState.Supported, SaveSource.Userdata),
+            [Rule("WinMyDocuments", "Game", "*", recursive: false)]);
+
+        Assert.Equal(SupportState.Supported, found.Support);
+        Assert.Equal(userdata, found.Folder);
+        Assert.Single(found.Spots);
+    }
+
+    [Fact]
+    public void ChosenSpotsAreKeptWithTheirIds()
+    {
+        string mine = Path.Combine(folder.Root, "mine");
+        string extra = Path.Combine(folder.Root, "extra");
+        Touch(Path.Combine(mine, "a.sav"));
+        Touch(Path.Combine(extra, "b.sav"));
+
+        var stored = new GameSpots(Path.Combine(folder.Root, "gamedata"));
+        stored.Load();
+        stored.SetPrimary(mine, SaveSource.Chosen);
+        stored.Add(extra, "", extra, SaveSource.Chosen);
+        stored.Save();
+
+        SaveLocation found = SaveLocator.Locate(Game(), [], [], Context(), [], LssData, stored);
+
+        Assert.Equal(SupportState.Supported, found.Support);
+        Assert.Equal([1, 2], found.Spots.Select(spot => spot.Id).ToArray());
+        Assert.Equal(extra, found.Spots[1].Folder);
+    }
+
+    [Fact]
+    public void ChosenSpotInsideAFoundFolderIsDroppedInFavourOfTheFoundOne()
+    {
+        string saves = Path.Combine(Steamuser, "AppData", "Local", "Game", "saves");
+        Touch(Path.Combine(saves, "a.sav"));
+
+        var stored = new GameSpots(Path.Combine(folder.Root, "gamedata"));
+        stored.Load();
+        stored.Add(Path.Combine(saves, "sub"), "", Path.Combine(saves, "sub"), SaveSource.Chosen);
+        Touch(Path.Combine(saves, "sub", "b.sav"));
+
+        SaveLocation found = SaveLocator.Locate(Game(), [Rule("WinAppDataLocal", "Game/saves")], [], Context(), [],
+            LssData, stored);
+
+        Assert.Equal(saves, found.Folder);
+        Assert.Single(found.Spots);
+    }
+
+    [Fact]
+    public void MoreThanEightSpotsIsUnsure()
+    {
+        var rules = new List<SaveRule>();
+
+        for (int i = 0; i < 9; i++)
+        {
+            string dir = Path.Combine(Steamuser, "AppData", "Local", "Game", "p" + i);
+            Touch(Path.Combine(dir, "a.sav"));
+            rules.Add(Rule("WinAppDataLocal", "Game/p" + i));
+        }
+
+        SaveLocation found = Run(Game(), rules);
+
+        Assert.Equal(SupportState.Unsure, found.Support);
+        Assert.Empty(found.Spots);
     }
 
     [Fact]
@@ -152,11 +257,10 @@ public sealed class SaveLocatorTests : IDisposable
         Assert.Equal(userdata, found.Folder);
         Assert.Equal(SaveSource.Userdata, found.Source);
         Assert.Equal(SupportState.Supported, found.Support);
-        Assert.False(found.HasOtherSaves);
     }
 
     [Fact]
-    public void SteamUserdataGameWithSavesInDocumentsHasOtherSaves()
+    public void SteamUserdataGameWithSavesInDocumentsHasAnExtraSpot()
     {
         string userdata = Path.Combine(folder.Root, "userdata", "111", "123450");
         Touch(Path.Combine(userdata, "remote", "a.sav"));
@@ -167,7 +271,10 @@ public sealed class SaveLocatorTests : IDisposable
 
         Assert.Equal(userdata, found.Folder);
         Assert.Equal(SupportState.Supported, found.Support);
-        Assert.True(found.HasOtherSaves);
+        Assert.Equal(2, found.Spots.Count);
+        Assert.Equal(1, found.Spots[0].Id);
+        Assert.Equal(Path.Combine(Steamuser, "Documents", "Game"), found.Spots[1].Folder);
+        Assert.NotEqual(1, found.Spots[1].Id);
     }
 
     [Fact]
@@ -180,5 +287,20 @@ public sealed class SaveLocatorTests : IDisposable
 
         Assert.Equal(SupportState.SavesElsewhere, found.Support);
         Assert.Equal(userdata, found.Folder);
+    }
+
+    [Fact]
+    public void OneUnsafeSpotMakesTheWholeGameUnsafe()
+    {
+        Touch(Path.Combine(Steamuser, "AppData", "Local", "Game", "a", "x.sav"));
+        Touch(Path.Combine(Steamuser, "AppData", "Local", "x", "y.sav"));
+
+        SaveLocation found = Run(Game(), [
+            Rule("WinAppDataLocal", "Game/a"),
+            Rule("WinAppDataLocal", "")
+        ]);
+
+        Assert.Equal(SupportState.Unsafe, found.Support);
+        Assert.Equal(SaveSource.Launcher, found.Source);
     }
 }

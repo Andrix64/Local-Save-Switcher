@@ -58,8 +58,6 @@
           </Button.Flyout>
         </Button>
       </StackPanel>
-      <TextBlock Text="{Binding OtherSavesText}" IsVisible="{Binding ShowOtherSaves}" TextWrapping="Wrap"
-                 FontSize="12" Foreground="{StaticResource TextMuted}" />
       <TextBlock Text="{Binding UserdataNotice}" IsVisible="{Binding ShowUserdataNotice}" TextWrapping="Wrap"
                  FontSize="12" Foreground="{StaticResource TextMuted}" />
     </StackPanel>

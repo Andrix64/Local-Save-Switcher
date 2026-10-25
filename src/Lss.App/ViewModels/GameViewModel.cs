@@ -25,7 +25,6 @@ public partial class GameViewModel : ObservableObject
         SaveFolderText = SaveFolderLine(manager);
         ShowUserdataNotice = manager.Game.Source == SaveSource.Userdata;
         ShowAutomaticFolder = manager.Game.Source is SaveSource.Chosen or SaveSource.Learned;
-        ShowOtherSaves = manager.Game.HasOtherSaves;
     }
 
     /// <summary>Cambia la cartella dei salvataggi del gioco (scelta o automatica): la lista va ricaricata.</summary>
@@ -41,11 +40,6 @@ public partial class GameViewModel : ObservableObject
 
     /// <summary>Con una cartella scelta o imparata si può tornare a quella automatica.</summary>
     public bool ShowAutomaticFolder { get; }
-
-    /// <summary>Il gioco ha salvataggi anche in altre cartelle, che LSS non cambia.</summary>
-    public bool ShowOtherSaves { get; }
-
-    public string OtherSavesText => Strings.SomeSavesElsewhere;
 
     // Sessione di gioco in corso: quando è partita e con quale partita.
     public SessionTracker Session { get; } = new();

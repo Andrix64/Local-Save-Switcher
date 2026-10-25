@@ -315,7 +315,7 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SafetyUnreadable" xml:space="preserve"><value>the folder can't be read.</value></data>
   <data name="SafetyBadPattern" xml:space="preserve"><value>the file pattern is too broad or names program or game files.</value></data>
   <data name="SupportNotFound" xml:space="preserve"><value>No save folder yet: start the game once and save.</value></data>
-  <data name="SupportUnsure" xml:space="preserve"><value>Saves are in several places: LSS can't switch them yet. You can choose the folder yourself.</value></data>
+  <data name="SupportUnsure" xml:space="preserve"><value>This game saves in too many places for LSS. You can choose its folders yourself.</value></data>
   <data name="SupportUnsafe" xml:space="preserve"><value>The save folder found can't be used safely: {0}</value></data>
   <data name="FindSaveFolder" xml:space="preserve"><value>Find the save folder…</value></data>
   <data name="ChooseSaveFolder" xml:space="preserve"><value>Choose the folder myself…</value></data>
@@ -329,7 +329,6 @@ Use it only if it contains just the saves of {1}.</value></data>
   <data name="SaveFolderFromLauncher" xml:space="preserve"><value>Saves: {0} (from {1})</value></data>
   <data name="SaveFolderChosen" xml:space="preserve"><value>Saves: {0} (chosen by you)</value></data>
   <data name="SaveFolderLearned" xml:space="preserve"><value>Saves: {0} (found by LSS)</value></data>
-  <data name="SomeSavesElsewhere" xml:space="preserve"><value>This game also keeps saves in other folders: LSS switches only this one.</value></data>
   <data name="SaveFolderMenu" xml:space="preserve"><value>Save folder options</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>This playthrough is from {0}, not from {1}.</value></data>
   <data name="GamesCaption" xml:space="preserve"><value>GAMES</value></data>

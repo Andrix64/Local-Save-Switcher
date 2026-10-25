@@ -60,7 +60,6 @@ public enum SaveSource
 /// <param name="CoverPath">Copertina 300×450, o "" se non c'è.</param>
 /// <param name="Source">Da dove viene la cartella dei salvataggi.</param>
 /// <param name="Reason">Motivo per il log, in italiano; non si mostra così com'è.</param>
-/// <param name="HasOtherSaves">true se il gioco ha salvataggi anche in altre cartelle.</param>
 public sealed record GameInfo(
     string Provider,
     string Id,
@@ -73,8 +72,7 @@ public sealed record GameInfo(
     string IconPath = "",
     string CoverPath = "",
     SaveSource Source = SaveSource.Userdata,
-    string Reason = "",
-    bool HasOtherSaves = false)
+    string Reason = "")
 {
     public const string ControlAppId = "870780";
 

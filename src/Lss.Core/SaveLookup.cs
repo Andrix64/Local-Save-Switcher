@@ -19,9 +19,9 @@ internal static class SaveLookup
 
         foreach (GameInfo game in games)
         {
-            // Cartella della scelta: <dati LSS>\<launcher>\<account>\<gioco> (vedi SaveManager.Open).
-            var settings = new GameSaveSettings(Path.Combine(lssDataRoot, provider.Id, account.Id, game.Id));
-            settings.Load();
+            // Posti scelti o imparati: <dati LSS>\<launcher>\<account>\<gioco> (vedi SaveManager.Open).
+            var stored = new GameSpots(Path.Combine(lssDataRoot, provider.Id, account.Id, game.Id));
+            stored.Load();
 
             SaveLocation found = SaveLocator.Locate(
                 game,
@@ -30,19 +30,17 @@ internal static class SaveLookup
                 ContextFor(provider, account, game, folders),
                 launchers,
                 lssDataRoot,
-                settings.Folder,
-                settings.Origin);
+                stored);
 
             if (found.Source != SaveSource.Userdata && found.Source != SaveSource.None)
                 Log.Write($"Salvataggi di {game.Name} fuori da userdata: {found.Folder} ({found.Source})");
 
             result.Add(game with
             {
-                Spots = GameInfo.SpotsOf(found.Folder, found.Source),
+                Spots = found.Spots,
                 Source = found.Source,
                 Support = found.Support,
                 Reason = found.Reason,
-                HasOtherSaves = found.HasOtherSaves,
             });
         }
 

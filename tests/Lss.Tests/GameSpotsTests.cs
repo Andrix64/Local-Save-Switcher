@@ -22,7 +22,7 @@ public sealed class GameSpotsTests : IDisposable
 
         var spots = new GameSpots(Data);
         spots.Load();
-        spots.Add(first, "", first, SaveSource.Chosen);
+        spots.SetPrimary(first, SaveSource.Chosen);
         spots.Add(second, "*.sav", "{WinAppDataRoaming}/Foo", SaveSource.Learned, recursive: false);
         spots.AddExtraRoot(extra);
         spots.Save();
@@ -62,8 +62,8 @@ public sealed class GameSpotsTests : IDisposable
 
         SaveSpot added = loaded.Add(Path.Combine(folder.Root, "c"), "", "c", SaveSource.Chosen);
 
-        Assert.Equal(3, added.Id);
-        Assert.Equal([1], loaded.Spots.Where(spot => spot.Id == 1).Select(spot => spot.Id));
+        Assert.Equal(4, added.Id);
+        Assert.Equal([3, 4], loaded.Spots.Select(spot => spot.Id));
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public sealed class GameSpotsTests : IDisposable
         Assert.Equal(roaming, loaded.LauncherId("{WinAppDataRoaming}/Foo"));
         Assert.Equal(install, loaded.LauncherId("{gameinstall}/saves"));
         Assert.NotEqual(roaming, install);
-        Assert.Equal(4, loaded.LauncherId("{WinMyDocuments}/Game"));
+        Assert.Equal(5, loaded.LauncherId("{WinMyDocuments}/Game"));
         Assert.Single(loaded.Spots);
     }
 
@@ -140,6 +140,6 @@ public sealed class GameSpotsTests : IDisposable
         spots.Remove(2);
         spots.Save();
 
-        Assert.Contains("Prossimo=3", File.ReadAllText(Posti));
+        Assert.Contains("Prossimo=4", File.ReadAllText(Posti));
     }
 }

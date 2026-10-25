@@ -214,16 +214,19 @@ public sealed partial class SaveManager
 
                 // Il controllo si ripete ad ogni apertura: la cartella può essere cambiata da quando è stata trovata.
                 IGameProvider launcher = provider ?? new SteamProvider(Platform.Current);
-                SafetyProblem problem = SaveFolderSafety.Check(
-                    game.SaveFolder,
-                    SaveLookup.ContextFor(launcher, account, game, Platform.Current.GetKnownFolders()),
-                    launcher.LauncherFolders(account),
-                    dataRoot);
+                SaveContext context = SaveLookup.ContextFor(launcher, account, game, Platform.Current.GetKnownFolders());
+                IReadOnlyList<string> launchers = launcher.LauncherFolders(account);
 
-                if (problem != SafetyProblem.None)
+                // Ogni posto, non solo il primo: una cartella può essere cambiata da quando è stata trovata.
+                foreach (SaveSpot spot in game.Spots)
                 {
-                    return Result<SaveManager>.Fail(Loc.F(Strings.SaveFolderNoLongerSafe, game.Name,
-                        SaveFolderSafety.Describe(problem)));
+                    SafetyProblem problem = SaveLocator.CheckSpot(spot, context, launchers, dataRoot);
+
+                    if (problem != SafetyProblem.None)
+                    {
+                        return Result<SaveManager>.Fail(Loc.F(Strings.SaveFolderNoLongerSafe, game.Name,
+                            SaveFolderSafety.Describe(problem)));
+                    }
                 }
             }
 
