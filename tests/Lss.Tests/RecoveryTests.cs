@@ -97,7 +97,7 @@ public sealed class RecoveryTests : IDisposable
         Assert.True(manager.ActivateProfile("Profilo_Manuale").Success);
         Assert.False(Directory.Exists(Path.Combine(Game, "remote")));
 
-        SteamAccount account = Assert.Single(SaveManager.FindAccounts(UserData, "870780"));
+        GameAccount account = Assert.Single(SaveManager.FindAccounts(UserData, "870780"));
         Assert.Equal("111", account.Id);
         Assert.Null(account.LastSaved);
     }
@@ -117,7 +117,7 @@ public sealed class RecoveryTests : IDisposable
         TestFolder.Write(Path.Combine(UserData, "222", "7", "remote", "sharedconfig.vdf"), "x");
         TestFolder.Write(Path.Combine(UserData, "222", "814380", "remotecache.vdf"), "x");
 
-        SteamAccount account = Assert.Single(SaveManager.FindAccountsWithGames(UserData));
+        GameAccount account = Assert.Single(SaveManager.FindAccountsWithGames(UserData));
         Assert.Equal("111", account.Id);
     }
 
@@ -134,7 +134,7 @@ public sealed class RecoveryTests : IDisposable
         Assert.Empty(SaveManager.FindAccountsWithGames(UserData));
 
         // L'account 222 ha solo cartelle di Steam: non conta.
-        SteamAccount account = Assert.Single(SaveManager.FindAccountsWithAnyGame(UserData));
+        GameAccount account = Assert.Single(SaveManager.FindAccountsWithAnyGame(UserData));
         Assert.Equal("111", account.Id);
     }
 

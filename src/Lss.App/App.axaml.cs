@@ -87,7 +87,7 @@ public partial class App : Application
         // Prima di cercare gli account: una cartella rimasta come 870780.vecchio le farebbe sparire.
         SaveManager.RecoverAllGameFolders(userData);
 
-        IReadOnlyList<SteamAccount> accounts = SaveManager.FindAccountsWithGames(userData);
+        IReadOnlyList<GameAccount> accounts = SaveManager.FindAccountsWithGames(userData);
 
         // Nessun gioco gestibile (per esempio tutti con i salvataggi in Proton):
         // la finestra si apre lo stesso e mostra i giochi con il motivo.
@@ -104,7 +104,7 @@ public partial class App : Application
         var settings = new AppSettings(Path.Combine(AppData.Root, "lss.ini"));
         settings.Load();
 
-        SteamAccount account = accounts[0];
+        GameAccount account = accounts[0];
 
         if (accounts.Count > 1)
         {

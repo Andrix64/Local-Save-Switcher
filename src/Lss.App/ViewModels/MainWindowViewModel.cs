@@ -10,7 +10,7 @@ namespace Lss.App.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ObservableObject
 {
-    private readonly SteamAccount account;
+    private readonly GameAccount account;
     private readonly AppSettings settings;
     private readonly IDialogService dialogs;
 
@@ -23,7 +23,7 @@ public partial class MainWindowViewModel : ObservableObject
     // Dopo l'apertura della finestra le selezioni fanno subito il primo avvio (vedi OnOpenedAsync).
     private bool opened;
 
-    internal MainWindowViewModel(SteamAccount account, IEnumerable<GameInfo> games, AppSettings settings, IDialogService dialogs)
+    internal MainWindowViewModel(GameAccount account, IEnumerable<GameInfo> games, AppSettings settings, IDialogService dialogs)
     {
         this.account = account;
         this.settings = settings;

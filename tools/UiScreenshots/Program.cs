@@ -78,7 +78,7 @@ internal static class Program
         Write(Path.Combine(controlSaves, "remotecache.vdf"), "cache");
         Write(Path.Combine(account, "814380", "remotecache.vdf"), "cache");
 
-        var steamAccount = new SteamAccount("111", "Andrix", account, DateTime.Now);
+        var steamAccount = new GameAccount("steam", "111", "Andrix", account, DateTime.Now);
         var control = new GameInfo(GameInfo.ControlAppId, "Control Ultimate Edition", "", "", controlSaves, SupportState.Supported);
         var sekiro = new GameInfo("814380", "Sekiro™: Shadows Die Twice", "", "", Path.Combine(account, "814380"), SupportState.SavesElsewhere);
 
@@ -134,7 +134,7 @@ internal static class Program
         Shot(new AccountWindow(
         [
             steamAccount,
-            new SteamAccount("222", "", Path.Combine(root, "userdata", "222"), null)
+            new GameAccount("steam", "222", "", Path.Combine(root, "userdata", "222"), null)
         ], "111"), "10-account");
 
         Shot(new DeletedWindow(new DeletedViewModel(manager, dialogs)), "11-deleted");

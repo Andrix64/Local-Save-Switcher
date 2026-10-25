@@ -31,18 +31,6 @@ public enum CloudState
 }
 
 /// <summary>
-/// Account Steam con i salvataggi di Control.
-/// </summary>
-/// <param name="Id">Nome della cartella in userdata (ID dell'account).</param>
-/// <param name="Name">Nome Steam, o "" se non si riesce a leggerlo.</param>
-/// <param name="Folder">Cartella userdata\ID.</param>
-/// <param name="LastSaved">Data del salvataggio più recente, se c'è.</param>
-public sealed record SteamAccount(string Id, string Name, string Folder, DateTime? LastSaved)
-{
-    public string DisplayName => Name != "" ? Name : Loc.F(Strings.AccountFallbackName, Id);
-}
-
-/// <summary>
 /// Logica dei profili di salvataggio, senza input/output di console.
 /// </summary>
 public sealed partial class SaveManager
@@ -105,7 +93,7 @@ public sealed partial class SaveManager
     /// o null se l'utente annulla. In quel caso il messaggio del risultato è vuoto.
     /// </param>
     public static Result<SaveManager> Initialize(
-        Func<IReadOnlyList<SteamAccount>, string?, SteamAccount?> chooseAccount)
+        Func<IReadOnlyList<GameAccount>, string?, GameAccount?> chooseAccount)
     {
         string steam = Platform.Current.FindSteamRoots().FirstOrDefault() ?? "";
 
@@ -121,7 +109,7 @@ public sealed partial class SaveManager
         // 870780.vecchio farebbe sparire l'account.
         RecoverGameFolders(userData, GameInfo.ControlAppId);
 
-        IReadOnlyList<SteamAccount> accounts = FindAccounts(userData, GameInfo.ControlAppId);
+        IReadOnlyList<GameAccount> accounts = FindAccounts(userData, GameInfo.ControlAppId);
 
         if (accounts.Count == 0)
         {
@@ -133,7 +121,7 @@ public sealed partial class SaveManager
         var settings = new AppSettings(Path.Combine(appData, "lss.ini"));
         settings.Load();
 
-        SteamAccount? account = accounts[0];
+        GameAccount? account = accounts[0];
 
         if (accounts.Count > 1)
         {
@@ -170,7 +158,7 @@ public sealed partial class SaveManager
     /// <summary>
     /// Manager per un gioco di un account: dati in dataRoot/IDAccount/AppID.
     /// </summary>
-    public static Result<SaveManager> Open(string dataRoot, SteamAccount account, GameInfo game)
+    public static Result<SaveManager> Open(string dataRoot, GameAccount account, GameInfo game)
     {
         if (game.Support != SupportState.Supported)
             return Result<SaveManager>.Fail(Loc.F(Strings.GameNotSupported, game.Name));
@@ -299,9 +287,9 @@ public sealed partial class SaveManager
     /// creato a mano può mancare la sottocartella remote, e l'account non deve
     /// sparire per questo.
     /// </summary>
-    internal static IReadOnlyList<SteamAccount> FindAccounts(string userData, string appId)
+    internal static IReadOnlyList<GameAccount> FindAccounts(string userData, string appId)
     {
-        var accounts = new List<SteamAccount>();
+        var accounts = new List<GameAccount>();
 
         foreach (string dir in Directory.GetDirectories(userData))
         {
@@ -331,7 +319,7 @@ public sealed partial class SaveManager
                 // Cartella non leggibile: nessuna data.
             }
 
-            accounts.Add(new SteamAccount(Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
+            accounts.Add(new GameAccount("steam", Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
         }
 
         return accounts.OrderByDescending(a => a.LastSaved ?? DateTime.MinValue).ToList();
@@ -341,9 +329,9 @@ public sealed partial class SaveManager
     /// Account in userdata che hanno almeno un gioco con salvataggi in
     /// userdata (SupportState.Supported), dal più usato di recente.
     /// </summary>
-    internal static IReadOnlyList<SteamAccount> FindAccountsWithGames(string userData)
+    internal static IReadOnlyList<GameAccount> FindAccountsWithGames(string userData)
     {
-        var accounts = new List<SteamAccount>();
+        var accounts = new List<GameAccount>();
 
         foreach (string dir in Directory.GetDirectories(userData))
         {
@@ -376,7 +364,7 @@ public sealed partial class SaveManager
                 // Cartella non leggibile: nessuna data.
             }
 
-            accounts.Add(new SteamAccount(Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
+            accounts.Add(new GameAccount("steam", Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
         }
 
         return accounts.OrderByDescending(a => a.LastSaved ?? DateTime.MinValue).ToList();
@@ -387,9 +375,9 @@ public sealed partial class SaveManager
     /// è gestibile (per esempio con i salvataggi nel prefisso di Proton): così
     /// l'app si apre lo stesso e mostra i giochi con il motivo.
     /// </summary>
-    internal static IReadOnlyList<SteamAccount> FindAccountsWithAnyGame(string userData)
+    internal static IReadOnlyList<GameAccount> FindAccountsWithAnyGame(string userData)
     {
-        var accounts = new List<SteamAccount>();
+        var accounts = new List<GameAccount>();
 
         foreach (string dir in Directory.GetDirectories(userData))
         {
@@ -401,7 +389,7 @@ public sealed partial class SaveManager
                              !SteamLibrary.SystemApps.Contains(Path.GetFileName(game)));
 
             if (hasGame)
-                accounts.Add(new SteamAccount(Path.GetFileName(dir), ReadPersonaName(dir), dir, null));
+                accounts.Add(new GameAccount("steam", Path.GetFileName(dir), ReadPersonaName(dir), dir, null));
         }
 
         return accounts;

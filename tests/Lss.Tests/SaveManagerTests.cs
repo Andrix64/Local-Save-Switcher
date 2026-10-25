@@ -4,7 +4,7 @@ public sealed class SaveManagerTests : IDisposable
 {
     private readonly TestFolder folder = new();
 
-    private static SteamAccount Account => new("111", "Mario", "", null);
+    private static GameAccount Account => new("steam", "111", "Mario", "", null);
 
     public void Dispose() => folder.Dispose();
 

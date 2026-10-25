@@ -7,8 +7,8 @@ namespace Lss.Tests;
 /// </summary>
 public sealed class AccountViewModelTests
 {
-    private static readonly SteamAccount First = new("111", "Anna", @"C:\userdata\111", null);
-    private static readonly SteamAccount Second = new("222", "", @"C:\userdata\222", null);
+    private static readonly GameAccount First = new("steam", "111", "Anna", @"C:\userdata\111", null);
+    private static readonly GameAccount Second = new("steam", "222", "", @"C:\userdata\222", null);
 
     [Fact]
     public void PreselectsTheLastUsedAccount()

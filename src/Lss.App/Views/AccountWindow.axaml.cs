@@ -13,14 +13,14 @@ public partial class AccountWindow : Window
 {
     public AccountWindow() => InitializeComponent();
 
-    public AccountWindow(IReadOnlyList<SteamAccount> accounts, string? lastId) : this()
+    public AccountWindow(IReadOnlyList<GameAccount> accounts, string? lastId) : this()
     {
         DataContext = new AccountViewModel(accounts, lastId);
     }
 
     private AccountViewModel ViewModel => (AccountViewModel)DataContext!;
 
-    public SteamAccount? Chosen { get; private set; }
+    public GameAccount? Chosen { get; private set; }
 
     private void Use_Click(object? sender, RoutedEventArgs e) => Use();
 

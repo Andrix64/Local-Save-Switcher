@@ -57,7 +57,7 @@ public sealed class StateAndAccountTests : IDisposable
         TestFolder.Write(Path.Combine(userData, "222", "870780", "remote", "b.sav"), "b");
         Directory.CreateDirectory(Path.Combine(userData, "333", "999999"));
 
-        IReadOnlyList<SteamAccount> accounts = SaveManager.FindAccounts(userData, "870780");
+        IReadOnlyList<GameAccount> accounts = SaveManager.FindAccounts(userData, "870780");
 
         Assert.Equal(new[] { "222", "111" }, accounts.Select(a => a.Id));
         Assert.Equal("Andrix", accounts[1].Name);
