@@ -119,7 +119,7 @@ per phase (the phase file names it).
 ### Phase K — Launchers in the core ([K-launchers-core.md](K-launchers-core.md))
 
 - [x] K1 — `GameAccount` instead of `SteamAccount` (53e8d82)
-- [ ] K2 — `GameInfo` with a provider
+- [x] K2 — `GameInfo` with a provider (89bcfc0)
 - [ ] K3 — Generic platform functions
 - [ ] K4a — The interface, unused
 - [ ] K4b — Accounts and games through the provider
