@@ -1,4 +1,5 @@
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Lss.App.ViewModels;
 
@@ -7,12 +8,17 @@ public sealed record AdminTile(Person Person, string Initial, IBrush Brush);
 
 /// <summary>
 /// "Chi sei?": si sceglie un amministratore. Solo gli admin compaiono, e
-/// scegliere un altro è rifiutato. Il risultato è Chosen, o null se si annulla.
+/// scegliere un altro è rifiutato. Un admin con PIN apre il tastierino (Pad);
+/// il risultato è Chosen, o null se si annulla.
 /// </summary>
-public sealed class AdminPickerViewModel
+public partial class AdminPickerViewModel : ObservableObject
 {
+    private readonly People people;
+
     internal AdminPickerViewModel(People people)
     {
+        this.people = people;
+
         Tiles = people.Admins
             .Select(person => new AdminTile(
                 person,
@@ -32,13 +38,41 @@ public sealed class AdminPickerViewModel
     /// <summary>L'amministratore scelto, o null.</summary>
     public Person? Chosen { get; private set; }
 
-    /// <summary>Sceglie una persona, se è tra gli amministratori. Ritorna false altrimenti.</summary>
+    /// <summary>Il tastierino aperto per un admin con PIN, o null.</summary>
+    [ObservableProperty]
+    private PinPadViewModel? pad;
+
+    public bool PadOpen => Pad != null;
+
+    partial void OnPadChanged(PinPadViewModel? value) => OnPropertyChanged(nameof(PadOpen));
+
+    /// <summary>
+    /// Sceglie una persona, se è tra gli amministratori. Senza PIN è scelta
+    /// subito; con PIN apre il tastierino. Ritorna false se non è un amministratore.
+    /// </summary>
     public bool Choose(Person person)
     {
         if (Tiles.All(tile => tile.Person.Id != person.Id))
             return false;
 
-        Chosen = person;
+        if (person.HasPin)
+            Pad = new PinPadViewModel(people, person);
+        else
+            Chosen = person;
+
         return true;
     }
+
+    /// <summary>Il PIN è giusto: l'amministratore del tastierino è scelto.</summary>
+    public bool CompletePin()
+    {
+        if (Pad?.Accepted != true)
+            return false;
+
+        Chosen = Pad.Admin;
+        return true;
+    }
+
+    /// <summary>Chiude il tastierino senza scegliere.</summary>
+    public void CancelPin() => Pad = null;
 }

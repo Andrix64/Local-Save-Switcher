@@ -9,6 +9,8 @@ public sealed class AdminPickerViewModelTests : IDisposable
 
     private readonly TestFolder folder = new();
 
+    public AdminPickerViewModelTests() => TestApp.Ensure();
+
     public void Dispose() => folder.Dispose();
 
     /// <summary>Persone: Andrea (admin, colore arancio) e Clara (utente).</summary>

@@ -5,7 +5,8 @@ namespace Lss;
 /// <summary>
 /// Una persona che gioca. Non è un account di Windows né di Steam.
 /// </summary>
-public sealed record Person(string Id, string Name, string Color, bool IsAdmin);
+/// <param name="HasPin">true se l'amministratore ha un PIN (vedi People.SetPin).</param>
+public sealed record Person(string Id, string Name, string Color, bool IsAdmin, bool HasPin = false);
 
 /// <summary>
 /// Le persone di LSS, in persone.ini. Non lancia mai eccezioni in lettura:
@@ -24,8 +25,16 @@ internal sealed class People
 
     private const int MaxNameLength = 30;
 
+    // PBKDF2-SHA256: il PIN non si scrive mai in chiaro.
+    private const int PinIterations = 100_000;
+    private const int PinSaltSize = 16;
+    private const int PinHashSize = 32;
+
     private readonly string path;
     private readonly List<Person> all = [];
+
+    // Id persona -> "salt:hash" in base64, per gli amministratori con PIN.
+    private readonly Dictionary<string, string> pins = [];
 
     public People(string dataRoot)
     {
@@ -48,6 +57,7 @@ internal sealed class People
     public void Load()
     {
         all.Clear();
+        pins.Clear();
 
         Dictionary<string, string> values = IniFile.Read(path);
         string[] order = values.TryGetValue("Ordine", out string? ordine)
@@ -69,7 +79,11 @@ internal sealed class People
             bool isAdmin = values.TryGetValue(id + ".Ruolo", out string? role) &&
                            role == "admin";
 
-            all.Add(new Person(id, cleanName, color, isAdmin));
+            // Un utente non ha PIN: se il file ne ha uno, si ignora.
+            if (isAdmin && values.TryGetValue(id + ".Pin", out string? pin) && IsStoredPin(pin))
+                pins[id] = pin;
+
+            all.Add(new Person(id, cleanName, color, isAdmin, pins.ContainsKey(id)));
         }
 
         if (all.Count == 0)
@@ -166,7 +180,11 @@ internal sealed class People
         if (!isAdmin && all[index].IsAdmin && Admins.Count == 1)
             return Result.Fail(Strings.LastAdmin);
 
-        all[index] = all[index] with { IsAdmin = isAdmin };
+        // Diventare utente toglie il PIN.
+        if (!isAdmin)
+            pins.Remove(id);
+
+        all[index] = all[index] with { IsAdmin = isAdmin, HasPin = isAdmin && pins.ContainsKey(id) };
         return Save();
     }
 
@@ -187,6 +205,7 @@ internal sealed class People
         if (all[index].IsAdmin && Admins.Count == 1)
             return Result.Fail(Strings.LastAdmin);
 
+        pins.Remove(id);
         all.RemoveAt(index);
         return Save();
     }
@@ -208,6 +227,9 @@ internal sealed class People
                 values.Add(new(person.Id + ".Nome", person.Name));
                 values.Add(new(person.Id + ".Colore", person.Color));
                 values.Add(new(person.Id + ".Ruolo", person.IsAdmin ? "admin" : "utente"));
+
+                if (pins.TryGetValue(person.Id, out string? pin))
+                    values.Add(new(person.Id + ".Pin", pin));
             }
 
             IniFile.Write(path, values);
@@ -218,6 +240,79 @@ internal sealed class People
             Log.Write("Salvataggio di persone.ini", ex);
             return Result.Fail(Strings.PlayersNotSaved);
         }
+    }
+
+    /// <summary>
+    /// Imposta o cambia il PIN di un amministratore: 4 cifre, salvate con PBKDF2.
+    /// Il PIN non è obbligatorio: senza, l'amministratore si sceglie da solo.
+    /// </summary>
+    public Result SetPin(string id, string pin)
+    {
+        int index = IndexOf(id);
+
+        if (index < 0)
+            return Result.Fail(Strings.PlayerNotFound);
+
+        if (!all[index].IsAdmin)
+            return Result.Fail(Strings.AdminOnlyText);
+
+        if (!IsPinFormat(pin))
+            return Result.Fail(Strings.PinFormat);
+
+        pins[id] = HashPin(pin);
+        all[index] = all[index] with { HasPin = true };
+        return Save();
+    }
+
+    /// <summary>Toglie il PIN. Vale anche senza il PIN attuale (vedi P4a: si chiede al cambio).</summary>
+    public Result RemovePin(string id)
+    {
+        int index = IndexOf(id);
+
+        if (index < 0)
+            return Result.Fail(Strings.PlayerNotFound);
+
+        pins.Remove(id);
+        all[index] = all[index] with { HasPin = false };
+        return Save();
+    }
+
+    /// <summary>
+    /// Il PIN è quello di questa persona? Confronto a tempo costante. Senza PIN, false.
+    /// </summary>
+    public bool CheckPin(string id, string pin)
+    {
+        if (!pins.TryGetValue(id, out string? stored) || !IsPinFormat(pin))
+            return false;
+
+        string[] parts = stored.Split(':');
+        byte[] expected = Convert.FromBase64String(parts[1]);
+        byte[] actual = Pbkdf2(pin, Convert.FromBase64String(parts[0]));
+
+        return CryptographicOperations.FixedTimeEquals(actual, expected);
+    }
+
+    private static bool IsPinFormat(string pin) =>
+        pin.Length == 4 && pin.All(c => c is >= '0' and <= '9');
+
+    /// <summary>Sale casuale e hash, come "salt:hash" in base64.</summary>
+    private static string HashPin(string pin)
+    {
+        byte[] salt = RandomNumberGenerator.GetBytes(PinSaltSize);
+        return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(Pbkdf2(pin, salt));
+    }
+
+    private static byte[] Pbkdf2(string pin, byte[] salt) =>
+        Rfc2898DeriveBytes.Pbkdf2(pin, salt, PinIterations, HashAlgorithmName.SHA256, PinHashSize);
+
+    /// <summary>Valore di persone.ini: salt e hash in base64, separati da ':'.</summary>
+    private static bool IsStoredPin(string value)
+    {
+        string[] parts = value.Split(':');
+
+        return parts.Length == 2 &&
+               Convert.TryFromBase64String(parts[0], new byte[PinSaltSize], out _) &&
+               Convert.TryFromBase64String(parts[1], new byte[PinHashSize], out _);
     }
 
     private int IndexOf(string id) =>

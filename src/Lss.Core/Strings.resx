@@ -472,4 +472,16 @@ LSS will look at what changed on the disk.</value></data>
   <data name="AdminPickerTitle" xml:space="preserve"><value>Who are you?</value></data>
   <data name="AdminOnlyText" xml:space="preserve"><value>Only an admin can do this.</value></data>
   <data name="AdminPickerCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="PinTitle" xml:space="preserve"><value>PIN of {0}</value></data>
+  <data name="PinPrompt" xml:space="preserve"><value>Enter the PIN</value></data>
+  <data name="PinWrong" xml:space="preserve"><value>Wrong PIN</value></data>
+  <data name="PinWait" xml:space="preserve"><value>Too many tries. Wait {0} seconds.</value></data>
+  <data name="PinFormat" xml:space="preserve"><value>The PIN is 4 digits.</value></data>
+  <data name="SetPin" xml:space="preserve"><value>Set PIN…</value></data>
+  <data name="ChangePin" xml:space="preserve"><value>Change PIN…</value></data>
+  <data name="RemovePin" xml:space="preserve"><value>Remove PIN</value></data>
+  <data name="PinNew" xml:space="preserve"><value>New PIN</value></data>
+  <data name="PinRepeat" xml:space="preserve"><value>Repeat the new PIN</value></data>
+  <data name="PinMismatch" xml:space="preserve"><value>The two PINs are different.</value></data>
+  <data name="PinOptional" xml:space="preserve"><value>Optional. With a PIN, only you can use your admin rights.</value></data>
 </root>

@@ -11,34 +11,63 @@
 
   <StackPanel Margin="36,30,36,28" Spacing="20">
 
-    <TextBlock Classes="title" Text="{Binding Title}" FontSize="20" />
-    <TextBlock Text="{Binding OnlyAdminText}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+    <!-- Chi sei: si scelgono gli amministratori -->
+    <StackPanel Spacing="20" IsVisible="{Binding !PadOpen}">
+      <TextBlock Classes="title" Text="{Binding Title}" FontSize="20" />
+      <TextBlock Text="{Binding OnlyAdminText}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
 
-    <ItemsControl ItemsSource="{Binding Tiles}">
-      <ItemsControl.ItemsPanel>
-        <ItemsPanelTemplate>
-          <WrapPanel />
-        </ItemsPanelTemplate>
-      </ItemsControl.ItemsPanel>
-      <ItemsControl.ItemTemplate>
-        <DataTemplate x:DataType="vm:AdminTile">
-          <Button Margin="0,0,16,16" Padding="18,14" MinWidth="130" MinHeight="44"
-                  HorizontalContentAlignment="Center" Tag="{Binding}" Click="Tile_Click">
-            <StackPanel Spacing="10" HorizontalAlignment="Center">
-              <Border Width="72" Height="72" CornerRadius="36" Background="{Binding Brush}"
-                      HorizontalAlignment="Center">
-                <TextBlock Text="{Binding Initial}" FontSize="32" FontWeight="Bold" Foreground="White"
-                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-              </Border>
-              <TextBlock Text="{Binding Person.Name}" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Button>
-        </DataTemplate>
-      </ItemsControl.ItemTemplate>
-    </ItemsControl>
+      <ItemsControl ItemsSource="{Binding Tiles}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:AdminTile">
+            <Button Margin="0,0,16,16" Padding="18,14" MinWidth="130" MinHeight="44"
+                    HorizontalContentAlignment="Center" Tag="{Binding}" Click="Tile_Click">
+              <StackPanel Spacing="10" HorizontalAlignment="Center">
+                <Border Width="72" Height="72" CornerRadius="36" Background="{Binding Brush}"
+                        HorizontalAlignment="Center">
+                  <TextBlock Text="{Binding Initial}" FontSize="32" FontWeight="Bold" Foreground="White"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="{Binding Person.Name}" HorizontalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
 
-    <Button Classes="link" Content="{Binding CancelText}" IsCancel="True" HorizontalAlignment="Left"
-            Click="Cancel_Click" />
+    <!-- PIN dell'amministratore scelto: tastierino -->
+    <StackPanel Spacing="14" IsVisible="{Binding PadOpen}" HorizontalAlignment="Center">
+      <TextBlock Classes="title" Text="{Binding Pad.Title}" FontSize="20" HorizontalAlignment="Center" />
+      <TextBlock Text="{Binding Pad.Prompt}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
+      <TextBlock Text="{Binding Pad.Dots}" FontSize="28" HorizontalAlignment="Center" />
+      <TextBlock Text="{Binding Pad.WrongText}" IsVisible="{Binding Pad.IsWrong}"
+                 Foreground="{StaticResource Error}" HorizontalAlignment="Center" />
+      <TextBlock Text="{Binding Pad.WaitText}" Foreground="{StaticResource Error}" HorizontalAlignment="Center"
+                 TextWrapping="Wrap" TextAlignment="Center" />
+
+      <UniformGrid Columns="3" Rows="4" HorizontalAlignment="Center">
+        <Button Classes="secondary" Tag="1" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="1" />
+        <Button Classes="secondary" Tag="2" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="2" />
+        <Button Classes="secondary" Tag="3" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="3" />
+        <Button Classes="secondary" Tag="4" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="4" />
+        <Button Classes="secondary" Tag="5" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="5" />
+        <Button Classes="secondary" Tag="6" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="6" />
+        <Button Classes="secondary" Tag="7" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="7" />
+        <Button Classes="secondary" Tag="8" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="8" />
+        <Button Classes="secondary" Tag="9" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="9" />
+        <Border Width="76" Height="64" />
+        <Button Classes="secondary" Tag="0" Click="Digit_Click" Width="76" Height="64" FontSize="26" Content="0" />
+        <Button Classes="secondary" Click="Back_Click" Width="76" Height="64" FontSize="22" Content="⌫"
+                AutomationProperties.Name="Cancella una cifra" />
+      </UniformGrid>
+
+      <Button Classes="link" Content="{Binding CancelText}" HorizontalAlignment="Center" Click="CancelPin_Click" />
+    </StackPanel>
 
   </StackPanel>
 
