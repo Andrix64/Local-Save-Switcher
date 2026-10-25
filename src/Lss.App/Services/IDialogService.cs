@@ -24,6 +24,9 @@ public interface IDialogService
     /// <summary>Sceglie un file qualsiasi, partendo da una cartella. Null se annullato.</summary>
     Task<string?> PickFileAsync(string title, string startFolder);
 
+    /// <summary>Sceglie una cartella, partendo da un'altra. Null se annullato.</summary>
+    Task<string?> PickFolderAsync(string title, string startFolder);
+
     /// <summary>Apre una cartella nel file manager. false se non si riesce.</summary>
     Task<bool> OpenFolderAsync(string path);
 }

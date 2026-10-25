@@ -313,12 +313,29 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SafetyTooBig" xml:space="preserve"><value>the folder is too big for a save folder (over 2 GB or 20,000 files).</value></data>
   <data name="SafetyInsideLss" xml:space="preserve"><value>the folder is inside LSS's own data.</value></data>
   <data name="SafetyUnreadable" xml:space="preserve"><value>the folder can't be read.</value></data>
+  <data name="SupportNotFound" xml:space="preserve"><value>No save folder yet: start the game once and save.</value></data>
+  <data name="SupportUnsure" xml:space="preserve"><value>Saves are in several places: LSS can't switch them yet. You can choose the folder yourself.</value></data>
+  <data name="SupportUnsafe" xml:space="preserve"><value>The save folder found can't be used safely: {0}</value></data>
+  <data name="FindSaveFolder" xml:space="preserve"><value>Find the save folder…</value></data>
+  <data name="ChooseSaveFolder" xml:space="preserve"><value>Choose the folder myself…</value></data>
+  <data name="ChooseSaveFolderTitle" xml:space="preserve"><value>Save folder of {0}</value></data>
+  <data name="UseThisFolderText" xml:space="preserve"><value>When you switch playthrough, LSS replaces everything in this folder with the playthrough's files:
+{0}
+Use it only if it contains just the saves of {1}.</value></data>
+  <data name="UseThisFolder" xml:space="preserve"><value>Use this folder</value></data>
+  <data name="UseAutomaticFolder" xml:space="preserve"><value>Use the automatic folder</value></data>
+  <data name="SaveFolderFromSteam" xml:space="preserve"><value>Saves: {0} (Steam)</value></data>
+  <data name="SaveFolderFromLauncher" xml:space="preserve"><value>Saves: {0} (from {1})</value></data>
+  <data name="SaveFolderChosen" xml:space="preserve"><value>Saves: {0} (chosen by you)</value></data>
+  <data name="SaveFolderLearned" xml:space="preserve"><value>Saves: {0} (found by LSS)</value></data>
+  <data name="SomeSavesElsewhere" xml:space="preserve"><value>This game also keeps saves in other folders: LSS switches only this one.</value></data>
+  <data name="SaveFolderMenu" xml:space="preserve"><value>Save folder options</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>This playthrough is from {0}, not from {1}.</value></data>
   <data name="GamesCaption" xml:space="preserve"><value>GAMES</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Other games</value></data>
-  <data name="SupportSavesElsewhere" xml:space="preserve"><value>Saves are outside Steam's userdata folder: not supported yet.</value></data>
+  <data name="SupportSavesElsewhere" xml:space="preserve"><value>The saves are not in Steam's userdata folder and LSS doesn't know where they are: you can choose the folder yourself.</value></data>
   <data name="SupportNoSaves" xml:space="preserve"><value>No saves yet: start the game once.</value></data>
-  <data name="NoSupportedGames" xml:space="preserve"><value>None of this account's games keeps its saves in Steam's userdata folder, so LSS can't manage them yet. Many games, especially those that run through Proton, save in other folders: you find them under Other games, with the reason.</value></data>
+  <data name="NoSupportedGames" xml:space="preserve"><value>LSS found no save folder it can use yet. Under Other games you see why for each game, and LSS can help you find the folder.</value></data>
   <data name="OnlyUserdataNotice" xml:space="preserve"><value>LSS copies only the files in Steam's userdata folder for {0}. If the game also saves elsewhere, those files don't change between playthroughs.</value></data>
   <data name="NoAccountWithGames" xml:space="preserve"><value>No Steam account on this PC has games with saves in the userdata folder.</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>LOCAL SAVE SWITCHER</value></data>

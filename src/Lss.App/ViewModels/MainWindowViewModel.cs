@@ -13,6 +13,9 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly AppSettings settings;
     private readonly IDialogService dialogs;
 
+    // Account e giochi di ogni launcher, come li ha letti l'avvio (o l'ultima ricarica).
+    private IReadOnlyList<LauncherGames> launchers;
+
     // Una GameViewModel per gioco, per provider/id.
     private readonly Dictionary<string, GameViewModel> gameModels = [];
 
@@ -24,39 +27,11 @@ public partial class MainWindowViewModel : ObservableObject
 
     internal MainWindowViewModel(IReadOnlyList<LauncherGames> launchers, AppSettings settings, IDialogService dialogs)
     {
+        this.launchers = launchers;
         this.settings = settings;
         this.dialogs = dialogs;
 
-        // Con più launcher ogni gruppo di giochi ha la sua intestazione.
-        bool headers = launchers.Count > 1;
-
-        foreach (LauncherGames launcher in launchers)
-        {
-            bool firstSupported = true;
-            bool firstOther = true;
-
-            foreach (GameInfo game in launcher.Games)
-            {
-                var item = new GameItemViewModel(game, launcher.Account, launcher.Provider);
-
-                if (game.Support == SupportState.Supported)
-                {
-                    if (headers && firstSupported)
-                        item.LauncherHeader = launcher.Provider.DisplayName;
-
-                    firstSupported = false;
-                    Games.Add(item);
-                }
-                else
-                {
-                    if (headers && firstOther)
-                        item.LauncherHeader = launcher.Provider.DisplayName;
-
-                    firstOther = false;
-                    OtherGames.Add(item);
-                }
-            }
-        }
+        FillGames(launchers);
 
         ShowSidebar = Games.Count > 1 || OtherGames.Count > 0;
         AccountText = string.Join("  ·  ", launchers.Select(l => l.Account.DisplayName));
@@ -98,7 +73,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnCurrentGameChanged(GameViewModel? value) => ShowNoGames = value == null;
 
-    public string AccountText { get; }
+    public string AccountText { get; private set; } = "";
 
     /// <summary>Sottotitolo dell'intestazione, con la versione.</summary>
     public string HeaderCaption => Strings.AppSubtitle + "  ·  v" + Program.Version;
@@ -150,6 +125,78 @@ public partial class MainWindowViewModel : ObservableObject
             game.CloseSession();
     }
 
+    /// <summary>
+    /// Riempie le due colonne dai giochi di ogni launcher: gestibili a sinistra,
+    /// gli altri in Altri giochi. Con più launcher ogni gruppo ha la sua intestazione.
+    /// </summary>
+    private void FillGames(IReadOnlyList<LauncherGames> list)
+    {
+        bool headers = list.Count > 1;
+
+        foreach (LauncherGames launcher in list)
+        {
+            bool firstSupported = true;
+            bool firstOther = true;
+
+            foreach (GameInfo game in launcher.Games)
+            {
+                var item = new GameItemViewModel(game, launcher.Account, launcher.Provider, ChooseFolderAsync);
+
+                if (game.Support == SupportState.Supported)
+                {
+                    if (headers && firstSupported)
+                        item.LauncherHeader = launcher.Provider.DisplayName;
+
+                    firstSupported = false;
+                    Games.Add(item);
+                }
+                else
+                {
+                    if (headers && firstOther)
+                        item.LauncherHeader = launcher.Provider.DisplayName;
+
+                    firstOther = false;
+                    OtherGames.Add(item);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rilegge i giochi di ogni launcher e ricostruisce le colonne. Resta
+    /// selezionato il gioco di prima (keepKey). changedKey è il gioco la cui
+    /// cartella è cambiata: la sua GameViewModel, con il vecchio SaveManager, va buttata.
+    /// </summary>
+    private void ReloadGames(string? keepKey, string? changedKey)
+    {
+        launchers = launchers
+            .Select(l => new LauncherGames(l.Provider, l.Account, l.Provider.FindGames(l.Account)))
+            .ToList();
+
+        if (changedKey != null && gameModels.TryGetValue(changedKey, out GameViewModel? stale) && !stale.IsBusy)
+            gameModels.Remove(changedKey);
+
+        Games.Clear();
+        OtherGames.Clear();
+        FillGames(launchers);
+
+        ShowSidebar = Games.Count > 1 || OtherGames.Count > 0;
+        SelectedGame = Games.FirstOrDefault(g => g.Info.Key == keepKey) ?? Games.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Sceglie a mano la cartella dei salvataggi di un gioco di Altri giochi;
+    /// se viene salvata, la lista si ricarica.
+    /// </summary>
+    private async Task ChooseFolderAsync(GameItemViewModel item)
+    {
+        GameItemViewModel? selected = SelectedGame;
+        bool saved = await SaveFolderChoice.ChooseAsync(dialogs, item.Info, item.Account, item.Provider);
+
+        if (saved)
+            ReloadGames(selected?.Info.Key, item.Info.Key);
+    }
+
     private GameViewModel GameFor(GameItemViewModel item)
     {
         if (gameModels.TryGetValue(item.Info.Key, out GameViewModel? existing))
@@ -162,6 +209,9 @@ public partial class MainWindowViewModel : ObservableObject
 
         var created = new GameViewModel(open.Value!, dialogs);
         created.Refresh();
+
+        // Tornare alla cartella automatica cambia il gioco: la lista si rilegge (vedi ReloadGames).
+        created.SaveFolderChanged += () => ReloadGames(SelectedGame?.Info.Key, item.Info.Key);
 
         gameModels[item.Info.Key] = created;
         return created;

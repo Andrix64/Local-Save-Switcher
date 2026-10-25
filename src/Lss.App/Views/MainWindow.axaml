@@ -47,6 +47,10 @@
                     <TextBlock Classes="caption" Text="{Binding LauncherHeader}" IsVisible="{Binding HasLauncherHeader}" />
                     <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
                     <TextBlock Classes="small" Text="{Binding SupportText}" TextWrapping="Wrap" />
+                    <Button Classes="secondary" Content="{loc:Str FindSaveFolder}" Command="{Binding FindFolderCommand}"
+                            HorizontalAlignment="Stretch" Margin="0,4,0,0" />
+                    <Button Classes="secondary" Content="{loc:Str ChooseSaveFolder}" Command="{Binding ChooseFolderCommand}"
+                            HorizontalAlignment="Stretch" />
                   </StackPanel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>

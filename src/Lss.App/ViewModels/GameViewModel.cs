@@ -22,9 +22,30 @@ public partial class GameViewModel : ObservableObject
         Manager = manager;
         this.dialogs = dialogs;
         UserdataNotice = Loc.F(Strings.OnlyUserdataNotice, manager.Game.Name);
+        SaveFolderText = SaveFolderLine(manager);
+        ShowUserdataNotice = manager.Game.Source == SaveSource.Userdata;
+        ShowAutomaticFolder = manager.Game.Source is SaveSource.Chosen or SaveSource.Learned;
+        ShowOtherSaves = manager.Game.HasOtherSaves;
     }
 
+    /// <summary>Cambia la cartella dei salvataggi del gioco (scelta o automatica): la lista va ricaricata.</summary>
+    public event Action? SaveFolderChanged;
+
     public SaveManager Manager { get; }
+
+    /// <summary>Dove sono i salvataggi del gioco, da dove li ha trovati LSS.</summary>
+    public string SaveFolderText { get; }
+
+    /// <summary>Solo per i giochi con la cartella in userdata: vale la nota su userdata.</summary>
+    public bool ShowUserdataNotice { get; }
+
+    /// <summary>Con una cartella scelta o imparata si può tornare a quella automatica.</summary>
+    public bool ShowAutomaticFolder { get; }
+
+    /// <summary>Il gioco ha salvataggi anche in altre cartelle, che LSS non cambia.</summary>
+    public bool ShowOtherSaves { get; }
+
+    public string OtherSavesText => Strings.SomeSavesElsewhere;
 
     // Sessione di gioco in corso: quando è partita e con quale partita.
     public SessionTracker Session { get; } = new();
@@ -75,6 +96,38 @@ public partial class GameViewModel : ObservableObject
 
     [ObservableProperty]
     private string emptyText = "";
+
+    /// <summary>
+    /// Testo della riga con la cartella dei salvataggi e la sua origine.
+    /// </summary>
+    private static string SaveFolderLine(SaveManager manager) => manager.Game.Source switch
+    {
+        SaveSource.Launcher => Loc.F(Strings.SaveFolderFromLauncher, manager.SavePath, manager.LauncherName),
+        SaveSource.Chosen => Loc.F(Strings.SaveFolderChosen, manager.SavePath),
+        SaveSource.Learned => Loc.F(Strings.SaveFolderLearned, manager.SavePath),
+        _ => Loc.F(Strings.SaveFolderFromSteam, manager.SavePath),
+    };
+
+    /// <summary>
+    /// Apre la cartella dei salvataggi nel file manager.
+    /// </summary>
+    [RelayCommand]
+    private Task OpenSaveFolderAsync() => OpenFolder(Manager.SavePath);
+
+    /// <summary>
+    /// Torna alla cartella trovata automaticamente: cancella la scelta in
+    /// cartella.ini e chiede di ricaricare la lista.
+    /// </summary>
+    [RelayCommand]
+    private void UseAutomaticFolder()
+    {
+        new GameSaveSettings(Path.Combine(AppData.Root, Manager.Account.Provider, Manager.Account.Id, Manager.Game.Id))
+        {
+            Folder = "",
+        }.Save();
+
+        SaveFolderChanged?.Invoke();
+    }
 
     /// <summary>
     /// Rilegge stato e partite dal disco e ricostruisce le schede.

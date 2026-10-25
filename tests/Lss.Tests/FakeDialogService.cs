@@ -53,10 +53,18 @@ public sealed class FakeDialogService : IDialogService
 
     public string? FileToPick { get; set; }
 
+    public string? FolderToPick { get; set; }
+
     public Task<string?> PickFileAsync(string title, string startFolder)
     {
         Calls.Add("PickFile");
         return Task.FromResult(FileToPick);
+    }
+
+    public Task<string?> PickFolderAsync(string title, string startFolder)
+    {
+        Calls.Add("PickFolder: " + startFolder);
+        return Task.FromResult(FolderToPick);
     }
 
     public Task<bool> OpenFolderAsync(string path)

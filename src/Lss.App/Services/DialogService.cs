@@ -74,6 +74,27 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
         return files.Count > 0 ? files[0].TryGetLocalPath() : null;
     }
 
+    public async Task<string?> PickFolderAsync(string title, string startFolder)
+    {
+        Window? window = owner();
+
+        if (window == null)
+            return null;
+
+        IStorageFolder? start = startFolder != "" && Directory.Exists(startFolder)
+            ? await window.StorageProvider.TryGetFolderFromPathAsync(new Uri(startFolder))
+            : null;
+
+        IReadOnlyList<IStorageFolder> folders = await window.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+            SuggestedStartLocation = start,
+        });
+
+        return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+    }
+
     public async Task<bool> OpenFolderAsync(string path)
     {
         Window? window = owner();

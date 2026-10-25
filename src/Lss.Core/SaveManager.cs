@@ -67,6 +67,11 @@ public sealed partial class SaveManager
     public GameAccount Account { get; }
 
     /// <summary>
+    /// Nome del launcher che gestisce il gioco (marchio: Steam, Epic...).
+    /// </summary>
+    public string LauncherName => provider.DisplayName;
+
+    /// <summary>
     /// Launcher che gestisce il gioco (Steam).
     /// </summary>
     private readonly IGameProvider provider;

@@ -39,8 +39,30 @@
       </StackPanel>
     </Grid>
 
-    <TextBlock Grid.Row="3" Text="{Binding UserdataNotice}" TextWrapping="Wrap" FontSize="12"
-               Foreground="{StaticResource TextMuted}" Margin="0,0,0,10" />
+    <!-- Dove sono i salvataggi del gioco, e da dove li ha trovati LSS -->
+    <StackPanel Grid.Row="3" Spacing="2" Margin="0,0,0,10">
+      <StackPanel Orientation="Horizontal" Spacing="4">
+        <Button Classes="link" Content="{Binding SaveFolderText}" Command="{Binding OpenSaveFolderCommand}"
+                FontSize="12" />
+        <Button Classes="more" IsVisible="{Binding ShowAutomaticFolder}"
+                AutomationProperties.Name="{loc:Str SaveFolderMenu}">
+          <StackPanel Orientation="Horizontal" Spacing="3">
+            <Ellipse />
+            <Ellipse />
+            <Ellipse />
+          </StackPanel>
+          <Button.Flyout>
+            <MenuFlyout>
+              <MenuItem Header="{loc:Str UseAutomaticFolder}" Command="{Binding UseAutomaticFolderCommand}" />
+            </MenuFlyout>
+          </Button.Flyout>
+        </Button>
+      </StackPanel>
+      <TextBlock Text="{Binding OtherSavesText}" IsVisible="{Binding ShowOtherSaves}" TextWrapping="Wrap"
+                 FontSize="12" Foreground="{StaticResource TextMuted}" />
+      <TextBlock Text="{Binding UserdataNotice}" IsVisible="{Binding ShowUserdataNotice}" TextWrapping="Wrap"
+                 FontSize="12" Foreground="{StaticResource TextMuted}" />
+    </StackPanel>
 
     <!-- Le schede delle partite -->
     <ScrollViewer Grid.Row="4">

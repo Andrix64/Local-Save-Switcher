@@ -313,12 +313,29 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SafetyTooBig" xml:space="preserve"><value>la cartella è troppo grande per dei salvataggi (oltre 2 GB o 20.000 file).</value></data>
   <data name="SafetyInsideLss" xml:space="preserve"><value>la cartella è dentro i dati di LSS.</value></data>
   <data name="SafetyUnreadable" xml:space="preserve"><value>la cartella non si legge.</value></data>
+  <data name="SupportNotFound" xml:space="preserve"><value>Nessuna cartella dei salvataggi: avvia il gioco e salva almeno una volta.</value></data>
+  <data name="SupportUnsure" xml:space="preserve"><value>I salvataggi sono in più posti: LSS non può ancora cambiarli. Puoi scegliere tu la cartella.</value></data>
+  <data name="SupportUnsafe" xml:space="preserve"><value>La cartella dei salvataggi trovata non si può usare in sicurezza: {0}</value></data>
+  <data name="FindSaveFolder" xml:space="preserve"><value>Trova la cartella dei salvataggi…</value></data>
+  <data name="ChooseSaveFolder" xml:space="preserve"><value>Scelgo io la cartella…</value></data>
+  <data name="ChooseSaveFolderTitle" xml:space="preserve"><value>Cartella dei salvataggi di {0}</value></data>
+  <data name="UseThisFolderText" xml:space="preserve"><value>Quando cambi partita, LSS sostituisce tutto il contenuto di questa cartella con i file della partita:
+{0}
+Usala solo se contiene solo i salvataggi di {1}.</value></data>
+  <data name="UseThisFolder" xml:space="preserve"><value>Usa questa cartella</value></data>
+  <data name="UseAutomaticFolder" xml:space="preserve"><value>Usa la cartella automatica</value></data>
+  <data name="SaveFolderFromSteam" xml:space="preserve"><value>Salvataggi: {0} (Steam)</value></data>
+  <data name="SaveFolderFromLauncher" xml:space="preserve"><value>Salvataggi: {0} (da {1})</value></data>
+  <data name="SaveFolderChosen" xml:space="preserve"><value>Salvataggi: {0} (scelta da te)</value></data>
+  <data name="SaveFolderLearned" xml:space="preserve"><value>Salvataggi: {0} (trovata da LSS)</value></data>
+  <data name="SomeSavesElsewhere" xml:space="preserve"><value>Questo gioco ha salvataggi anche in altre cartelle: LSS cambia solo questa.</value></data>
+  <data name="SaveFolderMenu" xml:space="preserve"><value>Opzioni della cartella dei salvataggi</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>Questa partita è di {0}, non di {1}.</value></data>
   <data name="GamesCaption" xml:space="preserve"><value>GIOCHI</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Altri giochi</value></data>
-  <data name="SupportSavesElsewhere" xml:space="preserve"><value>I salvataggi sono fuori dalla cartella userdata di Steam: per ora non è supportato.</value></data>
+  <data name="SupportSavesElsewhere" xml:space="preserve"><value>I salvataggi non sono nella cartella userdata di Steam e LSS non sa dove sono: puoi scegliere tu la cartella.</value></data>
   <data name="SupportNoSaves" xml:space="preserve"><value>Ancora nessun salvataggio: avvia il gioco una volta.</value></data>
-  <data name="NoSupportedGames" xml:space="preserve"><value>Nessun gioco di questo account tiene i salvataggi nella cartella userdata di Steam, quindi per ora LSS non può gestirli. Molti giochi, soprattutto quelli che girano con Proton, salvano in altre cartelle: li trovi in Altri giochi, con il motivo.</value></data>
+  <data name="NoSupportedGames" xml:space="preserve"><value>LSS non ha ancora trovato nessuna cartella dei salvataggi che può usare. In Altri giochi vedi il motivo per ogni gioco, e LSS può aiutarti a trovare la cartella.</value></data>
   <data name="OnlyUserdataNotice" xml:space="preserve"><value>LSS copia solo i file di {0} nella cartella userdata di Steam. Se il gioco salva anche altrove, quei file non cambiano tra le partite.</value></data>
   <data name="NoAccountWithGames" xml:space="preserve"><value>Nessun account Steam su questo PC ha giochi con i salvataggi nella cartella userdata.</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>LOCAL SAVE SWITCHER</value></data>
