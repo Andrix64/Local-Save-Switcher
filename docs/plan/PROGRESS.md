@@ -216,6 +216,94 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fine fase N (Haiku). N1–N13 committati su `v2` (da `97d27f2` a
+  `d708e11`), ogni task con il suo tick in un commit `Progress:`. N14 non fatto (👤).
+  Test Windows: 498 verdi, 0 warning (prima di N: 378). Linux (`lss-ci`,
+  `scripts/linux-check.sh lss-ci@192.168.1.3 --tests-only`): 496 verdi dopo N2, N5b e
+  N5d. Dopo N10 un test di N9b (radice `LinuxHome`, che su Linux esiste) falliva e
+  c'era un avviso xUnit2031 in N10: corretti in `69a2a7a`; verifica finale 498 verdi.
+  - Deviazioni dal piano, da sapere:
+    - N1: `ToPortable` sostituisce gli ID Steam dell'account con `{64BitSteamID}` /
+      `{Steam3AccountID}` (solo segmenti interi); `FromPortable` li riporta.
+      `GameInfo.SpotsOf(folder, source)` crea i posti di una cartella sola.
+    - N3: gli id dei posti partono da 2 (il posto 1 è il primario, `SetPrimary`).
+      `Ignorate` è `Ignorate.n`/`Aggiunta.n` come in M3b, non la lista `;` del piano
+      (si perdeva la data). `cartella.ini` si converte alla prima lettura. Test cambiati
+      di proposito perché il file è ora `posti.ini`: `GameSaveSettingsTests`,
+      `SaveFolderChoiceTests`, `LearnSavesViewModelTests`. Nuovo: `GameSpotsTests`.
+    - N4: il primo tentativo saltava `.lss-posizioni` anche nelle copie tra snapshot
+      (backup, profili, esporta): le avrebbe tolte. Corretto in `0292d9a`:
+      `CopyFolder`/`CopyFolderVerified` portano i posti extra; `ReplaceFolder` e
+      `MirrorFolder` hanno `carryExtraSpots` (default `false`, il caso del gioco).
+      Punti che trattano `remotecache.vdf` (N4), in `FileOps`: `CopyFolder`,
+      `MirrorFolder` (2), `CopyKeptFromDestination`, `HasNoSaveFiles`, `FoldersAreEqual`
+      (`ListNames`), `IsSkipped` (usato da `MatchedFiles` e `HasNoSaveFiles`). Fuori:
+      `SteamLibrary.GetSupport` e `SteamProvider` (righe 187, 279-283) leggono
+      `remotecache.vdf` nella cartella del gioco, dove `.lss-posizioni` non sta mai.
+    - N5a/N5b: `SaveSet.ReplaceGameFrom` scrive `cambio.ini`. I test di `SaveSetTests`
+      (scritti in N5a, in questa fase) passano ora un journal e un backup veri invece di
+      stringhe vuote: cambio di proposito. Il ripristino riporta dal backup tutti i posti
+      di `Posti=` (non solo `Fatti=`: un posto cambiato a metà va rimesso). Se un posto
+      del journal non è più noto al gioco, il journal resta.
+    - N5c, usi di `SavePath` cambiati in questo commit: `ReplaceGameSaves` (3 punti:
+      backup con `CopyGameTo`, `ReplaceGameFrom`, ripristino con
+      `ReplaceGameFrom(backup, backup, …)`); `Open` chiama `RecoverInterruptedSwitch`.
+    - N5d: `SaveProgress` usa `ReplaceSnapshotFromGame`; il ripristino del profilo dopo
+      un errore usa `ReplaceFolder(…, carryExtraSpots: true)`. Usi di `SavePath` rimasti
+      in `SaveManager*.cs`: costruttore, proprietà, `SharedFilePath` (file condivisi:
+      solo posto 1, per scelta) e `SaveManager.Playthroughs.cs` 529–531 (stesso motivo).
+      Nessun testo di log cambiato. Nuovo: `SaveManagerSpotsTests`.
+    - N6: il posto 1 scelto (`posti.ini` id 1) sostituisce le cartelle trovate, come in
+      L8; il piano diceva "aggiunto dopo". `HasOtherSaves` e `SomeSavesElsewhere` tolti.
+      I giochi Steam con userdata prendono anche le cartelle delle regole come posti
+      extra (Terraria): se una è insicura, **tutto il gioco diventa Unsafe**. È un rischio
+      di regressione per giochi che prima funzionavano: da controllare con Andrix.
+      Un posto extra che contiene il primario viene scartato (log). Test L8 cambiati di
+      proposito: `TwoFoldersAreUnsure` → `TwoFoldersAreTwoSpots`, `OnlyFilesAreUnsure` →
+      `OnlyFilesAreAPatternSpot`; le asserzioni su `HasOtherSaves` diventano su posti.
+      Il testo di `SupportUnsure` è nuovo (usato solo per più di 8 posti).
+    - N7: `AddSpot`/`RemoveSpot`. `RemoveSpot` tocca solo `posti.ini`: le copie restano.
+      `SaveManager.Game` ha ora `private set` e si aggiorna in memoria.
+    - N8: formato 4 (`Formato=4`, `posizioni.ini` nello zip). Il primo posto dello zip va
+      al primo posto qui, qualunque sia il suo percorso portabile (quello userdata non è
+      portabile tra PC); gli altri per percorso portabile, maschera e ricorsione. Senza il
+      primo posto l'importazione si rifiuta: una cartella principale vuota svuoterebbe il
+      gioco. Test cambiato di proposito: `Export_WritesFormat3…` → `…Format4…`.
+    - N9: wizard con caselle (la prima resta la cartella principale); le altre diventano
+      posti extra solo se il gioco non ha partite (con partite: nel log, e si aggiungono
+      con "Aggiungi un'altra cartella"). Quest'ultima chiede la scelta delle copie con due
+      conferme (copia, poi vuoto), non con tre pulsanti. Chiavi del piano presenti in
+      entrambi i `resx`. Non fatto: la finestra `ImportConfigWindow` (la conferma è una
+      per gioco).
+    - N9a–c: file `*.lss-config.json` (`SaveConfig`), lettura non fidata (`SaveConfig.Read`:
+      1 MB, 200 giochi, 8 posti, radici, percorsi, token, maschere), abbinamento e
+      applicazione (`SaveConfigImport`). Deviazioni: il preview non ha la casella Note
+      (vuote); niente finestra di import con caselle; niente "Esporta tutte" in
+      Impostazioni; con partite i posti importati ricevono una copia dei file attuali
+      senza chiedere; il pulsante di esporta è un link nella vista del gioco.
+    - N10: `SessionScan.Run` con soglia 9, posti e cartelle ignorate saltati; i file
+      sparsi con estensione .sav/.save/.dat/.sl2/.slot nella cartella di installazione
+      diventano una maschera (per estensione se sono tre o più, altrimenti i nomi). Le
+      proposte in `proposte.ini`; i motivi non si salvano (come da piano).
+    - N11: le proposte si esaminano con i dialoghi in sequenza (Aggiungi / Non sono
+      salvataggi, per questo gioco o per tutti / Più tardi), non con
+      `SpotSuggestionsWindow`. Il toast ha "Guarda"; la vista del gioco ha la riga "N
+      possibili cartelle". Il controllo è `CercaDopoPartita` in `lss.ini` (attivo di
+      default), **senza** interruttore in Impostazioni. La modalità semplice (P) non
+      esiste ancora: non è gestita.
+    - N12: `tools/UiScreenshots` mostra un gioco con tre posti (`19-game-spots`); le righe
+      dei posti e quella della cartella principale ora vanno a capo (prima uscivano dalla
+      finestra). Immagini generate in `scratchpad\shots` (fuori dal repository); letti
+      `16-learn-result` (caselle ok) e `19-game-spots`. Non ci sono immagini del toast né
+      delle conferme.
+    - N13: `docs/DEVELOPMENT.md`, sezione "Save spots".
+  - Da controllare con Andrix (N14 👤): Terraria (userdata + Documents) con due partite;
+    un gioco con file sparsi nella cartella di installazione; togliere un posto e
+    giocare (la ricerca lo ripropone); spegnere il computer durante un cambio con due
+    cartelle; le stesse prove sullo Steam Deck; il punto di N6 sui giochi Steam con una
+    cartella extra insicura; la conversione di `cartella.ini` in `posti.ini` su un gioco
+    vero.
+
 - 2026-10-25 — M7 so far (Andrix, Steam Deck, Opus fixing): Hollow Knight
   (Proton) found nothing: the search skipped every launcher folder with all
   its content, so the game's prefix, installation and userdata inside
