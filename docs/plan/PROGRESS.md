@@ -132,7 +132,7 @@ per phase (the phase file names it).
 
 ### Phase L — Save folders known by the launchers ([L-save-locations.md](L-save-locations.md))
 
-- [ ] L1 — Known folders
+- [x] L1 — Known folders (91e2f90; Linux 208 tests on lss-ci)
 - [ ] L2 — Installed Steam games without a `userdata` folder
 - [ ] L3 — Binary VDF reader
 - [ ] L4 — Steam save rules from `appinfo.vdf`
