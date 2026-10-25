@@ -31,7 +31,7 @@ public sealed record ConfigGamePlan(SaveConfigGame Config, GameInfo? Game, IRead
 /// risolve i posti in cartelle di questo computer e li controlla come ogni altra
 /// cartella. Plan non scrive nulla; Apply scrive solo quello che l'utente conferma.
 /// </summary>
-internal static class SaveConfigImport
+public static class SaveConfigImport
 {
     /// <summary>
     /// Abbina ogni gioco del file a uno di questo computer e ne decide i posti.

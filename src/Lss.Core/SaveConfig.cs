@@ -23,7 +23,7 @@ public sealed record SaveConfigFile(string Os, string Distro, bool SteamDeck, st
 /// radici come {WinAppDataLocal}, nessun nome utente, nessun ID Steam, nessun salvataggio.
 /// Il file che arriva da altri si controlla (SaveConfig.Read): è dato non fidato.
 /// </summary>
-internal static class SaveConfig
+public static class SaveConfig
 {
     public const string FormatName = "lss-save-config";
     public const int FormatVersion = 1;

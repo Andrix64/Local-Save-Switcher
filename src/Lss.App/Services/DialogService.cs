@@ -55,6 +55,41 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
         return files.Count > 0 ? files[0].TryGetLocalPath() : null;
     }
 
+    public async Task<string?> PickConfigToSaveAsync(string title, string suggestedName)
+    {
+        Window? window = owner();
+
+        if (window == null)
+            return null;
+
+        IStorageFile? file = await window.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = title,
+            SuggestedFileName = suggestedName,
+            DefaultExtension = "json",
+            FileTypeChoices = [new FilePickerFileType("LSS") { Patterns = ["*.lss-config.json"] }],
+        });
+
+        return file?.TryGetLocalPath();
+    }
+
+    public async Task<string?> PickConfigToOpenAsync(string title)
+    {
+        Window? window = owner();
+
+        if (window == null)
+            return null;
+
+        IReadOnlyList<IStorageFile> files = await window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("LSS") { Patterns = ["*.lss-config.json", "*.json"] }],
+        });
+
+        return files.Count > 0 ? files[0].TryGetLocalPath() : null;
+    }
+
     public async Task<string?> PickFileAsync(string title, string startFolder)
     {
         Window? window = owner();

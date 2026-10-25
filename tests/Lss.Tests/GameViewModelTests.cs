@@ -116,4 +116,19 @@ public sealed class GameViewModelTests : IDisposable
         after.Load();
         Assert.DoesNotContain(after.Spots, spot => spot.Id == 2);
     }
+
+    [Fact]
+    public async Task ExportConfigWritesAFileThatReadsBack()
+    {
+        string target = Path.Combine(folder.Root, "gioco.lss-config.json");
+        dialogs.ConfirmAnswer = true;
+        dialogs.ConfigToSave = target;
+        var vm = new GameViewModel(folder.CreateManager("L"), dialogs);
+
+        await vm.ExportConfigCommand.ExecuteAsync(null);
+
+        Result<SaveConfigFile> read = SaveConfig.Read(File.ReadAllText(target));
+        Assert.True(read.Success);
+        Assert.Single(read.Value!.Games);
+    }
 }

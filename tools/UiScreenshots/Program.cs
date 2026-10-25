@@ -295,6 +295,8 @@ internal sealed class NoDialogs : IDialogService
     public Task<T?> ShowAsync<T>(Window dialog) => Task.FromResult(default(T));
     public Task<string?> PickZipToSaveAsync(string title, string suggestedName, string filterName) => Task.FromResult<string?>(null);
     public Task<string?> PickZipToOpenAsync(string title, string filterName) => Task.FromResult<string?>(null);
+    public Task<string?> PickConfigToSaveAsync(string title, string suggestedName) => Task.FromResult<string?>(null);
+    public Task<string?> PickConfigToOpenAsync(string title) => Task.FromResult<string?>(null);
     public Task<string?> PickFileAsync(string title, string startFolder) => Task.FromResult<string?>(null);
     public Task<string?> PickFolderAsync(string title, string startFolder) => Task.FromResult<string?>(null);
     public Task<bool> OpenFolderAsync(string path) => Task.FromResult(false);

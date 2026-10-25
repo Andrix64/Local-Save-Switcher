@@ -51,6 +51,22 @@ public sealed class FakeDialogService : IDialogService
         return Task.FromResult(ZipToOpen);
     }
 
+    public string? ConfigToSave { get; set; }
+
+    public string? ConfigToOpen { get; set; }
+
+    public Task<string?> PickConfigToSaveAsync(string title, string suggestedName)
+    {
+        Calls.Add("SaveConfig: " + suggestedName);
+        return Task.FromResult(ConfigToSave);
+    }
+
+    public Task<string?> PickConfigToOpenAsync(string title)
+    {
+        Calls.Add("OpenConfig");
+        return Task.FromResult(ConfigToOpen);
+    }
+
     public string? FileToPick { get; set; }
 
     public string? FolderToPick { get; set; }

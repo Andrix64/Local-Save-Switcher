@@ -21,6 +21,12 @@ public interface IDialogService
 
     Task<string?> PickZipToOpenAsync(string title, string filterName);
 
+    /// <summary>Sceglie dove salvare una configurazione dei salvataggi (*.lss-config.json). Null se annullato.</summary>
+    Task<string?> PickConfigToSaveAsync(string title, string suggestedName);
+
+    /// <summary>Sceglie una configurazione dei salvataggi da importare. Null se annullato.</summary>
+    Task<string?> PickConfigToOpenAsync(string title);
+
     /// <summary>Sceglie un file qualsiasi, partendo da una cartella. Null se annullato.</summary>
     Task<string?> PickFileAsync(string title, string startFolder);
 

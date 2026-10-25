@@ -168,4 +168,18 @@ public sealed partial class SaveManager
     /// </summary>
     public string PortableFolder(string folder) =>
         SavePathResolver.ToPortable(folder, SaveLookup.ContextFor(provider, Account, Game, Platform.Current.GetKnownFolders()));
+
+    /// <summary>
+    /// File JSON della configurazione dei salvataggi di questo gioco, da condividere.
+    /// skipped: i posti che non stanno sotto una radice standard (non esportati).
+    /// </summary>
+    public string ExportConfigJson(string notes, out IReadOnlyList<string> skipped)
+    {
+        SaveContext context = SaveLookup.ContextFor(provider, Account, Game, Platform.Current.GetKnownFolders());
+        (SaveConfigGame config, IReadOnlyList<string> notExported) = SaveConfig.FromGame(Game, context, notes);
+
+        skipped = notExported;
+
+        return SaveConfig.Write(SaveConfig.CurrentFile([config]));
+    }
 }

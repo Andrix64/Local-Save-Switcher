@@ -82,8 +82,12 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
-      <Button Classes="link" Content="{loc:Str AddSpot}" Command="{Binding AddSpotCommand}"
-              IsEnabled="{Binding !IsBusy}" FontSize="12" HorizontalAlignment="Left" />
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <Button Classes="link" Content="{loc:Str AddSpot}" Command="{Binding AddSpotCommand}"
+                IsEnabled="{Binding !IsBusy}" FontSize="12" />
+        <Button Classes="link" Content="{loc:Str ExportConfig}" Command="{Binding ExportConfigCommand}"
+                IsEnabled="{Binding !IsBusy}" FontSize="12" />
+      </StackPanel>
     </StackPanel>
 
     <!-- Le schede delle partite -->

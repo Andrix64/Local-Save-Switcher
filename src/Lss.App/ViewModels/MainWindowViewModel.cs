@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Lss.App.Services;
 using Lss.App.Views;
 
@@ -214,6 +215,102 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (saved == true)
             ReloadGames(selected?.Info.Key, item.Info.Key);
+    }
+
+    /// <summary>
+    /// Importa un file di configurazione dei salvataggi: per ogni gioco che c'è qui si
+    /// mostra cosa succede, e si scrive solo quello che l'utente conferma.
+    /// </summary>
+    [RelayCommand]
+    private async Task ImportConfigAsync()
+    {
+        string? path = await dialogs.PickConfigToOpenAsync(Strings.ImportConfigTitle);
+
+        if (path == null)
+            return;
+
+        Result<SaveConfigFile> read;
+
+        try
+        {
+            read = SaveConfig.Read(File.ReadAllText(path));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            read = Result<SaveConfigFile>.Fail(Loc.F(Strings.ConfigInvalid, ex.Message));
+        }
+
+        if (!read.Success)
+        {
+            await dialogs.InformAsync(Strings.ImportConfigTitle, read.Message, InfoKind.Warning);
+            return;
+        }
+
+        SaveConfigFile file = read.Value!;
+        IReadOnlyList<ConfigGamePlan> plans = SaveConfigImport.Plan(file, Games.Select(item => item.Info).ToList(),
+            info => ContextOf(info), info => LauncherFoldersOf(info), AppData.Root);
+
+        int applied = 0;
+
+        foreach (ConfigGamePlan plan in plans)
+        {
+            if (plan.Game == null)
+            {
+                await dialogs.InformAsync(Strings.ImportConfigTitle, Loc.F(Strings.ConfigNoGame, plan.Config.Name), InfoKind.Info);
+                continue;
+            }
+
+            GameItemViewModel item = Games.First(game => game.Info.Key == plan.Game.Key);
+            string dataFolder = Path.Combine(AppData.Root, item.Account.Provider, item.Account.Id, plan.Game.Id);
+            bool playthroughs = SaveFolderChoice.HasPlaythroughs(dataFolder);
+
+            if (!await dialogs.ConfirmAsync(Strings.ImportConfigTitle, PlanText(file, plan), Strings.ImportConfig, kind: InfoKind.Info))
+                continue;
+
+            applied += SaveConfigImport.Apply(plan, dataFolder, playthroughs,
+                spot => GameFor(item).Manager.AddSpot(spot, NewSpotFill.CopyCurrent));
+        }
+
+        await dialogs.InformAsync(Strings.ImportConfigTitle, Loc.F(Strings.ConfigImported, applied), InfoKind.Info);
+        ReloadGames(SelectedGame?.Info.Key, SelectedGame?.Info.Key);
+    }
+
+    /// <summary>Il testo della conferma: la data del file e un rigo per posto.</summary>
+    private static string PlanText(SaveConfigFile file, ConfigGamePlan plan)
+    {
+        var text = new System.Text.StringBuilder(Loc.F(Strings.ConfigMadeOn, file.Created));
+
+        if (plan.WindowsInPrefix)
+            text.Append('\n').Append(Strings.ConfigWindowsInPrefix);
+
+        foreach (ConfigSpotPlan spot in plan.Spots)
+        {
+            string state = spot.State switch
+            {
+                ConfigSpotState.Found => Strings.ConfigFound,
+                ConfigSpotState.NotYet => Strings.ConfigNotYet,
+                ConfigSpotState.Refused => Loc.F(Strings.ConfigRefused, spot.Reason),
+                _ => Strings.ConfigNotForThisSystem,
+            };
+
+            text.Append('\n').Append(spot.Folder == "" ? spot.Spot.Root : spot.Folder).Append(": ").Append(state);
+        }
+
+        return text.ToString();
+    }
+
+    private GameItemViewModel? ItemOf(GameInfo info) => Games.FirstOrDefault(game => game.Info.Key == info.Key);
+
+    private SaveContext ContextOf(GameInfo info)
+    {
+        GameItemViewModel item = ItemOf(info)!;
+        return SaveLookup.ContextFor(item.Provider, item.Account, info, Platform.Current.GetKnownFolders());
+    }
+
+    private IReadOnlyList<string> LauncherFoldersOf(GameInfo info)
+    {
+        GameItemViewModel item = ItemOf(info)!;
+        return item.Provider.LauncherFolders(item.Account);
     }
 
     private GameViewModel GameFor(GameItemViewModel item)
