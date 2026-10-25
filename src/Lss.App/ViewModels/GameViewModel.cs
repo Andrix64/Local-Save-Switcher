@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lss.App.Services;
@@ -13,6 +14,9 @@ namespace Lss.App.ViewModels;
 public partial class GameViewModel : ObservableObject
 {
     private readonly IDialogService dialogs;
+
+    // Ricerca dopo la partita in corso (si annulla se il gioco riparte).
+    private CancellationTokenSource? lookCancel;
 
     // Avviso su Steam Cloud: una sola volta per sessione.
     private bool cloudWarningAccepted;
@@ -242,6 +246,119 @@ public partial class GameViewModel : ObservableObject
         {
             await dialogs.InformAsync(Strings.TitleOperationFailed, ex.Message, InfoKind.Warning);
         }
+    }
+
+    /// <summary>Dopo una partita si cercano altre cartelle dei salvataggi (impostazione CercaDopoPartita).</summary>
+    public bool LookAfterPlaying { get; set; } = true;
+
+    /// <summary>Proposte di cartelle dei salvataggi in attesa (vedi ReviewSuggestionsAsync).</summary>
+    [ObservableProperty]
+    private int pendingSuggestions;
+
+    public string SuggestionsPendingText => Loc.F(Strings.SuggestionsPending, PendingSuggestions);
+
+    public bool HasPendingSuggestions => PendingSuggestions > 0;
+
+    partial void OnPendingSuggestionsChanged(int value)
+    {
+        OnPropertyChanged(nameof(SuggestionsPendingText));
+        OnPropertyChanged(nameof(HasPendingSuggestions));
+    }
+
+    [RelayCommand]
+    private Task LookAtSuggestionsAsync() => ReviewSuggestionsAsync();
+
+    /// <summary>
+    /// Cerca altre cartelle dei salvataggi in background, con priorità bassa. Si ferma
+    /// se il gioco riparte (vedi OnGameState).
+    /// </summary>
+    private void StartLookAfterSession(DateTime startedLocal)
+    {
+        if (!LookAfterPlaying)
+            return;
+
+        lookCancel?.Cancel();
+        var cancel = new CancellationTokenSource();
+        lookCancel = cancel;
+        DateTime startedUtc = startedLocal.ToUniversalTime();
+
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                IReadOnlyList<SpotSuggestion> found = Manager.LookAfterSession(startedUtc, cancel.Token);
+                Dispatcher.UIThread.Post(() => ShowSuggestions(found.Count));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+            {
+                Log.Write("Ricerca di altre cartelle dopo la partita di " + Manager.Game.Name, ex);
+            }
+        })
+        {
+            IsBackground = true,
+            Priority = ThreadPriority.BelowNormal,
+        };
+
+        thread.Start();
+    }
+
+    private void ShowSuggestions(int found)
+    {
+        PendingSuggestions = SessionScan.Pending(Manager.DataFolder).Count;
+
+        if (found > 0)
+        {
+            Toast.Show(InfoKind.Info, Loc.F(Strings.SuggestionsFound, Manager.Game.Name),
+                Strings.SuggestionsLook, () => _ = ReviewSuggestionsAsync());
+        }
+    }
+
+    /// <summary>
+    /// Le proposte, una alla volta: si aggiungono ai posti, oppure non sono salvataggi
+    /// (per questo gioco o per tutti), oppure si lasciano per dopo.
+    /// </summary>
+    public async Task ReviewSuggestionsAsync()
+    {
+        string heading = Loc.F(Strings.SuggestionsTitle, Manager.Game.Name);
+
+        foreach (SpotSuggestion suggestion in SessionScan.Pending(Manager.DataFolder).ToList())
+        {
+            string what = suggestion.Pattern == ""
+                ? suggestion.Folder
+                : Loc.F(Strings.SpotFiles, suggestion.Folder, suggestion.Pattern);
+
+            if (await dialogs.ConfirmAsync(heading, what, Strings.SuggestionAdd, kind: InfoKind.Info))
+            {
+                var spot = new SaveSpot(0, suggestion.Folder, suggestion.Pattern, true,
+                    Manager.PortableFolder(suggestion.Folder), SaveSource.Learned);
+                Result added = Manager.AddSpot(spot, NewSpotFill.CopyCurrent);
+
+                if (added.Success)
+                    SessionScan.Forget(Manager.DataFolder, suggestion.Folder, suggestion.Pattern);
+                else
+                    await dialogs.InformAsync(Strings.TitleOperationFailed, added.Message, InfoKind.Warning);
+            }
+            else if (await dialogs.ConfirmAsync(heading, what, Strings.SuggestionNotSaves, destructive: true, kind: InfoKind.Info))
+            {
+                bool forGame = await dialogs.ConfirmAsync(heading, what, Loc.F(Strings.IgnoreForGame, Manager.Game.Name),
+                    kind: InfoKind.Info);
+                bool forAll = !forGame && await dialogs.ConfirmAsync(heading, what, Strings.IgnoreForAll, kind: InfoKind.Info);
+
+                if (!forGame && !forAll)
+                    continue;
+
+                var ignored = new IgnoredFolders(AppData.Root);
+
+                if (forAll)
+                    ignored.AddGlobal(Manager.PortableFolder(suggestion.Folder));
+                else
+                    ignored.AddForGame(Manager.DataFolder, suggestion.Folder);
+
+                SessionScan.Forget(Manager.DataFolder, suggestion.Folder, suggestion.Pattern);
+            }
+        }
+
+        PendingSuggestions = SessionScan.Pending(Manager.DataFolder).Count;
     }
 
     /// <summary>
@@ -708,12 +825,14 @@ public partial class GameViewModel : ObservableObject
         switch (e.Change)
         {
             case SessionChange.Started:
+                lookCancel?.Cancel();
                 Toast.Hide();
                 UpdateState();
                 break;
 
             case SessionChange.Ended:
                 await OnGameClosedAsync(e);
+                StartLookAfterSession(e.Start);
                 break;
 
             default:

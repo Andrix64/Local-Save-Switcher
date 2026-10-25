@@ -323,7 +323,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (!open.Success)
             throw new InvalidOperationException(open.Message);
 
-        var created = new GameViewModel(open.Value!, dialogs);
+        var created = new GameViewModel(open.Value!, dialogs) { LookAfterPlaying = settings.LookAfterPlaying };
         created.Refresh();
 
         // Tornare alla cartella automatica cambia il gioco: la lista si rilegge (vedi ReloadGames).

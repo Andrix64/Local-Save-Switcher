@@ -424,4 +424,13 @@ LSS will look at what changed on the disk.</value></data>
   <data name="ConfigTooNew" xml:space="preserve"><value>This file was made by a newer LSS. Update LSS to import it.</value></data>
   <data name="ConfigImported" xml:space="preserve"><value>Save folders imported for {0} game(s).</value></data>
   <data name="SaveFolderImported" xml:space="preserve"><value>Saves: {0} (imported)</value></data>
+  <data name="LookAfterPlaying" xml:space="preserve"><value>Look for other save folders after playing</value></data>
+  <data name="SuggestionsFound" xml:space="preserve"><value>LSS found files of {0} that may be saves, in a folder it doesn't switch yet.</value></data>
+  <data name="SuggestionsLook" xml:space="preserve"><value>Look</value></data>
+  <data name="SuggestionsPending" xml:space="preserve"><value>{0} possible save folders to check</value></data>
+  <data name="SuggestionsTitle" xml:space="preserve"><value>Possible save folders of {0}</value></data>
+  <data name="SuggestionAdd" xml:space="preserve"><value>Add to the save folders</value></data>
+  <data name="SuggestionNotSaves" xml:space="preserve"><value>Not saves…</value></data>
+  <data name="SuggestionLater" xml:space="preserve"><value>Later</value></data>
+  <data name="SaveFolderFoundForOther" xml:space="preserve"><value>LSS found where {0} saves.</value></data>
 </root>

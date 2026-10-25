@@ -182,4 +182,20 @@ public sealed partial class SaveManager
 
         return SaveConfig.Write(SaveConfig.CurrentFile([config]));
     }
+
+    /// <summary>Cartella dati del gioco per questo account (posti.ini, cambio.ini, proposte.ini).</summary>
+    public string DataFolder => dataFolder;
+
+    /// <summary>
+    /// Cerca altre cartelle dei salvataggi cambiate da quando la partita è cominciata
+    /// (vedi SessionScan). Legge soltanto e non tocca i posti.
+    /// </summary>
+    public IReadOnlyList<SpotSuggestion> LookAfterSession(DateTime startedUtc, CancellationToken cancel)
+    {
+        SaveContext context = SaveLookup.ContextFor(provider, Account, Game, Platform.Current.GetKnownFolders());
+        var spots = new GameSpots(dataFolder);
+        spots.Load();
+
+        return SessionScan.Run(Game, context, startedUtc, spots, provider.LauncherFolders(Account), AppData.Root, cancel);
+    }
 }

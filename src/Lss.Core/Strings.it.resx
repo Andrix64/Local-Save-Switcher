@@ -424,4 +424,13 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="ConfigTooNew" xml:space="preserve"><value>Questo file è stato fatto da un LSS più recente. Aggiorna LSS per importarlo.</value></data>
   <data name="ConfigImported" xml:space="preserve"><value>Cartelle dei salvataggi importate per {0} gioco/i.</value></data>
   <data name="SaveFolderImported" xml:space="preserve"><value>Salvataggi: {0} (importati)</value></data>
+  <data name="LookAfterPlaying" xml:space="preserve"><value>Cerca altre cartelle dei salvataggi dopo una partita</value></data>
+  <data name="SuggestionsFound" xml:space="preserve"><value>LSS ha trovato file di {0} che possono essere salvataggi, in una cartella che non cambia ancora.</value></data>
+  <data name="SuggestionsLook" xml:space="preserve"><value>Guarda</value></data>
+  <data name="SuggestionsPending" xml:space="preserve"><value>{0} possibili cartelle dei salvataggi da controllare</value></data>
+  <data name="SuggestionsTitle" xml:space="preserve"><value>Possibili cartelle dei salvataggi di {0}</value></data>
+  <data name="SuggestionAdd" xml:space="preserve"><value>Aggiungi alle cartelle dei salvataggi</value></data>
+  <data name="SuggestionNotSaves" xml:space="preserve"><value>Non sono salvataggi…</value></data>
+  <data name="SuggestionLater" xml:space="preserve"><value>Più tardi</value></data>
+  <data name="SaveFolderFoundForOther" xml:space="preserve"><value>LSS ha trovato dove salva {0}.</value></data>
 </root>
