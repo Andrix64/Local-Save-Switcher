@@ -506,4 +506,13 @@ LSS will look at what changed on the disk.</value></data>
   <data name="RemovePlayer" xml:space="preserve"><value>Remove</value></data>
   <data name="PlayerAdmin" xml:space="preserve"><value>Admin</value></data>
   <data name="PlayerAdminTooltip" xml:space="preserve"><value>Admins can open the advanced mode, add players and games, and allow games with cloud saves.</value></data>
+  <data name="DeletedIntro" xml:space="preserve"><value>Deleted playthroughs stay here until you recover them or delete them for good.</value></data>
+  <data name="PurgeButton" xml:space="preserve"><value>Delete for good…</value></data>
+  <data name="PurgeAllButton" xml:space="preserve"><value>Delete all for good…</value></data>
+  <data name="PurgeTitle" xml:space="preserve"><value>Delete for good?</value></data>
+  <data name="PurgeText" xml:space="preserve"><value>"{0}" will be deleted for good. This can't be undone.</value></data>
+  <data name="PurgeAllText" xml:space="preserve"><value>{0} deleted playthroughs will be deleted for good. This can't be undone.</value></data>
+  <data name="PurgeVerb" xml:space="preserve"><value>Delete for good</value></data>
+  <data name="Purged" xml:space="preserve"><value>Playthrough deleted for good.</value></data>
+  <data name="DeletedPlayTime" xml:space="preserve"><value>play time {0}</value></data>
 </root>

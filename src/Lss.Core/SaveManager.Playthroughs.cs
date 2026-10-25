@@ -441,12 +441,51 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
+    /// Elimina per sempre una partita eliminata: non si può annullare. Come per il
+    /// recupero, il backup deve stare in BackupPath ed essere una partita eliminata.
+    /// </summary>
+    public Result PurgeDeletedProfile(Snapshot deleted)
+    {
+        return Finish("Elimina per sempre " + ProfileDisplayName(deleted.Owner), PurgeDeletedProfileCore(deleted));
+    }
+
+    private Result PurgeDeletedProfileCore(Snapshot deleted)
+    {
+        if (deleted.Kind != BackupKind.Delete || !IsInside(deleted.Path, BackupPath) || !Directory.Exists(deleted.Path))
+            return Result.Fail(Loc.F(Strings.FolderNotFound, deleted.Path));
+
+        try
+        {
+            Directory.Delete(deleted.Path, true);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(Loc.F(Strings.ErrorWithMessage, ex.Message));
+        }
+
+        DeleteBackupInfo(deleted.Path);
+        return Result.Ok(Strings.Purged);
+    }
+
+    /// <summary>
+    /// Nota e tempo di gioco di una partita eliminata (dal suo file di backup).
+    /// </summary>
+    public PlaythroughInfo DeletedInfoOf(Snapshot deleted) =>
+        ParseInfo(IniFile.Read(BackupInfoFile(deleted.Path)));
+
+    /// <summary>
+    /// Id della persona a cui apparteneva una partita eliminata, o "" se non si sa.
+    /// </summary>
+    public string DeletedOwnerOf(Snapshot deleted) =>
+        IniFile.Read(BackupInfoFile(deleted.Path)).GetValueOrDefault("Giocatore", "");
+
+    /// <summary>
     /// Proprietario per recuperare una partita eliminata: la persona che la aveva, se esiste
     /// ancora; altrimenti il primo amministratore (come per le partite di prima di LSS 2.0).
     /// </summary>
     public string RecoveryOwnerOf(Snapshot deleted)
     {
-        string before = IniFile.Read(BackupInfoFile(deleted.Path)).GetValueOrDefault("Giocatore", "");
+        string before = DeletedOwnerOf(deleted);
 
         if (before != "" && OwnerIsKnown(before))
             return before;

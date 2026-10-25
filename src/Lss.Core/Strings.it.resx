@@ -506,4 +506,13 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="RemovePlayer" xml:space="preserve"><value>Togli</value></data>
   <data name="PlayerAdmin" xml:space="preserve"><value>Admin</value></data>
   <data name="PlayerAdminTooltip" xml:space="preserve"><value>Gli admin possono aprire la modalità avanzata, aggiungere giocatori e giochi, e consentire i giochi con il cloud.</value></data>
+  <data name="DeletedIntro" xml:space="preserve"><value>Le partite eliminate restano qui finché non le recuperi o le elimini per sempre.</value></data>
+  <data name="PurgeButton" xml:space="preserve"><value>Elimina per sempre…</value></data>
+  <data name="PurgeAllButton" xml:space="preserve"><value>Elimina tutte per sempre…</value></data>
+  <data name="PurgeTitle" xml:space="preserve"><value>Eliminare per sempre?</value></data>
+  <data name="PurgeText" xml:space="preserve"><value>"{0}" sarà eliminata per sempre. Non si può annullare.</value></data>
+  <data name="PurgeAllText" xml:space="preserve"><value>{0} partite eliminate saranno eliminate per sempre. Non si può annullare.</value></data>
+  <data name="PurgeVerb" xml:space="preserve"><value>Elimina per sempre</value></data>
+  <data name="Purged" xml:space="preserve"><value>Partita eliminata per sempre.</value></data>
+  <data name="DeletedPlayTime" xml:space="preserve"><value>tempo di gioco {0}</value></data>
 </root>

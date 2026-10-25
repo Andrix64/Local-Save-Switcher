@@ -1264,7 +1264,8 @@ public sealed partial class SaveManager
 
         try
         {
-            foreach (Snapshot backup in GetBackups().Skip(State.BackupsToKeep))
+            // Le partite eliminate non si contano e non si eliminano: restano finché non si eliminano per sempre.
+            foreach (Snapshot backup in GetBackups().Where(b => b.Kind != BackupKind.Delete).Skip(State.BackupsToKeep))
             {
                 try
                 {

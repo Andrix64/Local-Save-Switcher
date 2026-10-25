@@ -29,6 +29,10 @@
                  Classes.ok="{Binding StatusIsSuccess}" Classes.bad="{Binding StatusIsError}"
                  Classes.warn="{Binding StatusIsWarning}" VerticalAlignment="Center" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <Button Classes="secondary" Content="{Binding PurgeText}" Command="{Binding PurgeCommand}"
+                IsEnabled="{Binding CanUse}" Foreground="{StaticResource Error}" />
+        <Button Classes="secondary" Content="{Binding PurgeAllText}" Command="{Binding PurgeAllCommand}"
+                IsVisible="{Binding ShowPurgeAll}" IsEnabled="{Binding !Busy}" Foreground="{StaticResource Error}" />
         <Button Classes="primary" Content="{Binding RecoverText}" Command="{Binding RecoverCommand}"
                 IsEnabled="{Binding CanUse}" MinWidth="120" />
         <Button Classes="secondary" Content="{Binding OpenFolderText}" Command="{Binding OpenFolderCommand}"
@@ -38,7 +42,8 @@
       </StackPanel>
     </Grid>
 
-    <TextBlock DockPanel.Dock="Top" Classes="caption" Text="{Binding Caption}" Margin="2,0,0,8" />
+    <TextBlock DockPanel.Dock="Top" Classes="caption" Text="{Binding Caption}" Margin="2,0,0,4" />
+    <TextBlock DockPanel.Dock="Top" Classes="small" Text="{Binding Intro}" TextWrapping="Wrap" Margin="2,0,0,8" />
 
     <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
             CornerRadius="10" Padding="6">
@@ -51,6 +56,13 @@
             <DataTemplate x:DataType="vm:DeletedItemViewModel">
               <StackPanel Margin="6,4" Spacing="2">
                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <Border Width="18" Height="18" CornerRadius="9" Background="{Binding OwnerBrush}">
+                    <TextBlock Text="{Binding OwnerInitial}" FontSize="11" FontWeight="Bold" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <TextBlock Classes="small" Text="{Binding OwnerText}" />
+                </StackPanel>
                 <TextBlock Classes="small" Text="{Binding Details}" />
               </StackPanel>
             </DataTemplate>
