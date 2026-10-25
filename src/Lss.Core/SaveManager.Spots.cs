@@ -175,12 +175,20 @@ public sealed partial class SaveManager
     /// </summary>
     public string ExportConfigJson(string notes, out IReadOnlyList<string> skipped)
     {
-        SaveContext context = SaveLookup.ContextFor(provider, Account, Game, Platform.Current.GetKnownFolders());
-        (SaveConfigGame config, IReadOnlyList<string> notExported) = SaveConfig.FromGame(Game, context, notes);
-
-        skipped = notExported;
+        (SaveConfigGame config, skipped) = ConfigGame(notes);
 
         return SaveConfig.Write(SaveConfig.CurrentFile([config]));
+    }
+
+    /// <summary>
+    /// Il gioco come sta in una configurazione (anche con altri giochi, vedi
+    /// l'esportazione di tutti); skipped come in ExportConfigJson.
+    /// </summary>
+    public (SaveConfigGame Game, IReadOnlyList<string> Skipped) ConfigGame(string notes)
+    {
+        SaveContext context = SaveLookup.ContextFor(provider, Account, Game, Platform.Current.GetKnownFolders());
+
+        return SaveConfig.FromGame(Game, context, notes);
     }
 
     /// <summary>Cartella dati del gioco per questo account (posti.ini, cambio.ini, proposte.ini).</summary>

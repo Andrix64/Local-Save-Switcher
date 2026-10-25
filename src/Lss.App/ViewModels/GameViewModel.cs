@@ -37,6 +37,9 @@ public partial class GameViewModel : ObservableObject
 
     public SaveManager Manager { get; }
 
+    /// <summary>Esporta la configurazione di tutti i giochi (dalle Impostazioni): lo fa la finestra principale.</summary>
+    public Func<Task>? ExportAll { get; set; }
+
     /// <summary>Dove sono i salvataggi del gioco, da dove li ha trovati LSS.</summary>
     public string SaveFolderText { get; }
 
@@ -686,7 +689,7 @@ public partial class GameViewModel : ObservableObject
         if (IsBusy)
             return false;
 
-        bool saved = await dialogs.ShowAsync<bool>(new SettingsWindow(new SettingsViewModel(Manager, dialogs)));
+        bool saved = await dialogs.ShowAsync<bool>(new SettingsWindow(new SettingsViewModel(Manager, dialogs, ExportAll)));
 
         if (saved)
         {

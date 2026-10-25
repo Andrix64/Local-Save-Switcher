@@ -28,11 +28,14 @@ public partial class SettingsViewModel : ObservableObject
 {
     private readonly SaveManager manager;
     private readonly IDialogService dialogs;
+    private readonly Func<Task>? exportAll;
 
-    public SettingsViewModel(SaveManager manager, IDialogService dialogs)
+    /// <summary>exportAll esporta la configurazione di tutti i giochi (vedi ExportAllCommand).</summary>
+    public SettingsViewModel(SaveManager manager, IDialogService dialogs, Func<Task>? exportAll = null)
     {
         this.manager = manager;
         this.dialogs = dialogs;
+        this.exportAll = exportAll;
 
         AppState state = manager.State;
         launchGame = state.LaunchGame;
@@ -152,6 +155,16 @@ public partial class SettingsViewModel : ObservableObject
             return;
 
         SharedFiles.Add(new SharedFileItemViewModel(relative, Remove));
+    }
+
+    public string ExportAllText => Strings.ExportAllConfigs;
+
+    /// <summary>Esporta in un file le configurazioni di tutti i giochi con cartelle scelte, imparate o importate.</summary>
+    [RelayCommand]
+    private async Task ExportAllAsync()
+    {
+        if (exportAll != null)
+            await exportAll();
     }
 
     public string IgnoredFoldersText => Strings.IgnoredFoldersLink;

@@ -413,6 +413,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="ConfigFromLauncher" xml:space="preserve"><value>{0} already knows these folders: this file is useful only where it doesn't.</value></data>
   <data name="ConfigNotes" xml:space="preserve"><value>Notes (optional)</value></data>
   <data name="ImportConfigTitle" xml:space="preserve"><value>Import save configuration</value></data>
+  <data name="ConfigExportNone" xml:space="preserve"><value>No game has save folders to export yet: choose or learn a save folder first.</value></data>
   <data name="ConfigMadeOn" xml:space="preserve"><value>Made on {0}</value></data>
   <data name="ConfigWindowsInPrefix" xml:space="preserve"><value>Made on Windows: here the folders are inside the game's Proton/Wine folder.</value></data>
   <data name="ConfigFound" xml:space="preserve"><value>found</value></data>
