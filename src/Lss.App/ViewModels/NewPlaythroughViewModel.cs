@@ -3,7 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace Lss.App.ViewModels;
 
 /// <summary>Esito della finestra: nome e scelte. Null se annullata.</summary>
-public sealed record NewPlaythroughResult(string Name, bool CopyCurrentSaves, bool ActivateNow);
+/// <param name="PlayerId">Persona a cui va la partita nuova ("" se non c'è nessuna).</param>
+public sealed record NewPlaythroughResult(string Name, bool CopyCurrentSaves, bool ActivateNow, string PlayerId = "");
 
 /// <summary>
 /// Nuova partita o rinomina (NewProfileForm in WinForms): nome con controllo
@@ -20,14 +21,31 @@ public partial class NewPlaythroughViewModel : ObservableObject
 
     /// <param name="profileExists">Dice se esiste già una partita con quel nome.</param>
     /// <param name="currentName">Nome da mostrare per la rinomina; null per una partita nuova.</param>
-    public NewPlaythroughViewModel(Func<string, bool> profileExists, string? currentName = null)
+    /// <param name="players">Persone tra cui scegliere il giocatore della partita nuova.</param>
+    /// <param name="defaultPlayerId">Giocatore preselezionato (il proprietario della partita in gioco).</param>
+    public NewPlaythroughViewModel(Func<string, bool> profileExists, string? currentName = null,
+        IReadOnlyList<Person>? players = null, string? defaultPlayerId = null)
     {
         this.profileExists = profileExists;
         this.currentName = currentName;
 
         name = currentName ?? "";
+        Players = players ?? [];
+        selectedPlayer = Players.FirstOrDefault(person => person.Id == defaultPlayerId) ?? Players.FirstOrDefault();
         Validate();
     }
+
+    /// <summary>Le persone tra cui scegliere (nella partita nuova con più di una persona).</summary>
+    public IReadOnlyList<Person> Players { get; }
+
+    /// <summary>La persona a cui va la partita nuova.</summary>
+    [ObservableProperty]
+    private Person? selectedPlayer;
+
+    /// <summary>Il campo Giocatore si vede solo per una partita nuova con più persone.</summary>
+    public bool ShowPlayer => !IsRename && Players.Count > 1;
+
+    public string PlayerCaption => Strings.PlaythroughPlayer;
 
     [ObservableProperty]
     private string name = "";
@@ -62,7 +80,7 @@ public partial class NewPlaythroughViewModel : ObservableObject
     }
 
     public NewPlaythroughResult CreateResult() =>
-        new(Name.Trim(), CopyCurrentSaves, ActivateNow);
+        new(Name.Trim(), CopyCurrentSaves, ActivateNow, SelectedPlayer?.Id ?? "");
 
     partial void OnNameChanged(string value) => Validate();
 

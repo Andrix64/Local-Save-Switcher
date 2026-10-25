@@ -675,16 +675,23 @@ public partial class GameViewModel : ObservableObject
         if (IsBusy)
             return;
 
+        // Di default la partita va alla persona di quella in gioco (o alla prima).
+        string defaultOwner = Manager.HasActiveProfile ? Manager.GetInfo(Manager.State.ActiveProfile).Owner : "";
+
         var window = new NewPlaythroughWindow(new NewPlaythroughViewModel(
-            name => Manager.ProfileExists(SaveManager.ProfileFolderName(name))));
+            name => Manager.ProfileExists(SaveManager.ProfileFolderName(name)),
+            players: Manager.Players?.All,
+            defaultPlayerId: defaultOwner == "" ? Manager.DefaultOwnerId : defaultOwner));
 
         NewPlaythroughResult? choice = await dialogs.ShowAsync<NewPlaythroughResult>(window);
 
         if (choice == null)
             return;
 
+        string owner = choice.PlayerId == "" ? Manager.DefaultOwnerId : choice.PlayerId;
+
         Result result = await RunBusyAsync(Strings.BusyCreating,
-            () => Manager.CreateProfile(choice.Name, choice.CopyCurrentSaves, Manager.DefaultOwnerId));
+            () => Manager.CreateProfile(choice.Name, choice.CopyCurrentSaves, owner));
 
         await ShowResult(result);
 
