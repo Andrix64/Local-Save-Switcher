@@ -138,7 +138,7 @@ per phase (the phase file names it).
 - [x] L4 — Steam save rules from `appinfo.vdf` (eefb435)
 - [x] L5 — Rules from the provider (b673864)
 - [x] L6 — From a rule to real paths (92a9a59; Linux 266 tests on lss-ci)
-- [ ] L7 — Safety of a save folder
+- [x] L7 — Safety of a save folder (23bd093)
 - [ ] L8 — Locate the saves of a game
 - [ ] L9 — Folder chosen or learned
 - [ ] L10 — Every provider uses the locator
