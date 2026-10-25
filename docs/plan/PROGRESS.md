@@ -216,6 +216,22 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — L13 step 0 (Opus, Andrix's Steam Deck `appinfo.vdf`, read
+  with the throw-away reader): version 29, 115 games in Steam's cache (the
+  library, not only what is installed): 53 with `savefiles` rules, 29 with
+  `ufs` but no `savefiles` (Steam Cloud API → `userdata`), 33 without `ufs`.
+  The AppImage of `v2` at `4e85d6f` found only Stardew Valley as supported
+  outside `userdata`, and that is what phase L is meant to do: almost every
+  Steam rule uses a file pattern (`*.dat` Hollow Knight, `*.sav` Portal,
+  `*.hg` No Man's Sky, exact names like `SaveData.sav` Hotline Miami),
+  `*.*` without `recursive` (Half-Life), or several folders (Half-Life 2:
+  four), and L8 leaves all of these `Unsure` until phase N (pattern spots,
+  several spots). Most of these games become supported with N1–N6.
+  Also seen: `rootoverrides` on `gameinstall` with `os = Windows` (Hotline
+  Miami 2, Jotun) and paths starting with `/` or `.` (`/HotlineMiami`,
+  `'.'`): L6 must treat a leading `/`, `.` and `'.'` as "no sub-path" —
+  check it when N6 is done, with these games.
+
 - 2026-10-25 — Fine fase L (Haiku), L1–L12 committati su `v2` (da `91e2f90` a
   `71f4d18`, tick in commit `Progress:`). L13 non fatto (👤). Test Windows: 311
   verdi, 0 warning. Linux (`lss-ci`, `scripts/linux-check.sh lss-ci@192.168.1.3
