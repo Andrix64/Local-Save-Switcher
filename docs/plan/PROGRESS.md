@@ -204,7 +204,7 @@ per phase (the phase file names it).
 - [x] P5a — Deleted playthroughs: kept until deleted for good (0d1b427)
 - [x] P6 — Simple view: players and games (dc7b761)
 - [x] P7 — Simple mode: play, and the "My games" menu (3292e4a)
-- [ ] P8 — Screenshots
+- [x] P8 — Screenshots (b40ca6d)
 - [ ] P9 — 👤 Check with real people
 
 ### Phase Q — Docs and release ([Q-release.md](Q-release.md))
@@ -223,6 +223,28 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P8 (Haiku), commit `b40ca6d` (tick nel commit successivo). Test Windows: 742
+  verdi, 0 warning. Linux (`lss-ci`, `--tests-only`, `b40ca6d`): 742 verdi.
+  - Schermate: `tools/UiScreenshots` (output in una cartella temporanea, `it`): 33 PNG. Nuove: 23
+    persone (modalità semplice), 24 giochi di Andrea, 25 "Le mie partite", 26 pannello in gioco, 27
+    "di chi sono i salvataggi", 28 avanzata raggruppata per persona, 29 finestra Giocatori, 30 e 31
+    togliere una persona (conferma e "dai le partite a"), 32 prima scelta di modalità, 33 "Chi sei?".
+  - Viste e confrontate con il canvas (sono le schede `Main`, `Games`, `MyGames`, `Playing`,
+    `WhoseSaves`, `Advanced`, `Players`, `RemovePlayer`, `FirstRun`, `AdminPin`): le schede di
+    persone, la scelta "di chi sono", la barra cloud con "Consenti anche in modalità semplice", il
+    gruppo per persona con ★ e ☆, la finestra Giocatori, la conferma e la scelta "Dai le partite a"
+    corrispondono. Cosa ho corretto guardando le immagini: il nome del launcher ora è "Steam" (non
+    "steam"); il simbolo dello scudo è più grande; il pulsante del colore mostra il colore e
+    "Rinomina…" non è tagliato; le descrizioni della scelta di modalità non sono in grassetto; "Chi sei?"
+    ha il pulsante Annulla; l'intestazione della modalità avanzata aveva troppi pulsanti e copriva il
+    titolo: "Giocatori…" e "Modalità semplice" sono ora nelle Impostazioni del gioco, come nel canvas
+    (`Settings` ha entrambi i link).
+  - Non guardate in questa sessione: 02–07 e 09–22 (finestre di 1.0 e delle fasi L–O). Non le ho
+    cambiate in P, tranne la finestra "Nuova partita" (04/05) che ha ora il campo Giocatore quando ci
+    sono più persone: lo schermo di prova ha una sola persona, quindi non appare. Da guardare con
+    Andrix sul computer vero.
+  - Da vedere con Andrix (P9 👤, saltato): la vista semplice su un Deck (schermo 1280×800), i tasti
+    grandi, la velocità con molti giochi (ogni tile apre il gioco).
 - 2026-10-25 — Fase P, P7 (Haiku), commit `3292e4a` (tick nel commit successivo). Test Windows: 742
   verdi, 0 warning. Cosa c'è: giocare dalla modalità semplice (`SimplePlayFlow`): controllo cloud
   (un utente manda a un admin; l'admin consente il gioco o lo gioca solo questa volta; cloud spento =
