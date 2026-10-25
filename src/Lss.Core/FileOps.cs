@@ -13,6 +13,10 @@ internal static class FileOps
     // come gli altri.
     private const string SteamCacheFile = "remotecache.vdf";
 
+    // Cartella al primo livello di uno snapshot con i posti extra del gioco
+    // (.lss-posizioni/<id>): non è mai parte della partita, va solo tenuta.
+    public const string ExtraSpotsFolder = ".lss-posizioni";
+
     // Cartelle accanto alla destinazione durante ReplaceFolder.
     public const string TempSuffix = ".nuovo";
     public const string OldSuffix = ".vecchio";
@@ -40,7 +44,12 @@ internal static class FileOps
         }
 
         foreach (string dir in Directory.GetDirectories(source))
+        {
+            if (IsExtraSpots(Path.GetFileName(dir), topLevel))
+                continue;
+
             CopyFolder(dir, Path.Combine(destination, Path.GetFileName(dir)), topLevel: false);
+        }
     }
 
     /// <summary>
@@ -70,10 +79,15 @@ internal static class FileOps
                 File.Delete(file);
         }
 
-        // Elimina le cartelle non presenti nella sorgente.
+        // Elimina le cartelle non presenti nella sorgente (i posti extra no).
         foreach (string dir in Directory.GetDirectories(destination))
         {
-            if (!Directory.Exists(Path.Combine(source, Path.GetFileName(dir))))
+            string name = Path.GetFileName(dir);
+
+            if (IsExtraSpots(name, topLevel))
+                continue;
+
+            if (!Directory.Exists(Path.Combine(source, name)))
                 Directory.Delete(dir, true);
         }
 
@@ -90,7 +104,12 @@ internal static class FileOps
 
         // Sincronizza le sottocartelle.
         foreach (string dir in Directory.GetDirectories(source))
+        {
+            if (IsExtraSpots(Path.GetFileName(dir), topLevel))
+                continue;
+
             MirrorFolder(dir, Path.Combine(destination, Path.GetFileName(dir)), topLevel: false);
+        }
     }
 
     /// <summary>
@@ -123,7 +142,7 @@ internal static class FileOps
             CopyFolder(source, temp);
 
             if (Directory.Exists(destination))
-                CopySteamCache(destination, temp);
+                CopyKeptFromDestination(destination, temp);
 
             Verify(source, temp);
 
@@ -378,10 +397,17 @@ internal static class FileOps
 
     /// <summary>
     /// true se il percorso relativo non è un file da confrontare: il file di Steam
-    /// Cloud al primo livello.
+    /// Cloud al primo livello, o qualcosa dentro i posti extra.
     /// </summary>
     private static bool IsSkipped(string relative) =>
-        string.Equals(relative, SteamCacheFile, StringComparison.OrdinalIgnoreCase);
+        string.Equals(relative, SteamCacheFile, StringComparison.OrdinalIgnoreCase)
+        || IsExtraSpots(relative.Split(Path.DirectorySeparatorChar)[0], topLevel: true);
+
+    /// <summary>
+    /// true se il nome è la cartella dei posti extra, al primo livello.
+    /// </summary>
+    private static bool IsExtraSpots(string name, bool topLevel) =>
+        topLevel && string.Equals(name, ExtraSpotsFolder, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// true se il nome è un file temporaneo di una sostituzione (.nuovo o .vecchio).
@@ -409,14 +435,20 @@ internal static class FileOps
     }
 
     /// <summary>
-    /// Copia nella destinazione il file di Steam Cloud di source, se c'è.
+    /// Copia nella destinazione ciò che la sostituzione non tocca: il file di
+    /// Steam Cloud e la cartella dei posti extra di source, se ci sono.
     /// </summary>
-    private static void CopySteamCache(string source, string destination)
+    private static void CopyKeptFromDestination(string source, string destination)
     {
         string cache = Path.Combine(source, SteamCacheFile);
 
         if (File.Exists(cache))
             File.Copy(cache, Path.Combine(destination, SteamCacheFile), true);
+
+        string extra = Path.Combine(source, ExtraSpotsFolder);
+
+        if (Directory.Exists(extra))
+            CopyAll(extra, Path.Combine(destination, ExtraSpotsFolder));
     }
 
     /// <summary>
@@ -479,7 +511,8 @@ internal static class FileOps
 
         return !Directory
             .EnumerateFiles(path, "*", SearchOption.AllDirectories)
-            .Any(file => !string.Equals(file, cache, StringComparison.OrdinalIgnoreCase));
+            .Any(file => !string.Equals(file, cache, StringComparison.OrdinalIgnoreCase)
+                         && !IsSkipped(Path.GetRelativePath(path, file)));
     }
 
     /// <summary>
@@ -509,10 +542,10 @@ internal static class FileOps
                 return false;
         }
 
-        List<string> dirs = ListNames(Directory.GetDirectories(first), _ => true);
+        List<string> dirs = ListNames(Directory.GetDirectories(first), name => !IsExtraSpots(name, topLevel));
 
         if (!dirs.SequenceEqual(
-                ListNames(Directory.GetDirectories(second), _ => true),
+                ListNames(Directory.GetDirectories(second), name => !IsExtraSpots(name, topLevel)),
                 StringComparer.OrdinalIgnoreCase))
             return false;
 

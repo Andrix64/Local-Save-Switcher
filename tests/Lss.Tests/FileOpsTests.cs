@@ -232,4 +232,55 @@ public sealed class FileOpsTests : IDisposable
         Assert.Equal("game", File.ReadAllText(Path.Combine(Destination, "slot1.sav")));
         Assert.Equal("game only", File.ReadAllText(Path.Combine(Destination, "slot2.sav")));
     }
+
+    [Fact]
+    public void ReplaceFolderFromSnapshotDoesNotCreateExtraSpotsInTheGame()
+    {
+        TestFolder.Write(Path.Combine(Source, "a.sav"), "snap");
+        TestFolder.Write(Path.Combine(Source, FileOps.ExtraSpotsFolder, "2", "b.sav"), "extra");
+
+        FileOps.ReplaceFolder(Source, Destination);
+
+        Assert.Equal("snap", File.ReadAllText(Path.Combine(Destination, "a.sav")));
+        Assert.False(Directory.Exists(Path.Combine(Destination, FileOps.ExtraSpotsFolder)));
+    }
+
+    [Fact]
+    public void ReplaceFolderFromGameKeepsTheSnapshotsExtraSpots()
+    {
+        TestFolder.Write(Path.Combine(Source, "a.sav"), "game");
+        TestFolder.Write(Path.Combine(Destination, "a.sav"), "old");
+        TestFolder.Write(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav"), "kept");
+
+        FileOps.ReplaceFolder(Source, Destination);
+
+        Assert.Equal("game", File.ReadAllText(Path.Combine(Destination, "a.sav")));
+        Assert.Equal("kept", File.ReadAllText(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav")));
+    }
+
+    [Fact]
+    public void MirrorKeepsTheExtraSpotsOfTheDestination()
+    {
+        TestFolder.Write(Path.Combine(Source, "a.sav"), "game");
+        TestFolder.Write(Path.Combine(Destination, "old.sav"), "old");
+        TestFolder.Write(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav"), "kept");
+
+        FileOps.MirrorFolder(Source, Destination);
+
+        Assert.False(File.Exists(Path.Combine(Destination, "old.sav")));
+        Assert.Equal("kept", File.ReadAllText(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav")));
+    }
+
+    [Fact]
+    public void EqualityAndEmptinessIgnoreTheExtraSpots()
+    {
+        TestFolder.Write(Path.Combine(Source, "a.sav"), "same");
+        TestFolder.Write(Path.Combine(Destination, "a.sav"), "same");
+        TestFolder.Write(Path.Combine(Destination, FileOps.ExtraSpotsFolder, "2", "b.sav"), "x");
+        TestFolder.Write(Path.Combine(folder.Root, "only", FileOps.ExtraSpotsFolder, "2", "b.sav"), "x");
+
+        Assert.True(FileOps.FoldersAreEqual(Source, Destination));
+        Assert.False(FileOps.HasNoSaveFiles(Destination));
+        Assert.True(FileOps.HasNoSaveFiles(Path.Combine(folder.Root, "only")));
+    }
 }
