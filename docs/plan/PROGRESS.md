@@ -216,6 +216,27 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fine fase O (Haiku). O1–O6 committati su `v2` (da `67d1031` a `cb3f550`), ogni
+  task con il suo tick in un commit `Progress:`. O7 non fatto (👤). Test Windows: 584 verdi, 0
+  warning (prima di O: 526). Linux (`lss-ci`, `--tests-only`, a fine fase): 584 verdi.
+  - Formati controllati su file veri (sola lettura): solo il catalogo Epic (`catcache.bin`).
+    Non controllati (launcher non installati su questo PC): manifest Epic `.item`, registro GOG,
+    tutto Heroic (incluso l'indirizzo heroic://, non confermato, quindi `CanLaunch` false), `shortcuts.vdf`.
+  - Cambi di test voluti (ognuno nel commit): `SteamProviderTests.ProvidersHaveSteamFirst`
+    (O1–O4: da uno a cinque launcher, ora 5 con i giochi a mano); `FakePlatform` con processi,
+    registro e programmi avviati (default invariati).
+  - Deviazioni da sapere, in ordine di importanza:
+    - Heroic non avvia i giochi da LSS (regola del piano per l'indirizzo non confermato).
+    - Giochi a mano: il menu Modifica/Rimuovi non c'è in UI (il core sì); "Aggiungi un gioco…"
+      usa le finestre esistenti invece di `AddGameWindow`. Vedi la nota di O4.
+    - Scelte di O1: `{AppData}` = AppData\Local (confermato dal catalogo reale), e i `..`
+      verso locallow/roaming diventano radici LSS.
+    - Scorciatoie Steam: appid letto con segno, usato senza segno (O5).
+    - Gli avvisi cloud fuori da Steam non usano la guida di Steam (`CloudHelpAsync` generico).
+  - Da controllare con Andrix (O7 👤): un gioco Epic e uno GOG su Windows (formati mai visti);
+    Heroic sul Deck (formati e `gogSaves`); un gioco a mano su entrambi; uno Steam con
+    `shortcuts.vdf` vero; la cartella del pulsante "Aggiungi un gioco…" nell'intestazione
+    (l'intestazione è più piena ora).
 - 2026-10-25 — O6 (Haiku), commit `cb3f550`. `DuplicateGames.Keep` (cartella d'installazione,
   senza distinguere le maiuscole su Windows): tiene il primo launcher di `Providers.All`, log
   in italiano. Applicato alla costruzione di `MainWindowViewModel` e alla rilettura
