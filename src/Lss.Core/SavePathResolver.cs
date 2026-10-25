@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Lss;
 
@@ -122,9 +123,13 @@ internal static class SavePathResolver
     /// <summary>
     /// Percorso portabile di una cartella: la radice tra graffe ({WinAppDataLocal}/Discord)
     /// se la cartella sta sotto una radice di questo sistema, altrimenti il percorso intero.
-    /// Vale per ogni gioco, anche in un altro prefisso.
+    /// Vale per ogni gioco, anche in un altro prefisso. Gli ID Steam dell'account
+    /// diventano {64BitSteamID} e {Steam3AccountID}, così non finiscono nei file da condividere.
     /// </summary>
-    internal static string ToPortable(string folder, SaveContext context)
+    internal static string ToPortable(string folder, SaveContext context) =>
+        ReplaceAccountIds(PortableRoot(folder, context), context);
+
+    private static string PortableRoot(string folder, SaveContext context)
     {
         string bestRoot = "";
         string bestFolder = "";
@@ -158,7 +163,7 @@ internal static class SavePathResolver
     internal static string? FromPortable(string portable, SaveContext context)
     {
         if (!portable.StartsWith('{'))
-            return portable;
+            return ReplaceAccountTokens(portable, context);
 
         int close = portable.IndexOf('}');
 
@@ -170,9 +175,40 @@ internal static class SavePathResolver
         if (folder == "")
             return null;
 
-        string rest = portable[(close + 1)..].TrimStart('/', '\\');
+        string rest = ReplaceAccountTokens(portable[(close + 1)..].TrimStart('/', '\\'), context)
+            .Replace('/', Path.DirectorySeparatorChar);
 
         return rest == "" ? folder : Path.Combine(folder, rest);
+    }
+
+    /// <summary>
+    /// Sostituisce {64BitSteamID} e {Steam3AccountID} con l'ID dell'account di
+    /// questo sistema. Gli altri testi restano com'erano.
+    /// </summary>
+    private static string ReplaceAccountTokens(string path, SaveContext context)
+    {
+        if (context.AccountId == "")
+            return path;
+
+        if (ulong.TryParse(context.AccountId, NumberStyles.None, CultureInfo.InvariantCulture, out ulong account))
+            path = path.Replace("{64BitSteamID}", (SteamId64Base + account).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
+
+        return path.Replace("{Steam3AccountID}", context.AccountId, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Sostituisce con i token l'ID a 64 bit e il numero di account quando sono
+    /// un intero componente del percorso (non una parte di un nome).
+    /// </summary>
+    private static string ReplaceAccountIds(string path, SaveContext context)
+    {
+        if (context.AccountId == "" || !ulong.TryParse(context.AccountId, NumberStyles.None, CultureInfo.InvariantCulture, out ulong account))
+            return path;
+
+        string id64 = (SteamId64Base + account).ToString(CultureInfo.InvariantCulture);
+
+        return Regex.Replace(path, @"(?<=^|[\\/])(" + id64 + "|" + Regex.Escape(context.AccountId) + @")(?=$|[\\/])",
+            match => match.Value == id64 ? "{64BitSteamID}" : "{Steam3AccountID}");
     }
 
     private static bool IsSameOrInside(string folder, string root, SaveContext context)

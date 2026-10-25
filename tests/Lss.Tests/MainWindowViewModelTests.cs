@@ -25,7 +25,7 @@ public sealed class MainWindowViewModelTests : IDisposable
     }
 
     private GameInfo Game(string provider, string id, string name, SupportState support = SupportState.Supported) =>
-        new(provider, id, name, "", "", "", Path.Combine(folder.Root, provider, id), support);
+        new(provider, id, name, "", "", "", GameInfo.SpotsOf(Path.Combine(folder.Root, provider, id), SaveSource.Userdata), support);
 
     private MainWindowViewModel Create(params LauncherGames[] launchers) =>
         new(launchers, new AppSettings(Path.Combine(folder.Root, "lss.ini")), new FakeDialogService());

@@ -197,7 +197,7 @@ public sealed class PlaythroughTests : IDisposable
     public void Import_OtherLauncherIsRefused()
     {
         string zip = WriteZip("epic.zip", "Formato=3\nProvider=epic\nAppId=870780\nGioco=Control\nNome=Mario\n");
-        var epicControl = new GameInfo("epic", GameInfo.ControlAppId, "Control", "", "", "", folder.Game, SupportState.Supported);
+        var epicControl = new GameInfo("epic", GameInfo.ControlAppId, "Control", "", "", "", GameInfo.SpotsOf(folder.Game, SaveSource.Userdata), SupportState.Supported);
         SaveManager epic = new(folder.Game, Path.Combine(folder.Root, "epic"), "", epicControl);
 
         // Lo zip è di epic: entra nel gioco di epic...
@@ -245,7 +245,7 @@ public sealed class PlaythroughTests : IDisposable
         Assert.Empty(control.GetProfiles());
     }
 
-    private static GameInfo OtherGame => new("steam", "123450", "Test", "", "", "", "", SupportState.Supported);
+    private static GameInfo OtherGame => new("steam", "123450", "Test", "", "", "", [], SupportState.Supported);
 
     private static string ReadEntry(ZipArchive archive, string name)
     {
@@ -320,7 +320,7 @@ public sealed class PlaythroughTests : IDisposable
     [Fact]
     public void SharedFiles_EmptyForOtherGames()
     {
-        var game = new GameInfo("steam", "123450", "Test", "", "", "", folder.Game, SupportState.Supported);
+        var game = new GameInfo("steam", "123450", "Test", "", "", "", GameInfo.SpotsOf(folder.Game, SaveSource.Userdata), SupportState.Supported);
         var manager = new SaveManager(folder.Game, folder.Data, "", game);
 
         Assert.Empty(manager.SharedFiles);
@@ -341,7 +341,7 @@ public sealed class PlaythroughTests : IDisposable
     [Fact]
     public void SharedFiles_SeveralFilesKeptAcrossActivation()
     {
-        var game = new GameInfo("steam", "123450", "Test", "", "", "", folder.Game, SupportState.Supported);
+        var game = new GameInfo("steam", "123450", "Test", "", "", "", GameInfo.SpotsOf(folder.Game, SaveSource.Userdata), SupportState.Supported);
         SaveManager manager = new(folder.Game, folder.Data, "", game);
         manager.State.SharedFiles = new[] { "remote/a.cfg", "b.ini" };
         manager.State.SharePreferences = true;

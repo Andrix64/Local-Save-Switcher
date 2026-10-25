@@ -30,7 +30,7 @@ public sealed class SaveFolderChoiceTests : IDisposable
     private string SettingsFile => Path.Combine(folder.Data, "steam", "111", "123450", "cartella.ini");
 
     private static GameInfo Game(SupportState support = SupportState.SavesElsewhere, string reason = "") =>
-        new("steam", "123450", "Sandfall", "", "", "", "", support, "", "", SaveSource.None, reason);
+        new("steam", "123450", "Sandfall", "", "", "", [], support, "", "", SaveSource.None, reason);
 
     private static GameAccount Account => new("steam", "111", "Andrix", "", null);
 

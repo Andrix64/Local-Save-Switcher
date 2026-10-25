@@ -17,7 +17,7 @@ public sealed class ExternalSavesTests : IDisposable
     private string Userdata => Path.Combine(SteamRoot, "userdata", "111");
 
     private static GameInfo Game(string saveFolder) =>
-        new("steam", "123450", "Sandfall", "", "", "", saveFolder, SupportState.Supported, "", "", SaveSource.Launcher);
+        new("steam", "123450", "Sandfall", "", "", "", GameInfo.SpotsOf(saveFolder, SaveSource.Launcher), SupportState.Supported, "", "", SaveSource.Launcher);
 
     private GameAccount Account => new("steam", "111", "Andrix", Userdata, null);
 

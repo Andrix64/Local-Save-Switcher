@@ -54,7 +54,7 @@ public enum SaveSource
 /// <param name="InstallDir">Cartella in steamapps/common, o "" se non è installato.</param>
 /// <param name="LibraryPath">Libreria Steam che lo contiene, o "" se non è installato.</param>
 /// <param name="InstallPath">Cartella del gioco installato, o "" se non è installato.</param>
-/// <param name="SaveFolder">Cartella userdata/IDAccount/AppID, o "" se non c'è ancora.</param>
+/// <param name="Spots">Posti dove il gioco salva (vuoti se non c'è ancora una cartella). Il primo è la cartella userdata/IDAccount/AppID, se c'è.</param>
 /// <param name="Support">Se LSS può gestirlo.</param>
 /// <param name="IconPath">Icona 32×32, o "" se non c'è.</param>
 /// <param name="CoverPath">Copertina 300×450, o "" se non c'è.</param>
@@ -68,7 +68,7 @@ public sealed record GameInfo(
     string InstallDir,
     string LibraryPath,
     string InstallPath,
-    string SaveFolder,
+    IReadOnlyList<SaveSpot> Spots,
     SupportState Support,
     string IconPath = "",
     string CoverPath = "",
@@ -84,10 +84,20 @@ public sealed record GameInfo(
     /// <summary>Chiave salvata in lss.ini: provider/id.</summary>
     public string Key => Provider + "/" + Id;
 
+    /// <summary>Cartella del primo posto, o "" se il gioco non ne ha.</summary>
+    public string SaveFolder => Spots.Count > 0 ? Spots[0].Folder : "";
+
+    /// <summary>
+    /// Posti di un gioco con una sola cartella: il posto 1 è la cartella intera,
+    /// o nessun posto se folder è "".
+    /// </summary>
+    public static IReadOnlyList<SaveSpot> SpotsOf(string folder, SaveSource source) =>
+        folder == "" ? [] : [new SaveSpot(1, folder, "", true, folder, source)];
+
     /// <summary>
     /// Control con la cartella dei salvataggi data: usato finché l'interfaccia
     /// WinForms apre solo Control, e dai test.
     /// </summary>
     public static GameInfo Control(string saveFolder) =>
-        new("steam", ControlAppId, "Control", "", "", "", saveFolder, SupportState.Supported);
+        new("steam", ControlAppId, "Control", "", "", "", SpotsOf(saveFolder, SaveSource.Userdata), SupportState.Supported);
 }

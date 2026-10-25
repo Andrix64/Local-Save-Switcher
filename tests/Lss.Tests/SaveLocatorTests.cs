@@ -31,7 +31,7 @@ public sealed class SaveLocatorTests : IDisposable
 
     private static GameInfo Game(string saveFolder = "", SupportState support = SupportState.NoSaves,
         SaveSource source = SaveSource.None) =>
-        new("steam", "123450", "Test", "", "", "", saveFolder, support, "", "", source);
+        new("steam", "123450", "Test", "", "", "", GameInfo.SpotsOf(saveFolder, source), support, "", "", source);
 
     private SaveLocation Run(GameInfo game, IReadOnlyList<SaveRule> rules, string chosen = "",
         SaveSource chosenSource = SaveSource.Chosen) =>

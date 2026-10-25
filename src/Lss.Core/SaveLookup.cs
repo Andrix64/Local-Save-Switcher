@@ -38,7 +38,7 @@ internal static class SaveLookup
 
             result.Add(game with
             {
-                SaveFolder = found.Folder,
+                Spots = GameInfo.SpotsOf(found.Folder, found.Source),
                 Source = found.Source,
                 Support = found.Support,
                 Reason = found.Reason,

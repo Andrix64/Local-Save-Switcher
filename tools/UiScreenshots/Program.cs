@@ -80,8 +80,8 @@ internal static class Program
         Write(Path.Combine(account, "814380", "remotecache.vdf"), "cache");
 
         var steamAccount = new GameAccount("steam", "111", "Andrix", account, DateTime.Now);
-        var control = new GameInfo("steam", GameInfo.ControlAppId, "Control Ultimate Edition", "", "", "", controlSaves, SupportState.Supported);
-        var sekiro = new GameInfo("steam", "814380", "Sekiro™: Shadows Die Twice", "", "", "", Path.Combine(account, "814380"), SupportState.SavesElsewhere);
+        var control = new GameInfo("steam", GameInfo.ControlAppId, "Control Ultimate Edition", "", "", "", GameInfo.SpotsOf(controlSaves, SaveSource.Userdata), SupportState.Supported);
+        var sekiro = new GameInfo("steam", "814380", "Sekiro™: Shadows Die Twice", "", "", "", GameInfo.SpotsOf(Path.Combine(account, "814380"), SaveSource.Userdata), SupportState.SavesElsewhere);
 
         // Dati finti nella lingua delle immagini: quelle in inglese finiscono nel README.
         bool english = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
@@ -142,7 +142,7 @@ internal static class Program
 
         // Come su uno Steam Deck: nessun gioco gestibile, tanti giochi Proton che salvano altrove.
         GameInfo Elsewhere(string id, string name) =>
-            new("steam", id, name, "", "", "", Path.Combine(account, id), SupportState.SavesElsewhere);
+            new("steam", id, name, "", "", "", GameInfo.SpotsOf(Path.Combine(account, id), SaveSource.Userdata), SupportState.SavesElsewhere);
 
         var noSupported = new MainWindow
         {
@@ -169,7 +169,7 @@ internal static class Program
     private static void RenderLearn(string root, GameAccount account, IDialogService dialogs)
     {
         var provider = new SteamProvider(new FakePlatform());
-        var game = new GameInfo("steam", "367520", "Hollow Knight", "", "", "", "", SupportState.NotFound);
+        var game = new GameInfo("steam", "367520", "Hollow Knight", "", "", "", [], SupportState.NotFound);
         string documents = Path.Combine(root, "home", "Documents");
         string dataFolder = Path.Combine(AppData.Root, "steam", account.Id, game.Id);
 

@@ -139,7 +139,7 @@ public sealed class SteamProviderTests : IDisposable
 
         var provider = new SteamProvider(platform);
         GameAccount account = provider.FindAccounts().Single();
-        GameInfo game = new("steam", "105600", "Test", "", "", "", "", SupportState.Supported);
+        GameInfo game = new("steam", "105600", "Test", "", "", "", [], SupportState.Supported);
 
         Assert.Empty(provider.SaveRules(account, game));
         Assert.Empty(provider.RootOverrides(account, game));

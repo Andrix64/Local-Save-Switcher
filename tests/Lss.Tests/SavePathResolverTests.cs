@@ -338,4 +338,66 @@ public sealed class SavePathResolverTests : IDisposable
         Assert.Equal("", SavePathResolver.RootFolder("WinMyDocuments", context));
         Assert.Equal(Home, SavePathResolver.RootFolder("LinuxHome", context));
     }
+
+    [Fact]
+    public void DocumentsBecomeARootInPortablePath()
+    {
+        string game = Path.Combine(Steamuser, "Documents", "My Games", "X");
+        Directory.CreateDirectory(game);
+
+        Assert.Equal("{WinMyDocuments}/My Games/X", SavePathResolver.ToPortable(game, PrefixContext()));
+    }
+
+    [Fact]
+    public void AppDataRoamingBecomesARootInPortablePath()
+    {
+        string game = Path.Combine(Steamuser, "AppData", "Roaming", "Foo");
+        Directory.CreateDirectory(game);
+
+        Assert.Equal("{WinAppDataRoaming}/Foo", SavePathResolver.ToPortable(game, PrefixContext()));
+    }
+
+    [Fact]
+    public void GameFolderBecomesGameinstallInPortablePath()
+    {
+        string install = Path.Combine(folder.Root, "Games", "Foo");
+        var context = new SaveContext(Folders(), Prefix, true, install, "123", IgnoreCase: false);
+
+        Assert.Equal("{gameinstall}/saves", SavePathResolver.ToPortable(Path.Combine(install, "saves"), context));
+    }
+
+    [Fact]
+    public void UnknownFolderStaysFullInPortablePath()
+    {
+        string other = Path.Combine(folder.Root, "elsewhere", "Game");
+
+        Assert.Equal(other, SavePathResolver.ToPortable(other, PrefixContext()));
+    }
+
+    [Fact]
+    public void SteamIdsBecomeTokensInPortablePath()
+    {
+        string bySteam64 = Path.Combine(Steamuser, "AppData", "Roaming", "Foo", "76561197960265851", "x");
+        string bySteam3 = Path.Combine(Steamuser, "AppData", "Roaming", "Foo", "123", "x");
+        string notAnId = Path.Combine(Steamuser, "AppData", "Roaming", "Foo", "1234", "x");
+        Directory.CreateDirectory(bySteam64);
+        Directory.CreateDirectory(bySteam3);
+        Directory.CreateDirectory(notAnId);
+
+        Assert.Equal("{WinAppDataRoaming}/Foo/{64BitSteamID}/x", SavePathResolver.ToPortable(bySteam64, PrefixContext()));
+        Assert.Equal("{WinAppDataRoaming}/Foo/{Steam3AccountID}/x", SavePathResolver.ToPortable(bySteam3, PrefixContext()));
+        Assert.Equal("{WinAppDataRoaming}/Foo/1234/x", SavePathResolver.ToPortable(notAnId, PrefixContext()));
+    }
+
+    [Fact]
+    public void SteamIdTokensComeBackAsThisAccount()
+    {
+        string roaming = Path.Combine(Steamuser, "AppData", "Roaming", "Foo");
+        Directory.CreateDirectory(roaming);
+
+        Assert.Equal(Path.Combine(roaming, "76561197960265851", "x"),
+            SavePathResolver.FromPortable("{WinAppDataRoaming}/Foo/{64BitSteamID}/x", PrefixContext()));
+        Assert.Equal(Path.Combine(roaming, "123"),
+            SavePathResolver.FromPortable("{WinAppDataRoaming}/Foo/{Steam3AccountID}", PrefixContext()));
+    }
 }

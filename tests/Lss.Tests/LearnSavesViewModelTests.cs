@@ -39,7 +39,7 @@ public sealed class LearnSavesViewModelTests : IDisposable
     private static GameAccount Account => new("steam", "111", "Andrix", "", null);
 
     private GameInfo Game(string saveFolder = "") =>
-        new("steam", "123450", "Sandfall", "", "", "", saveFolder, SupportState.Unsure, "", "", SaveSource.None);
+        new("steam", "123450", "Sandfall", "", "", "", GameInfo.SpotsOf(saveFolder, SaveSource.None), SupportState.Unsure, "", "", SaveSource.None);
 
     private LearnSavesViewModel Model(GameInfo? game = null) => new(
         game ?? Game(), Account, provider, dialogs, () => now,

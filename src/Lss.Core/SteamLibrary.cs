@@ -226,7 +226,7 @@ internal static class SteamLibrary
                 installDir,
                 library,
                 installPath,
-                dir,
+                GameInfo.SpotsOf(dir, SaveSource.Userdata),
                 GetSupport(dir),
                 icon,
                 cover));
@@ -253,7 +253,7 @@ internal static class SteamLibrary
                 installDir,
                 library,
                 installPath,
-                "",
+                [],
                 SupportState.NoSaves,
                 icon,
                 cover,
