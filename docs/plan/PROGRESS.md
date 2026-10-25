@@ -137,7 +137,7 @@ per phase (the phase file names it).
 - [x] L3 — Binary VDF reader (2bf56cb)
 - [x] L4 — Steam save rules from `appinfo.vdf` (eefb435)
 - [x] L5 — Rules from the provider (b673864)
-- [ ] L6 — From a rule to real paths
+- [x] L6 — From a rule to real paths (92a9a59; Linux 266 tests on lss-ci)
 - [ ] L7 — Safety of a save folder
 - [ ] L8 — Locate the saves of a game
 - [ ] L9 — Folder chosen or learned
