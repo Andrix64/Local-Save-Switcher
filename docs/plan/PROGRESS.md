@@ -76,7 +76,7 @@ hash after it. 👤 = done by Andrix, skip it. Rules in [README.md](README.md).
 - [x] H5 — Case of names (34b0517)
 - [x] H6 — Paths and permissions (f77a0cb)
 - [x] H7 — Linux tests required in CI (7217d15)
-- [ ] H8 — 👤 Real Linux check
+- [ ] H8 — 👤 Real Linux check (2026-10-24, Steam Deck: Steam found, games list right, all games save outside userdata so no switch could be tried; the app now opens anyway, `27146a0`. Still open: a switch and a game run on Linux with a supported game, Flatpak/Snap Steam)
 
 ## Phase I — Packages ([I-packaging.md](I-packaging.md))
 
@@ -107,8 +107,8 @@ hash after it. 👤 = done by Andrix, skip it. Rules in [README.md](README.md).
 - [x] J3 — Other documents (5e5c0ac)
 - [x] J4 — Version `1.0.0-beta.1` (bd813d5; Linux check on lss-ci: 176 tests, six installs report `LSS 1.0.0-beta.1`)
 - [x] J5 — 👤 First beta (2026-10-24: tag `v1.0.0-beta.1` at `4805f83`, all five CI jobs green, published as pre-release with `gh`; Windows exe not signed yet)
-- [ ] J6 — 👤 SignPath (2026-10-24: application sent by Andrix on signpath.org, describing LSS as a tool for PC games with Steam supported today; waiting for the answer. Then: project, `LSS.exe` artifact configuration, `release-signing` policy, CI user and token, GitHub secret and variables)
-- [ ] J7 — Further betas
+- [x] J6 — 👤 SignPath: closed (application sent 2026-10-24, refused 2026-10-25; decision: release without code signing, `9395e93`)
+- [x] J7 — Further betas: skipped (they were only for the signed exe)
 - [ ] J8 — 1.0.0
 
 ## Notes
