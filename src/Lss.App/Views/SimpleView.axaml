@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:Lss.App.Localization"
+             xmlns:vm="using:Lss.App.ViewModels"
+             x:Class="Lss.App.Views.SimpleView"
+             x:DataType="vm:SimpleViewModel">
+
+  <Grid RowDefinitions="Auto,*" Margin="24,16,24,12">
+
+    <!-- Intestazione: LSS, e ⚙ per passare alla modalità avanzata (chiede un admin) -->
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,18">
+      <TextBlock Classes="title" Text="LSS" FontSize="24" VerticalAlignment="Center" />
+      <Button Grid.Column="1" Classes="secondary" Content="⚙" Command="{Binding ToAdvancedCommand}"
+              ToolTip.Tip="{loc:Str SwitchToAdvanced}" AutomationProperties.Name="{loc:Str SwitchToAdvanced}" />
+    </Grid>
+
+    <ScrollViewer Grid.Row="1">
+    <StackPanel>
+
+      <!-- Prima pagina: chi gioca -->
+      <StackPanel Spacing="22" IsVisible="{Binding !OnGamesPage}">
+        <TextBlock Text="{loc:Str SimpleWhoIsPlaying}" FontSize="26" FontWeight="SemiBold" />
+
+        <ItemsControl ItemsSource="{Binding Players}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:PersonTile">
+              <Button Width="180" Height="200" Margin="0,0,20,20" Padding="8" HorizontalContentAlignment="Center"
+                      Tag="{Binding}" Click="Player_Click">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                  <Border Width="140" Height="140" CornerRadius="70" Background="{Binding Brush}"
+                          HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Initial}" FontSize="60" FontWeight="Bold" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <TextBlock Text="{Binding Person.Name}" FontSize="18" HorizontalAlignment="Center" />
+                  <TextBlock Text="🛡" IsVisible="{Binding Person.IsAdmin}" HorizontalAlignment="Center"
+                             ToolTip.Tip="{loc:Str PlayerAdmin}" AutomationProperties.Name="{loc:Str PlayerAdmin}" />
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Width="180" Height="200" Padding="8" Command="{Binding AddPlayerCommand}" HorizontalContentAlignment="Center">
+          <StackPanel Spacing="8" HorizontalAlignment="Center">
+            <Border Width="140" Height="140" CornerRadius="70" BorderBrush="{StaticResource Border}" BorderThickness="2"
+                    HorizontalAlignment="Center">
+              <TextBlock Text="+" FontSize="60" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <TextBlock Text="{loc:Str SimpleAddPlayer}" FontSize="18" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+
+      <!-- Seconda pagina: i giochi della persona scelta -->
+      <StackPanel Spacing="20" IsVisible="{Binding OnGamesPage}">
+        <StackPanel Orientation="Horizontal" Spacing="14">
+          <Button Classes="secondary" Content="←" Command="{Binding GoBackCommand}"
+                  ToolTip.Tip="{loc:Str SimpleChangePlayer}" AutomationProperties.Name="{loc:Str SimpleChangePlayer}" />
+          <Border Width="40" Height="40" CornerRadius="20" Background="{Binding CurrentTile.Brush}" VerticalAlignment="Center">
+            <TextBlock Text="{Binding CurrentTile.Initial}" FontWeight="Bold" Foreground="White"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <TextBlock Text="{Binding CurrentName}" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <ItemsControl ItemsSource="{Binding Games}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SimpleGameTile">
+              <StackPanel Width="190" Margin="0,0,18,22" Spacing="6" Opacity="{Binding Opacity}">
+                <Button Width="190" Height="285" Padding="0" Tag="{Binding}" Click="Game_Click"
+                        IsEnabled="{Binding !Running}" HorizontalContentAlignment="Center">
+                  <Grid>
+                    <Image Source="{Binding Cover}" IsVisible="{Binding HasCover}" Stretch="UniformToFill" />
+                    <Border IsVisible="{Binding !HasCover}" Background="{Binding TileBrush}" Width="190" Height="285">
+                      <TextBlock Text="{Binding Initials}" FontSize="56" FontWeight="Bold" Foreground="White"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                  </Grid>
+                </Button>
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Classes="small" Text="{Binding Launcher}" />
+                <TextBlock Classes="small" Text="{Binding LastPlayText}" IsVisible="{Binding LastPlayText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                <TextBlock Classes="small" Text="{Binding CloudText}" IsVisible="{Binding HasCloud}" />
+                <TextBlock Classes="small" Text="{loc:Str SimpleNeedsSetup}" IsVisible="{Binding !Ready}" />
+                <TextBlock Classes="small" Text="{loc:Str SimplePlaying}" IsVisible="{Binding Running}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Width="190" Height="285" Padding="8" Command="{Binding AddGameCommand}" HorizontalContentAlignment="Center">
+          <StackPanel Spacing="8" HorizontalAlignment="Center">
+            <TextBlock Text="+" FontSize="60" HorizontalAlignment="Center" />
+            <TextBlock Text="{loc:Str SimpleAddGame}" FontSize="16" HorizontalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+
+    </StackPanel>
+    </ScrollViewer>
+  </Grid>
+
+</UserControl>

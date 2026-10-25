@@ -10,7 +10,10 @@
         MinWidth="640" MinHeight="560"
         WindowStartupLocation="CenterScreen">
 
-  <DockPanel>
+  <Grid>
+
+  <!-- La modalità avanzata: intestazione, colonna dei giochi, il gioco -->
+  <DockPanel IsVisible="{Binding !IsSimple}">
 
     <!-- Intestazione -->
     <Border DockPanel.Dock="Top" Height="68" Background="{StaticResource Header}" Padding="16,0">
@@ -25,6 +28,7 @@
           <Button Classes="secondary" Content="{loc:Str AddGameButton}" Command="{Binding AddGameCommand}" />
           <Button Classes="secondary" Content="{loc:Str ImportConfig}" Command="{Binding ImportConfigCommand}" />
           <Button Classes="secondary" Content="{loc:Str PlayersButton}" Command="{Binding OpenPlayersCommand}" />
+          <Button Classes="secondary" Content="{loc:Str SwitchToSimple}" Command="{Binding SwitchToSimpleCommand}" />
           <Button Classes="secondary" Content="{loc:Str SettingsButton}"
                   Command="{Binding CurrentGame.SettingsCommand}" />
         </StackPanel>
@@ -100,5 +104,16 @@
     </Grid>
 
   </DockPanel>
+
+  <!-- La modalità semplice: al posto di tutto il resto -->
+  <ContentControl Content="{Binding Simple}" IsVisible="{Binding IsSimple}">
+    <ContentControl.DataTemplates>
+      <DataTemplate x:DataType="vm:SimpleViewModel">
+        <views:SimpleView />
+      </DataTemplate>
+    </ContentControl.DataTemplates>
+  </ContentControl>
+
+  </Grid>
 
 </Window>

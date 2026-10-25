@@ -51,6 +51,20 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         Monitor = new GameMonitor(() => gameModels.Values);
+
+        isSimple = settings.Mode == AppSettings.SimpleMode;
+
+        if (people != null)
+        {
+            Simple = new SimpleViewModel(people, dialogs, Games,
+                item => ManagerOrNull(item),
+                item => FindFolderAsync(item),
+                item => PlaySimpleAsync(item),
+                () => AddGameAsync())
+            {
+                ToAdvanced = SwitchToAdvancedAsync,
+            };
+        }
         SelectedGame = Games.FirstOrDefault(g => AppSettings.Refers(settings.LastGame, g.Info.Provider, g.Info.Id)) ?? Games.FirstOrDefault();
     }
 
@@ -68,6 +82,60 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool showSidebar;
+
+    /// <summary>La modalità semplice (chi gioca sceglie il gioco): al suo posto la vista semplice.</summary>
+    [ObservableProperty]
+    private bool isSimple;
+
+    /// <summary>La vista semplice, o null se non ci sono persone.</summary>
+    public SimpleViewModel? Simple { get; }
+
+    /// <summary>"Modalità semplice" nell'intestazione della modalità avanzata.</summary>
+    [RelayCommand]
+    private void SwitchToSimple()
+    {
+        SetMode(AppSettings.SimpleMode);
+        IsSimple = true;
+        Simple?.Refresh();
+    }
+
+    /// <summary>"Modalità avanzata" dalla vista semplice: chiede un admin (il PIN se ce l'ha).</summary>
+    private async Task SwitchToAdvancedAsync()
+    {
+        if (people == null)
+            return;
+
+        Person? admin = await dialogs.ChooseAdminAsync(people);
+
+        if (admin == null)
+            return;
+
+        SetMode(AppSettings.AdvancedMode);
+        IsSimple = false;
+    }
+
+    private void SetMode(string mode)
+    {
+        settings.Mode = mode;
+        settings.Save();
+    }
+
+    // Un gioco senza gestore (non si apre) resta senza partite nella vista semplice.
+    private SaveManager? ManagerOrNull(GameItemViewModel item)
+    {
+        try
+        {
+            return GameFor(item).Manager;
+        }
+        catch (InvalidOperationException ex)
+        {
+            Log.Write("Gioco non aperto nella modalità semplice: " + ex.Message);
+            return null;
+        }
+    }
+
+    // Giocare dalla modalità semplice: arriva con P7 (mai fatto finora, così la vista non avvia nulla).
+    private static Task PlaySimpleAsync(GameItemViewModel item) => Task.CompletedTask;
 
     // Senza gioco gestibile si mostra il messaggio al suo posto.
     [ObservableProperty]

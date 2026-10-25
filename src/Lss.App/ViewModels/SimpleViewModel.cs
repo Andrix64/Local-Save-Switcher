@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lss.App.Services;
@@ -20,7 +21,17 @@ public sealed record SimpleGameTile(
     bool Ready,
     bool Running,
     string LastPlayText,
-    string? CloudText);
+    string? CloudText,
+    IImage? Cover)
+{
+    /// <summary>true se c'è la copertina; altrimenti la piastrella generata.</summary>
+    public bool HasCover => Cover != null;
+
+    /// <summary>Un gioco non pronto si vede sbiadito.</summary>
+    public double Opacity => Ready ? 1 : 0.45;
+
+    public bool HasCloud => CloudText != null;
+}
 
 /// <summary>
 /// Modalità semplice: "Chi gioca?" (le persone), poi i giochi del giocatore. Un
@@ -64,6 +75,9 @@ public sealed partial class SimpleViewModel : ObservableObject
     /// <summary>Il giocatore attuale, o null sulla prima pagina.</summary>
     public Person? Current { get; private set; }
 
+    /// <summary>La piastrella del giocatore attuale (il suo pallino nella pagina dei giochi), o null.</summary>
+    public PersonTile? CurrentTile { get; private set; }
+
     /// <summary>true sulla pagina dei giochi.</summary>
     public bool OnGamesPage => Current != null;
 
@@ -90,9 +104,28 @@ public sealed partial class SimpleViewModel : ObservableObject
                 Games.Add(tile);
         }
 
+        CurrentTile = Current == null ? null : Players.FirstOrDefault(tile => tile.Person.Id == Current.Id);
+
         OnPropertyChanged(nameof(OnGamesPage));
         OnPropertyChanged(nameof(CurrentName));
+        OnPropertyChanged(nameof(CurrentTile));
     }
+
+    /// <summary>"⚙": si passa alla modalità avanzata (chi autorizza lo decide il MainWindowViewModel).</summary>
+    public Func<Task>? ToAdvanced { get; set; }
+
+    [RelayCommand]
+    private async Task ToAdvancedAsync()
+    {
+        if (ToAdvanced != null)
+            await ToAdvanced();
+    }
+
+    [RelayCommand]
+    private void SelectPlayerTile(PersonTile tile) => SelectPlayer(tile.Person);
+
+    [RelayCommand]
+    private Task ActivateGameTile(SimpleGameTile tile) => ActivateAsync(tile);
 
     /// <summary>Chi gioca: si va alla pagina dei giochi di quella persona.</summary>
     public void SelectPlayer(Person person)
@@ -107,6 +140,10 @@ public sealed partial class SimpleViewModel : ObservableObject
         Current = null;
         Refresh();
     }
+
+    /// <summary>La freccia "←" della pagina dei giochi.</summary>
+    [RelayCommand]
+    private void GoBack() => ChangePlayer();
 
     /// <summary>Un gioco: si gioca se è pronto, altrimenti si sistema (con un admin).</summary>
     public async Task ActivateAsync(SimpleGameTile tile)
@@ -199,7 +236,8 @@ public sealed partial class SimpleViewModel : ObservableObject
                 item.Info.Support == SupportState.Supported,
                 running,
                 last is DateTime when ? Loc.F(Strings.SimpleLastPlay, when.ToString("d")) : "",
-                cloud);
+                cloud,
+                LoadCover(item.Info.CoverPath));
 
             built.Add((tile, last));
         }
@@ -209,6 +247,23 @@ public sealed partial class SimpleViewModel : ObservableObject
             .ThenBy(entry => entry.Tile.Name, StringComparer.OrdinalIgnoreCase)
             .Select(entry => entry.Tile)
             .ToList();
+    }
+
+    // La copertina del gioco, se il file c'è; altrimenti null e si mostra la piastrella generata.
+    private static IImage? LoadCover(string path)
+    {
+        if (path == "" || !File.Exists(path))
+            return null;
+
+        try
+        {
+            return new Bitmap(path);
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Copertina non letta: " + path, ex);
+            return null;
+        }
     }
 
     private static string Initial(string name) =>

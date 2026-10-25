@@ -160,6 +160,27 @@ public sealed class SimpleViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task ARunningGameIsNotStarted()
+    {
+        // Il gioco è aperto: la piastrella è disattivata e un clic non fa niente.
+        SaveManager manager = new(folder.Game, folder.Data, "", null, new FakeProvider { Running = true });
+        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+            $"Ordine={TestFolder.Owner}\n{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n");
+        var people = new People(folder.Data);
+        people.Load();
+        manager.Players = people;
+        SimpleViewModel model = Model(manager, people, new FakeDialogService(), Item("Mario", SupportState.Supported));
+        model.SelectPlayer(people.Find(TestFolder.Owner)!);
+
+        SimpleGameTile tile = model.Games.Single();
+        Assert.True(tile.Running);
+
+        await model.ActivateAsync(tile);
+
+        Assert.Empty(played);
+    }
+
+    [Fact]
     public void ChangePlayerGoesBackToThePlayers()
     {
         (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
