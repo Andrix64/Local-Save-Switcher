@@ -203,7 +203,7 @@ per phase (the phase file names it).
 - [x] P5 — Advanced mode: playthroughs grouped by player (88b01ee)
 - [x] P5a — Deleted playthroughs: kept until deleted for good (0d1b427)
 - [x] P6 — Simple view: players and games (dc7b761)
-- [ ] P7 — Simple mode: play, and the "My games" menu
+- [x] P7 — Simple mode: play, and the "My games" menu (3292e4a)
 - [ ] P8 — Screenshots
 - [ ] P9 — 👤 Check with real people
 
@@ -223,6 +223,23 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P7 (Haiku), commit `3292e4a` (tick nel commit successivo). Test Windows: 742
+  verdi, 0 warning. Cosa c'è: giocare dalla modalità semplice (`SimplePlayFlow`): controllo cloud
+  (un utente manda a un admin; l'admin consente il gioco o lo gioca solo questa volta; cloud spento =
+  nessuna domanda), preparazione (`SimplePlay`), avvio, pannello "Buon divertimento", fine (segnale del
+  launcher, o "Ho finito di giocare" se il launcher non lo sa dire), salvataggio sempre alla chiusura,
+  tempo di gioco, poi la ricerca di cartelle dopo la partita (N11, senza domande). Menu "Le mie
+  partite" (`MyGamesWindow`): le partite della persona, la preferita per prima; una riga la gioca e la
+  rende preferita; "Inizia una nuova partita". Niente si elimina né si rinomina lì.
+  - Deviazioni: (1) l'avviso cloud usa la barra del gioco per il consenso, il piano dice "Consenti" nei
+    pulsanti dell'avviso. Per "Consenti" e "Solo questa volta" si fanno due domande in sequenza (la
+    finestra ha un solo pulsante di conferma). (2) "Ho finito" e l'esito si mostrano nel pannello e in
+    `Message`, niente toast. (3) Le scritte "non lo so" sono il pulsante annulla della scelta di persona.
+  - **Chiudere LSS mentre gira un gioco avviato dalla modalità semplice**: la finestra si chiude e
+    l'app si chiude (come oggi nella modalità avanzata). Il salvataggio alla chiusura del gioco non
+    parte in nessuna delle due modalità: i progressi sono quelli salvati l'ultima volta, e il tempo di
+    gioco di quella sessione si perde. Da decidere con Andrix (uguale ai 1.0 o da cambiare).
+  - Non verificato a schermo: il pannello, il menu ⋯ e "Le mie partite" (P8).
 - 2026-10-25 — Fase P, P4 e P6 (Haiku), commit `dc7b761` (tick nel commit successivo). Test
   Windows: 730 verdi, 0 warning. Cosa c'è: modalità in `lss.ini`; intestazione "Modalità semplice";
   vista semplice con le persone (piastrelle da 140 px, scudo per gli admin, "Aggiungi giocatore":
