@@ -436,4 +436,10 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SuggestionNotSaves" xml:space="preserve"><value>Not saves…</value></data>
   <data name="SuggestionLater" xml:space="preserve"><value>Later</value></data>
   <data name="SaveFolderFoundForOther" xml:space="preserve"><value>LSS found where {0} saves.</value></data>
+  <data name="EpicItemMissing" xml:space="preserve"><value>Epic Games Launcher doesn&apos;t list this game any more.</value></data>
+  <data name="LaunchFailedVia" xml:space="preserve"><value>We couldn&apos;t start {0} through {1}: {2}</value></data>
+  <data name="CloudOnGeneric" xml:space="preserve"><value>{0} keeps a copy of the saves online (cloud saves). It may bring back the saves of another playthrough: turn it off for this game in {1}.</value></data>
+  <data name="CloudBarTitleGeneric" xml:space="preserve"><value>Cloud saves are on for {0}</value></data>
+  <data name="CloudConfirmHeadingGeneric" xml:space="preserve"><value>Cloud saves might mix up your playthroughs</value></data>
+  <data name="CloudBarGeneric" xml:space="preserve"><value>{0} keeps a copy of the saves online. Turn it off for this game in {1}.</value></data>
 </root>

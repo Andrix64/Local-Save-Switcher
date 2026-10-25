@@ -109,9 +109,11 @@ public sealed class SteamProviderTests : IDisposable
     {
         IReadOnlyList<IGameProvider> all = Providers.All(platform);
 
-        Assert.Single(all);
+        // Fase O1: dopo Steam c'è Epic Games (il test di K7 diceva "uno solo").
+        Assert.Equal(2, all.Count);
         Assert.Equal("steam", all[0].Id);
         Assert.Equal("Steam", all[0].DisplayName);
+        Assert.Equal("epic", all[1].Id);
     }
 
     [Fact]

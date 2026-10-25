@@ -414,6 +414,9 @@ public sealed partial class SaveManager
     /// </summary>
     public CloudState GetCloudState() => provider.GetCloudState(Account, Game);
 
+    /// <summary>true se il launcher del gioco è aperto.</summary>
+    public bool IsLauncherRunning() => provider.IsLauncherRunning();
+
     // PROFILI
 
     /// <summary>

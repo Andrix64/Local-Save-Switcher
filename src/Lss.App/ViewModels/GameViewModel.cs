@@ -431,6 +431,11 @@ public partial class GameViewModel : ObservableObject
     }
 
     /// <summary>
+    /// true se il gioco è di Steam: gli avvisi sul cloud nominano Steam Cloud.
+    /// </summary>
+    private bool IsSteamGame => Manager.Game.Provider == "steam";
+
+    /// <summary>
     /// Aggiorna le barre, il testo di elenco vuoto e lo stato delle schede.
     /// </summary>
     public void UpdateState()
@@ -438,8 +443,17 @@ public partial class GameViewModel : ObservableObject
         EmptyText = Playthroughs.Count == 0 ? Strings.NoPlaythroughs : "";
 
         ShowCloudBar = Cloud == CloudState.Enabled;
-        CloudBarTitle = Loc.F(Strings.CloudBarTitle, Manager.Game.Name);
-        CloudBarText = Loc.F(Strings.CloudBarText, Manager.Game.Name);
+
+        if (IsSteamGame)
+        {
+            CloudBarTitle = Loc.F(Strings.CloudBarTitle, Manager.Game.Name);
+            CloudBarText = Loc.F(Strings.CloudBarText, Manager.Game.Name);
+        }
+        else
+        {
+            CloudBarTitle = Loc.F(Strings.CloudBarTitleGeneric, Manager.Game.Name);
+            CloudBarText = Loc.F(Strings.CloudBarGeneric, Manager.Game.Name, Manager.LauncherName);
+        }
 
         if (GameRunning)
         {
@@ -787,6 +801,13 @@ public partial class GameViewModel : ObservableObject
     [RelayCommand]
     public async Task CloudHelpAsync()
     {
+        if (!IsSteamGame)
+        {
+            await dialogs.InformAsync(Loc.F(Strings.CloudBarTitleGeneric, Manager.Game.Name),
+                Loc.F(Strings.CloudOnGeneric, Manager.Game.Name, Manager.LauncherName), InfoKind.Info);
+            return;
+        }
+
         await dialogs.InformAsync(Loc.F(Strings.CloudHelpHeading, Manager.Game.Name),
             Loc.F(Strings.CloudHelpText, Manager.Game.Name), InfoKind.Info);
 
@@ -953,15 +974,17 @@ public partial class GameViewModel : ObservableObject
     /// </summary>
     private async Task<bool> ConfirmCloudAsync(bool launching)
     {
-        if (cloudWarningAccepted || Cloud == CloudState.Disabled)
+        // Fuori da Steam l'avviso serve solo se il launcher dice che il cloud è attivo.
+        if (cloudWarningAccepted || Cloud == CloudState.Disabled || (!IsSteamGame && Cloud != CloudState.Enabled))
             return true;
 
-        if (!launching && !SaveManager.IsSteamRunning())
+        if (!launching && !Manager.IsLauncherRunning())
             return true;
 
-        cloudWarningAccepted = await dialogs.ConfirmAsync(Strings.CloudConfirmHeading,
+        cloudWarningAccepted = await dialogs.ConfirmAsync(
+            IsSteamGame ? Strings.CloudConfirmHeading : Strings.CloudConfirmHeadingGeneric,
             Cloud == CloudState.Enabled
-                ? Loc.F(Strings.CloudConfirmOn, Manager.Game.Name)
+                ? Loc.F(IsSteamGame ? Strings.CloudConfirmOn : Strings.CloudOnGeneric, Manager.Game.Name, Manager.LauncherName)
                 : Loc.F(Strings.CloudConfirmMaybe, Manager.Game.Name),
             launching ? Strings.StartAnyway : Strings.ContinueAnyway,
             kind: InfoKind.Warning);

@@ -436,4 +436,10 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="SuggestionNotSaves" xml:space="preserve"><value>Non sono salvataggi…</value></data>
   <data name="SuggestionLater" xml:space="preserve"><value>Più tardi</value></data>
   <data name="SaveFolderFoundForOther" xml:space="preserve"><value>LSS ha trovato dove salva {0}.</value></data>
+  <data name="EpicItemMissing" xml:space="preserve"><value>Epic Games Launcher non elenca più questo gioco.</value></data>
+  <data name="LaunchFailedVia" xml:space="preserve"><value>Non siamo riusciti ad avviare {0} tramite {1}: {2}</value></data>
+  <data name="CloudOnGeneric" xml:space="preserve"><value>{0} conserva una copia dei salvataggi online (salvataggi nel cloud). Potrebbe rimettere i salvataggi di un&apos;altra partita: disattivalo per questo gioco in {1}.</value></data>
+  <data name="CloudBarTitleGeneric" xml:space="preserve"><value>Il cloud dei salvataggi è attivo per {0}</value></data>
+  <data name="CloudConfirmHeadingGeneric" xml:space="preserve"><value>Il cloud dei salvataggi potrebbe mescolare le partite</value></data>
+  <data name="CloudBarGeneric" xml:space="preserve"><value>{0} conserva una copia dei salvataggi online. Disattivalo per questo gioco in {1}.</value></data>
 </root>
