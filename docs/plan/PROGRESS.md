@@ -216,6 +216,76 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fine fase M (Haiku). M1–M6 committati su `v2` (da `1d0b994` a
+  `76c8fee`), ogni task con il suo tick in un commit `Progress:`. M7 non fatto (👤).
+  Test Windows: 376 verdi, 0 warning (prima di M: 317). Linux (`lss-ci`,
+  `scripts/linux-check.sh lss-ci@192.168.1.3 --tests-only`): dopo M1 (corretto, vedi
+  sotto) 327 verdi, dopo M2 337 verdi, dopo M3b 353 verdi, a fine fase 376 verdi.
+  Nessun test già esistente è cambiato: `git diff ab5c301 -- tests` non toglie righe,
+  solo aggiunge. `GameSaveSettingsTests` non è cambiato; la conservazione delle altre
+  chiavi di `cartella.ini` è coperta da `IgnoredFoldersTests.SavingTheSaveFolderKeepsTheIgnoredFolders`.
+  - Smart App Control: tra le 12:20 e le 12:25 (ora locale) del 2026-10-25 ha bloccato
+    `Lss.Tests.dll` e poi `LSS.dll` appena compilate (Code Integrity, eventi 3077 e 3033,
+    "did not meet the Enterprise signing level"). Bloccate anche la build Debug e quella
+    con `--no-incremental` e con un'altra cartella di output. Poi, senza che io cambiassi
+    nulla alle impostazioni di sicurezza, la build successiva è passata. Se torna, vedi
+    `docs/DEVELOPMENT.md` → "Smart App Control".
+  - M1: `SaveFinder.Roots` ha un terzo parametro opzionale, `userdataFolder` (la
+    userdata di Steam del gioco), perché `SaveContext` non la contiene. La fusione tiene
+    la cartella esterna con la profondità maggiore; una cartella del gioco dentro una
+    cartella non del gioco resta a parte (così il punteggio la riconosce). Le cartelle
+    nascoste di Home e i prefissi Wine senza prefisso noto sono come da tabella (le
+    prime solo su Linux). Il run Linux dopo il primo M1 ha trovato due test sbagliati
+    (`.local/share` e `.wine/drive_c/users` sono dentro cartelle nascoste di Home e la
+    fusione le unisce): corretto l'atteso del test, e il commit M1 è stato corretto con
+    `--amend` prima del tick (era solo locale, non ancora ticked).
+  - M2: il percorso usa `Directory.GetFileSystemEntries` (array, con try/catch) invece di
+    `EnumerateFileSystemEntries`: un errore a metà non perde le voci già lette. "windows",
+    "Program Files" e "Program Files (x86)" si saltano solo sotto la radice di un disco.
+    Un file visto da più radici compare una volta sola (vince la prima, cioè quella del
+    gioco). Test Linux corretti in `5e7d799`: su Linux `SetCreationTimeUtc` cambia la data
+    di modifica, quindi il test imposta solo la scrittura, usa un'ora di partenza nel
+    futuro e controlla la data di creazione solo su Windows.
+  - M3: il motivo "il nome contiene" mostra il nome della cartella trovata, non il token
+    (più leggibile per l'utente). Il punteggio dei file di impostazioni (−4) richiede
+    estensione `.ini/.cfg/.xml/.json` **e** un nome con `config/setting/option/prefs`, come
+    scritto nel piano. Le parole da cartella di salvataggi: +2 per una, +3 con due (totale).
+    `Rank` ha due parametri opzionali in più, preparati per M3b e N: la lista delle
+    cartelle ignorate (già risolta, così non si legge `cartella.ini` per ogni file) e le
+    cartelle già note.
+  - M3b: `cartella.ini` ha `Ignorate.<n>` e `Aggiunta.<n>` per un gioco solo (percorso
+    assoluto: la cartella dati è locale); `cartelle-ignorate.ini` ha `Cartella.<n>` e
+    `Aggiunta.<n>` per tutti i giochi (percorso portabile, `{WinAppDataLocal}/Discord`).
+    `Folder` e `PortablePath` coincidono. `AddGlobal` riceve solo il percorso portabile;
+    `RemoveGlobal` e `RemoveForGame` il percorso salvato.
+  - M3b, cambio di comportamento su L: `GameSaveSettings.Save` ora conserva le altre chiavi
+    di `cartella.ini` (prima scriveva solo le sue due, e avrebbe perso le cartelle
+    ignorate). Con `Folder` vuota elimina il file solo se non ne restano altre chiavi.
+    `SavePathResolver.ToPortable` e `FromPortable` sono stati aggiunti in L6 (il piano lo
+    prevedeva se N1 non era fatto).
+  - M4: che la cartella attuale del gioco non si possa segnare lo decide il ViewModel
+    (`IgnoredFolders` non conosce il gioco attuale). `CartelleExtra` (separate da `;`) in
+    `cartella.ini`: `GameSaveSettings.ExtraFolders` e `AddExtraFolder`. La lista del
+    risultato ha pulsanti radio (la prima scelta) e un solo "Usa questa cartella".
+    "Trova la cartella" di Altri giochi apre ora la procedura (prima era la scelta a mano).
+    Le cartelle "non di salvataggi" in Impostazioni compaiono in tutte le modalità: non
+    c'è ancora l'amministratore (fase P). La finestra mostra quelle di tutti i giochi e
+    quelle di questo gioco. Il percorso portabile si vede com'è salvato
+    (`{WinAppDataLocal}/Discord`): da rivedere con Andrix, forse un testo più semplice.
+  - M5: con partite già fatte e cartella cambiata c'è un solo avviso (`LearnFolderChanged`)
+    al posto della conferma normale, non due finestre. "Ha partite" = c'è una
+    `Profili\Profilo_*` nella cartella dei dati (senza aprire un `SaveManager`).
+  - M6: lo screenshot ha mostrato due difetti, corretti in `a78b9cd`. I pulsanti del
+    risultato uscivano dalla finestra (ora il pulsante principale sta da solo sulla riga,
+    gli altri vanno a capo). `startedUtc` parte dalla creazione del ViewModel: prima, un
+    passo "in gioco" impostato senza `StartAsync` sottraeva da `DateTime.MinValue`.
+    Le immagini sono in `%TEMP%\shots-m6` (fuori dal repository, come da
+    `docs/DEVELOPMENT.md`). Le ho lette: i quattro passi, il risultato con tre cartelle,
+    il "nessuna cartella" e le cartelle non di salvataggi (più la voce in Impostazioni).
+  - Da controllare con Andrix (M7, 👤): i pesi di `SaveFinder` (costanti in cima al file)
+    contro i giochi reali. Il nome del gioco con parole di 3 lettere può prendere cartelle
+    che non c'entrano (il token minimo è 3, come da piano).
+
 - 2026-10-25 — L13 step 0 (Opus, Andrix's Steam Deck `appinfo.vdf`, read
   with the throw-away reader): version 29, 115 games in Steam's cache (the
   library, not only what is installed): 53 with `savefiles` rules, 29 with
