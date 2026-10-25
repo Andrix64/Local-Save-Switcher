@@ -201,6 +201,7 @@ per phase (the phase file names it).
 - [ ] P4 — Mode setting and start-up
 - [ ] P4a — Optional PIN for admins
 - [ ] P5 — Advanced mode: playthroughs grouped by player
+- [ ] P5a — Deleted playthroughs: kept until deleted for good
 - [ ] P6 — Simple view: players and games
 - [ ] P7 — Simple mode: play, and the "My games" menu
 - [ ] P8 — Screenshots

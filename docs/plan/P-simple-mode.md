@@ -410,6 +410,61 @@ the playthroughs away, remove player deleting them, last player refused.
 
 Commit: `Advanced mode: playthroughs grouped by player`
 
+## P5a — Deleted playthroughs: kept until deleted for good
+
+Asked by Andrix (2026-10-25). Read `SaveManager.Playthroughs.cs`
+(`GetDeletedProfiles`, `RecoverDeletedProfile`), `SaveManager.cs`
+(`DeleteProfile`, `PruneBackups`), `DeletedWindow.axaml(.cs)` and its view
+model first.
+
+1. **Not pruned any more.** A deleted playthrough is a backup with the
+   `Eliminato_` prefix (`BackupKind.Delete`), so `PruneBackups` deletes it
+   with the other old backups after `BackupsToKeep` newer ones, without
+   telling anyone. `PruneBackups` must skip every `BackupKind.Delete`
+   backup, and they don't count towards `BackupsToKeep`. Test: with
+   `BackupsToKeep = 2`, a deleted playthrough and five newer backups → the
+   deleted playthrough is still there after the pruning, and two other
+   backups are kept.
+2. **Delete for good.** `SaveManager`:
+
+   ```csharp
+   /// <summary>Elimina per sempre una partita eliminata (non si può annullare).</summary>
+   public Result PurgeDeletedProfile(Snapshot deleted);
+   ```
+
+   Same checks as `RecoverDeletedProfileCore` (kind `Delete`, inside
+   `BackupPath`, exists), then `Directory.Delete` + `DeleteBackupInfo`,
+   through `Finish` (log line `Elimina per sempre <name>`). Test: the folder
+   and its info file are gone, a folder outside `BackupPath` is refused,
+   other backups untouched.
+3. **Interface** (`DeletedWindow`, advanced mode, so only admins): each row
+   shows the name, the **player** it belonged to (P2: circle and name; "—"
+   when the owner doesn't exist any more), when it was deleted and the play
+   time; buttons **Recover** (as today) and **Delete for good…** (danger
+   style). The confirmation is destructive (`ConfirmAsync(…, destructive:
+   true)`, verb `PurgeVerb`): `PurgeText` names the playthrough and says it
+   can't be undone. At the bottom, when there are at least two,
+   **Delete all for good…** with its own confirmation (`PurgeAllText`, with
+   the number). The intro text of the window changes from "kept" to
+   `DeletedIntro`. Follow the design canvas (board "Popup · Partite
+   eliminate").
+
+| Key | English |
+|---|---|
+| `DeletedIntro` | Deleted playthroughs stay here until you recover them or delete them for good. |
+| `PurgeButton` | Delete for good… |
+| `PurgeAllButton` | Delete all for good… |
+| `PurgeTitle` | Delete for good? |
+| `PurgeText` | "{0}" will be deleted for good. This can't be undone. |
+| `PurgeAllText` | {0} deleted playthroughs will be deleted for good. This can't be undone. |
+| `PurgeVerb` | Delete for good |
+| `Purged` | Playthrough deleted for good. |
+
+Tests on the view model (FakeDialogService): purge asks and deletes; cancel
+deletes nothing; purge all with two items; the window shows the owner.
+
+Commit: `Deleted playthroughs: kept until deleted for good`
+
 ## P6 — Simple view: players and games
 
 `SimpleView.axaml` + `SimpleViewModel` (one public type per file). Follow
