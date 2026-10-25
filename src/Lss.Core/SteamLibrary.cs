@@ -14,7 +14,7 @@ internal static class SteamLibrary
     // Nomi dei manifest che non sono giochi (runtime di Steam e di Proton).
     private static readonly string[] SystemNamePrefixes =
     [
-        "Proton", "Steam Linux Runtime", "Steamworks Common Redistributables"
+        "Proton", "Steam Linux Runtime", "Steamworks Common Redistributables", "SteamVR"
     ];
 
     // Nomi noti dei giochi senza manifest (disinstallati ma con i salvataggi).
@@ -205,10 +205,81 @@ internal static class SteamLibrary
                 cover));
         }
 
+        // Giochi installati senza cartella in userdata: il gioco salva altrove
+        // (Proton, Documents...) e va trovato con le regole di Steam.
+        var listed = games.Select(game => game.Id).ToHashSet();
+
+        foreach ((string appId, string name, string installDir, string library) in InstalledApps(libraries))
+        {
+            if (listed.Contains(appId) || SystemApps.Contains(appId))
+                continue;
+
+            (string icon, string cover) = FindImages(steamRoot, appId);
+            string installPath = installDir != "" && library != ""
+                ? Path.Combine(library, "steamapps", "common", installDir)
+                : "";
+
+            games.Add(new GameInfo(
+                "steam",
+                appId,
+                name,
+                installDir,
+                library,
+                installPath,
+                "",
+                SupportState.NoSaves,
+                icon,
+                cover,
+                SaveSource.None));
+        }
+
         return games
             .OrderBy(game => game.Support != SupportState.Supported)
             .ThenBy(game => game.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
+    }
+
+    /// <summary>
+    /// Giochi installati in tutte le librerie, da steamapps/appmanifest_*.acf.
+    /// Salta i manifest senza nome e quelli che non sono giochi (runtime, Proton).
+    /// </summary>
+    internal static IEnumerable<(string AppId, string Name, string InstallDir, string Library)> InstalledApps(
+        IReadOnlyList<string> libraries)
+    {
+        var apps = new List<(string AppId, string Name, string InstallDir, string Library)>();
+
+        foreach (string library in libraries)
+        {
+            string steamapps = Path.Combine(library, "steamapps");
+
+            if (!Directory.Exists(steamapps))
+                continue;
+
+            foreach (string file in Directory.GetFiles(steamapps, "appmanifest_*.acf"))
+            {
+                string appId = Path.GetFileNameWithoutExtension(file)["appmanifest_".Length..];
+
+                if (!appId.All(char.IsAsciiDigit))
+                    continue;
+
+                try
+                {
+                    Vdf.Node root = Vdf.Parse(File.ReadAllText(file));
+                    string? name = Vdf.Find(root, "AppState", "name");
+
+                    if (string.IsNullOrEmpty(name) || IsSystemName(name))
+                        continue;
+
+                    apps.Add((appId, name, Vdf.Find(root, "AppState", "installdir") ?? "", library));
+                }
+                catch (Exception ex)
+                {
+                    Log.Write("Manifest di Steam non letto: " + file, ex);
+                }
+            }
+        }
+
+        return apps;
     }
 
     private static bool IsSystemName(string name) =>
