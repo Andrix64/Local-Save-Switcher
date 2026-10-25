@@ -96,13 +96,13 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>La vista semplice, o null se non ci sono persone.</summary>
     public SimpleViewModel? Simple { get; }
 
-    /// <summary>"Modalità semplice" nell'intestazione della modalità avanzata.</summary>
-    [RelayCommand]
-    private void SwitchToSimple()
+    /// <summary>"Passa alla modalità semplice" dalle Impostazioni di un gioco.</summary>
+    private Task SwitchToSimpleAsync()
     {
         SetMode(AppSettings.SimpleMode);
         IsSimple = true;
         Simple?.Refresh();
+        return Task.CompletedTask;
     }
 
     /// <summary>"Modalità avanzata" dalla vista semplice: chiede un admin (il PIN se ce l'ha).</summary>
@@ -633,6 +633,8 @@ public partial class MainWindowViewModel : ObservableObject
         {
             Settings = settings,
             ExportAll = ExportAllConfigsAsync,
+            OpenPlayers = OpenPlayersAsync,
+            SwitchToSimple = SwitchToSimpleAsync,
         };
         created.Refresh();
 

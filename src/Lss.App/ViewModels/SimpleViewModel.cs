@@ -284,7 +284,7 @@ public sealed partial class SimpleViewModel : ObservableObject
             var tile = new SimpleGameTile(
                 item,
                 item.Name,
-                item.Info.Provider,
+                item.Provider.DisplayName,
                 item.Info.CoverPath == "" ? null : item.Info.CoverPath,
                 Initials(item.Name),
                 new SolidColorBrush(Color.Parse(People.Palette[Stable(item.Name) % People.Palette.Count])),

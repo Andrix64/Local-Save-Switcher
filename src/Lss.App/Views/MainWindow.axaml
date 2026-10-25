@@ -27,8 +27,6 @@
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
           <Button Classes="secondary" Content="{loc:Str AddGameButton}" Command="{Binding AddGameCommand}" />
           <Button Classes="secondary" Content="{loc:Str ImportConfig}" Command="{Binding ImportConfigCommand}" />
-          <Button Classes="secondary" Content="{loc:Str PlayersButton}" Command="{Binding OpenPlayersCommand}" />
-          <Button Classes="secondary" Content="{loc:Str SwitchToSimple}" Command="{Binding SwitchToSimpleCommand}" />
           <Button Classes="secondary" Content="{loc:Str SettingsButton}"
                   Command="{Binding CurrentGame.SettingsCommand}" />
         </StackPanel>

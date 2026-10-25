@@ -41,6 +41,12 @@ public partial class GameViewModel : ObservableObject
     /// <summary>Esporta la configurazione di tutti i giochi (dalle Impostazioni): lo fa la finestra principale.</summary>
     public Func<Task>? ExportAll { get; set; }
 
+    /// <summary>"Giocatori…" dalle Impostazioni del gioco (la finestra è del MainWindowViewModel).</summary>
+    public Func<Task>? OpenPlayers { get; set; }
+
+    /// <summary>"Passa alla modalità semplice" dalle Impostazioni del gioco.</summary>
+    public Func<Task>? SwitchToSimple { get; set; }
+
     /// <summary>Dove sono i salvataggi del gioco, da dove li ha trovati LSS.</summary>
     public string SaveFolderText { get; }
 
@@ -890,7 +896,8 @@ public partial class GameViewModel : ObservableObject
         if (IsBusy)
             return false;
 
-        bool saved = await dialogs.ShowAsync<bool>(new SettingsWindow(new SettingsViewModel(Manager, dialogs, ExportAll, Settings)));
+        bool saved = await dialogs.ShowAsync<bool>(new SettingsWindow(new SettingsViewModel(Manager, dialogs, ExportAll,
+            Settings, OpenPlayers, SwitchToSimple)));
 
         if (saved)
         {

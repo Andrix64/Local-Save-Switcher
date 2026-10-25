@@ -18,14 +18,14 @@
               Padding="20" Click="Simple_Click">
         <StackPanel Spacing="8">
           <TextBlock FontSize="18" FontWeight="Bold" Text="{loc:Str ModeSimpleTitle}" />
-          <TextBlock Text="{loc:Str ModeSimpleText}" TextWrapping="Wrap" />
+          <TextBlock Text="{loc:Str ModeSimpleText}" TextWrapping="Wrap" FontWeight="Normal" />
         </StackPanel>
       </Button>
       <Button Grid.Column="2" Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
               Padding="20" Click="Advanced_Click">
         <StackPanel Spacing="8">
           <TextBlock FontSize="18" FontWeight="Bold" Text="{loc:Str ModeAdvancedTitle}" />
-          <TextBlock Text="{loc:Str ModeAdvancedText}" TextWrapping="Wrap" />
+          <TextBlock Text="{loc:Str ModeAdvancedText}" TextWrapping="Wrap" FontWeight="Normal" />
         </StackPanel>
       </Button>
     </Grid>

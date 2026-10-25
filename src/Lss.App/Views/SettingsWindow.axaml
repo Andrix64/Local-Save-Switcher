@@ -70,6 +70,10 @@
             HorizontalAlignment="Left" Margin="0,8,0,0" />
     <Button Classes="link" Content="{Binding ExportAllText}" Command="{Binding ExportAllCommand}"
             HorizontalAlignment="Left" Margin="0,4,0,0" />
+    <Button Classes="link" Content="{Binding PlayersText}" Command="{Binding OpenPlayersCommand}"
+            HorizontalAlignment="Left" Margin="0,4,0,0" />
+    <Button Classes="link" Content="{Binding SimpleModeText}" Command="{Binding SwitchToSimpleCommand}"
+            HorizontalAlignment="Left" Margin="0,4,0,0" />
     <TextBlock Classes="small" Text="{Binding AboutText}" Foreground="{StaticResource TextMuted}"
                TextWrapping="Wrap" Margin="2,8,0,0" />
 

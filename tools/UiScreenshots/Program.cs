@@ -111,6 +111,8 @@ internal static class Program
         };
         Shot(main, "01-main");
 
+        RenderPeople(steamAccount, control, sekiro, manager, dialogs);
+
         Shot(MessageWindow.Confirm(
             Loc.F(Strings.ConfirmDeleteHeading, second),
             Loc.F(Strings.ConfirmDeleteText, Loc.F(Strings.ConfirmDeleteKeepN, 20)),
@@ -327,6 +329,73 @@ internal static class Program
         ignored.AddGlobal("{WinAppDataLocal}/Discord");
         ignored.AddForGame(dataFolder, Path.Combine(documents, "Launcher Logs"));
         Shot(new IgnoredFoldersWindow(new IgnoredFoldersViewModel(dataFolder, game.Name)), "18-ignored-folders");
+    }
+
+    // Le schermate di fase P: persone, modalità semplice, partite per persona, dialoghi nuovi.
+    private static void RenderPeople(GameAccount account, GameInfo control, GameInfo sekiro,
+        SaveManager manager, IDialogService dialogs)
+    {
+        // Andrea è la persona già creata dal gestore (proprietaria delle partite); Clara è un utente nuovo.
+        string andrea = manager.Players!.All[0].Id;
+        const string clara = "b2c3d4e5";
+
+        Directory.CreateDirectory(AppData.Root);
+        File.WriteAllText(Path.Combine(AppData.Root, "persone.ini"),
+            $"Ordine={andrea},{clara}\n" +
+            $"{andrea}.Nome=Andrea\n{andrea}.Colore=#C2410C\n{andrea}.Ruolo=admin\n" +
+            $"{clara}.Nome=Clara\n{clara}.Colore=#1D6FD0\n{clara}.Ruolo=utente\n");
+
+        var people = new People(AppData.Root);
+        people.Load();
+        manager.Players = people;
+        manager.CreateProfile("Luigi", false, clara);
+
+        Person andreaPerson = people.Find(andrea)!;
+        Person claraPerson = people.Find(clara)!;
+
+        var provider = new SteamProvider(new FakePlatform());
+        var controlItem = new GameItemViewModel(control, account, provider);
+        var sekiroItem = new GameItemViewModel(sekiro, account, provider);
+
+        var simple = new SimpleViewModel(people, dialogs, [controlItem, sekiroItem], _ => manager,
+            _ => Task.CompletedTask, _ => Task.CompletedTask, () => Task.CompletedTask);
+
+        Window Page(object content) => new()
+        {
+            Width = 1280,
+            Height = 800,
+            Content = content,
+        };
+
+        Shot(Page(new SimpleView { DataContext = simple }), "23-simple-players");
+
+        simple.SelectPlayer(andreaPerson);
+        Shot(Page(new SimpleView { DataContext = simple }), "24-simple-games");
+
+        Shot(new MyGamesWindow(new MyGamesViewModel(manager, andreaPerson)), "25-my-games");
+
+        simple.BeginPlaying(new PlaySession(manager, controlItem, andreaPerson, DateTime.Now, true, false));
+        Shot(Page(new SimpleView { DataContext = simple }), "26-simple-playing");
+        simple.EndPlaying();
+
+        Shot(new PlayerChoiceWindow(new PlayerChoiceViewModel(
+            Loc.F(Strings.SimpleWhoseSaves, control.Name), "", people.All, Strings.SimpleDontKnow)), "27-whose-saves");
+
+        var advanced = new GameViewModel(manager, dialogs);
+        advanced.Refresh();
+        Shot(Page(new GameView { DataContext = advanced }), "28-advanced-grouped");
+
+        Shot(new PlayersWindow(new PlayersViewModel(people, dialogs, (_, _) => Result.Ok(""))), "29-players");
+
+        Shot(MessageWindow.Confirm(Loc.F(Strings.RemovePlayerText, claraPerson.Name), Strings.DeleteThemText,
+            Strings.DeleteThemVerb, destructive: true, InfoKind.Warning), "30-remove-confirm");
+
+        Shot(new PlayerChoiceWindow(new PlayerChoiceViewModel(
+            Loc.F(Strings.RemovePlayerText, claraPerson.Name), Strings.GiveToText, [andreaPerson])), "31-remove-give");
+
+        Shot(new ModeChoiceWindow(), "32-mode-choice");
+
+        Shot(new AdminPickerWindow(new AdminPickerViewModel(people)), "33-admin-picker");
     }
 
     private static void Shot(Window window, string name)

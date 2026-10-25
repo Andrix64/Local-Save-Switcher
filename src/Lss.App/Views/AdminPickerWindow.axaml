@@ -38,6 +38,8 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
+      <Button Classes="link" Content="{Binding CancelText}" IsCancel="True" HorizontalAlignment="Left"
+              Click="Cancel_Click" />
     </StackPanel>
 
     <!-- PIN dell'amministratore scelto: tastierino -->

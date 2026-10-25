@@ -30,18 +30,22 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IDialogService dialogs;
     private readonly Func<Task>? exportAll;
     private readonly AppSettings? settings;
+    private readonly Func<Task>? openPlayers;
+    private readonly Func<Task>? switchToSimple;
 
     /// <summary>
     /// exportAll esporta la configurazione di tutti i giochi (vedi ExportAllCommand); settings
     /// sono le impostazioni dell'app (lss.ini), dove sta CercaDopoPartita.
     /// </summary>
     internal SettingsViewModel(SaveManager manager, IDialogService dialogs, Func<Task>? exportAll = null,
-        AppSettings? settings = null)
+        AppSettings? settings = null, Func<Task>? openPlayers = null, Func<Task>? switchToSimple = null)
     {
         this.manager = manager;
         this.dialogs = dialogs;
         this.exportAll = exportAll;
         this.settings = settings;
+        this.openPlayers = openPlayers;
+        this.switchToSimple = switchToSimple;
 
         AppState state = manager.State;
         launchGame = state.LaunchGame;
@@ -179,6 +183,26 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     public string ExportAllText => Strings.ExportAllConfigs;
+
+    public string PlayersText => Strings.PlayersButton;
+
+    public string SimpleModeText => Strings.SwitchToSimple;
+
+    /// <summary>"Giocatori…": la finestra delle persone di LSS.</summary>
+    [RelayCommand]
+    private async Task OpenPlayersAsync()
+    {
+        if (openPlayers != null)
+            await openPlayers();
+    }
+
+    /// <summary>"Passa alla modalità semplice".</summary>
+    [RelayCommand]
+    private async Task SwitchToSimpleAsync()
+    {
+        if (switchToSimple != null)
+            await switchToSimple();
+    }
 
     /// <summary>Esporta in un file le configurazioni di tutti i giochi con cartelle scelte, imparate o importate.</summary>
     [RelayCommand]
