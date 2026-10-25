@@ -557,7 +557,12 @@ public sealed partial class SaveManager
         string operation = "Crea profilo " + ProfileFolderName(name) +
                            (copyCurrentSaves ? " (copia dei salvataggi)" : " (vuoto)");
 
-        return Finish(operation, CreateProfileCore(name, copyCurrentSaves, ownerId));
+        Result result = CreateProfileCore(name, copyCurrentSaves, ownerId);
+
+        if (result.Success)
+            RepairFavourites();
+
+        return Finish(operation, result);
     }
 
     private Result CreateProfileCore(string name, bool copyCurrentSaves, string ownerId)
@@ -627,8 +632,17 @@ public sealed partial class SaveManager
     /// </summary>
     public Result RenameProfile(string profileName, string newName)
     {
-        return Log.Write($"Rinomina {profileName} in {ProfileFolderName(newName)}",
-            RenameProfileCore(profileName, newName));
+        Result result = RenameProfileCore(profileName, newName);
+        string newProfileName = ProfileFolderName(newName);
+
+        // Partita rinominata (anche solo nelle maiuscole): la preferita segue il nuovo nome.
+        bool renamed = ProfileExists(newProfileName) &&
+                       (!ProfileExists(profileName) || string.Equals(profileName, newProfileName, StringComparison.OrdinalIgnoreCase));
+
+        if (renamed)
+            RepairFavourites(profileName, newProfileName);
+
+        return Log.Write($"Rinomina {profileName} in {newProfileName}", result);
     }
 
     private Result RenameProfileCore(string profileName, string newName)
@@ -719,7 +733,13 @@ public sealed partial class SaveManager
     /// </summary>
     public Result DeleteProfile(string profileName)
     {
-        return Finish("Elimina " + profileName, DeleteProfileCore(profileName));
+        Result result = DeleteProfileCore(profileName);
+
+        // Eliminata (anche se restano i savestate): la preferita passa a un'altra partita.
+        if (!ProfileExists(profileName))
+            RepairFavourites();
+
+        return Finish("Elimina " + profileName, result);
     }
 
     private Result DeleteProfileCore(string profileName)
@@ -799,7 +819,12 @@ public sealed partial class SaveManager
     /// </summary>
     public Result ActivateProfile(string profileName)
     {
-        return Finish("Attiva " + profileName, ActivateProfileCore(profileName));
+        Result result = ActivateProfileCore(profileName);
+
+        if (result.Success)
+            MarkPlayed(profileName, DateTime.Now);
+
+        return Finish("Attiva " + profileName, result);
     }
 
     private Result ActivateProfileCore(string profileName)

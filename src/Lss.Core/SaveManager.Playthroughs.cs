@@ -128,6 +128,7 @@ public sealed partial class SaveManager
             }));
 
             Log.Write($"Sessione di gioco in {profileName}: {(int)(end - start).TotalMinutes} min");
+            MarkPlayed(profileName, end);
         }
         catch (Exception ex)
         {
@@ -222,7 +223,12 @@ public sealed partial class SaveManager
     /// </summary>
     public Result SetOwner(string profileName, string personId)
     {
-        return Log.Write($"Proprietario di {profileName}: {personId}", SetOwnerCore(profileName, personId));
+        Result result = SetOwnerCore(profileName, personId);
+
+        if (result.Success)
+            RepairFavourites();
+
+        return Log.Write($"Proprietario di {profileName}: {personId}", result);
     }
 
     private Result SetOwnerCore(string profileName, string personId)
@@ -389,7 +395,12 @@ public sealed partial class SaveManager
     /// </summary>
     public Result RecoverDeletedProfile(Snapshot deleted, string ownerId)
     {
-        return Finish("Recupera " + deleted.Owner, RecoverDeletedProfileCore(deleted, ownerId));
+        Result result = RecoverDeletedProfileCore(deleted, ownerId);
+
+        if (result.Success)
+            RepairFavourites();
+
+        return Finish("Recupera " + deleted.Owner, result);
     }
 
     private Result RecoverDeletedProfileCore(Snapshot deleted, string ownerId)
@@ -694,6 +705,9 @@ public sealed partial class SaveManager
         Result<string> result = OwnerIsKnown(ownerId)
             ? ImportProfileCore(zipPath, ownerId)
             : Result<string>.Fail(Strings.PlayerNotFound);
+
+        if (result.Success)
+            RepairFavourites();
         Log.Write($"Importa {zipPath}: " + (result.Success ? result.Value : "ERRORE " + result.Message));
         return result;
     }
