@@ -95,6 +95,16 @@ public partial class App : Application
         var settings = new AppSettings(Path.Combine(AppData.Root, "lss.ini"));
         settings.Load();
 
+        // Primo avvio (non c'era lss.ini): semplice o avanzata. Chi ha già lss.ini resta com'è.
+        if (settings.FirstStart)
+        {
+            var modeWindow = new ModeChoiceWindow();
+            await ShowStandaloneAsync(modeWindow);
+
+            settings.Mode = modeWindow.Chosen ?? AppSettings.AdvancedMode;
+            settings.Save();
+        }
+
         // Un account per launcher si usa senza domande; con più account dello
         // stesso launcher si chiede quale usare. Annullare salta quel launcher.
         var launchers = new List<LauncherGames>();

@@ -463,4 +463,13 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="NotYourPlaythrough" xml:space="preserve"><value>Questa partita appartiene a un altro giocatore.</value></data>
   <data name="SimpleCloseGame" xml:space="preserve"><value>{0} è già aperto. Chiudilo prima.</value></data>
   <data name="SavesBeforeLss" xml:space="preserve"><value>Prima di LSS</value></data>
+  <data name="ModeTitle" xml:space="preserve"><value>Come vuoi usare LSS?</value></data>
+  <data name="ModeHint" xml:space="preserve"><value>Puoi cambiare in ogni momento dalle impostazioni.</value></data>
+  <data name="ModeSimpleTitle" xml:space="preserve"><value>Semplice</value></data>
+  <data name="ModeSimpleText" xml:space="preserve"><value>Scegli chi gioca e clicca su un gioco. Ognuno ritrova le sue partite.</value></data>
+  <data name="ModeAdvancedTitle" xml:space="preserve"><value>Avanzata</value></data>
+  <data name="ModeAdvancedText" xml:space="preserve"><value>Tutte le partite, i punti salvati, la cronologia, le cartelle dei salvataggi e tutte le opzioni.</value></data>
+  <data name="AdminPickerTitle" xml:space="preserve"><value>Chi sei?</value></data>
+  <data name="AdminOnlyText" xml:space="preserve"><value>Solo un admin può farlo.</value></data>
+  <data name="AdminPickerCancel" xml:space="preserve"><value>Annulla</value></data>
 </root>

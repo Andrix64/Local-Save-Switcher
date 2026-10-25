@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        x:Class="Lss.App.Views.ModeChoiceWindow"
+        Title="Local Save Switcher"
+        Width="640" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="36,30,36,28" Spacing="20">
+
+    <TextBlock Classes="title" Text="{loc:Str ModeTitle}" TextWrapping="Wrap" FontSize="20" />
+    <TextBlock Text="{loc:Str ModeHint}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+
+    <Grid ColumnDefinitions="*,16,*">
+      <Button Grid.Column="0" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+              Padding="20" Click="Simple_Click">
+        <StackPanel Spacing="8">
+          <TextBlock FontSize="18" FontWeight="Bold" Text="{loc:Str ModeSimpleTitle}" />
+          <TextBlock Text="{loc:Str ModeSimpleText}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Button>
+      <Button Grid.Column="2" Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+              Padding="20" Click="Advanced_Click">
+        <StackPanel Spacing="8">
+          <TextBlock FontSize="18" FontWeight="Bold" Text="{loc:Str ModeAdvancedTitle}" />
+          <TextBlock Text="{loc:Str ModeAdvancedText}" TextWrapping="Wrap" />
+        </StackPanel>
+      </Button>
+    </Grid>
+
+  </StackPanel>
+
+</Window>

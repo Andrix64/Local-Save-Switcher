@@ -463,4 +463,13 @@ LSS will look at what changed on the disk.</value></data>
   <data name="NotYourPlaythrough" xml:space="preserve"><value>This playthrough belongs to another player.</value></data>
   <data name="SimpleCloseGame" xml:space="preserve"><value>{0} is already open. Close it first.</value></data>
   <data name="SavesBeforeLss" xml:space="preserve"><value>Before LSS</value></data>
+  <data name="ModeTitle" xml:space="preserve"><value>How do you want to use LSS?</value></data>
+  <data name="ModeHint" xml:space="preserve"><value>You can change it at any time in Settings.</value></data>
+  <data name="ModeSimpleTitle" xml:space="preserve"><value>Simple</value></data>
+  <data name="ModeSimpleText" xml:space="preserve"><value>Choose who's playing and click a game. Everyone finds their own playthroughs.</value></data>
+  <data name="ModeAdvancedTitle" xml:space="preserve"><value>Advanced</value></data>
+  <data name="ModeAdvancedText" xml:space="preserve"><value>All playthroughs, saved points, history, save folders and every option.</value></data>
+  <data name="AdminPickerTitle" xml:space="preserve"><value>Who are you?</value></data>
+  <data name="AdminOnlyText" xml:space="preserve"><value>Only an admin can do this.</value></data>
+  <data name="AdminPickerCancel" xml:space="preserve"><value>Cancel</value></data>
 </root>

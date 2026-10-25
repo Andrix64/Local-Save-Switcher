@@ -1,0 +1,45 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.AdminPickerWindow"
+        x:DataType="vm:AdminPickerViewModel"
+        Title="Local Save Switcher"
+        Width="560" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="36,30,36,28" Spacing="20">
+
+    <TextBlock Classes="title" Text="{Binding Title}" FontSize="20" />
+    <TextBlock Text="{Binding OnlyAdminText}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+
+    <ItemsControl ItemsSource="{Binding Tiles}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:AdminTile">
+          <Button Margin="0,0,16,16" Padding="18,14" MinWidth="130" MinHeight="44"
+                  HorizontalContentAlignment="Center" Tag="{Binding}" Click="Tile_Click">
+            <StackPanel Spacing="10" HorizontalAlignment="Center">
+              <Border Width="72" Height="72" CornerRadius="36" Background="{Binding Brush}"
+                      HorizontalAlignment="Center">
+                <TextBlock Text="{Binding Initial}" FontSize="32" FontWeight="Bold" Foreground="White"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <TextBlock Text="{Binding Person.Name}" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <Button Classes="link" Content="{Binding CancelText}" IsCancel="True" HorizontalAlignment="Left"
+            Click="Cancel_Click" />
+
+  </StackPanel>
+
+</Window>
