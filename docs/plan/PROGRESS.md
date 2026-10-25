@@ -216,6 +216,16 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fine fase K (Haiku). K1–K7 committati su `v2` con i tick. Test
+  Windows: 204 verdi, 0 warning. Linux (`lss-ci`, `scripts/linux-check.sh
+  lss-ci@192.168.1.3 --tests-only`, su `0c18b5d`): 204 verdi. Non provato a
+  video: l'avvio con più launcher e la finestra principale con le intestazioni
+  vanno controllati da Andrix (K8). Test cambiati, tutti voluti: K5
+  `Open_UsesAccountAndGameFolder` (cartella `steam`); K6
+  `Export_WritesFormat2WithGame` diventa `Export_WritesFormat3WithGameAndProvider`
+  (`Formato=3`, `Provider=steam`); nessun altro test cambiato in K7. K8 saltato
+  (👤).
+
 - 2026-10-25 — K6 (Haiku), approved by the coordinating session: export
   `Formato=3` with `Provider`; import accepts formats 1 and 2 as Steam and
   refuses a zip of another launcher or game. Test changes (only the ones
