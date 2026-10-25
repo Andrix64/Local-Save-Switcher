@@ -404,4 +404,24 @@ LSS will look at what changed on the disk.</value></data>
   <data name="IgnoredRemove" xml:space="preserve"><value>Propose it again</value></data>
   <data name="IgnoredFoldersLink" xml:space="preserve"><value>Folders that are not saves…</value></data>
   <data name="LearnFolderChanged" xml:space="preserve"><value>The playthroughs of {0} were made with another folder. Use the new folder anyway?</value></data>
+  <data name="ExportConfig" xml:space="preserve"><value>Export save configuration…</value></data>
+  <data name="ExportAllConfigs" xml:space="preserve"><value>Export all save configurations…</value></data>
+  <data name="ImportConfig" xml:space="preserve"><value>Import save configuration…</value></data>
+  <data name="ConfigPreviewTitle" xml:space="preserve"><value>Save configuration of {0}</value></data>
+  <data name="ConfigPreviewText" xml:space="preserve"><value>These folders will be in the file, written so they work on another computer. No user name and no saves are in it.</value></data>
+  <data name="ConfigSpotSkipped" xml:space="preserve"><value>Not exported (not in a standard folder): {0}</value></data>
+  <data name="ConfigFromLauncher" xml:space="preserve"><value>{0} already knows these folders: this file is useful only where it doesn't.</value></data>
+  <data name="ConfigNotes" xml:space="preserve"><value>Notes (optional)</value></data>
+  <data name="ImportConfigTitle" xml:space="preserve"><value>Import save configuration</value></data>
+  <data name="ConfigMadeOn" xml:space="preserve"><value>Made on {0}</value></data>
+  <data name="ConfigWindowsInPrefix" xml:space="preserve"><value>Made on Windows: here the folders are inside the game's Proton/Wine folder.</value></data>
+  <data name="ConfigFound" xml:space="preserve"><value>found</value></data>
+  <data name="ConfigNotYet" xml:space="preserve"><value>not here yet: it will be used once the game creates it</value></data>
+  <data name="ConfigRefused" xml:space="preserve"><value>refused: {0}</value></data>
+  <data name="ConfigNotForThisSystem" xml:space="preserve"><value>not for this system</value></data>
+  <data name="ConfigNoGame" xml:space="preserve"><value>{0} is not on this computer.</value></data>
+  <data name="ConfigInvalid" xml:space="preserve"><value>This file is not a valid save configuration: {0}</value></data>
+  <data name="ConfigTooNew" xml:space="preserve"><value>This file was made by a newer LSS. Update LSS to import it.</value></data>
+  <data name="ConfigImported" xml:space="preserve"><value>Save folders imported for {0} game(s).</value></data>
+  <data name="SaveFolderImported" xml:space="preserve"><value>Saves: {0} (imported)</value></data>
 </root>

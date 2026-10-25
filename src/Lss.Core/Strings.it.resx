@@ -404,4 +404,24 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="IgnoredRemove" xml:space="preserve"><value>Proponila di nuovo</value></data>
   <data name="IgnoredFoldersLink" xml:space="preserve"><value>Cartelle che non sono salvataggi…</value></data>
   <data name="LearnFolderChanged" xml:space="preserve"><value>Le partite di {0} sono state fatte con un'altra cartella. Usare comunque la nuova cartella?</value></data>
+  <data name="ExportConfig" xml:space="preserve"><value>Esporta configurazione dei salvataggi…</value></data>
+  <data name="ExportAllConfigs" xml:space="preserve"><value>Esporta tutte le configurazioni dei salvataggi…</value></data>
+  <data name="ImportConfig" xml:space="preserve"><value>Importa configurazione dei salvataggi…</value></data>
+  <data name="ConfigPreviewTitle" xml:space="preserve"><value>Configurazione dei salvataggi di {0}</value></data>
+  <data name="ConfigPreviewText" xml:space="preserve"><value>Queste cartelle saranno nel file, scritte perché funzionino su un altro computer. Non ci sono il nome utente né i salvataggi.</value></data>
+  <data name="ConfigSpotSkipped" xml:space="preserve"><value>Non esportata (non in una cartella standard): {0}</value></data>
+  <data name="ConfigFromLauncher" xml:space="preserve"><value>{0} conosce già queste cartelle: questo file serve solo dove non le conosce.</value></data>
+  <data name="ConfigNotes" xml:space="preserve"><value>Note (facoltative)</value></data>
+  <data name="ImportConfigTitle" xml:space="preserve"><value>Importa configurazione dei salvataggi</value></data>
+  <data name="ConfigMadeOn" xml:space="preserve"><value>Fatta su {0}</value></data>
+  <data name="ConfigWindowsInPrefix" xml:space="preserve"><value>Fatta su Windows: qui le cartelle sono dentro la cartella Proton/Wine del gioco.</value></data>
+  <data name="ConfigFound" xml:space="preserve"><value>trovata</value></data>
+  <data name="ConfigNotYet" xml:space="preserve"><value>non ancora qui: sarà usata quando il gioco la crea</value></data>
+  <data name="ConfigRefused" xml:space="preserve"><value>rifiutata: {0}</value></data>
+  <data name="ConfigNotForThisSystem" xml:space="preserve"><value>non per questo sistema</value></data>
+  <data name="ConfigNoGame" xml:space="preserve"><value>{0} non è su questo computer.</value></data>
+  <data name="ConfigInvalid" xml:space="preserve"><value>Questo file non è una configurazione dei salvataggi valida: {0}</value></data>
+  <data name="ConfigTooNew" xml:space="preserve"><value>Questo file è stato fatto da un LSS più recente. Aggiorna LSS per importarlo.</value></data>
+  <data name="ConfigImported" xml:space="preserve"><value>Cartelle dei salvataggi importate per {0} gioco/i.</value></data>
+  <data name="SaveFolderImported" xml:space="preserve"><value>Salvataggi: {0} (importati)</value></data>
 </root>

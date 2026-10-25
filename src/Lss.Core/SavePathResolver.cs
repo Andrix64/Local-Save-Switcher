@@ -46,6 +46,11 @@ internal static class SavePathResolver
     ];
 
     /// <summary>
+    /// true se la radice (gameinstall, WinMyDocuments...) è una di quelle che LSS sa leggere.
+    /// </summary>
+    internal static bool IsKnownRoot(string root) => KnownRoots.Contains(root);
+
+    /// <summary>
     /// "Windows" se il gioco ha un prefisso o siamo su Windows, altrimenti "Linux".
     /// </summary>
     public static string PlatformFor(SaveContext context) =>
