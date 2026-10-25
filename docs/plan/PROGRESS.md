@@ -155,7 +155,7 @@ per phase (the phase file names it).
 - [x] M4 — The wizard (ce24576; Windows 373 tests)
 - [x] M5 — Learning a game that already has playthroughs (3413df7; Windows 376 tests)
 - [x] M6 — Screenshots (a78b9cd; Windows 376 tests)
-- [ ] M7 — 👤 Real check
+- [x] M7 — 👤 Real check (2026-10-25, Andrix on the Steam Deck: works after f42f760 and 58c4f89, see the notes)
 
 ### Phase N — Several save folders, look after every session ([N-several-folders.md](N-several-folders.md))
 
