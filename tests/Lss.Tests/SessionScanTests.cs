@@ -96,7 +96,7 @@ public sealed class SessionScanTests : IDisposable
 
         IReadOnlyList<SpotSuggestion> found = Run(Spots(), start);
 
-        SpotSuggestion suggestion = Assert.Single(found.Where(s => s.Pattern != ""));
+        SpotSuggestion suggestion = Assert.Single(found, s => s.Pattern != "");
         Assert.Equal(Install, suggestion.Folder);
         Assert.Equal("*.sav", suggestion.Pattern);
     }

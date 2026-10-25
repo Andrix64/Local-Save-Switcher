@@ -176,7 +176,7 @@ public sealed class SaveConfigImportTests : IDisposable
         var game = new GameInfo("steam", "632470", "Disco", "Disco", "", Install, [], SupportState.NoSaves);
 
         ConfigGamePlan plan = Assert.Single(SaveConfigImport.Plan(
-            FileWith(new SaveConfigSpot("LinuxHome", "saves", "", true)), [game], _ => Context(), _ => [], Lss));
+            FileWith(new SaveConfigSpot(OperatingSystem.IsLinux() ? "WinAppDataLocal" : "LinuxHome", "saves", "", true)), [game], _ => Context(), _ => [], Lss));
 
         Assert.Equal(ConfigSpotState.NotForThisSystem, Assert.Single(plan.Spots).State);
     }
