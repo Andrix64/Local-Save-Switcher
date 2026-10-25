@@ -347,6 +347,16 @@ Commit: `Optional PIN for admins`
 Read `GameView.axaml`, `GameViewModel.cs`, `PlaythroughViewModel.cs`,
 `PlaythroughCardView.axaml`, `NewPlaythroughViewModel.cs` first.
 
+- The **save folders** block of the game (the main folder line, the other
+  spots, **Add another folder…**, **Export save configuration…**) is
+  **closed by default**: a header `SaveFoldersCount` ("Save folders ({0})" /
+  "Cartelle dei salvataggi ({0})", `{0}` = number of spots) that opens it.
+  Open or closed is kept for every game while the app runs (a static value,
+  not saved). The line about pending suggestions (N11) stays visible below
+  it even when it is closed. Asked by Andrix (2026-10-25): the long paths
+  took too much space above the playthroughs. `tools/UiScreenshots` opens it
+  for `19-game-spots`. Test: closed at start, opening it in one game keeps
+  it open in another.
 - The list of playthroughs of a game is **grouped by player**, in the
   `People` order: header with the player's coloured circle and name; inside,
   the favourite first, then the others by last save. Players without
