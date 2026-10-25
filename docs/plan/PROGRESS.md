@@ -126,7 +126,7 @@ per phase (the phase file names it).
 - [x] K4c — Running, launch and cloud through the provider (1562655)
 - [x] K4d — Clean-up and check (69fd782)
 - [x] K5 — Data folder per provider (24931b1)
-- [ ] K6 — Export format 3
+- [x] K6 — Export format 3 (9a4d94a)
 - [ ] K7 — Start-up and games list for several providers
 - [ ] K8 — 👤 Check
 
