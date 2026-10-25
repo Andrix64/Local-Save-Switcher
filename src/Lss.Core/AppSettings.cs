@@ -21,6 +21,13 @@ internal sealed class AppSettings
     }
 
     /// <summary>
+    /// true se il valore salvato (provider/id) è quell'account o quel gioco. I
+    /// valori di prima della K5 non hanno il launcher: sono di Steam.
+    /// </summary>
+    public static bool Refers(string stored, string provider, string id) =>
+        stored.Contains('/') ? stored == provider + "/" + id : provider == "steam" && stored == id;
+
+    /// <summary>
     /// Legge lss.ini. Se manca o non si legge, i valori restano vuoti.
     /// </summary>
     public void Load()

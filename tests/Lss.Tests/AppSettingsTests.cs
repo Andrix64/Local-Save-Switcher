@@ -22,6 +22,15 @@ public sealed class AppSettingsTests : IDisposable
     }
 
     [Fact]
+    public void OldValuesWithoutProviderAreSteam()
+    {
+        Assert.True(AppSettings.Refers("111", "steam", "111"));
+        Assert.True(AppSettings.Refers("steam/111", "steam", "111"));
+        Assert.False(AppSettings.Refers("epic/111", "steam", "111"));
+        Assert.False(AppSettings.Refers("", "steam", "111"));
+    }
+
+    [Fact]
     public void MissingFile_GivesEmptyValues()
     {
         var settings = new AppSettings(IniPath);

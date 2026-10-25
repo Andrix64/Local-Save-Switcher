@@ -45,12 +45,12 @@ public partial class MainWindowViewModel : ObservableObject
         // I giochi già usati restano controllati anche quando non sono selezionati.
         foreach (GameItemViewModel item in Games)
         {
-            if (File.Exists(Path.Combine(AppData.Root, account.Id, item.Info.Id, "stato.ini")))
+            if (File.Exists(Path.Combine(AppData.Root, account.Provider, account.Id, item.Info.Id, "stato.ini")))
                 GameFor(item.Info);
         }
 
         Monitor = new GameMonitor(() => gameModels.Values);
-        SelectedGame = Games.FirstOrDefault(g => g.Info.Id == settings.LastGame) ?? Games.FirstOrDefault();
+        SelectedGame = Games.FirstOrDefault(g => AppSettings.Refers(settings.LastGame, g.Info.Provider, g.Info.Id)) ?? Games.FirstOrDefault();
     }
 
     public ObservableCollection<GameItemViewModel> Games { get; } = [];
@@ -97,7 +97,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         GameViewModel game = GameFor(value.Info);
         CurrentGame = game;
-        settings.LastGame = value.Info.Id;
+        settings.LastGame = value.Info.Key;
         settings.Save();
 
         // Alla prima selezione di un gioco (quelle prima dell'apertura le fa OnOpenedAsync).

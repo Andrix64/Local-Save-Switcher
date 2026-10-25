@@ -37,7 +37,7 @@ public partial class AccountViewModel : ObservableObject
             Accounts.Add(new AccountItemViewModel(account));
 
         // Preseleziona l'ultimo account usato, altrimenti il primo.
-        SelectedAccount = Accounts.FirstOrDefault(a => a.Account.Id == lastId) ?? Accounts.FirstOrDefault();
+        SelectedAccount = Accounts.FirstOrDefault(a => AppSettings.Refers(lastId ?? "", a.Account.Provider, a.Account.Id)) ?? Accounts.FirstOrDefault();
     }
 
     public string Intro => Strings.AccountIntroAny;

@@ -145,7 +145,7 @@ public sealed partial class SaveManager
             if (account == null)
                 return Result<SaveManager>.Fail("");
 
-            settings.LastAccount = account.Id;
+            settings.LastAccount = account.Key;
             settings.Save();
         }
 
@@ -160,7 +160,7 @@ public sealed partial class SaveManager
 
             return Result<SaveManager>.Ok(new SaveManager(
                 savePath,
-                Path.Combine(appData, account.Id, GameInfo.ControlAppId),
+                Path.Combine(appData, account.Provider, account.Id, GameInfo.ControlAppId),
                 account.Name,
                 game,
                 new SteamProvider(Platform.Current)));
@@ -183,7 +183,7 @@ public sealed partial class SaveManager
         {
             return Result<SaveManager>.Ok(new SaveManager(
                 game.SaveFolder,
-                Path.Combine(dataRoot, account.Id, game.Id),
+                Path.Combine(dataRoot, account.Provider, account.Id, game.Id),
                 account.Name,
                 game,
                 provider));

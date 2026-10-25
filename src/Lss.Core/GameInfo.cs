@@ -45,6 +45,9 @@ public sealed record GameInfo(
     /// <summary>true se il gioco è installato in una libreria trovata.</summary>
     public bool IsInstalled => InstallDir != "" && LibraryPath != "";
 
+    /// <summary>Chiave salvata in lss.ini: provider/id.</summary>
+    public string Key => Provider + "/" + Id;
+
     /// <summary>
     /// Control con la cartella dei salvataggi data: usato finché l'interfaccia
     /// WinForms apre solo Control, e dai test.

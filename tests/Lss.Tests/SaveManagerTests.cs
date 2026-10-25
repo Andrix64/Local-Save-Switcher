@@ -16,7 +16,7 @@ public sealed class SaveManagerTests : IDisposable
         Result<SaveManager> result = SaveManager.Open(folder.Data, Account, game);
 
         Assert.True(result.Success);
-        Assert.Equal(Path.Combine(folder.Data, "111", "123450", "Profili"), result.Value!.ProfilesPath);
+        Assert.Equal(Path.Combine(folder.Data, "steam", "111", "123450", "Profili"), result.Value!.ProfilesPath);
         Assert.Equal(game.Id, result.Value.Game.Id);
     }
 

@@ -12,4 +12,7 @@ namespace Lss;
 public sealed record GameAccount(string Provider, string Id, string Name, string Folder, DateTime? LastSaved)
 {
     public string DisplayName => Name != "" ? Name : Loc.F(Strings.AccountFallbackName, Id);
+
+    /// <summary>Chiave salvata in lss.ini: provider/id.</summary>
+    public string Key => Provider + "/" + Id;
 }

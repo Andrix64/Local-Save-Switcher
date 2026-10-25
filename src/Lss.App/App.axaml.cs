@@ -61,6 +61,9 @@ public partial class App : Application
         // Compatibilità con Control Save Manager (vedi LegacyMigration).
         (LegacyMigration.MoveResult moved, string moveDetail) = LegacyMigration.Run();
 
+        // Cartelle degli account sotto steam\ (dalle beta): prima di leggere i dati.
+        DataLayoutMigration.Run(AppData.Root);
+
         Log.Write("Avvio versione " + Program.Version);
 
         if (LegacyMigration.Notice(moved, moveDetail) is (string text, bool isWarning))
@@ -119,7 +122,7 @@ public partial class App : Application
             }
 
             account = accountWindow.Chosen;
-            settings.LastAccount = account.Id;
+            settings.LastAccount = account.Key;
             settings.Save();
         }
 
