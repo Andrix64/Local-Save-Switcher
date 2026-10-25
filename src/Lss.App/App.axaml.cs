@@ -69,7 +69,7 @@ public partial class App : Application
         if (LegacyMigration.Notice(moved, moveDetail) is (string text, bool isWarning))
             await ShowStandaloneAsync(text, isWarning ? InfoKind.Warning : InfoKind.Info);
 
-        // Fino alla K7 c'è un solo launcher: Steam.
+        // Steam resta obbligatorio: i suoi controlli di cartella sono qui, prima degli altri launcher.
         var steamProvider = new SteamProvider(Platform.Current);
         string? steam = steamProvider.FindRoot();
 
@@ -92,45 +92,56 @@ public partial class App : Application
         // Prima di cercare gli account: una cartella rimasta come 870780.vecchio le farebbe sparire.
         SaveManager.RecoverAllGameFolders(userData);
 
-        IGameProvider provider = steamProvider;
+        var settings = new AppSettings(Path.Combine(AppData.Root, "lss.ini"));
+        settings.Load();
 
-        // Nessun gioco gestibile (per esempio tutti con i salvataggi in Proton):
-        // la finestra si apre lo stesso e mostra i giochi con il motivo.
-        IReadOnlyList<GameAccount> accounts = provider.FindAccounts();
+        // Un account per launcher si usa senza domande; con più account dello
+        // stesso launcher si chiede quale usare. Annullare salta quel launcher.
+        var launchers = new List<LauncherGames>();
+        bool cancelled = false;
 
-        if (accounts.Count == 0)
+        foreach (IGameProvider provider in Providers.All(Platform.Current))
         {
-            await ShowStandaloneAsync(Strings.NoAccountWithGames, InfoKind.Warning);
+            // Nessun gioco gestibile (per esempio tutti con i salvataggi in Proton):
+            // la finestra si apre lo stesso e mostra i giochi con il motivo.
+            IReadOnlyList<GameAccount> accounts = provider.FindAccounts();
+
+            if (accounts.Count == 0)
+                continue;
+
+            GameAccount? account = accounts[0];
+
+            if (accounts.Count > 1)
+            {
+                var accountWindow = new AccountWindow(accounts, settings.LastAccount, provider.DisplayName);
+                await ShowStandaloneAsync(accountWindow);
+
+                account = accountWindow.Chosen;
+                cancelled |= account == null;
+
+                if (account == null)
+                    continue;
+
+                settings.LastAccount = account.Key;
+                settings.Save();
+            }
+
+            launchers.Add(new LauncherGames(provider, account, provider.FindGames(account)));
+        }
+
+        if (launchers.Count == 0)
+        {
+            // Uscita come prima: senza un account scelto, l'app si chiude in silenzio.
+            if (!cancelled)
+                await ShowStandaloneAsync(Strings.NoAccountWithGames, InfoKind.Warning);
+
             desktop.Shutdown();
             return;
         }
 
-        var settings = new AppSettings(Path.Combine(AppData.Root, "lss.ini"));
-        settings.Load();
-
-        GameAccount account = accounts[0];
-
-        if (accounts.Count > 1)
-        {
-            var accountWindow = new AccountWindow(accounts, settings.LastAccount);
-            await ShowStandaloneAsync(accountWindow);
-
-            if (accountWindow.Chosen == null)
-            {
-                desktop.Shutdown();
-                return;
-            }
-
-            account = accountWindow.Chosen;
-            settings.LastAccount = account.Key;
-            settings.Save();
-        }
-
-        IReadOnlyList<GameInfo> games = provider.FindGames(account);
-
         var window = new MainWindow
         {
-            DataContext = new MainWindowViewModel(account, games, settings, new DialogService(() => desktop.MainWindow)),
+            DataContext = new MainWindowViewModel(launchers, settings, new DialogService(() => desktop.MainWindow)),
         };
 
         window.Closed += (_, _) => desktop.Shutdown();

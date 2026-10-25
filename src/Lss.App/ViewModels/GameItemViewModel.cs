@@ -3,13 +3,16 @@ using Avalonia.Media.Imaging;
 namespace Lss.App.ViewModels;
 
 /// <summary>
-/// Un gioco nella colonna di sinistra: icona (o lettera iniziale) e nome.
+/// Un gioco nella colonna di sinistra: icona (o lettera iniziale), nome e,
+/// con più launcher, l'intestazione del gruppo.
 /// </summary>
 public sealed class GameItemViewModel
 {
-    public GameItemViewModel(GameInfo info)
+    public GameItemViewModel(GameInfo info, GameAccount account, IGameProvider provider)
     {
         Info = info;
+        Account = account;
+        Provider = provider;
         Name = info.Name;
         Initial = info.Name.Length > 0 ? char.ToUpperInvariant(info.Name[0]).ToString() : "?";
         SupportText = info.Support switch
@@ -22,6 +25,16 @@ public sealed class GameItemViewModel
     }
 
     public GameInfo Info { get; }
+
+    /// <summary>Account di cui è il gioco, e il launcher che lo gestisce.</summary>
+    public GameAccount Account { get; }
+
+    public IGameProvider Provider { get; }
+
+    /// <summary>Nome del launcher sopra il primo gioco di ciascun gruppo, o "" (un solo launcher).</summary>
+    public string LauncherHeader { get; set; } = "";
+
+    public bool HasLauncherHeader => LauncherHeader != "";
 
     public string Name { get; }
 

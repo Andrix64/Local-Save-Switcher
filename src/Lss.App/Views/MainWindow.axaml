@@ -44,6 +44,7 @@
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:GameItemViewModel">
                   <StackPanel Margin="0,4,0,8" Spacing="2">
+                    <TextBlock Classes="caption" Text="{Binding LauncherHeader}" IsVisible="{Binding HasLauncherHeader}" />
                     <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
                     <TextBlock Classes="small" Text="{Binding SupportText}" TextWrapping="Wrap" />
                   </StackPanel>
@@ -57,6 +58,8 @@
                  Background="Transparent" BorderThickness="0">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="vm:GameItemViewModel">
+              <StackPanel Spacing="2">
+              <TextBlock Classes="caption" Text="{Binding LauncherHeader}" IsVisible="{Binding HasLauncherHeader}" Margin="0,6,0,0" />
               <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
                 <Image Source="{Binding Icon}" Width="32" Height="32" IsVisible="{Binding HasIcon}" />
                 <Border Width="32" Height="32" CornerRadius="6" Background="{StaticResource SurfaceSelected}"
@@ -65,6 +68,7 @@
                              FontWeight="Bold" />
                 </Border>
                 <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" />
+              </StackPanel>
               </StackPanel>
             </DataTemplate>
           </ListBox.ItemTemplate>

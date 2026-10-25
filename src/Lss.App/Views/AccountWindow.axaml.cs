@@ -13,9 +13,9 @@ public partial class AccountWindow : Window
 {
     public AccountWindow() => InitializeComponent();
 
-    public AccountWindow(IReadOnlyList<GameAccount> accounts, string? lastId) : this()
+    public AccountWindow(IReadOnlyList<GameAccount> accounts, string? lastId, string launcher = "") : this()
     {
-        DataContext = new AccountViewModel(accounts, lastId);
+        DataContext = new AccountViewModel(accounts, lastId, launcher);
     }
 
     private AccountViewModel ViewModel => (AccountViewModel)DataContext!;

@@ -106,7 +106,7 @@ internal static class Program
         {
             Width = 900,
             Height = 640,
-            DataContext = new MainWindowViewModel(steamAccount, [control, sekiro], settings, dialogs)
+            DataContext = new MainWindowViewModel([new LauncherGames(new SteamProvider(new FakePlatform()), steamAccount, [control, sekiro])], settings, dialogs)
         };
         Shot(main, "01-main");
 
@@ -147,13 +147,13 @@ internal static class Program
         {
             Width = 900,
             Height = 640,
-            DataContext = new MainWindowViewModel(steamAccount,
+            DataContext = new MainWindowViewModel([new LauncherGames(new SteamProvider(new FakePlatform()), steamAccount,
             [
                 Elsewhere("1145360", "Hades"), Elsewhere("367520", "Hollow Knight"),
                 Elsewhere("413150", "Stardew Valley"), Elsewhere("753640", "Outer Wilds"),
                 Elsewhere("632470", "Disco Elysium"), Elsewhere("814380", "Sekiro™: Shadows Die Twice"),
                 Elsewhere("1313140", "Cult of the Lamb")
-            ], settings, dialogs)
+            ])], settings, dialogs)
         };
         Shot(noSupported, "12-no-supported-games");
     }

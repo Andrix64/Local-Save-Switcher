@@ -10,11 +10,10 @@ namespace Lss.App.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ObservableObject
 {
-    private readonly GameAccount account;
     private readonly AppSettings settings;
     private readonly IDialogService dialogs;
 
-    // Una GameViewModel per gioco, per AppID.
+    // Una GameViewModel per gioco, per provider/id.
     private readonly Dictionary<string, GameViewModel> gameModels = [];
 
     // Giochi già aperti in lista: al primo ingresso si fa il primo avvio e il controllo delle cartelle.
@@ -23,30 +22,50 @@ public partial class MainWindowViewModel : ObservableObject
     // Dopo l'apertura della finestra le selezioni fanno subito il primo avvio (vedi OnOpenedAsync).
     private bool opened;
 
-    internal MainWindowViewModel(GameAccount account, IEnumerable<GameInfo> games, AppSettings settings, IDialogService dialogs)
+    internal MainWindowViewModel(IReadOnlyList<LauncherGames> launchers, AppSettings settings, IDialogService dialogs)
     {
-        this.account = account;
         this.settings = settings;
         this.dialogs = dialogs;
 
-        foreach (GameInfo game in games)
-        {
-            var item = new GameItemViewModel(game);
+        // Con più launcher ogni gruppo di giochi ha la sua intestazione.
+        bool headers = launchers.Count > 1;
 
-            if (game.Support == SupportState.Supported)
-                Games.Add(item);
-            else
-                OtherGames.Add(item);
+        foreach (LauncherGames launcher in launchers)
+        {
+            bool firstSupported = true;
+            bool firstOther = true;
+
+            foreach (GameInfo game in launcher.Games)
+            {
+                var item = new GameItemViewModel(game, launcher.Account, launcher.Provider);
+
+                if (game.Support == SupportState.Supported)
+                {
+                    if (headers && firstSupported)
+                        item.LauncherHeader = launcher.Provider.DisplayName;
+
+                    firstSupported = false;
+                    Games.Add(item);
+                }
+                else
+                {
+                    if (headers && firstOther)
+                        item.LauncherHeader = launcher.Provider.DisplayName;
+
+                    firstOther = false;
+                    OtherGames.Add(item);
+                }
+            }
         }
 
         ShowSidebar = Games.Count > 1 || OtherGames.Count > 0;
-        AccountText = account.DisplayName;
+        AccountText = string.Join("  ·  ", launchers.Select(l => l.Account.DisplayName));
 
         // I giochi già usati restano controllati anche quando non sono selezionati.
         foreach (GameItemViewModel item in Games)
         {
-            if (File.Exists(Path.Combine(AppData.Root, account.Provider, account.Id, item.Info.Id, "stato.ini")))
-                GameFor(item.Info);
+            if (File.Exists(Path.Combine(AppData.Root, item.Account.Provider, item.Account.Id, item.Info.Id, "stato.ini")))
+                GameFor(item);
         }
 
         Monitor = new GameMonitor(() => gameModels.Values);
@@ -95,13 +114,13 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        GameViewModel game = GameFor(value.Info);
+        GameViewModel game = GameFor(value);
         CurrentGame = game;
         settings.LastGame = value.Info.Key;
         settings.Save();
 
         // Alla prima selezione di un gioco (quelle prima dell'apertura le fa OnOpenedAsync).
-        if (checkedGames.Add(value.Info.Id) && opened)
+        if (checkedGames.Add(value.Info.Key) && opened)
             _ = OpenGameAsync(game);
     }
 
@@ -131,12 +150,12 @@ public partial class MainWindowViewModel : ObservableObject
             game.CloseSession();
     }
 
-    private GameViewModel GameFor(GameInfo game)
+    private GameViewModel GameFor(GameItemViewModel item)
     {
-        if (gameModels.TryGetValue(game.Id, out GameViewModel? existing))
+        if (gameModels.TryGetValue(item.Info.Key, out GameViewModel? existing))
             return existing;
 
-        Result<SaveManager> open = SaveManager.Open(AppData.Root, account, game);
+        Result<SaveManager> open = SaveManager.Open(AppData.Root, item.Account, item.Info, item.Provider);
 
         if (!open.Success)
             throw new InvalidOperationException(open.Message);
@@ -144,7 +163,7 @@ public partial class MainWindowViewModel : ObservableObject
         var created = new GameViewModel(open.Value!, dialogs);
         created.Refresh();
 
-        gameModels[game.Id] = created;
+        gameModels[item.Info.Key] = created;
         return created;
     }
 }

@@ -31,8 +31,13 @@ public sealed class AccountItemViewModel
 /// </summary>
 public partial class AccountViewModel : ObservableObject
 {
-    public AccountViewModel(IReadOnlyList<GameAccount> accounts, string? lastId)
+    /// <param name="launcher">Nome del launcher degli account, nei testi.</param>
+    private readonly string launcher;
+
+    public AccountViewModel(IReadOnlyList<GameAccount> accounts, string? lastId, string launcher = "")
     {
+        this.launcher = launcher;
+
         foreach (GameAccount account in accounts)
             Accounts.Add(new AccountItemViewModel(account));
 
@@ -40,9 +45,9 @@ public partial class AccountViewModel : ObservableObject
         SelectedAccount = Accounts.FirstOrDefault(a => AppSettings.Refers(lastId ?? "", a.Account.Provider, a.Account.Id)) ?? Accounts.FirstOrDefault();
     }
 
-    public string Intro => Strings.AccountIntroAny;
+    public string Intro => Loc.F(Strings.AccountIntroAny, launcher);
 
-    public string CaptionText => Strings.CaptionSteamAccount;
+    public string CaptionText => Loc.F(Strings.CaptionLauncherAccount, launcher.ToUpperInvariant());
 
     public string UseText => Strings.UseThisAccount;
 

@@ -111,7 +111,7 @@ DO NOT start the game. The backup is in:
   <data name="Exit" xml:space="preserve"><value>Exit</value></data>
   <data name="AccountIntro" xml:space="preserve"><value>This PC has more than one Steam account with {0}.
 Which one do you want to use? Each account has its own playthroughs.</value></data>
-  <data name="CaptionSteamAccount" xml:space="preserve"><value>STEAM ACCOUNT</value></data>
+  <data name="CaptionLauncherAccount" xml:space="preserve"><value>{0} ACCOUNT</value></data>
   <data name="AccountNoSaves" xml:space="preserve"><value>no saves</value></data>
   <data name="AccountLastSaved" xml:space="preserve"><value>last saved {0}</value></data>
   <data name="Close" xml:space="preserve"><value>Close</value></data>
@@ -287,7 +287,7 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SavedOnExit" xml:space="preserve"><value>Progress of “{0}” saved when the game closed.</value></data>
   <data name="SavedToday" xml:space="preserve"><value>saved today at {0}</value></data>
   <data name="SavedYesterday" xml:space="preserve"><value>saved yesterday at {0}</value></data>
-  <data name="SettingAbout" xml:space="preserve"><value>Steam account: {0}  ·  Version {1}  ·  MIT license</value></data>
+  <data name="SettingAbout" xml:space="preserve"><value>Account: {0}  ·  Version {1}  ·  MIT license</value></data>
   <data name="SettingDataFolder" xml:space="preserve"><value>Playthroughs and copies are in {0}</value></data>
   <data name="SettingKeepCopies" xml:space="preserve"><value>Automatic copies to keep</value></data>
   <data name="SettingKeepCopiesHint" xml:space="preserve"><value>0 = all</value></data>
@@ -315,7 +315,7 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="OnlyUserdataNotice" xml:space="preserve"><value>LSS copies only the files in Steam's userdata folder for {0}. If the game also saves elsewhere, those files don't change between playthroughs.</value></data>
   <data name="NoAccountWithGames" xml:space="preserve"><value>No Steam account on this PC has games with saves in the userdata folder.</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>LOCAL SAVE SWITCHER</value></data>
-  <data name="AccountIntroAny" xml:space="preserve"><value>More than one Steam account on this PC has game saves. Choose the one to manage.</value></data>
+  <data name="AccountIntroAny" xml:space="preserve"><value>More than one {0} account on this PC has game saves. Choose the one to manage.</value></data>
   <data name="SharedFilesCaption" xml:space="preserve"><value>FILES KEPT THE SAME</value></data>
   <data name="AddSharedFile" xml:space="preserve"><value>Add file...</value></data>
   <data name="RemoveSharedFile" xml:space="preserve"><value>Remove</value></data>
