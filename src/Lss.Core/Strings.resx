@@ -496,4 +496,14 @@ LSS will look at what changed on the disk.</value></data>
   <data name="NoOtherPlayer" xml:space="preserve"><value>There is no other player to give it to. Add a player first.</value></data>
   <data name="ImportPlayerPick" xml:space="preserve"><value>Whose playthrough is it?</value></data>
   <data name="PlaythroughPlayer" xml:space="preserve"><value>Player</value></data>
+  <data name="RemovePlayerText" xml:space="preserve"><value>What about the playthroughs of {0}?</value></data>
+  <data name="DeleteThemText" xml:space="preserve"><value>Deleted playthroughs can be recovered from the deleted playthroughs.</value></data>
+  <data name="DeleteThemVerb" xml:space="preserve"><value>Delete them</value></data>
+  <data name="GiveToText" xml:space="preserve"><value>Give them to:</value></data>
+  <data name="PlayersButton" xml:space="preserve"><value>Players…</value></data>
+  <data name="PlayersTitle" xml:space="preserve"><value>Players</value></data>
+  <data name="AddPlayer" xml:space="preserve"><value>Add player</value></data>
+  <data name="RemovePlayer" xml:space="preserve"><value>Remove</value></data>
+  <data name="PlayerAdmin" xml:space="preserve"><value>Admin</value></data>
+  <data name="PlayerAdminTooltip" xml:space="preserve"><value>Admins can open the advanced mode, add players and games, and allow games with cloud saves.</value></data>
 </root>

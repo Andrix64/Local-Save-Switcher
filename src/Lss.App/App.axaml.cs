@@ -149,9 +149,13 @@ public partial class App : Application
             return;
         }
 
+        // Le persone di LSS: una lista sola, condivisa da tutti i giochi.
+        var people = new People(AppData.Root);
+        people.Load();
+
         var window = new MainWindow
         {
-            DataContext = new MainWindowViewModel(launchers, settings, new DialogService(() => desktop.MainWindow)),
+            DataContext = new MainWindowViewModel(launchers, settings, new DialogService(() => desktop.MainWindow), people),
         };
 
         window.Closed += (_, _) => desktop.Shutdown();

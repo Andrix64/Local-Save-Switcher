@@ -1,0 +1,138 @@
+using Lss.App.ViewModels;
+
+namespace Lss.Tests;
+
+public sealed class PlayersViewModelTests : IDisposable
+{
+    private const string Admin = "a1b2c3d4";
+    private const string User = "b2c3d4e5";
+
+    private readonly TestFolder folder = new();
+
+    // Chiamate di rimozione: persona e a chi (null = eliminate).
+    private readonly List<(string Person, string? GiveTo)> removals = [];
+
+    public PlayersViewModelTests() => TestApp.Ensure();
+
+    public void Dispose() => folder.Dispose();
+
+    private People People()
+    {
+        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+            $"Ordine={Admin},{User}\n" +
+            $"{Admin}.Nome=Andrea\n{Admin}.Ruolo=admin\n" +
+            $"{User}.Nome=Clara\n{User}.Ruolo=utente\n");
+
+        var people = new People(folder.Data);
+        people.Load();
+        return people;
+    }
+
+    private PlayersViewModel Model(People people, FakeDialogService dialogs) =>
+        new(people, dialogs, (person, giveTo) =>
+        {
+            removals.Add((person.Id, giveTo));
+            return people.Remove(person.Id);
+        });
+
+    [Fact]
+    public void AddShowsTheNewPlayerAndRefusesADuplicate()
+    {
+        People people = People();
+        PlayersViewModel model = Model(people, new FakeDialogService());
+
+        Assert.True(model.Add("Luca").Success);
+        Assert.Equal(3, model.Rows.Count);
+
+        Assert.False(model.Add("luca").Success);
+        Assert.True(model.HasMessage);
+    }
+
+    [Fact]
+    public void TheLastAdminCannotBeDemoted()
+    {
+        People people = People();
+        PlayersViewModel model = Model(people, new FakeDialogService());
+
+        Assert.False(model.SetAdmin(people.Find(Admin)!, false).Success);
+
+        Assert.True(people.Find(Admin)!.IsAdmin);
+        Assert.Equal(Strings.LastAdmin, model.Message);
+    }
+
+    [Fact]
+    public void NextColorTakesTheNextOneOfThePalette()
+    {
+        People people = People();
+        PlayersViewModel model = Model(people, new FakeDialogService());
+        Person andrea = people.Find(Admin)!;
+        string next = Lss.People.Palette[(Lss.People.Palette.ToList().IndexOf(andrea.Color) + 1) % Lss.People.Palette.Count];
+
+        Assert.True(model.NextColor(andrea).Success);
+
+        Assert.Equal(next, people.Find(Admin)!.Color);
+    }
+
+    [Fact]
+    public void MoveSwapsThePlayers()
+    {
+        People people = People();
+        PlayersViewModel model = Model(people, new FakeDialogService());
+
+        model.Move(people.Find(User)!, -1);
+
+        Assert.Equal(User, model.Rows[0].Person.Id);
+    }
+
+    [Fact]
+    public async Task RemovingDeletesThePlaythroughsWhenAskedTo()
+    {
+        People people = People();
+        var dialogs = new FakeDialogService { ConfirmAnswer = true };
+        PlayersViewModel model = Model(people, dialogs);
+
+        Result result = await model.RemoveAsync(people.Find(User)!);
+
+        Assert.True(result.Success);
+        Assert.Equal([(User, (string?)null)], removals);
+    }
+
+    [Fact]
+    public async Task RemovingGivesThePlaythroughsToTheChosenPlayer()
+    {
+        People people = People();
+        var dialogs = new FakeDialogService { ConfirmAnswer = false, ChosenPerson = people.Find(Admin) };
+        PlayersViewModel model = Model(people, dialogs);
+
+        Result result = await model.RemoveAsync(people.Find(User)!);
+
+        Assert.True(result.Success);
+        Assert.Equal([(User, (string?)Admin)], removals);
+    }
+
+    [Fact]
+    public async Task CancelingTheRemovalChangesNothing()
+    {
+        People people = People();
+        var dialogs = new FakeDialogService { ConfirmAnswer = false, ChosenPerson = null };
+        PlayersViewModel model = Model(people, dialogs);
+
+        await model.RemoveAsync(people.Find(User)!);
+
+        Assert.Empty(removals);
+        Assert.NotNull(people.Find(User));
+    }
+
+    [Fact]
+    public async Task TheLastPlayerCannotBeRemoved()
+    {
+        People people = People();
+        people.Remove(User);
+        PlayersViewModel model = Model(people, new FakeDialogService { ConfirmAnswer = true });
+
+        Result result = await model.RemoveAsync(people.Find(Admin)!);
+
+        Assert.False(result.Success);
+        Assert.Empty(removals);
+    }
+}

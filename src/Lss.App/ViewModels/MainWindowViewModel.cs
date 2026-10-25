@@ -15,6 +15,9 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly AppSettings settings;
     private readonly IDialogService dialogs;
 
+    // Le persone di LSS: una sola lista per tutti i giochi, così una modifica vale ovunque.
+    private readonly People? people;
+
     // Account e giochi di ogni launcher, come li ha letti l'avvio (o l'ultima ricarica).
     private IReadOnlyList<LauncherGames> launchers;
 
@@ -27,11 +30,13 @@ public partial class MainWindowViewModel : ObservableObject
     // Dopo l'apertura della finestra le selezioni fanno subito il primo avvio (vedi OnOpenedAsync).
     private bool opened;
 
-    internal MainWindowViewModel(IReadOnlyList<LauncherGames> launchers, AppSettings settings, IDialogService dialogs)
+    internal MainWindowViewModel(IReadOnlyList<LauncherGames> launchers, AppSettings settings, IDialogService dialogs,
+        People? people = null)
     {
         this.launchers = WithoutDuplicates(launchers);
         this.settings = settings;
         this.dialogs = dialogs;
+        this.people = people;
 
         FillGames(this.launchers);
 
@@ -404,6 +409,81 @@ public partial class MainWindowViewModel : ObservableObject
         return item.Provider.LauncherFolders(item.Account);
     }
 
+    /// <summary>"Giocatori…": la finestra con le persone di LSS.</summary>
+    [RelayCommand]
+    private async Task OpenPlayersAsync()
+    {
+        if (people == null)
+            return;
+
+        await dialogs.ShowAsync<bool>(new PlayersWindow(new PlayersViewModel(people, dialogs, RemovePlayer)));
+
+        // Nomi e colori compaiono nelle partite di ogni gioco aperto.
+        foreach (GameViewModel game in gameModels.Values)
+            game.Refresh();
+    }
+
+    /// <summary>
+    /// Toglie una persona da LSS: le sue partite di tutti i giochi vanno a <paramref name="giveTo"/>,
+    /// o si eliminano (null). Prima si controlla tutto (regole di People, partite nel gioco
+    /// aperto), poi si cambia.
+    /// </summary>
+    internal Result RemovePlayer(Person person, string? giveTo)
+    {
+        if (people == null)
+            return Result.Fail(Strings.PlayerNotFound);
+
+        if (people.All.Count == 1)
+            return Result.Fail(Strings.LastPlayer);
+
+        if (person.IsAdmin && people.Admins.Count == 1)
+            return Result.Fail(Strings.LastAdmin);
+
+        var owned = new List<(GameViewModel Game, string Profile)>();
+
+        foreach (GameItemViewModel item in Games.ToList())
+        {
+            GameViewModel game;
+
+            try
+            {
+                game = GameFor(item);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Un gioco che non si apre non ha partite da spostare: si salta.
+                Log.Write("Gioco saltato togliendo una persona: " + ex.Message);
+                continue;
+            }
+
+            foreach (string profile in game.Manager.GetProfilesOf(person.Id))
+                owned.Add((game, profile));
+        }
+
+        if (giveTo == null && owned.Any(item => item.Game.Manager.HasActiveProfile &&
+                                                item.Game.Manager.State.ActiveProfile == item.Profile))
+        {
+            return Result.Fail(Strings.CannotDeleteActive);
+        }
+
+        foreach ((GameViewModel game, string profile) in owned)
+        {
+            Result moved = giveTo == null
+                ? game.Manager.DeleteProfile(profile)
+                : game.Manager.SetOwner(profile, giveTo);
+
+            if (!moved.Success)
+                return moved;
+        }
+
+        Result removed = people.Remove(person.Id);
+
+        foreach (GameViewModel game in gameModels.Values)
+            game.Refresh();
+
+        return removed;
+    }
+
     private GameViewModel GameFor(GameItemViewModel item)
     {
         if (gameModels.TryGetValue(item.Info.Key, out GameViewModel? existing))
@@ -413,6 +493,9 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (!open.Success)
             throw new InvalidOperationException(open.Message);
+
+        if (people != null)
+            open.Value!.Players = people;
 
         var created = new GameViewModel(open.Value!, dialogs)
         {
