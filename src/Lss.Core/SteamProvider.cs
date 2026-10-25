@@ -15,17 +15,27 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
     public string DisplayName => "Steam";
 
     /// <summary>
+    /// Cartella principale di Steam, o null se Steam non è installato.
+    /// </summary>
+    public string? FindRoot() => platform.FindSteamRoots().FirstOrDefault();
+
+    /// <summary>
+    /// Cartella userdata di una installazione di Steam.
+    /// </summary>
+    internal static string UserDataFolder(string steamRoot) => Path.Combine(steamRoot, "userdata");
+
+    /// <summary>
     /// Account con giochi gestibili in userdata; se non ce ne sono, quelli con
     /// almeno una cartella di gioco (vedi FindAccountsWithAnyGame).
     /// </summary>
     public IReadOnlyList<GameAccount> FindAccounts()
     {
-        string? steam = platform.FindSteamRoots().FirstOrDefault();
+        string? steam = FindRoot();
 
         if (steam == null)
             return [];
 
-        string userData = Path.Combine(steam, "userdata");
+        string userData = UserDataFolder(steam);
 
         if (!Directory.Exists(userData))
             return [];
@@ -40,7 +50,7 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
     /// </summary>
     public IReadOnlyList<GameInfo> FindGames(GameAccount account)
     {
-        string? steam = platform.FindSteamRoots().FirstOrDefault();
+        string? steam = FindRoot();
 
         if (steam == null)
             return [];

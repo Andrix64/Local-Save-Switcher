@@ -66,7 +66,9 @@ public partial class App : Application
         if (LegacyMigration.Notice(moved, moveDetail) is (string text, bool isWarning))
             await ShowStandaloneAsync(text, isWarning ? InfoKind.Warning : InfoKind.Info);
 
-        string? steam = Platform.Current.FindSteamRoots().FirstOrDefault();
+        // Fino alla K7 c'è un solo launcher: Steam.
+        var steamProvider = new SteamProvider(Platform.Current);
+        string? steam = steamProvider.FindRoot();
 
         if (steam == null)
         {
@@ -75,7 +77,7 @@ public partial class App : Application
             return;
         }
 
-        string userData = Path.Combine(steam, "userdata");
+        string userData = SteamProvider.UserDataFolder(steam);
 
         if (!Directory.Exists(userData))
         {
@@ -87,8 +89,7 @@ public partial class App : Application
         // Prima di cercare gli account: una cartella rimasta come 870780.vecchio le farebbe sparire.
         SaveManager.RecoverAllGameFolders(userData);
 
-        // Fino alla K7 c'è un solo launcher: Steam.
-        IGameProvider provider = Providers.All(Platform.Current)[0];
+        IGameProvider provider = steamProvider;
 
         // Nessun gioco gestibile (per esempio tutti con i salvataggi in Proton):
         // la finestra si apre lo stesso e mostra i giochi con il motivo.

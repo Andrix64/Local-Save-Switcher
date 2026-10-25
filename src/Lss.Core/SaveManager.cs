@@ -109,12 +109,13 @@ public sealed partial class SaveManager
     public static Result<SaveManager> Initialize(
         Func<IReadOnlyList<GameAccount>, string?, GameAccount?> chooseAccount)
     {
-        string steam = Platform.Current.FindSteamRoots().FirstOrDefault() ?? "";
+        var steamProvider = new SteamProvider(Platform.Current);
+        string steam = steamProvider.FindRoot() ?? "";
 
         if (steam == "")
             return Result<SaveManager>.Fail(Strings.SteamNotFound);
 
-        string userData = Path.Combine(steam, "userdata");
+        string userData = SteamProvider.UserDataFolder(steam);
 
         if (!Directory.Exists(userData))
             return Result<SaveManager>.Fail(Strings.UserDataNotFound);
@@ -154,7 +155,7 @@ public sealed partial class SaveManager
 
             // Dalle librerie di Steam, se Control è installato: con la cartella
             // di installazione il gioco aperto si riconosce anche dai processi.
-            GameInfo game = SteamLibrary.FindGames(steam, account.Folder)
+            GameInfo game = steamProvider.FindGames(account)
                 .FirstOrDefault(g => g.Id == GameInfo.ControlAppId) ?? GameInfo.Control(savePath);
 
             return Result<SaveManager>.Ok(new SaveManager(
