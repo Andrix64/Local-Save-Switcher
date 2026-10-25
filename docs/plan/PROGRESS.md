@@ -120,7 +120,7 @@ per phase (the phase file names it).
 
 - [x] K1 — `GameAccount` instead of `SteamAccount` (53e8d82)
 - [x] K2 — `GameInfo` with a provider (89bcfc0)
-- [ ] K3 — Generic platform functions
+- [x] K3 — Generic platform functions (5bbbfc9; Linux tests 184 passed on lss-ci)
 - [ ] K4a — The interface, unused
 - [ ] K4b — Accounts and games through the provider
 - [ ] K4c — Running, launch and cloud through the provider
