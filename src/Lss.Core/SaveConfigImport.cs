@@ -70,10 +70,11 @@ public static class SaveConfigImport
     /// <summary>
     /// Scrive i posti da importare (trovati o non ancora qui) nei posti del gioco, con
     /// origine importata. Con partite fatte ogni posto passa da addWithPlaythroughs
-    /// (AddSpot: copia o vuoto). Ritorna quanti posti sono stati aggiunti.
+    /// (AddSpot con la scelta di copia o vuoto, chiesta all'utente): true se è stato aggiunto.
+    /// Ritorna quanti posti sono stati aggiunti.
     /// </summary>
-    public static int Apply(ConfigGamePlan plan, string dataFolder, bool hasPlaythroughs,
-        Func<SaveSpot, Result>? addWithPlaythroughs)
+    public static async Task<int> ApplyAsync(ConfigGamePlan plan, string dataFolder, bool hasPlaythroughs,
+        Func<SaveSpot, Task<bool>>? addWithPlaythroughs)
     {
         if (plan.Game == null)
             return 0;
@@ -99,7 +100,7 @@ public static class SaveConfigImport
                 var candidate = new SaveSpot(0, spot.Folder, spot.Spot.Pattern, spot.Spot.Recursive, portable,
                     SaveSource.Imported);
 
-                if (addWithPlaythroughs(candidate).Success)
+                if (await addWithPlaythroughs(candidate))
                     added++;
 
                 continue;

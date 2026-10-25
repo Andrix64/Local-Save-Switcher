@@ -1,7 +1,7 @@
 namespace Lss.Tests;
 
 /// <summary>
-/// SaveConfig.Read (controlli del file non fidato), SaveConfigImport.Plan e Apply (N9b).
+/// SaveConfig.Read (controlli del file non fidato), SaveConfigImport.Plan e ApplyAsync (N9b).
 /// </summary>
 public sealed class SaveConfigImportTests : IDisposable
 {
@@ -194,7 +194,7 @@ public sealed class SaveConfigImportTests : IDisposable
     }
 
     [Fact]
-    public void ApplyWritesTheSpotsAsImported()
+    public async Task ApplyWritesTheSpotsAsImported()
     {
         Directory.CreateDirectory(Path.Combine(Install, "saves"));
         var game = new GameInfo("steam", "632470", "Disco", "Disco", "", Install, [], SupportState.NoSaves);
@@ -203,10 +203,10 @@ public sealed class SaveConfigImportTests : IDisposable
             [game], _ => Context(), _ => [], Lss));
         string data = Path.Combine(folder.Root, "gamedata");
 
-        // Nessuna scrittura finché non si chiama Apply (l'annullo non lo chiama).
+        // Nessuna scrittura finché non si chiama ApplyAsync (l'annullo non lo chiama).
         Assert.False(File.Exists(Path.Combine(data, "posti.ini")));
 
-        int added = SaveConfigImport.Apply(plan, data, hasPlaythroughs: false, addWithPlaythroughs: null);
+        int added = await SaveConfigImport.ApplyAsync(plan, data, hasPlaythroughs: false, addWithPlaythroughs: null);
 
         Assert.Equal(2, added);
         Assert.Contains("importata", File.ReadAllText(Path.Combine(data, "posti.ini")));

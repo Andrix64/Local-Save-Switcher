@@ -165,35 +165,47 @@ public partial class GameViewModel : ObservableObject
         if (folder == null)
             return;
 
-        string playthrough = Manager.HasActiveProfile ? SaveManager.ProfileDisplayName(Manager.State.ActiveProfile) : "";
-        string text = Loc.F(Strings.AddSpotText, folder, playthrough);
-        var spot = new SaveSpot(0, folder, "", true, Manager.PortableFolder(folder), SaveSource.Chosen);
+        await AddSpotWithChoiceAsync(new SaveSpot(0, folder, "", true, Manager.PortableFolder(folder), SaveSource.Chosen));
+    }
 
-        NewSpotFill fill = NewSpotFill.CopyCurrent;
+    /// <summary>
+    /// Aggiunge un posto ai posti del gioco. Con altre partite si chiede se danno una
+    /// copia dei file o partono vuote (vedi ChooseFillAsync). true se è stato aggiunto.
+    /// Usato anche dall'importazione di una configurazione (N9c).
+    /// </summary>
+    public async Task<bool> AddSpotWithChoiceAsync(SaveSpot spot)
+    {
+        NewSpotFill? fill = await ChooseFillAsync(spot.Folder);
 
-        if (Manager.GetProfiles().Count > 1)
-        {
-            bool copy = await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpotCopy);
+        if (fill == null)
+            return false;
 
-            if (!copy)
-            {
-                if (!await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpotEmpty))
-                    return;
-
-                fill = NewSpotFill.Empty;
-            }
-        }
-        else if (!await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpot))
-        {
-            return;
-        }
-
-        Result result = Manager.AddSpot(spot, fill);
+        Result result = Manager.AddSpot(spot, fill.Value);
 
         if (!result.Success)
             await dialogs.InformAsync(Strings.TitleOperationFailed, result.Message, InfoKind.Warning);
 
         RebuildSpotLines();
+
+        return result.Success;
+    }
+
+    /// <summary>
+    /// Cosa fanno le altre partite con una cartella nuova: una copia dei file attuali
+    /// o una partenza vuota. Con una sola partita basta confermare. Null se si annulla.
+    /// </summary>
+    private async Task<NewSpotFill?> ChooseFillAsync(string folder)
+    {
+        string playthrough = Manager.HasActiveProfile ? SaveManager.ProfileDisplayName(Manager.State.ActiveProfile) : "";
+        string text = Loc.F(Strings.AddSpotText, folder, playthrough);
+
+        if (Manager.GetProfiles().Count <= 1)
+            return await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpot) ? NewSpotFill.CopyCurrent : null;
+
+        if (await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpotCopy))
+            return NewSpotFill.CopyCurrent;
+
+        return await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpotEmpty) ? NewSpotFill.Empty : null;
     }
 
     /// <summary>Toglie un posto aggiunto, dopo la conferma. Le copie nelle partite restano.</summary>

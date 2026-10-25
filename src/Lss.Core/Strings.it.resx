@@ -414,6 +414,7 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="ConfigNotes" xml:space="preserve"><value>Note (facoltative)</value></data>
   <data name="ImportConfigTitle" xml:space="preserve"><value>Importa configurazione dei salvataggi</value></data>
   <data name="ConfigExportNone" xml:space="preserve"><value>Nessun gioco ha ancora cartelle dei salvataggi da esportare: scegline una o falla trovare prima.</value></data>
+  <data name="ImportConfigNow" xml:space="preserve"><value>Importa</value></data>
   <data name="ConfigMadeOn" xml:space="preserve"><value>Fatta su {0}</value></data>
   <data name="ConfigWindowsInPrefix" xml:space="preserve"><value>Fatta su Windows: qui le cartelle sono dentro la cartella Proton/Wine del gioco.</value></data>
   <data name="ConfigFound" xml:space="preserve"><value>trovata</value></data>

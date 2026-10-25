@@ -250,53 +250,33 @@ public partial class MainWindowViewModel : ObservableObject
         IReadOnlyList<ConfigGamePlan> plans = SaveConfigImport.Plan(file, Games.Select(item => item.Info).ToList(),
             info => ContextOf(info), info => LauncherFoldersOf(info), AppData.Root);
 
-        int applied = 0;
+        var model = new ImportConfigViewModel(file, plans, info => ItemOf(info)!.Provider.DisplayName, ApplyConfigAsync);
 
-        foreach (ConfigGamePlan plan in plans)
-        {
-            if (plan.Game == null)
-            {
-                await dialogs.InformAsync(Strings.ImportConfigTitle, Loc.F(Strings.ConfigNoGame, plan.Config.Name), InfoKind.Info);
-                continue;
-            }
+        if (await dialogs.ShowAsync<bool>(new ImportConfigWindow(model)) != true)
+            return;
 
-            GameItemViewModel item = Games.First(game => game.Info.Key == plan.Game.Key);
-            string dataFolder = Path.Combine(AppData.Root, item.Account.Provider, item.Account.Id, plan.Game.Id);
-            bool playthroughs = SaveFolderChoice.HasPlaythroughs(dataFolder);
-
-            if (!await dialogs.ConfirmAsync(Strings.ImportConfigTitle, PlanText(file, plan), Strings.ImportConfig, kind: InfoKind.Info))
-                continue;
-
-            applied += SaveConfigImport.Apply(plan, dataFolder, playthroughs,
-                spot => GameFor(item).Manager.AddSpot(spot, NewSpotFill.CopyCurrent));
-        }
-
-        await dialogs.InformAsync(Strings.ImportConfigTitle, Loc.F(Strings.ConfigImported, applied), InfoKind.Info);
+        await dialogs.InformAsync(Strings.ImportConfigTitle, Loc.F(Strings.ConfigImported, model.Applied), InfoKind.Info);
         ReloadGames(SelectedGame?.Info.Key, SelectedGame?.Info.Key);
     }
 
-    /// <summary>Il testo della conferma: la data del file e un rigo per posto.</summary>
-    private static string PlanText(SaveConfigFile file, ConfigGamePlan plan)
+    /// <summary>
+    /// Scrive i posti importabili di un gioco (vedi SaveConfigImport.ApplyAsync). Con partite
+    /// ogni posto chiede copia o vuoto; la scheda del gioco si ricrea alla prossima apertura.
+    /// </summary>
+    private async Task<int> ApplyConfigAsync(ConfigGamePlan plan)
     {
-        var text = new System.Text.StringBuilder(Loc.F(Strings.ConfigMadeOn, file.Created));
+        GameItemViewModel item = ItemOf(plan.Game!)!;
+        string dataFolder = Path.Combine(AppData.Root, item.Account.Provider, item.Account.Id, plan.Game!.Id);
+        bool playthroughs = SaveFolderChoice.HasPlaythroughs(dataFolder);
+        GameViewModel game = GameFor(item);
 
-        if (plan.WindowsInPrefix)
-            text.Append('\n').Append(Strings.ConfigWindowsInPrefix);
+        int added = await SaveConfigImport.ApplyAsync(plan, dataFolder, playthroughs, game.AddSpotWithChoiceAsync);
 
-        foreach (ConfigSpotPlan spot in plan.Spots)
-        {
-            string state = spot.State switch
-            {
-                ConfigSpotState.Found => Strings.ConfigFound,
-                ConfigSpotState.NotYet => Strings.ConfigNotYet,
-                ConfigSpotState.Refused => Loc.F(Strings.ConfigRefused, spot.Reason),
-                _ => Strings.ConfigNotForThisSystem,
-            };
+        // Il gioco cambia: la sua scheda, con i posti di prima, va ricreata.
+        if (added > 0 && !game.IsBusy)
+            gameModels.Remove(item.Info.Key);
 
-            text.Append('\n').Append(spot.Folder == "" ? spot.Spot.Root : spot.Folder).Append(": ").Append(state);
-        }
-
-        return text.ToString();
+        return added;
     }
 
     /// <summary>

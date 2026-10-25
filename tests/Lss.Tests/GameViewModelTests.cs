@@ -152,4 +152,35 @@ public sealed class GameViewModelTests : IDisposable
         Assert.Equal(1, vm.PendingSuggestions);
         Assert.Single(SessionScan.Pending(folder.Data));
     }
+
+    [Fact]
+    public async Task AnImportedSpotInAGameWithPlaythroughsAsksCopyOrEmpty()
+    {
+        SaveManager manager = TwoPlaythroughs();
+        string extra = Path.Combine(folder.Root, "extra");
+        TestFolder.Write(Path.Combine(extra, "a.sav"), "x");
+        var vm = new GameViewModel(manager, dialogs);
+        dialogs.ConfirmAnswer = true;
+
+        bool added = await vm.AddSpotWithChoiceAsync(new SaveSpot(0, extra, "", true, manager.PortableFolder(extra), SaveSource.Imported));
+
+        Assert.True(added);
+        Assert.Contains("Confirm: " + Strings.AddSpot, dialogs.Calls);
+        Assert.Contains(vm.Manager.Game.Spots, spot => spot.Folder == extra && spot.Source == SaveSource.Imported);
+    }
+
+    [Fact]
+    public async Task AnImportedSpotRefusedInTheChoiceIsNotAdded()
+    {
+        SaveManager manager = TwoPlaythroughs();
+        string extra = Path.Combine(folder.Root, "extra");
+        TestFolder.Write(Path.Combine(extra, "a.sav"), "x");
+        var vm = new GameViewModel(manager, dialogs);
+        dialogs.ConfirmAnswer = false;
+
+        bool added = await vm.AddSpotWithChoiceAsync(new SaveSpot(0, extra, "", true, manager.PortableFolder(extra), SaveSource.Imported));
+
+        Assert.False(added);
+        Assert.DoesNotContain(vm.Manager.Game.Spots, spot => spot.Folder == extra);
+    }
 }
