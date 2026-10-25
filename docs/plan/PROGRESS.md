@@ -136,7 +136,7 @@ per phase (the phase file names it).
 - [x] L2 — Installed Steam games without a `userdata` folder (6e58581)
 - [x] L3 — Binary VDF reader (2bf56cb)
 - [x] L4 — Steam save rules from `appinfo.vdf` (eefb435)
-- [ ] L5 — Rules from the provider
+- [x] L5 — Rules from the provider (b673864)
 - [ ] L6 — From a rule to real paths
 - [ ] L7 — Safety of a save folder
 - [ ] L8 — Locate the saves of a game
