@@ -216,6 +216,17 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — M7 so far (Andrix, Steam Deck, Opus fixing): Hollow Knight
+  (Proton) found nothing: the search skipped every launcher folder with all
+  its content, so the game's prefix, installation and userdata inside
+  `~/.local/share/Steam` were never read (fixed in `f42f760`). Sekiro
+  (Proton) after the fix: first proposal right,
+  `…/pfx/drive_c/users/steamuser/AppData/Roaming/Sekiro` (`S0000.sl2`,
+  `GraphicsConfig.xml`, as Steam's own rules); second proposal was DXVK's
+  shader cache `AppData/Local/dxvk` (`.dxvk.bin` counted as save-like):
+  `dxvk`, `vkd3d-proton`, `vkd3d` are now skipped folder names and
+  `.dxvk.bin`, `.dxvk.lut`, `.dxvk-cache` ignored files.
+
 - 2026-10-25 — Fine fase M (Haiku). M1–M6 committati su `v2` (da `1d0b994` a
   `76c8fee`), ogni task con il suo tick in un commit `Progress:`. M7 non fatto (👤).
   Test Windows: 376 verdi, 0 warning (prima di M: 317). Linux (`lss-ci`,

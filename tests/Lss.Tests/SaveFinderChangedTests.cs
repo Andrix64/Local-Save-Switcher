@@ -73,6 +73,21 @@ public sealed class SaveFinderChangedTests : IDisposable
         Assert.Equal(save, file.Path);
     }
 
+    // Visto su Steam Deck con Sekiro: la cache di DXVK nel prefisso veniva proposta.
+    [Fact]
+    public void ProtonShaderCachesAreNotRead()
+    {
+        Write(Path.Combine("AppData", "Local", "dxvk", "8cb2b32eb981dfbe.dxvk.bin"), since.AddSeconds(5));
+        Write(Path.Combine("AppData", "Local", "vkd3d-proton", "cache.bin"), since.AddSeconds(5));
+        Write(Path.Combine("bin", "sekiro.dxvk-cache"), since.AddSeconds(5));
+        Write(Path.Combine("other", "x.dxvk.bin"), since.AddSeconds(5));
+        string kept = Write(Path.Combine("AppData", "Roaming", "Sekiro", "S0000.sl2"), since.AddSeconds(5));
+
+        ChangedFile found = Assert.Single(Find());
+
+        Assert.Equal(kept, found.Path);
+    }
+
     [Fact]
     public void SystemFolderNamesAreNotRead()
     {

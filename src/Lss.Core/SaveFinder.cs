@@ -508,8 +508,13 @@ internal static partial class SaveFinder
         "shadercache", "D3DSCache", "DXCache", "GLCache", "NVIDIA", "NVIDIA Corporation", "AMD", "Intel",
         "Microsoft", "Packages", "Google", "Mozilla", "BraveSoftware", "discord", "Spotify", "CrashDumps",
         "Crashes", "CrashReports", "crashpad", "logs", "htmlcache", "webcache", "mesa_shader_cache",
-        "fontconfig", "pulse", "Trash", ".Trash-1000", "node_modules", ".git"
+        "fontconfig", "pulse", "Trash", ".Trash-1000", "node_modules", ".git",
+        // Cache degli shader di Proton: cambiano a ogni partita, in ogni prefisso.
+        "dxvk", "vkd3d-proton", "vkd3d"
     };
+
+    // Finali di nome di file che non sono salvataggi (cache degli shader di DXVK).
+    private static readonly string[] IgnoredSuffixes = [".dxvk.bin", ".dxvk.lut", ".dxvk-cache"];
 
     // Cartelle del sistema che si saltano solo direttamente sotto la radice di un disco.
     private static readonly HashSet<string> DriveRootNames = new(StringComparer.OrdinalIgnoreCase)
@@ -608,7 +613,8 @@ internal static partial class SaveFinder
         {
             string name = Path.GetFileName(file);
 
-            if (name.EndsWith('~') || IgnoredExtensions.Contains(Path.GetExtension(name)))
+            if (name.EndsWith('~') || IgnoredExtensions.Contains(Path.GetExtension(name))
+                || IgnoredSuffixes.Any(suffix => name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)))
                 return;
 
             try
