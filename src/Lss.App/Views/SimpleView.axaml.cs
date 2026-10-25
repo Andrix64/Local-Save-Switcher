@@ -32,4 +32,7 @@ public partial class SimpleView : UserControl
         if (sender is Button { Tag: SimpleGameTile tile } && ViewModel != null)
             _ = ViewModel.ActivateAsync(tile);
     }
+
+    // La piastrella "Aggiungi un gioco" è nella stessa griglia dei giochi.
+    private void AddGame_Click(object? sender, RoutedEventArgs e) => ViewModel?.AddGameCommand.Execute(null);
 }

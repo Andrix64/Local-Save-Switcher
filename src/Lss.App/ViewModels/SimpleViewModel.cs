@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -27,10 +28,39 @@ public sealed record SimpleGameTile(
     /// <summary>true se c'è la copertina; altrimenti la piastrella generata.</summary>
     public bool HasCover => Cover != null;
 
-    /// <summary>Un gioco non pronto si vede sbiadito.</summary>
-    public double Opacity => Ready ? 1 : 0.45;
+    /// <summary>Un gioco non pronto, o aperto da qualcuno, si vede sbiadito (come nel design).</summary>
+    public double Opacity => Running ? 0.55 : !Ready ? 0.6 : HasCloud ? 0.75 : 1;
 
     public bool HasCloud => CloudText != null;
+
+    /// <summary>Il nome del launcher sulla copertina, in maiuscolo.</summary>
+    public string LauncherChip => Launcher.ToUpperInvariant();
+
+    // Un'etichetta sola in alto a destra: in gioco, da preparare o cloud (in quest'ordine).
+    public bool ShowRunningBadge => Running;
+    public bool ShowSetupBadge => !Running && !Ready;
+    public bool ShowCloudBadge => !Running && Ready && HasCloud;
+
+    /// <summary>Il testo dell'etichetta in alto a destra, in maiuscolo; "" se non ce n'è.</summary>
+    public string BadgeText => (Running ? Strings.SimplePlaying
+        : !Ready ? Strings.SimpleNeedsSetup
+        : HasCloud ? Strings.SimpleCloudLabel
+        : "").ToUpper(CultureInfo.CurrentUICulture);
+
+    /// <summary>La riga sotto il nome: una sola, con lo stesso ordine delle etichette.</summary>
+    public string SubText => Running ? Strings.SimplePlaying
+        : !Ready ? Strings.SimpleNeedsSetupOnce
+        : CloudText ?? LastPlayText;
+}
+
+/// <summary>L'ultima piastrella della griglia: "Aggiungi un gioco".</summary>
+public sealed class SimpleAddGameTile
+{
+    public static SimpleAddGameTile Instance { get; } = new();
+
+    private SimpleAddGameTile()
+    {
+    }
 }
 
 /// <summary>
@@ -72,6 +102,9 @@ public sealed partial class SimpleViewModel : ObservableObject
     /// <summary>I giochi del giocatore attuale, dal più recente.</summary>
     public ObservableCollection<SimpleGameTile> Games { get; } = [];
 
+    /// <summary>La griglia della pagina dei giochi: i giochi e, in fondo, "Aggiungi un gioco".</summary>
+    public ObservableCollection<object> Tiles { get; } = [];
+
     /// <summary>Il giocatore attuale, o null sulla prima pagina.</summary>
     public Person? Current { get; private set; }
 
@@ -103,6 +136,13 @@ public sealed partial class SimpleViewModel : ObservableObject
             foreach (SimpleGameTile tile in BuildGames(Current))
                 Games.Add(tile);
         }
+
+        Tiles.Clear();
+
+        foreach (SimpleGameTile tile in Games)
+            Tiles.Add(tile);
+
+        Tiles.Add(SimpleAddGameTile.Instance);
 
         CurrentTile = Current == null ? null : Players.FirstOrDefault(tile => tile.Person.Id == Current.Id);
 
@@ -166,6 +206,17 @@ public sealed partial class SimpleViewModel : ObservableObject
 
     public string FinishText => Strings.SimpleFinished;
 
+    /// <summary>Il pannello "In gioco" come nel design: titolo, testo e la copertina del gioco.</summary>
+    public string PlayingTitle => Playing == null ? "" : Loc.F(Strings.SimpleHaveFunTitle, Playing.Player.Name);
+
+    public string PlayingBody => Playing == null ? "" : Loc.F(Strings.SimpleHaveFunBody, Playing.Item.Name);
+
+    public string PlayingOpenText => Playing == null ? "" : Loc.F(Strings.SimpleGameOpen, Playing.Item.Name);
+
+    public bool ShowStartYourself => Playing is { Launched: false };
+
+    public SimpleGameTile? PlayingTile => Playing == null ? null : Games.FirstOrDefault(tile => tile.Item == Playing.Item);
+
     private TaskCompletionSource? finishing;
 
     partial void OnPlayingChanged(PlaySession? value)
@@ -174,6 +225,11 @@ public sealed partial class SimpleViewModel : ObservableObject
         OnPropertyChanged(nameof(PlayingText));
         OnPropertyChanged(nameof(StartYourselfText));
         OnPropertyChanged(nameof(ShowFinishButton));
+        OnPropertyChanged(nameof(PlayingTitle));
+        OnPropertyChanged(nameof(PlayingBody));
+        OnPropertyChanged(nameof(PlayingOpenText));
+        OnPropertyChanged(nameof(ShowStartYourself));
+        OnPropertyChanged(nameof(PlayingTile));
     }
 
     /// <summary>Mostra il pannello della partita. Il Task finisce quando l'utente preme "Ho finito".</summary>

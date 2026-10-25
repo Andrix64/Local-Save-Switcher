@@ -517,11 +517,19 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="DeletedPlayTime" xml:space="preserve"><value>tempo di gioco {0}</value></data>
   <data name="PlayerNameCaption" xml:space="preserve"><value>Nome del giocatore</value></data>
   <data name="SimpleLastPlay" xml:space="preserve"><value>Ultima partita: {0}</value></data>
-  <data name="SimpleNeedsSetup" xml:space="preserve"><value>Da sistemare</value></data>
+  <data name="SimpleNeedsSetup" xml:space="preserve"><value>Da preparare</value></data>
+  <data name="SimpleNeedsSetupOnce" xml:space="preserve"><value>Da preparare una volta</value></data>
   <data name="SimpleCloudLabel" xml:space="preserve"><value>Chiedi a un admin</value></data>
   <data name="SwitchToSimple" xml:space="preserve"><value>Modalità semplice</value></data>
   <data name="SwitchToAdvanced" xml:space="preserve"><value>Modalità avanzata</value></data>
   <data name="SimpleWhoIsPlaying" xml:space="preserve"><value>Chi gioca?</value></data>
+  <data name="SimpleTapName" xml:space="preserve"><value>Tocca il tuo nome per vedere i tuoi giochi.</value></data>
+  <data name="SimpleWhatToPlay" xml:space="preserve"><value>A cosa giochi oggi?</value></data>
+  <data name="SimpleAddGameAny" xml:space="preserve"><value>Qualsiasi gioco del PC</value></data>
+  <data name="SimpleHaveFunTitle" xml:space="preserve"><value>Buon divertimento, {0}!</value></data>
+  <data name="SimpleHaveFunBody" xml:space="preserve"><value>Quando chiudi {0}, LSS salva la tua partita da solo. Non devi fare niente.</value></data>
+  <data name="SimpleGameOpen" xml:space="preserve"><value>{0} è aperto</value></data>
+  <data name="SimpleCantDetect" xml:space="preserve"><value>LSS non riesce a vedere quando chiudi questo gioco: quando hai finito, premi qui.</value></data>
   <data name="SimpleChangePlayer" xml:space="preserve"><value>Cambia giocatore</value></data>
   <data name="SimpleAddPlayer" xml:space="preserve"><value>Aggiungi giocatore</value></data>
   <data name="SimpleAddGame" xml:space="preserve"><value>Aggiungi un gioco</value></data>
