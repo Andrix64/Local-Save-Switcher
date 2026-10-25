@@ -134,7 +134,7 @@ per phase (the phase file names it).
 
 - [x] L1 — Known folders (91e2f90; Linux 208 tests on lss-ci)
 - [x] L2 — Installed Steam games without a `userdata` folder (6e58581)
-- [ ] L3 — Binary VDF reader
+- [x] L3 — Binary VDF reader (2bf56cb)
 - [ ] L4 — Steam save rules from `appinfo.vdf`
 - [ ] L5 — Rules from the provider
 - [ ] L6 — From a rule to real paths

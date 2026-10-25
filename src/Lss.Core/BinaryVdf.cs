@@ -105,7 +105,7 @@ internal static class BinaryVdf
     /// <summary>
     /// Testo UTF-8 terminato da un byte 0 (il byte 0 non è incluso).
     /// </summary>
-    private static string ReadCString(BinaryReader reader)
+    internal static string ReadCString(BinaryReader reader)
     {
         var bytes = new List<byte>();
 
