@@ -41,6 +41,9 @@ internal sealed class GameSpots
         oldFile = Path.Combine(gameDataFolder, OldFileName);
     }
 
+    /// <summary>Cartella dati del gioco, dove stanno posti.ini e proposte.ini.</summary>
+    public string GameDataFolder => Path.GetDirectoryName(file) ?? "";
+
     /// <summary>Posti scelti o imparati, in ordine di id (dopo Load).</summary>
     public IReadOnlyList<SaveSpot> Spots => spots.OrderBy(spot => spot.Id).ToList();
 
