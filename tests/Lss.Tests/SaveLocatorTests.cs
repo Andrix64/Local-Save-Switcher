@@ -303,4 +303,41 @@ public sealed class SaveLocatorTests : IDisposable
         Assert.Equal(SupportState.Unsafe, found.Support);
         Assert.Equal(SaveSource.Launcher, found.Source);
     }
+
+    // Un gioco che nella 1.0 funzionava con la userdata non deve diventare Unsafe.
+    [Fact]
+    public void UnsafeRuleFolderOfAUserdataGameIsLeftOut()
+    {
+        string userdata = Path.Combine(folder.Root, "userdata", "111", "123450");
+        Touch(Path.Combine(userdata, "remote", "a.sav"));
+        Touch(Path.Combine(Steamuser, "Documents", "Game", "b.sav"));
+        Touch(Path.Combine(Steamuser, "AppData", "Local", "x", "y.sav"));
+
+        SaveLocation found = Run(Game(userdata, SupportState.Supported, SaveSource.Userdata), [
+            Rule("WinMyDocuments", "Game"),
+            Rule("WinAppDataLocal", "")
+        ]);
+
+        Assert.Equal(SupportState.Supported, found.Support);
+        Assert.Equal(SaveSource.Userdata, found.Source);
+        Assert.Equal(new[] { userdata, Path.Combine(Steamuser, "Documents", "Game") },
+            found.Spots.Select(spot => spot.Folder));
+    }
+
+    [Fact]
+    public void UnsafeChosenExtraFolderOfAUserdataGameIsStillUnsafe()
+    {
+        string userdata = Path.Combine(folder.Root, "userdata", "111", "123450");
+        Touch(Path.Combine(userdata, "remote", "a.sav"));
+        Touch(Path.Combine(Steamuser, "AppData", "Local", "x", "y.sav"));
+        string local = Path.Combine(Steamuser, "AppData", "Local");
+        var stored = new GameSpots(Path.Combine(folder.Root, "gamedata"));
+        stored.Load();
+        stored.Add(local, "", local, SaveSource.Chosen);
+
+        SaveLocation found = SaveLocator.Locate(Game(userdata, SupportState.Supported, SaveSource.Userdata),
+            [], [], Context(), [], LssData, stored);
+
+        Assert.Equal(SupportState.Unsafe, found.Support);
+    }
 }
