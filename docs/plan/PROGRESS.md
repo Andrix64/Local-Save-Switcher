@@ -159,7 +159,7 @@ per phase (the phase file names it).
 
 ### Phase N — Several save folders, look after every session ([N-several-folders.md](N-several-folders.md))
 
-- [ ] N1 — `SaveSpot` and `GameInfo.Spots`
+- [x] N1 — `SaveSpot` and `GameInfo.Spots` (97d27f2)
 - [ ] N2 — Pattern spots in `FileOps` and `SaveFolderSafety`
 - [ ] N3 — Spots of a game: `posti.ini`
 - [ ] N4 — Snapshots with extra spots
