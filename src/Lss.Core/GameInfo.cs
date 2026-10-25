@@ -41,6 +41,9 @@ public enum SaveSource
     /// <summary>Cartella trovata da LSS guardando il disco.</summary>
     Learned,
 
+    /// <summary>Cartella di una configurazione dei salvataggi importata.</summary>
+    Imported,
+
     /// <summary>Nessuna cartella trovata.</summary>
     None
 }

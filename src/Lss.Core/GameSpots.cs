@@ -23,6 +23,7 @@ internal sealed class GameSpots
     private const string OldOriginKey = "Origine";
     private const string ScelteText = "scelta";
     private const string ImparateText = "imparata";
+    private const string ImportateText = "importata";
 
     private const int FirstExtraId = 2;
 
@@ -194,10 +195,10 @@ internal sealed class GameSpots
     }
 
     private static SaveSource OriginOf(string text) =>
-        text == ImparateText ? SaveSource.Learned : SaveSource.Chosen;
+        text == ImparateText ? SaveSource.Learned : text == ImportateText ? SaveSource.Imported : SaveSource.Chosen;
 
     private static string TextOf(SaveSource source) =>
-        source == SaveSource.Learned ? ImparateText : ScelteText;
+        source == SaveSource.Learned ? ImparateText : source == SaveSource.Imported ? ImportateText : ScelteText;
 
     private static void CheckText(string folder, string portable, string pattern)
     {

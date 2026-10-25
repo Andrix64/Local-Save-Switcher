@@ -135,7 +135,7 @@ public partial class GameViewModel : ObservableObject
         foreach (SaveSpot spot in Manager.Game.Spots.Where(spot => spot.Id != 1))
         {
             string text = spot.IsWholeFolder ? spot.Folder : Loc.F(Strings.SpotFiles, spot.Folder, spot.Pattern);
-            bool added = spot.Source is SaveSource.Chosen or SaveSource.Learned;
+            bool added = spot.Source is SaveSource.Chosen or SaveSource.Learned or SaveSource.Imported;
             IAsyncRelayCommand? remove = added ? new AsyncRelayCommand(() => RemoveSpotAsync(spot.Id)) : null;
 
             SpotLines.Add(new SpotLine(spot.Id, text, spot.Folder,

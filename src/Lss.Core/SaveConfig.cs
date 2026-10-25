@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text;
 using System.Text.Json.Nodes;
 
 namespace Lss;
@@ -26,6 +27,11 @@ internal static class SaveConfig
 {
     public const string FormatName = "lss-save-config";
     public const int FormatVersion = 1;
+
+    // Limiti del file importato (dato non fidato).
+    private const int MaxBytes = 1024 * 1024;
+    private const int MaxGames = 200;
+    private const int MaxSpots = 8;
 
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -120,14 +126,81 @@ internal static class SaveConfig
 
             SaveConfigFile? file = JsonSerializer.Deserialize<SaveConfigFile>(json, Options);
 
-            return file == null
-                ? Result<SaveConfigFile>.Fail(Loc.F(Strings.ConfigInvalid, "file vuoto"))
-                : Result<SaveConfigFile>.Ok(file);
+            if (file == null)
+                return Result<SaveConfigFile>.Fail(Loc.F(Strings.ConfigInvalid, "file vuoto"));
+
+            string? problem = Problem(file, json);
+
+            return problem == null
+                ? Result<SaveConfigFile>.Ok(file)
+                : Result<SaveConfigFile>.Fail(Loc.F(Strings.ConfigInvalid, problem));
         }
         catch (JsonException ex)
         {
             return Result<SaveConfigFile>.Fail(Loc.F(Strings.ConfigInvalid, ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Il motivo per cui il file non si accetta, o null. Il file arriva da altri: limiti
+    /// di dimensione, di giochi e di posti, radici e percorsi validi, maschere permesse.
+    /// </summary>
+    private static string? Problem(SaveConfigFile file, string json)
+    {
+        if (Encoding.UTF8.GetByteCount(json) > MaxBytes)
+            return "più di 1 MB";
+
+        if (file.Games == null || file.Games.Count > MaxGames)
+            return "troppi giochi";
+
+        foreach (SaveConfigGame game in file.Games)
+        {
+            if (game.Spots == null || game.Spots.Count > MaxSpots)
+                return "troppi posti per " + game.Name;
+
+            foreach (SaveConfigSpot spot in game.Spots)
+            {
+                string? problem = SpotProblem(spot);
+
+                if (problem != null)
+                    return problem + " (" + game.Name + ")";
+            }
+        }
+
+        return null;
+    }
+
+    private static string? SpotProblem(SaveConfigSpot spot)
+    {
+        if (spot.Root == null || spot.Path == null || spot.Pattern == null)
+            return "posto incompleto";
+
+        if (!SavePathResolver.IsKnownRoot(spot.Root))
+            return "radice sconosciuta: " + spot.Root;
+
+        if (Path.IsPathRooted(spot.Path) || spot.Path.StartsWith('/') || spot.Path.Contains(':'))
+            return "percorso assoluto";
+
+        if (spot.Path.Contains("..") || spot.Path.Contains('\\') || spot.Path.Contains('*') || spot.Path.Contains('?'))
+            return "percorso non permesso: " + spot.Path;
+
+        if (!TokensAreAllowed(spot.Path))
+            return "token non permesso: " + spot.Path;
+
+        if (spot.Pattern != "" && (spot.Pattern.Contains('/') || !SaveFolderSafety.PatternIsAllowed(spot.Pattern)))
+            return "maschera non permessa: " + spot.Pattern;
+
+        return null;
+    }
+
+    /// <summary>
+    /// true se nel percorso ci sono solo i due token degli ID Steam, e nessuna graffa sola.
+    /// </summary>
+    private static bool TokensAreAllowed(string path)
+    {
+        string rest = path.Replace("{64BitSteamID}", "").Replace("{Steam3AccountID}", "");
+
+        return !rest.Contains('{') && !rest.Contains('}');
     }
 
     /// <summary>
