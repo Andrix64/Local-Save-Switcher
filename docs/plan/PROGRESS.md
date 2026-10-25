@@ -169,7 +169,7 @@ per phase (the phase file names it).
 - [x] N5d — `SaveManager` saves through `SaveSet`, and the check (48ecbc7)
 - [x] N6 — The locator finds several spots (b5f8fd3)
 - [x] N7 — Adding and removing a spot of a game that has playthroughs (3d46a6a)
-- [ ] N8 — Export and import with spots
+- [x] N8 — Export and import with spots (e63cf3a)
 - [ ] N9 — Interface: the save folders of a game
 - [ ] N9a — Save configuration: the file and the export
 - [ ] N9b — Save configuration: import
