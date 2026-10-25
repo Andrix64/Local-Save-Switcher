@@ -273,11 +273,15 @@ every change keeps this in mind:
   (`SaveManager`, `FileOps`, the playthrough/history/session logic, the
   ViewModels): Steam-specific code stays in `SteamLibrary`, in the Steam
   parts of `IPlatform`, and in texts that say "Steam".
-- Sketch for that plan, not to do now: an `IGameProvider` per launcher
+- The plan now exists: phases K–Q in this folder (see README.md → "The
+  2.0 plan"): launchers in the core, save locations (Steam Deck), learning
+  the save folder from the disk, Epic / GOG / Heroic / any game, simple
+  mode, release.
+- Original sketch, not to do now: an `IGameProvider` per launcher
   (find installed games, save folders, running game, launch URI, cloud
   sync state) with `SteamProvider` as the first one; `GameInfo` gets a
   provider id and a generic game id instead of `AppId`; data folder
   `<data>/<provider>/<account>/<game>/` with a migration from today's
   layout (in `LegacyMigration`); save locations for launchers without a
-  fixed folder from a manifest such as Ludusavi's; the games list grouped
+  fixed folder from a manifest such as Ludusavi's (dropped on 2026-10-24: no third-party list, see phase L); the games list grouped
   by launcher.

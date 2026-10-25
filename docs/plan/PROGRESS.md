@@ -111,10 +111,147 @@ hash after it. 👤 = done by Andrix, skip it. Rules in [README.md](README.md).
 - [x] J7 — Further betas: skipped (they were only for the signed exe)
 - [x] J8 — 1.0.0 (2026-10-25: tag `v1.0.0` at `85a86fe`, all five CI jobs green, published as latest release "LSS 1.0.0" without code signing; the 0.9.0 release is no longer on GitHub, so no "Continued as LSS" line)
 
+## The 2.0 plan — phases K–Q
+
+Order and reasons in [README.md](README.md) → "The 2.0 plan". One branch
+per phase (the phase file names it).
+
+### Phase K — Launchers in the core ([K-launchers-core.md](K-launchers-core.md))
+
+- [ ] K1 — `GameAccount` instead of `SteamAccount`
+- [ ] K2 — `GameInfo` with a provider
+- [ ] K3 — Generic platform functions
+- [ ] K4a — The interface, unused
+- [ ] K4b — Accounts and games through the provider
+- [ ] K4c — Running, launch and cloud through the provider
+- [ ] K4d — Clean-up and check
+- [ ] K5 — Data folder per provider
+- [ ] K6 — Export format 3
+- [ ] K7 — Start-up and games list for several providers
+- [ ] K8 — 👤 Check
+
+### Phase L — Save folders known by the launchers ([L-save-locations.md](L-save-locations.md))
+
+- [ ] L1 — Known folders
+- [ ] L2 — Installed Steam games without a `userdata` folder
+- [ ] L3 — Binary VDF reader
+- [ ] L4 — Steam save rules from `appinfo.vdf`
+- [ ] L5 — Rules from the provider
+- [ ] L6 — From a rule to real paths
+- [ ] L7 — Safety of a save folder
+- [ ] L8 — Locate the saves of a game
+- [ ] L9 — Folder chosen or learned
+- [ ] L10 — Every provider uses the locator
+- [ ] L11 — `SaveManager` with a folder outside `userdata`
+- [ ] L12 — Interface (advanced mode)
+- [ ] L13 — 👤 Steam Deck and Windows check
+
+### Phase M — Learn the save folder ([M-learn-saves.md](M-learn-saves.md))
+
+- [ ] M1 — Search folders
+- [ ] M2 — Changed files
+- [ ] M3 — Candidates and their score
+- [ ] M3b — Folders that are never saves
+- [ ] M4 — The wizard
+- [ ] M5 — Learning a game that already has playthroughs
+- [ ] M6 — Screenshots
+- [ ] M7 — 👤 Real check
+
+### Phase N — Several save folders, look after every session ([N-several-folders.md](N-several-folders.md))
+
+- [ ] N1 — `SaveSpot` and `GameInfo.Spots`
+- [ ] N2 — Pattern spots in `FileOps` and `SaveFolderSafety`
+- [ ] N3 — Spots of a game: `posti.ini`
+- [ ] N4 — Snapshots with extra spots
+- [ ] N5a — `SaveSet` without the journal, unused
+- [ ] N5b — Journal and recovery
+- [ ] N5c — `SaveManager` switches through `SaveSet`
+- [ ] N5d — `SaveManager` saves through `SaveSet`, and the check
+- [ ] N6 — The locator finds several spots
+- [ ] N7 — Adding and removing a spot of a game that has playthroughs
+- [ ] N8 — Export and import with spots
+- [ ] N9 — Interface: the save folders of a game
+- [ ] N9a — Save configuration: the file and the export
+- [ ] N9b — Save configuration: import
+- [ ] N9c — Save configuration: interface
+- [ ] N10 — Look after every session (core)
+- [ ] N11 — Look after every session (interface)
+- [ ] N12 — Screenshots
+- [ ] N13 — Docs for developers
+- [ ] N14 — 👤 Checks
+
+### Phase O — Other launchers and any game ([O-launchers.md](O-launchers.md))
+
+- [ ] O1 — Epic Games Launcher (Windows)
+- [ ] O2 — GOG Galaxy and GOG games (Windows)
+- [ ] O3 — Heroic Games Launcher
+- [ ] O4 — Any other game, added by hand
+- [ ] O5 — Non-Steam games added to Steam
+- [ ] O6 — The same game twice
+- [ ] O7 — 👤 Checks
+
+### Phase P — Players, favourites and the two modes ([P-simple-mode.md](P-simple-mode.md))
+
+- [ ] P1 — Players
+- [ ] P2a — Owner
+- [ ] P2b — Favourite
+- [ ] P2c — Existing playthroughs and export
+- [ ] P3 — Getting a game ready for a player (simple mode)
+- [ ] P4 — Mode setting and start-up
+- [ ] P4a — Optional PIN for admins
+- [ ] P5 — Advanced mode: playthroughs grouped by player
+- [ ] P6 — Simple view: players and games
+- [ ] P7 — Simple mode: play, and the "My games" menu
+- [ ] P8 — Screenshots
+- [ ] P9 — 👤 Check with real people
+
+### Phase Q — Docs and release ([Q-release.md](Q-release.md))
+
+- [ ] Q1 — Docs
+- [ ] Q2 — Version `2.0.0-beta.1`
+- [ ] Q3 — 👤 Beta, then 2.0.0
+
 ## Notes
 
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
+
+- 2026-10-24 — 2.0 plan written (Opus), phases K–Q, after Andrix's
+  request: LSS lists the games of Steam, Epic and GOG (Heroic on Linux /
+  Steam Deck) and any game added by hand; it finds the saves by itself
+  (Steam `userdata` and Steam's own Auto-Cloud rules in `appinfo.vdf`, Epic's
+  cloud-save folder, Heroic's GOG cloud locations), and every other game by
+  watching what changed on the disk after "start, save, quit"; a simple mode
+  (who's playing → click a game) next to today's advanced mode; every
+  playthrough has a player, one favourite per player and game, the simple
+  mode uses only the favourite (with a "My games" menu to switch), the
+  advanced mode lists playthroughs grouped by player. Decisions
+  with Andrix: 1.0 ships as it is and this plan is 2.0; no AI (rules and
+  scores only, with the reasons shown); **no Ludusavi manifest or other
+  third-party list** (a draft used it; removed); automatic detection only
+  for Steam, Epic and GOG games, normal or through Proton/Wine; a look after
+  **every** session for folders not detected yet; games with **several save
+  folders** fully supported (phase N, extra spots in `.lss-posizioni/<id>/`
+  inside each snapshot, so games with one folder don't change). Other
+  choices: the data-folder move to `<data>/<provider>/...` goes in a new
+  `DataLayoutMigration`, not in `LegacyMigration` (that file is only for
+  Control Save Manager); the disk is scanned by timestamps after the game
+  closes, no file watcher. GOG on Windows has no readable save data
+  (Galaxy uses SQLite): GOG games there always use the search.
+  Players are users or admins (the first is admin, at least one always);
+  only admins open the advanced mode, add players and games, set up a game
+  or allow a game with cloud saves (a user is never asked "play anyway");
+  an admin may set an optional 4-digit PIN (P4a). K4, N5 and P2 are split in
+  smaller commits. `appinfo.vdf` was read on Andrix's PC: format confirmed
+  (v29), the four installed games that save outside `userdata` all have
+  Steam rules; the Steam Deck file is still to read (L13, step 0).
+  Save configurations (N9a–N9c): an admin exports where a game saves
+  (portable roots, no user name, no Steam ids, no saves) to a
+  `.lss-config.json` file and shares it by hand; importing checks it as
+  untrusted and every folder still passes `SaveFolderSafety`. A folder
+  found by LSS can be marked "not a save folder" for one game or for every
+  game (M3b, stored in portable form so it also covers Proton prefixes);
+  Settings lists them to undo.
 
 - 2026-10-24 — Direction: LSS will support several game launchers after
   1.0 (Epic Games Launcher and others). Rules and a sketch are in
