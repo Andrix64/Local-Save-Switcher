@@ -29,4 +29,20 @@ public sealed class SettingsViewModelTests : IDisposable
 
         Assert.True(exported);
     }
+
+    [Fact]
+    public async Task LookAfterPlayingIsOnByDefaultAndSavedInLssIni()
+    {
+        string ini = Path.Combine(folder.Root, "lss.ini");
+        var settings = new AppSettings(ini);
+        var vm = new SettingsViewModel(folder.CreateManager("L"), dialogs, settings: settings);
+        Assert.True(vm.LookAfterPlaying);
+
+        vm.LookAfterPlaying = false;
+        Assert.True(await vm.TrySaveAsync());
+
+        var read = new AppSettings(ini);
+        read.Load();
+        Assert.False(read.LookAfterPlaying);
+    }
 }

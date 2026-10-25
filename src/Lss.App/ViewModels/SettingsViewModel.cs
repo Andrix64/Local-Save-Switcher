@@ -29,19 +29,26 @@ public partial class SettingsViewModel : ObservableObject
     private readonly SaveManager manager;
     private readonly IDialogService dialogs;
     private readonly Func<Task>? exportAll;
+    private readonly AppSettings? settings;
 
-    /// <summary>exportAll esporta la configurazione di tutti i giochi (vedi ExportAllCommand).</summary>
-    public SettingsViewModel(SaveManager manager, IDialogService dialogs, Func<Task>? exportAll = null)
+    /// <summary>
+    /// exportAll esporta la configurazione di tutti i giochi (vedi ExportAllCommand); settings
+    /// sono le impostazioni dell'app (lss.ini), dove sta CercaDopoPartita.
+    /// </summary>
+    internal SettingsViewModel(SaveManager manager, IDialogService dialogs, Func<Task>? exportAll = null,
+        AppSettings? settings = null)
     {
         this.manager = manager;
         this.dialogs = dialogs;
         this.exportAll = exportAll;
+        this.settings = settings;
 
         AppState state = manager.State;
         launchGame = state.LaunchGame;
         saveOnExit = state.SaveOnGameExit;
         shareOptions = state.SharePreferences;
         keepCopies = Math.Min(999, state.BackupsToKeep);
+        lookAfterPlaying = settings?.LookAfterPlaying ?? true;
 
         foreach (string file in manager.SharedFiles)
             SharedFiles.Add(new SharedFileItemViewModel(file, Remove));
@@ -100,6 +107,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private decimal keepCopies;
 
+    [ObservableProperty]
+    private bool lookAfterPlaying;
+
+    public string LookAfterPlayingText => Strings.LookAfterPlaying;
+
+    public string LookAfterPlayingHint => Strings.LookAfterPlayingHint;
+
     public ObservableCollection<SharedFileItemViewModel> SharedFiles { get; } = [];
 
     /// <summary>
@@ -124,6 +138,13 @@ public partial class SettingsViewModel : ObservableObject
         {
             await dialogs.InformAsync(Strings.TitleOperationFailed, result.Message, InfoKind.Warning);
             return false;
+        }
+
+        // Impostazione dell'app, non di questo gioco: vale subito per tutti i giochi.
+        if (settings != null)
+        {
+            settings.LookAfterPlaying = LookAfterPlaying;
+            settings.Save();
         }
 
         return true;

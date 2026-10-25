@@ -414,6 +414,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="ConfigNotes" xml:space="preserve"><value>Notes (optional)</value></data>
   <data name="ImportConfigTitle" xml:space="preserve"><value>Import save configuration</value></data>
   <data name="ConfigExportNone" xml:space="preserve"><value>No game has save folders to export yet: choose or learn a save folder first.</value></data>
+  <data name="LookAfterPlayingHint" xml:space="preserve"><value>After a session LSS looks at the files that changed and suggests folders that may be saves. It only suggests: nothing changes without your choice.</value></data>
   <data name="ImportConfigNow" xml:space="preserve"><value>Import</value></data>
   <data name="ConfigMadeOn" xml:space="preserve"><value>Made on {0}</value></data>
   <data name="ConfigWindowsInPrefix" xml:space="preserve"><value>Made on Windows: here the folders are inside the game's Proton/Wine folder.</value></data>

@@ -233,8 +233,8 @@ public partial class GameViewModel : ObservableObject
     private async Task ExportConfigAsync() =>
         await dialogs.ShowAsync<bool>(new ExportConfigWindow(new ExportConfigViewModel(Manager, dialogs)));
 
-    /// <summary>Dopo una partita si cercano altre cartelle dei salvataggi (impostazione CercaDopoPartita).</summary>
-    public bool LookAfterPlaying { get; set; } = true;
+    /// <summary>Le impostazioni dell'app: CercaDopoPartita dice se dopo una partita si cercano altre cartelle.</summary>
+    internal AppSettings? Settings { get; set; }
 
     /// <summary>Proposte di cartelle dei salvataggi in attesa (vedi ReviewSuggestionsAsync).</summary>
     [ObservableProperty]
@@ -259,7 +259,7 @@ public partial class GameViewModel : ObservableObject
     /// </summary>
     private void StartLookAfterSession(DateTime startedLocal)
     {
-        if (!LookAfterPlaying)
+        if (Settings?.LookAfterPlaying == false)
             return;
 
         lookCancel?.Cancel();
@@ -700,7 +700,7 @@ public partial class GameViewModel : ObservableObject
         if (IsBusy)
             return false;
 
-        bool saved = await dialogs.ShowAsync<bool>(new SettingsWindow(new SettingsViewModel(Manager, dialogs, ExportAll)));
+        bool saved = await dialogs.ShowAsync<bool>(new SettingsWindow(new SettingsViewModel(Manager, dialogs, ExportAll, Settings)));
 
         if (saved)
         {

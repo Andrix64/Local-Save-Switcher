@@ -53,6 +53,11 @@
     </StackPanel>
     <TextBlock Classes="small" Text="{Binding KeepHint}" Margin="2,0,0,18" TextWrapping="Wrap" />
 
+    <!-- Dopo ogni partita: altre cartelle dei salvataggi (impostazione di tutto il programma) -->
+    <CheckBox Content="{Binding LookAfterPlayingText}" IsChecked="{Binding LookAfterPlaying, Mode=TwoWay}"
+              FontWeight="SemiBold" />
+    <TextBlock Classes="hint" Text="{Binding LookAfterPlayingHint}" Margin="28,0,0,18" />
+
     <!-- Cartella dei dati e informazioni -->
     <TextBlock Classes="caption" Text="{Binding CaptionData}" Margin="2,0,0,6" />
     <StackPanel Orientation="Horizontal" Spacing="12">

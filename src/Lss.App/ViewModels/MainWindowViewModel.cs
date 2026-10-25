@@ -343,7 +343,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         var created = new GameViewModel(open.Value!, dialogs)
         {
-            LookAfterPlaying = settings.LookAfterPlaying,
+            Settings = settings,
             ExportAll = ExportAllConfigsAsync,
         };
         created.Refresh();
