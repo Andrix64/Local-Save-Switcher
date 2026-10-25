@@ -10,4 +10,8 @@ public sealed record PlayerGroup(
     Person Person,
     string Initial,
     IBrush Brush,
-    IReadOnlyList<PlaythroughViewModel> Cards);
+    IReadOnlyList<PlaythroughViewModel> Cards)
+{
+    /// <summary>"2 partite" accanto al nome.</summary>
+    public string CountText => Cards.Count == 1 ? Strings.PlaythroughCountOne : Loc.F(Strings.PlaythroughCount, Cards.Count);
+}

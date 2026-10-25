@@ -466,7 +466,14 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="ModeTitle" xml:space="preserve"><value>Come vuoi usare LSS?</value></data>
   <data name="ModeHint" xml:space="preserve"><value>Puoi cambiare in ogni momento dalle impostazioni.</value></data>
   <data name="ModeSimpleTitle" xml:space="preserve"><value>Semplice</value></data>
-  <data name="ModeSimpleText" xml:space="preserve"><value>Scegli chi gioca e clicca su un gioco. Ognuno ritrova le sue partite.</value></data>
+  <data name="ModeSimpleText" xml:space="preserve"><value>Scegli chi gioca e clicca su un gioco. Ognuno ritrova le sue partite. Adatta a tutti, anche ai bambini.</value></data>
+  <data name="ModeSimplePoint1" xml:space="preserve"><value>Un giocatore, un clic, si gioca</value></data>
+  <data name="ModeSimplePoint2" xml:space="preserve"><value>Salva da solo quando chiudi il gioco</value></data>
+  <data name="ModeSimplePoint3" xml:space="preserve"><value>Nessun pulsante che cancella</value></data>
+  <data name="ModeAdvancedPoint1" xml:space="preserve"><value>Più partite per gioco, con note</value></data>
+  <data name="ModeAdvancedPoint2" xml:space="preserve"><value>Punti salvati e copie automatiche</value></data>
+  <data name="ModeAdvancedPoint3" xml:space="preserve"><value>Esporta e importa tra computer</value></data>
+  <data name="ModeContinue" xml:space="preserve"><value>Continua con {0}</value></data>
   <data name="ModeAdvancedTitle" xml:space="preserve"><value>Avanzata</value></data>
   <data name="ModeAdvancedText" xml:space="preserve"><value>Tutte le partite, i punti salvati, la cronologia, le cartelle dei salvataggi e tutte le opzioni.</value></data>
   <data name="AdminPickerTitle" xml:space="preserve"><value>Chi sei?</value></data>
@@ -474,6 +481,8 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="AdminPickerCancel" xml:space="preserve"><value>Annulla</value></data>
   <data name="PinTitle" xml:space="preserve"><value>PIN di {0}</value></data>
   <data name="PinPrompt" xml:space="preserve"><value>Inserisci il PIN</value></data>
+  <data name="AdminWithPin" xml:space="preserve"><value>con PIN</value></data>
+  <data name="AdminWithoutPin" xml:space="preserve"><value>senza PIN</value></data>
   <data name="PinWrong" xml:space="preserve"><value>PIN sbagliato</value></data>
   <data name="PinWait" xml:space="preserve"><value>Troppi tentativi. Aspetta {0} secondi.</value></data>
   <data name="PinFormat" xml:space="preserve"><value>Il PIN è di 4 cifre.</value></data>
@@ -486,6 +495,8 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="PinOptional" xml:space="preserve"><value>Facoltativo. Con un PIN, solo tu puoi usare i tuoi diritti di admin.</value></data>
   <data name="GiveToBusy" xml:space="preserve"><value>Cambio il giocatore...</value></data>
   <data name="SaveFoldersCount" xml:space="preserve"><value>Cartelle dei salvataggi ({0})</value></data>
+  <data name="PlaythroughCountOne" xml:space="preserve"><value>1 partita</value></data>
+  <data name="PlaythroughCount" xml:space="preserve"><value>{0} partite</value></data>
   <data name="FavouriteTooltip" xml:space="preserve"><value>Preferita: quella usata nella modalità semplice</value></data>
   <data name="CloudAllowSimple" xml:space="preserve"><value>Consenti anche in modalità semplice</value></data>
   <data name="CloudAllowedSimple" xml:space="preserve"><value>Consentito in modalità semplice anche con le copie online attive.</value></data>
@@ -536,8 +547,9 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="SimplePlaying" xml:space="preserve"><value>In gioco</value></data>
   <data name="SimpleMyGames" xml:space="preserve"><value>Le mie partite</value></data>
   <data name="SimpleMyGamesTitle" xml:space="preserve"><value>Le tue partite di {0}</value></data>
+  <data name="SimpleMyGamesHint" xml:space="preserve"><value>{0} · tocca una partita per giocarla</value></data>
   <data name="SimpleFavourite" xml:space="preserve"><value>Quella che giochi</value></data>
-  <data name="SimpleNewGame" xml:space="preserve"><value>Inizia una nuova partita</value></data>
+  <data name="SimpleNewGame" xml:space="preserve"><value>Inizia una partita nuova</value></data>
   <data name="SimpleHaveFun" xml:space="preserve"><value>Buon divertimento, {0}! Quando chiudi {1}, LSS salva la tua partita.</value></data>
   <data name="SimpleStartYourself" xml:space="preserve"><value>Ora avvia {0} come al solito. Quando hai finito, torna qui.</value></data>
   <data name="SimpleFinished" xml:space="preserve"><value>Ho finito di giocare</value></data>
@@ -548,6 +560,24 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="SimpleCloudAllow" xml:space="preserve"><value>Consenti questo gioco</value></data>
   <data name="SimpleCloudOnce" xml:space="preserve"><value>Gioca solo questa volta</value></data>
   <data name="SimpleWhoseSaves" xml:space="preserve"><value>C'è già una partita salvata di {0} su questo computer. Di chi è?</value></data>
-  <data name="SimpleDontKnow" xml:space="preserve"><value>Non lo so — la metto da parte</value></data>
+  <data name="SimpleDontKnow" xml:space="preserve"><value>Non lo so: tienila da parte e inizia una partita nuova</value></data>
+  <data name="SimpleWhoseSavesHint" xml:space="preserve"><value>LSS la tiene da parte per quella persona. Chiede solo questa volta.</value></data>
   <data name="SimpleAskForHelp" xml:space="preserve"><value>Chiedi a chi ha installato LSS di guardarla.</value></data>
+  <data name="PinCurrent" xml:space="preserve"><value>PIN attuale</value></data>
+  <data name="PinAgain" xml:space="preserve"><value>Ripeti il nuovo PIN</value></data>
+  <data name="PinDigits" xml:space="preserve"><value>4 cifre</value></data>
+  <data name="PinSave" xml:space="preserve"><value>Salva il PIN</value></data>
+  <data name="PinSetHint" xml:space="preserve"><value>Facoltativo. Con un PIN, solo tu puoi usare i permessi di admin. Se lo dimentichi, un altro admin può toglierlo.</value></data>
+  <data name="PinSetMenu" xml:space="preserve"><value>Imposta PIN…</value></data>
+  <data name="PinChangeMenu" xml:space="preserve"><value>Cambia PIN…</value></data>
+  <data name="PinRemoveMenu" xml:space="preserve"><value>Togli il PIN</value></data>
+  <data name="PlayerUser" xml:space="preserve"><value>Utente</value></data>
+  <data name="PlayersHint" xml:space="preserve"><value>Gli admin possono aprire la modalità avanzata, aggiungere giocatori e giochi e consentire i giochi con i salvataggi nel cloud. Il PIN è facoltativo.</value></data>
+  <data name="PlayersColName" xml:space="preserve"><value>NOME</value></data>
+  <data name="PlayersColAdmin" xml:space="preserve"><value>ADMIN</value></data>
+  <data name="PlayersColPin" xml:space="preserve"><value>PIN</value></data>
+  <data name="PlayersColColour" xml:space="preserve"><value>COLORE</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>Sposta su</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>Sposta giù</value></data>
+  <data name="RemovePlayerMenu" xml:space="preserve"><value>Rimuovi…</value></data>
 </root>

@@ -42,10 +42,19 @@ public sealed class FakeDialogService : IDialogService
     /// <summary>Il testo che l'utente scrive nella finestra di richiesta (null = annulla).</summary>
     public string? PromptAnswer { get; set; }
 
-    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm)
+    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "")
     {
         Calls.Add("Prompt: " + title);
         return Task.FromResult(PromptAnswer);
+    }
+
+    /// <summary>Il PIN che l'utente scrive in "PIN di …" (null = annulla).</summary>
+    public string? PinAnswer { get; set; }
+
+    public Task<bool> SetPinAsync(People people, Person admin)
+    {
+        Calls.Add("SetPin: " + admin.Name);
+        return Task.FromResult(PinAnswer != null && people.SetPin(admin.Id, PinAnswer).Success);
     }
 
     public Task<bool> InformAsync(string heading, string text, InfoKind kind, string? actionText = null)

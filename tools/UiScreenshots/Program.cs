@@ -372,14 +372,14 @@ internal static class Program
         simple.SelectPlayer(andreaPerson);
         Shot(Page(new SimpleView { DataContext = simple }), "24-simple-games");
 
-        Shot(new MyGamesWindow(new MyGamesViewModel(manager, andreaPerson)), "25-my-games");
+        Shot(new MyGamesWindow(new MyGamesViewModel(manager, andreaPerson) { Tile = simple.Games[0] }), "25-my-games");
 
         simple.BeginPlaying(new PlaySession(manager, controlItem, andreaPerson, DateTime.Now, true, false));
         Shot(Page(new SimpleView { DataContext = simple }), "26-simple-playing");
         simple.EndPlaying();
 
         Shot(new PlayerChoiceWindow(new PlayerChoiceViewModel(
-            Loc.F(Strings.SimpleWhoseSaves, control.Name), "", people.All, Strings.SimpleDontKnow)), "27-whose-saves");
+            Loc.F(Strings.SimpleWhoseSaves, control.Name), Strings.SimpleWhoseSavesHint, people.All, Strings.SimpleDontKnow)), "27-whose-saves");
 
         var advanced = new GameViewModel(manager, dialogs);
         advanced.Refresh();
@@ -396,6 +396,15 @@ internal static class Program
         Shot(new ModeChoiceWindow(), "32-mode-choice");
 
         Shot(new AdminPickerWindow(new AdminPickerViewModel(people)), "33-admin-picker");
+
+        people.SetPin(andreaPerson.Id, "1234");
+        var picker = new AdminPickerViewModel(people);
+        picker.Choose(people.Find(andreaPerson.Id)!);
+        picker.Pad!.Press("1");
+        picker.Pad.Press("2");
+        Shot(new AdminPickerWindow(picker), "34-admin-pin");
+
+        Shot(new SetPinWindow(new SetPinViewModel(people, claraPerson) { NewPin = "1234", Again = "12" }), "35-set-pin");
     }
 
     private static void Shot(Window window, string name)
@@ -450,7 +459,8 @@ internal sealed class NoDialogs : IDialogService
     public Task<T?> ShowAsync<T>(Window dialog) => Task.FromResult(default(T));
     public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null) => Task.FromResult<Person?>(null);
     public Task<Person?> ChooseAdminAsync(People people) => Task.FromResult<Person?>(null);
-    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm) => Task.FromResult<string?>(null);
+    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "") => Task.FromResult<string?>(null);
+    public Task<bool> SetPinAsync(People people, Person admin) => Task.FromResult(false);
     public Task<string?> PickZipToSaveAsync(string title, string suggestedName, string filterName) => Task.FromResult<string?>(null);
     public Task<string?> PickZipToOpenAsync(string title, string filterName) => Task.FromResult<string?>(null);
     public Task<string?> PickConfigToSaveAsync(string title, string suggestedName) => Task.FromResult<string?>(null);

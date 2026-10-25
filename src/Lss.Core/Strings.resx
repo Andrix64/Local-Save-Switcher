@@ -466,7 +466,14 @@ LSS will look at what changed on the disk.</value></data>
   <data name="ModeTitle" xml:space="preserve"><value>How do you want to use LSS?</value></data>
   <data name="ModeHint" xml:space="preserve"><value>You can change it at any time in Settings.</value></data>
   <data name="ModeSimpleTitle" xml:space="preserve"><value>Simple</value></data>
-  <data name="ModeSimpleText" xml:space="preserve"><value>Choose who's playing and click a game. Everyone finds their own playthroughs.</value></data>
+  <data name="ModeSimpleText" xml:space="preserve"><value>Choose who's playing and click a game. Everyone finds their own playthroughs. Fits everyone, kids too.</value></data>
+  <data name="ModeSimplePoint1" xml:space="preserve"><value>One player, one click, play</value></data>
+  <data name="ModeSimplePoint2" xml:space="preserve"><value>Saves by itself when you close the game</value></data>
+  <data name="ModeSimplePoint3" xml:space="preserve"><value>No button that deletes</value></data>
+  <data name="ModeAdvancedPoint1" xml:space="preserve"><value>Several playthroughs per game, with notes</value></data>
+  <data name="ModeAdvancedPoint2" xml:space="preserve"><value>Save points and automatic copies</value></data>
+  <data name="ModeAdvancedPoint3" xml:space="preserve"><value>Export and import between computers</value></data>
+  <data name="ModeContinue" xml:space="preserve"><value>Continue with {0}</value></data>
   <data name="ModeAdvancedTitle" xml:space="preserve"><value>Advanced</value></data>
   <data name="ModeAdvancedText" xml:space="preserve"><value>All playthroughs, saved points, history, save folders and every option.</value></data>
   <data name="AdminPickerTitle" xml:space="preserve"><value>Who are you?</value></data>
@@ -474,6 +481,8 @@ LSS will look at what changed on the disk.</value></data>
   <data name="AdminPickerCancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="PinTitle" xml:space="preserve"><value>PIN of {0}</value></data>
   <data name="PinPrompt" xml:space="preserve"><value>Enter the PIN</value></data>
+  <data name="AdminWithPin" xml:space="preserve"><value>with PIN</value></data>
+  <data name="AdminWithoutPin" xml:space="preserve"><value>no PIN</value></data>
   <data name="PinWrong" xml:space="preserve"><value>Wrong PIN</value></data>
   <data name="PinWait" xml:space="preserve"><value>Too many tries. Wait {0} seconds.</value></data>
   <data name="PinFormat" xml:space="preserve"><value>The PIN is 4 digits.</value></data>
@@ -486,6 +495,8 @@ LSS will look at what changed on the disk.</value></data>
   <data name="PinOptional" xml:space="preserve"><value>Optional. With a PIN, only you can use your admin rights.</value></data>
   <data name="GiveToBusy" xml:space="preserve"><value>Changing the player...</value></data>
   <data name="SaveFoldersCount" xml:space="preserve"><value>Save folders ({0})</value></data>
+  <data name="PlaythroughCountOne" xml:space="preserve"><value>1 playthrough</value></data>
+  <data name="PlaythroughCount" xml:space="preserve"><value>{0} playthroughs</value></data>
   <data name="FavouriteTooltip" xml:space="preserve"><value>Favourite: the one used in simple mode</value></data>
   <data name="CloudAllowSimple" xml:space="preserve"><value>Allow in simple mode anyway</value></data>
   <data name="CloudAllowedSimple" xml:space="preserve"><value>Allowed in simple mode even with cloud saves on.</value></data>
@@ -536,6 +547,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SimplePlaying" xml:space="preserve"><value>Playing</value></data>
   <data name="SimpleMyGames" xml:space="preserve"><value>My games</value></data>
   <data name="SimpleMyGamesTitle" xml:space="preserve"><value>Your games of {0}</value></data>
+  <data name="SimpleMyGamesHint" xml:space="preserve"><value>{0} · tap a game to play it</value></data>
   <data name="SimpleFavourite" xml:space="preserve"><value>The one you play</value></data>
   <data name="SimpleNewGame" xml:space="preserve"><value>Start a new game</value></data>
   <data name="SimpleHaveFun" xml:space="preserve"><value>Have fun, {0}! When you close {1}, LSS saves your game.</value></data>
@@ -548,6 +560,24 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SimpleCloudAllow" xml:space="preserve"><value>Allow this game</value></data>
   <data name="SimpleCloudOnce" xml:space="preserve"><value>Play only this time</value></data>
   <data name="SimpleWhoseSaves" xml:space="preserve"><value>There is already a saved game of {0} on this computer. Whose is it?</value></data>
-  <data name="SimpleDontKnow" xml:space="preserve"><value>I don't know — keep it aside</value></data>
+  <data name="SimpleDontKnow" xml:space="preserve"><value>I don't know: keep it aside and start a new game</value></data>
+  <data name="SimpleWhoseSavesHint" xml:space="preserve"><value>LSS keeps it aside for that person. It only asks this once.</value></data>
   <data name="SimpleAskForHelp" xml:space="preserve"><value>Ask whoever set up LSS to look at it.</value></data>
+  <data name="PinCurrent" xml:space="preserve"><value>Current PIN</value></data>
+  <data name="PinAgain" xml:space="preserve"><value>Repeat the new PIN</value></data>
+  <data name="PinDigits" xml:space="preserve"><value>4 digits</value></data>
+  <data name="PinSave" xml:space="preserve"><value>Save the PIN</value></data>
+  <data name="PinSetHint" xml:space="preserve"><value>Optional. With a PIN, only you can use the admin rights. If you forget it, another admin can remove it.</value></data>
+  <data name="PinSetMenu" xml:space="preserve"><value>Set PIN…</value></data>
+  <data name="PinChangeMenu" xml:space="preserve"><value>Change PIN…</value></data>
+  <data name="PinRemoveMenu" xml:space="preserve"><value>Remove PIN</value></data>
+  <data name="PlayerUser" xml:space="preserve"><value>User</value></data>
+  <data name="PlayersHint" xml:space="preserve"><value>Admins can open the advanced mode, add players and games and allow games with cloud saves. The PIN is optional.</value></data>
+  <data name="PlayersColName" xml:space="preserve"><value>NAME</value></data>
+  <data name="PlayersColAdmin" xml:space="preserve"><value>ADMIN</value></data>
+  <data name="PlayersColPin" xml:space="preserve"><value>PIN</value></data>
+  <data name="PlayersColColour" xml:space="preserve"><value>COLOUR</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="RemovePlayerMenu" xml:space="preserve"><value>Remove…</value></data>
 </root>

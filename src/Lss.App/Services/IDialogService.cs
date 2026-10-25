@@ -23,8 +23,11 @@ public interface IDialogService
     /// <summary>Chi è l'amministratore che autorizza: l'admin scelto (con PIN se ce l'ha), o null.</summary>
     Task<Person?> ChooseAdminAsync(People people);
 
-    /// <summary>Chiede un testo (un nome): il testo, o null se si annulla.</summary>
-    Task<string?> PromptAsync(string title, string caption, string hint, string confirm);
+    /// <summary>Chiede un testo (un nome), partendo da initial: il testo, o null se si annulla.</summary>
+    Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "");
+
+    /// <summary>"PIN di …": imposta o cambia il PIN di un admin. true se è salvato.</summary>
+    Task<bool> SetPinAsync(People people, Person admin);
 
     Task<string?> PickZipToSaveAsync(string title, string suggestedName, string filterName);
 

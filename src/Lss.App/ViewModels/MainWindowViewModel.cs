@@ -156,7 +156,10 @@ public partial class MainWindowViewModel : ObservableObject
             return;
 
         MyGamesChoice? choice = await dialogs.ShowAsync<MyGamesChoice>(
-            new MyGamesWindow(new MyGamesViewModel(manager, player)));
+            new MyGamesWindow(new MyGamesViewModel(manager, player)
+            {
+                Tile = Simple.Games.FirstOrDefault(tile => tile.Item == item),
+            }));
 
         if (choice == null)
             return;

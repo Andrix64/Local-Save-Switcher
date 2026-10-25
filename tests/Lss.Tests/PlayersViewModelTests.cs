@@ -135,4 +135,58 @@ public sealed class PlayersViewModelTests : IDisposable
         Assert.False(result.Success);
         Assert.Empty(removals);
     }
+
+    [Fact]
+    public async Task AddAsksTheNameAndCancelChangesNothing()
+    {
+        People people = People();
+        var dialogs = new FakeDialogService { PromptAnswer = null };
+        PlayersViewModel model = Model(people, dialogs);
+
+        await model.AddAsync();
+        Assert.Equal(2, model.Rows.Count);
+
+        dialogs.PromptAnswer = "Luca";
+        await model.AddAsync();
+        Assert.Equal(3, model.Rows.Count);
+    }
+
+    [Fact]
+    public async Task RenameAsyncUsesTheNewName()
+    {
+        People people = People();
+        PlayersViewModel model = Model(people, new FakeDialogService { PromptAnswer = "Clarissa" });
+
+        await model.RenameAsync(people.Find(User)!);
+
+        Assert.Equal("Clarissa", people.Find(User)!.Name);
+    }
+
+    [Fact]
+    public async Task OnlyAnAdminGetsAPinAndItCanBeRemoved()
+    {
+        People people = People();
+        var dialogs = new FakeDialogService { PinAnswer = "4821" };
+        PlayersViewModel model = Model(people, dialogs);
+
+        await model.SetPinAsync(people.Find(User)!);
+        Assert.DoesNotContain("SetPin: Clara", dialogs.Calls);
+
+        await model.SetPinAsync(people.Find(Admin)!);
+        Assert.True(people.Find(Admin)!.HasPin);
+        Assert.Equal(Strings.PinChangeMenu, model.Rows[0].PinActionText);
+
+        Assert.True(model.RemovePin(people.Find(Admin)!).Success);
+        Assert.False(people.Find(Admin)!.HasPin);
+    }
+
+    [Fact]
+    public void TheRowMarksTheColourOfThePlayer()
+    {
+        People people = People();
+        PlayersViewModel model = Model(people, new FakeDialogService());
+
+        ColourSwatch selected = Assert.Single(model.Rows[0].Swatches, swatch => swatch.Selected);
+        Assert.Equal(people.Find(Admin)!.Color, selected.Color);
+    }
 }

@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.SetPinWindow"
+        x:DataType="vm:SetPinViewModel"
+        Title="Local Save Switcher"
+        Width="460" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <!-- Come il design (canvas "Imposta il PIN"). -->
+  <Window.Styles>
+    <Style Selector="TextBox.pin">
+      <Setter Property="Width" Value="160" />
+      <Setter Property="Height" Value="44" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="LetterSpacing" Value="6" />
+      <Setter Property="PasswordChar" Value="●" />
+      <Setter Property="MaxLength" Value="4" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox.pin.mismatch">
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+    </Style>
+  </Window.Styles>
+
+  <StackPanel Margin="28,24" Spacing="16">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <Border Width="40" Height="40" CornerRadius="20" Background="{Binding Brush}">
+        <TextBlock Text="{Binding Initial}" FontSize="18" FontWeight="Bold" Foreground="White"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <TextBlock Text="{Binding Title}" FontSize="19" FontWeight="Bold" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <TextBlock Text="{loc:Str PinSetHint}" Foreground="{StaticResource TextSecondary}" LineHeight="20" TextWrapping="Wrap" />
+
+    <StackPanel Spacing="6" IsVisible="{Binding NeedsCurrent}">
+      <TextBlock Classes="label" Text="{loc:Str PinCurrent}" />
+      <TextBox x:Name="CurrentBox" Classes="pin" Text="{Binding Current, Mode=TwoWay}" />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="label" Text="{loc:Str PinNew}" />
+      <TextBox x:Name="NewBox" Classes="pin" Text="{Binding NewPin, Mode=TwoWay}" />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="label" Text="{loc:Str PinAgain}" />
+      <TextBox Classes="pin" Text="{Binding Again, Mode=TwoWay}"
+               Classes.mismatch="{Binding Mismatch}" />
+      <TextBlock Text="{loc:Str PinDigits}" FontSize="12" Foreground="{StaticResource TextSecondary}"
+                 IsVisible="{Binding !Mismatch}" />
+      <TextBlock Text="{loc:Str PinMismatch}" FontSize="12" Foreground="{StaticResource Error}"
+                 IsVisible="{Binding Mismatch}" />
+    </StackPanel>
+
+    <TextBlock Text="{Binding Message}" Foreground="{StaticResource Error}" TextWrapping="Wrap"
+               IsVisible="{Binding HasMessage}" />
+
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+      <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" Click="Cancel_Click" />
+      <Button Classes="primary" Content="{loc:Str PinSave}" IsDefault="True" IsEnabled="{Binding CanSave}"
+              Click="Save_Click" />
+    </StackPanel>
+  </StackPanel>
+
+</Window>

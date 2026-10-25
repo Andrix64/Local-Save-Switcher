@@ -22,8 +22,11 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
     public Task<Person?> ChooseAdminAsync(People people) =>
         ShowAsync<Person>(new AdminPickerWindow(new AdminPickerViewModel(people)));
 
-    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm) =>
-        ShowAsync<string>(new TextPromptWindow(new TextPromptViewModel(title, caption, "", hint, 30, confirm)));
+    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "") =>
+        ShowAsync<string>(new TextPromptWindow(new TextPromptViewModel(title, caption, initial, hint, 30, confirm)));
+
+    public async Task<bool> SetPinAsync(People people, Person admin) =>
+        await ShowAsync<bool>(new SetPinWindow(new SetPinViewModel(people, admin)));
 
     // Serve una finestra padre: senza, il dialogo non sarebbe modale.
     public async Task<T?> ShowAsync<T>(Window dialog)

@@ -40,6 +40,10 @@ public partial class PinPadViewModel : ObservableObject
     [ObservableProperty]
     private string dots = "○○○○";
 
+    /// <summary>I quattro pallini del design: true per ogni cifra inserita.</summary>
+    [ObservableProperty]
+    private IReadOnlyList<bool> dotFilled = [false, false, false, false];
+
     /// <summary>true dopo un PIN sbagliato, finché non si ricomincia.</summary>
     [ObservableProperty]
     private bool isWrong;
@@ -106,6 +110,7 @@ public partial class PinPadViewModel : ObservableObject
     private void Refresh()
     {
         Dots = new string('●', digits.Length) + new string('○', 4 - digits.Length);
+        DotFilled = Enumerable.Range(0, 4).Select(index => index < digits.Length).ToArray();
 
         WaitText = Waiting
             ? Loc.F(Strings.PinWait, (int)Math.Ceiling((waitUntil - now()).TotalSeconds))

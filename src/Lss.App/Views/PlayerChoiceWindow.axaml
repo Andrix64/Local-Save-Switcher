@@ -4,40 +4,80 @@
         x:Class="Lss.App.Views.PlayerChoiceWindow"
         x:DataType="vm:PlayerChoiceViewModel"
         Title="Local Save Switcher"
-        Width="560" SizeToContent="Height"
+        Width="760" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
+        Background="{StaticResource Surface}"
         WindowStartupLocation="CenterOwner">
 
-  <StackPanel Margin="36,30,36,28" Spacing="20">
-    <TextBlock Classes="title" Text="{Binding Title}" FontSize="20" TextWrapping="Wrap" />
-    <TextBlock Text="{Binding Text}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+  <!-- Come il design (canvas "Di chi sono i salvataggi"). -->
+  <Window.Styles>
+    <Style Selector="Button.person">
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="16" />
+      <Setter Property="Padding" Value="12,22" />
+      <Setter Property="Margin" Value="0,0,16,16" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.person:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource SurfaceHover}" />
+      <Setter Property="BorderBrush" Value="{StaticResource TextDisabled}" />
+    </Style>
+    <Style Selector="Button.outline">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="#3A3A40" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="MinHeight" Value="56" />
+      <Setter Property="Padding" Value="20,0" />
+      <Setter Property="FontSize" Value="17" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.outline:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="BorderBrush" Value="{StaticResource TextDisabled}" />
+    </Style>
+  </Window.Styles>
 
-    <ItemsControl ItemsSource="{Binding Tiles}">
+  <StackPanel Margin="44" Spacing="28">
+    <StackPanel Spacing="8">
+      <TextBlock Text="{Binding Title}" FontSize="28" FontWeight="ExtraBold" LineHeight="34" TextWrapping="Wrap" />
+      <TextBlock Text="{Binding Text}" FontSize="16" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap"
+                 IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+
+    <!-- Tre per riga; il margine destro dell'ultima colonna si recupera qui -->
+    <ItemsControl ItemsSource="{Binding Tiles}" Margin="0,0,-16,-16">
       <ItemsControl.ItemsPanel>
         <ItemsPanelTemplate>
-          <WrapPanel />
+          <UniformGrid Columns="3" />
         </ItemsPanelTemplate>
       </ItemsControl.ItemsPanel>
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="vm:PersonTile">
-          <Button Margin="0,0,16,16" Padding="18,14" MinWidth="130" MinHeight="44"
-                  HorizontalContentAlignment="Center" Tag="{Binding}" Click="Tile_Click">
-            <StackPanel Spacing="10" HorizontalAlignment="Center">
-              <Border Width="64" Height="64" CornerRadius="32" Background="{Binding Brush}"
-                      HorizontalAlignment="Center">
-                <TextBlock Text="{Binding Initial}" FontSize="28" FontWeight="Bold" Foreground="White"
+          <Button Classes="person" Tag="{Binding}" Click="Tile_Click" AutomationProperties.Name="{Binding Person.Name}">
+            <StackPanel Spacing="12" HorizontalAlignment="Center">
+              <Border Width="72" Height="72" CornerRadius="36" Background="{Binding Brush}" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding Initial}" FontSize="32" FontWeight="Bold" Foreground="White"
                            HorizontalAlignment="Center" VerticalAlignment="Center" />
               </Border>
-              <TextBlock Text="{Binding Person.Name}" HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding Person.Name}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
             </StackPanel>
           </Button>
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
 
-    <Button Classes="link" Content="{Binding CancelText}" IsCancel="True" HorizontalAlignment="Left"
-            Click="Cancel_Click" />
+    <Button Classes="outline" IsCancel="True" Click="Cancel_Click">
+      <TextBlock Text="{Binding CancelText}" TextWrapping="Wrap" TextAlignment="Center" />
+    </Button>
   </StackPanel>
 
 </Window>

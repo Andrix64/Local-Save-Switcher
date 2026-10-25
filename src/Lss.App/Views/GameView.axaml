@@ -6,7 +6,44 @@
              x:Class="Lss.App.Views.GameView"
              x:DataType="vm:GameViewModel">
 
-  <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24,16,24,12">
+  <!-- Come il design (canvas "Avanzata"). -->
+  <UserControl.Styles>
+    <Style Selector="Button.folderToggle">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.folderToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.path">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0,3" />
+      <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, DejaVu Sans Mono, monospace" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#D6D6DA" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.path:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource Text}" />
+    </Style>
+    <Style Selector="Path.folder">
+      <Setter Property="Data" Value="M3 6 H9 L11 8 H21 V19 H3 Z" />
+      <Setter Property="Stroke" Value="{StaticResource TextMuted}" />
+      <Setter Property="StrokeThickness" Value="1.8" />
+      <Setter Property="StrokeJoin" Value="Round" />
+      <Setter Property="Width" Value="15" />
+      <Setter Property="Height" Value="15" />
+      <Setter Property="Stretch" Value="Uniform" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" Margin="24,16,24,12">
 
     <!-- Steam Cloud attivo per il gioco -->
     <Border Grid.Row="0" Classes="infobar warning" Margin="0,0,0,8" IsVisible="{Binding ShowCloudBar}">
@@ -36,9 +73,97 @@
       </StackPanel>
     </Border>
 
+    <!-- Proposte dopo l'ultima partita: barra blu con Guarda -->
+    <Border Grid.Row="2" Classes="infobar info" Margin="0,0,0,10" IsVisible="{Binding HasPendingSuggestions}">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+        <TextBlock Text="{Binding SuggestionsPendingText}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="secondary" Content="{loc:Str SuggestionsLook}" Command="{Binding LookAtSuggestionsCommand}"
+                VerticalAlignment="Center" />
+      </Grid>
+    </Border>
+
+    <!-- Dove sono i salvataggi del gioco, e da dove li ha trovati LSS: un riquadro che parte chiuso -->
+    <Border Grid.Row="3" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
+            CornerRadius="8" Padding="14,6" Margin="0,0,0,14">
+      <StackPanel Spacing="6">
+        <Grid ColumnDefinitions="*,Auto">
+          <Button Classes="folderToggle" Command="{Binding ToggleSaveFoldersCommand}" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Path Data="M9 6 L15 12 L9 18" Stroke="{StaticResource TextMuted}" StrokeThickness="2" StrokeLineCap="Round"
+                    StrokeJoin="Round" Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center"
+                    IsVisible="{Binding !SaveFoldersOpen}" />
+              <Path Data="M6 9 L12 15 L18 9" Stroke="{StaticResource TextMuted}" StrokeThickness="2" StrokeLineCap="Round"
+                    StrokeJoin="Round" Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center"
+                    IsVisible="{Binding SaveFoldersOpen}" />
+              <TextBlock Text="{Binding SaveFoldersHeader}" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" IsVisible="{Binding SaveFoldersOpen}">
+            <Button Classes="link" Content="{loc:Str ExportConfig}" Command="{Binding ExportConfigCommand}"
+                    IsEnabled="{Binding !IsBusy}" FontSize="12" />
+            <Button Classes="link" Command="{Binding AddSpotCommand}" IsEnabled="{Binding !IsBusy}" FontSize="12">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="+" />
+                <TextBlock Text="{loc:Str AddSpot}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <StackPanel Spacing="2" Margin="0,0,0,4" IsVisible="{Binding SaveFoldersOpen}">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Path Classes="folder" />
+            <Button Classes="path" Command="{Binding OpenSaveFolderCommand}">
+              <TextBlock Text="{Binding SaveFolderText}" TextWrapping="Wrap" MaxWidth="640" />
+            </Button>
+            <Button Classes="more" IsVisible="{Binding ShowAutomaticFolder}"
+                    AutomationProperties.Name="{loc:Str SaveFolderMenu}">
+              <StackPanel Orientation="Horizontal" Spacing="3">
+                <Ellipse />
+                <Ellipse />
+                <Ellipse />
+              </StackPanel>
+              <Button.Flyout>
+                <MenuFlyout>
+                  <MenuItem Header="{loc:Str UseAutomaticFolder}" Command="{Binding UseAutomaticFolderCommand}" />
+                </MenuFlyout>
+              </Button.Flyout>
+            </Button>
+          </StackPanel>
+          <TextBlock Text="{Binding UserdataNotice}" IsVisible="{Binding ShowUserdataNotice}" TextWrapping="Wrap"
+                     FontSize="12" Foreground="{StaticResource TextMuted}" Margin="25,0,0,0" />
+          <!-- Altre cartelle dei salvataggi: un posto per riga -->
+          <ItemsControl ItemsSource="{Binding SpotLines}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SpotLine">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <Path Classes="folder" />
+                  <Button Classes="path" Command="{Binding OpenCommand}">
+                    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" MaxWidth="640" />
+                  </Button>
+                  <Button Classes="more" IsVisible="{Binding Removable}" AutomationProperties.Name="{loc:Str SaveFolderMenu}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                      <Ellipse />
+                      <Ellipse />
+                      <Ellipse />
+                    </StackPanel>
+                    <Button.Flyout>
+                      <MenuFlyout>
+                        <MenuItem Header="{loc:Str RemoveSpot}" Command="{Binding RemoveCommand}" />
+                      </MenuFlyout>
+                    </Button.Flyout>
+                  </Button>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
     <!-- Titolo dell'elenco e azioni -->
-    <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,4,0,8">
-      <TextBlock Grid.Column="0" Classes="heading" Text="{loc:Str YourPlaythroughs}" VerticalAlignment="Center" />
+    <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+      <TextBlock Grid.Column="0" Text="{loc:Str YourPlaythroughs}" FontSize="19" FontWeight="Bold" VerticalAlignment="Center" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
         <Button Classes="secondary" Content="{loc:Str ImportButton}"
                 Command="{Binding ImportCommand}" IsEnabled="{Binding !IsBusy}" />
@@ -47,84 +172,21 @@
       </StackPanel>
     </Grid>
 
-    <!-- Dove sono i salvataggi del gioco, e da dove li ha trovati LSS -->
-    <StackPanel Grid.Row="3" Spacing="2" Margin="0,0,0,10">
-      <!-- Il blocco parte chiuso: si apre con l'intestazione. I suggerimenti restano visibili sotto. -->
-      <Button Classes="link" Content="{Binding SaveFoldersHeader}" Command="{Binding ToggleSaveFoldersCommand}"
-              FontSize="12" HorizontalAlignment="Left" />
-      <StackPanel Spacing="2" IsVisible="{Binding SaveFoldersOpen}">
-      <StackPanel Orientation="Horizontal" Spacing="4">
-        <Button Classes="link" Command="{Binding OpenSaveFolderCommand}"
-                FontSize="12">
-          <TextBlock Text="{Binding SaveFolderText}" TextWrapping="Wrap" MaxWidth="520" />
-        </Button>
-        <Button Classes="more" IsVisible="{Binding ShowAutomaticFolder}"
-                AutomationProperties.Name="{loc:Str SaveFolderMenu}">
-          <StackPanel Orientation="Horizontal" Spacing="3">
-            <Ellipse />
-            <Ellipse />
-            <Ellipse />
-          </StackPanel>
-          <Button.Flyout>
-            <MenuFlyout>
-              <MenuItem Header="{loc:Str UseAutomaticFolder}" Command="{Binding UseAutomaticFolderCommand}" />
-            </MenuFlyout>
-          </Button.Flyout>
-        </Button>
-      </StackPanel>
-      <TextBlock Text="{Binding UserdataNotice}" IsVisible="{Binding ShowUserdataNotice}" TextWrapping="Wrap"
-                 FontSize="12" Foreground="{StaticResource TextMuted}" />
-      <!-- Altre cartelle dei salvataggi: un posto per riga -->
-      <ItemsControl ItemsSource="{Binding SpotLines}" Margin="0,4,0,0">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:SpotLine">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <Button Classes="link" Command="{Binding OpenCommand}" FontSize="12">
-                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" MaxWidth="520" />
-              </Button>
-              <Button Classes="more" IsVisible="{Binding Removable}" AutomationProperties.Name="{loc:Str SaveFolderMenu}">
-                <StackPanel Orientation="Horizontal" Spacing="3">
-                  <Ellipse />
-                  <Ellipse />
-                  <Ellipse />
-                </StackPanel>
-                <Button.Flyout>
-                  <MenuFlyout>
-                    <MenuItem Header="{loc:Str RemoveSpot}" Command="{Binding RemoveCommand}" />
-                  </MenuFlyout>
-                </Button.Flyout>
-              </Button>
-            </StackPanel>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-      <StackPanel Orientation="Horizontal" Spacing="12">
-        <Button Classes="link" Content="{loc:Str AddSpot}" Command="{Binding AddSpotCommand}"
-                IsEnabled="{Binding !IsBusy}" FontSize="12" />
-        <Button Classes="link" Content="{loc:Str ExportConfig}" Command="{Binding ExportConfigCommand}"
-                IsEnabled="{Binding !IsBusy}" FontSize="12" />
-      </StackPanel>
-      </StackPanel>
-      <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasPendingSuggestions}">
-        <TextBlock Text="{Binding SuggestionsPendingText}" FontSize="12" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" />
-        <Button Classes="link" Content="{loc:Str SuggestionsLook}" Command="{Binding LookAtSuggestionsCommand}" FontSize="12" />
-      </StackPanel>
-    </StackPanel>
-
     <!-- Le schede delle partite -->
-    <ScrollViewer Grid.Row="4">
+    <ScrollViewer Grid.Row="5">
       <StackPanel>
         <!-- Le partite per persona: intestazione col colore, poi le schede (la preferita per prima). -->
         <ItemsControl ItemsSource="{Binding PlayerGroups}">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:PlayerGroup">
-              <StackPanel Spacing="8" Margin="0,0,0,14">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <Border Width="24" Height="24" CornerRadius="12" Background="{Binding Brush}">
-                    <TextBlock Text="{Binding Initial}" FontSize="12" FontWeight="Bold" Foreground="White"
+              <StackPanel Spacing="6" Margin="0,0,0,14">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="2,2,2,0">
+                  <Border Width="20" Height="20" CornerRadius="10" Background="{Binding Brush}">
+                    <TextBlock Text="{Binding Initial}" FontSize="10" FontWeight="Bold" Foreground="White"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
-                  <TextBlock Text="{Binding Person.Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding Person.Name}" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding CountText}" FontSize="12" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" />
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding Cards}">
                   <ItemsControl.ItemTemplate>
@@ -146,7 +208,7 @@
     </ScrollViewer>
 
     <!-- Avviso dell'ultima operazione -->
-    <Border Grid.Row="5" Classes="infobar" Margin="0,6,0,0" IsVisible="{Binding Toast.IsVisible}"
+    <Border Grid.Row="6" Classes="infobar" Margin="0,6,0,0" IsVisible="{Binding Toast.IsVisible}"
             Classes.info="{Binding Toast.IsInfo}"
             Classes.warning="{Binding Toast.IsWarning}"
             Classes.success="{Binding Toast.IsSuccess}"

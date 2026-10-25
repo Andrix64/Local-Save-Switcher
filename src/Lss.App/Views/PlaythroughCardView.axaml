@@ -5,45 +5,72 @@
              x:Class="Lss.App.Views.PlaythroughCardView"
              x:DataType="vm:PlaythroughViewModel">
 
-  <!-- Partita nel gioco: azioni sotto i dati. Le altre: azioni a destra. -->
+  <!-- Come il design (canvas "Avanzata"): una riga sola. ★ preferita, nome, dati, azioni a destra. -->
+  <UserControl.Styles>
+    <Style Selector="Button.star">
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.star:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="Foreground" Value="{StaticResource Warning}" />
+    </Style>
+    <Style Selector="Button.small">
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Padding" Value="10,0" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.more.small">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+  </UserControl.Styles>
+
   <Border Classes="card" Classes.active="{Binding IsActive}"
           IsEnabled="{Binding Enabled}"
           AutomationProperties.Name="{Binding AccessibleName}"
-          Margin="0,0,0,10">
-    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+          Padding="10,8,14,8" CornerRadius="8"
+          Margin="0,0,0,6">
+    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
 
-      <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
-        <StackPanel Orientation="Horizontal" Spacing="10">
-          <TextBlock Classes="cardTitle" Text="{Binding Name}" VerticalAlignment="Center" />
-          <!-- La preferita è piena; le altre hanno il contorno e si cliccano per farle preferite. -->
-          <Button Classes="link" Content="☆" Command="{Binding SetFavouriteCommand}"
-                  IsVisible="{Binding !IsFavourite}" VerticalAlignment="Center"
-                  ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
-          <TextBlock Text="★" VerticalAlignment="Center" IsVisible="{Binding IsFavourite}"
-                     ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
-          <Border Classes="pill" IsVisible="{Binding IsActive}" VerticalAlignment="Center">
-            <TextBlock Text="{loc:Str InGameNow}" />
-          </Border>
-        </StackPanel>
+      <!-- La preferita è la stella gialla; le altre hanno il contorno e si cliccano per farle preferite. -->
+      <Button Grid.Column="0" Classes="star" Content="☆" Command="{Binding SetFavouriteCommand}"
+              IsVisible="{Binding !IsFavourite}"
+              ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
+      <TextBlock Grid.Column="0" Text="★" FontSize="18" Width="28" TextAlignment="Center" VerticalAlignment="Center"
+                 Foreground="{StaticResource Warning}" IsVisible="{Binding IsFavourite}"
+                 ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
 
-        <!-- Con MaxWidth e senza allineamento Avalonia centra il testo: va a sinistra. -->
-        <TextBlock Classes="note" Text="{Binding Note}" TextWrapping="Wrap"
-                   IsVisible="{Binding HasNote}" MaxWidth="420" HorizontalAlignment="Left" />
+      <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
+                 TextTrimming="CharacterEllipsis" MaxWidth="320" />
 
-        <TextBlock Classes="small" Text="{Binding Details}" TextWrapping="Wrap" MaxWidth="440"
-                   HorizontalAlignment="Left" />
+      <Border Grid.Column="2" CornerRadius="4" Background="{StaticResource Accent}" Padding="7,2"
+              VerticalAlignment="Center" IsVisible="{Binding IsActive}">
+        <TextBlock Text="{loc:Str InGameNow}" FontSize="11" FontWeight="Bold" Foreground="White" />
+      </Border>
 
-        <Button Classes="link" Content="{loc:Str AddNote}" Margin="0,2,0,0" HorizontalAlignment="Left"
-                IsVisible="{Binding !HasNote}" Command="{Binding EditNoteCommand}" />
-      </StackPanel>
+      <TextBlock Grid.Column="3" Text="{Binding Details}" FontSize="12" Foreground="{StaticResource TextMuted}"
+                 VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Details}" />
 
-      <!-- Partite non nel gioco: Gioca e ⋯ a destra. -->
-      <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8"
-                  VerticalAlignment="Center" IsVisible="{Binding !IsActive}">
-        <Button Classes="primary" Content="{Binding PlayText}" Command="{Binding PlayCommand}"
+      <!-- Azioni: nel gioco Salva un punto e Cronologia; le altre Gioca questa. Poi ⋯. -->
+      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+        <Button Classes="primary small" Content="{Binding PlayText}" Command="{Binding PlayCommand}"
                 IsEnabled="{Binding CanPlay}" IsVisible="{Binding ShowPlay}" />
-        <Button Classes="more"
-                AutomationProperties.Name="{Binding MoreActionsName}">
+        <Button Classes="secondary small" Content="{loc:Str SavePointButton}" Command="{Binding SavePointCommand}"
+                IsEnabled="{Binding CanPlay}" IsVisible="{Binding IsActive}" />
+        <Button Classes="secondary small" Content="{loc:Str HistoryButton}" Command="{Binding HistoryCommand}"
+                IsVisible="{Binding IsActive}" />
+        <Button Classes="more small" AutomationProperties.Name="{Binding MoreActionsName}">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Ellipse />
             <Ellipse />
@@ -52,7 +79,7 @@
           <Button.Flyout>
             <MenuFlyout>
               <MenuItem Header="{loc:Str LoadWithoutStarting}" Command="{Binding LoadOnlyCommand}"
-                        IsEnabled="{Binding CanPlay}" />
+                        IsEnabled="{Binding CanPlay}" IsVisible="{Binding !IsActive}" />
               <MenuItem Header="{loc:Str RenameMenu}" Command="{Binding RenameCommand}" />
               <MenuItem Header="{loc:Str EditNote}" Command="{Binding EditNoteCommand}" />
               <MenuItem Header="{loc:Str ExportMenu}" Command="{Binding ExportCommand}" />
@@ -65,35 +92,9 @@
         </Button>
       </StackPanel>
 
-      <!-- Partita nel gioco: Gioca, Salva un punto, Cronologia e ⋯ sotto i dati. -->
-      <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal"
-                  Spacing="8" Margin="0,10,0,0" IsVisible="{Binding IsActive}">
-        <Button Classes="secondary" Content="{Binding PlayText}" Command="{Binding PlayCommand}"
-                IsEnabled="{Binding CanPlay}" IsVisible="{Binding ShowPlay}" />
-        <Button Classes="secondary" Content="{loc:Str SavePointButton}" Command="{Binding SavePointCommand}"
-                IsEnabled="{Binding CanPlay}" />
-        <Button Classes="secondary" Content="{loc:Str HistoryButton}" Command="{Binding HistoryCommand}" />
-        <Button Classes="more"
-                AutomationProperties.Name="{Binding MoreActionsName}">
-          <StackPanel Orientation="Horizontal" Spacing="3">
-            <Ellipse />
-            <Ellipse />
-            <Ellipse />
-          </StackPanel>
-          <Button.Flyout>
-            <MenuFlyout>
-              <MenuItem Header="{loc:Str RenameMenu}" Command="{Binding RenameCommand}" />
-              <MenuItem Header="{loc:Str EditNote}" Command="{Binding EditNoteCommand}" />
-              <MenuItem Header="{loc:Str ExportMenu}" Command="{Binding ExportCommand}" />
-              <MenuItem Header="{loc:Str GiveToMenu}" Command="{Binding GiveToMenuCommand}" />
-              <Separator />
-              <MenuItem Header="{loc:Str DeletePlaythroughMenu}" Command="{Binding DeleteCommand}"
-                        IsEnabled="{Binding CanDelete}" ToolTip.Tip="{loc:Str ActiveCannotBeDeleted}" />
-            </MenuFlyout>
-          </Button.Flyout>
-        </Button>
-      </StackPanel>
-
+      <!-- La nota, se c'è, sotto il nome (si scrive dal menu ⋯) -->
+      <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Classes="note" Text="{Binding Note}"
+                 TextWrapping="Wrap" FontSize="12" Margin="0,2,0,2" IsVisible="{Binding HasNote}" />
     </Grid>
   </Border>
 

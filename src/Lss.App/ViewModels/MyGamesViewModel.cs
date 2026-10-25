@@ -61,4 +61,10 @@ public sealed partial class MyGamesViewModel
 
     /// <summary>La persona che gioca (per le scritte della finestra).</summary>
     public string PlayerName => player.Name;
+
+    /// <summary>"Andrea · tocca una partita per giocarla", sotto il titolo.</summary>
+    public string Hint => Loc.F(Strings.SimpleMyGamesHint, player.Name);
+
+    /// <summary>La copertina del gioco (la piastrella della vista semplice), se c'è.</summary>
+    public SimpleGameTile? Tile { get; init; }
 }

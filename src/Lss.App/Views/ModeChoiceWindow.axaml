@@ -3,33 +3,109 @@
         xmlns:loc="using:Lss.App.Localization"
         x:Class="Lss.App.Views.ModeChoiceWindow"
         Title="Local Save Switcher"
-        Width="640" SizeToContent="Height"
+        Width="1000" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
+        Background="{StaticResource Background}"
         WindowStartupLocation="CenterOwner">
 
-  <StackPanel Margin="36,30,36,28" Spacing="20">
+  <!-- Come il design (canvas "Primo avvio"): si sceglie una scheda, poi Continua. -->
+  <Window.Styles>
+    <Style Selector="Button.mode">
+      <Setter Property="Background" Value="{StaticResource Surface}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="CornerRadius" Value="18" />
+      <Setter Property="Padding" Value="32" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Top" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.mode:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Surface}" />
+      <Setter Property="BorderBrush" Value="{StaticResource TextDisabled}" />
+    </Style>
+    <Style Selector="Button.mode.selected /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="TextBlock.point">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Foreground" Value="#D6D6DA" />
+    </Style>
+    <Style Selector="Border.face">
+      <Setter Property="Width" Value="56" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="Border.face TextBlock">
+      <Setter Property="FontSize" Value="24" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </Window.Styles>
 
-    <TextBlock Classes="title" Text="{loc:Str ModeTitle}" TextWrapping="Wrap" FontSize="20" />
-    <TextBlock Text="{loc:Str ModeHint}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
-
-    <Grid ColumnDefinitions="*,16,*">
-      <Button Grid.Column="0" Classes="primary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-              Padding="20" Click="Simple_Click">
-        <StackPanel Spacing="8">
-          <TextBlock FontSize="18" FontWeight="Bold" Text="{loc:Str ModeSimpleTitle}" />
-          <TextBlock Text="{loc:Str ModeSimpleText}" TextWrapping="Wrap" FontWeight="Normal" />
+  <StackPanel>
+    <Border Height="76" Background="{StaticResource Header}" Padding="28,0">
+      <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+        <Border Width="4" Height="36" Background="{StaticResource Accent}" />
+        <StackPanel Spacing="2" VerticalAlignment="Center">
+          <TextBlock Text="LSS" FontSize="22" FontWeight="ExtraBold" />
+          <TextBlock x:Name="VersionText" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextMuted}" />
         </StackPanel>
-      </Button>
-      <Button Grid.Column="2" Classes="secondary" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-              Padding="20" Click="Advanced_Click">
-        <StackPanel Spacing="8">
-          <TextBlock FontSize="18" FontWeight="Bold" Text="{loc:Str ModeAdvancedTitle}" />
-          <TextBlock Text="{loc:Str ModeAdvancedText}" TextWrapping="Wrap" FontWeight="Normal" />
-        </StackPanel>
-      </Button>
-    </Grid>
+      </StackPanel>
+    </Border>
 
+    <StackPanel Margin="56,44,56,40" Spacing="32">
+      <StackPanel Spacing="10">
+        <TextBlock Text="{loc:Str ModeTitle}" FontSize="30" FontWeight="ExtraBold" TextWrapping="Wrap" />
+        <TextBlock Text="{loc:Str ModeHint}" FontSize="16" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+      </StackPanel>
+
+      <Grid ColumnDefinitions="*,28,*">
+        <Button x:Name="SimpleCard" Grid.Column="0" Classes="mode selected" Click="Simple_Click">
+          <StackPanel Spacing="22">
+            <StackPanel Orientation="Horizontal" Spacing="12" Height="56">
+              <Border Classes="face" Background="#C2410C"><TextBlock Text="A" /></Border>
+              <Border Classes="face" Background="#1D6FD0"><TextBlock Text="C" /></Border>
+              <Border Classes="face" Background="#2F7D3B"><TextBlock Text="L" /></Border>
+            </StackPanel>
+            <TextBlock Text="{loc:Str ModeSimpleTitle}" FontSize="24" FontWeight="ExtraBold" />
+            <TextBlock Text="{loc:Str ModeSimpleText}" FontSize="16" LineHeight="25" Foreground="{StaticResource TextSecondary}"
+                       TextWrapping="Wrap" />
+            <StackPanel Spacing="8">
+              <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="point" Text="✓" /><TextBlock Classes="point" Text="{loc:Str ModeSimplePoint1}" /></StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="point" Text="✓" /><TextBlock Classes="point" Text="{loc:Str ModeSimplePoint2}" /></StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="point" Text="✓" /><TextBlock Classes="point" Text="{loc:Str ModeSimplePoint3}" /></StackPanel>
+            </StackPanel>
+          </StackPanel>
+        </Button>
+
+        <Button x:Name="AdvancedCard" Grid.Column="2" Classes="mode" Click="Advanced_Click">
+          <StackPanel Spacing="22">
+            <StackPanel Spacing="8" Height="56" VerticalAlignment="Top">
+              <Border Height="14" Width="220" CornerRadius="4" Background="#2C2C30" HorizontalAlignment="Left" />
+              <Border Height="14" Width="170" CornerRadius="4" Background="#2C2C30" HorizontalAlignment="Left" />
+              <Border Height="14" Width="200" CornerRadius="4" Background="#2C2C30" HorizontalAlignment="Left" />
+            </StackPanel>
+            <TextBlock Text="{loc:Str ModeAdvancedTitle}" FontSize="24" FontWeight="ExtraBold" />
+            <TextBlock Text="{loc:Str ModeAdvancedText}" FontSize="16" LineHeight="25" Foreground="{StaticResource TextSecondary}"
+                       TextWrapping="Wrap" />
+            <StackPanel Spacing="8">
+              <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="point" Text="✓" /><TextBlock Classes="point" Text="{loc:Str ModeAdvancedPoint1}" /></StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="point" Text="✓" /><TextBlock Classes="point" Text="{loc:Str ModeAdvancedPoint2}" /></StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="point" Text="✓" /><TextBlock Classes="point" Text="{loc:Str ModeAdvancedPoint3}" /></StackPanel>
+            </StackPanel>
+          </StackPanel>
+        </Button>
+      </Grid>
+
+      <Button x:Name="ContinueButton" Classes="primary" HorizontalAlignment="Right" Height="48" Padding="32,0"
+              FontSize="16" FontWeight="Bold" VerticalContentAlignment="Center" IsDefault="True" Click="Continue_Click" />
+    </StackPanel>
   </StackPanel>
 
 </Window>

@@ -15,7 +15,7 @@ public sealed record PlaySession(
 internal sealed class SimpleQuestions(IDialogService dialogs) : ISimpleQuestions
 {
     public Task<Person?> WhoseSavesAsync(string gameName, IReadOnlyList<Person> people) =>
-        dialogs.ChoosePersonAsync(Loc.F(Strings.SimpleWhoseSaves, gameName), "", people, Strings.SimpleDontKnow);
+        dialogs.ChoosePersonAsync(Loc.F(Strings.SimpleWhoseSaves, gameName), Strings.SimpleWhoseSavesHint, people, Strings.SimpleDontKnow);
 }
 
 /// <summary>

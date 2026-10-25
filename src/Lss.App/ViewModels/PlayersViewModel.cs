@@ -5,7 +5,10 @@ using Lss.App.Services;
 
 namespace Lss.App.ViewModels;
 
-/// <summary>Una riga della finestra Giocatori: il nome si modifica nella riga.</summary>
+/// <summary>Un colore della tavolozza nella riga di un giocatore.</summary>
+public sealed record ColourSwatch(string Color, IBrush Brush, bool Selected);
+
+/// <summary>Una riga della finestra Giocatori.</summary>
 public sealed partial class PlayerRow : ObservableObject
 {
     public PlayerRow(Person person, string initial, IBrush brush)
@@ -14,6 +17,9 @@ public sealed partial class PlayerRow : ObservableObject
         Initial = initial;
         Brush = brush;
         editName = person.Name;
+        Swatches = People.Palette
+            .Select(color => new ColourSwatch(color, new SolidColorBrush(Color.Parse(color)), color == person.Color))
+            .ToList();
     }
 
     public Person Person { get; }
@@ -21,6 +27,15 @@ public sealed partial class PlayerRow : ObservableObject
     public string Initial { get; }
 
     public IBrush Brush { get; }
+
+    /// <summary>I colori da scegliere: quello della persona è segnato.</summary>
+    public IReadOnlyList<ColourSwatch> Swatches { get; }
+
+    /// <summary>"Admin" o "Utente", accanto alla casella.</summary>
+    public string RoleText => Person.IsAdmin ? Strings.PlayerAdmin : Strings.PlayerUser;
+
+    /// <summary>"Imposta PIN…" o "Cambia PIN…": solo per un admin.</summary>
+    public string PinActionText => Person.HasPin ? Strings.PinChangeMenu : Strings.PinSetMenu;
 
     /// <summary>Il nome che l'utente sta scrivendo (si salva con Rinomina).</summary>
     [ObservableProperty]
@@ -79,7 +94,38 @@ public sealed partial class PlayersViewModel : ObservableObject
         return Done(added.Success ? Result.Ok("") : Result.Fail(added.Message));
     }
 
+    /// <summary>"+ Aggiungi giocatore": chiede il nome e aggiunge. Annullando, non cambia nulla.</summary>
+    public async Task<Result> AddAsync()
+    {
+        string? name = await dialogs.PromptAsync(Strings.AddPlayer, Strings.PlayerNameCaption, Strings.PlayerNameCaption,
+            Strings.AddPlayer);
+
+        return name == null ? Result.Ok("") : Add(name);
+    }
+
     public Result Rename(Person person, string name) => Done(people.Rename(person.Id, name));
+
+    /// <summary>"Rinomina…" dal menu ⋯: chiede il nome nuovo partendo da quello attuale.</summary>
+    public async Task<Result> RenameAsync(Person person)
+    {
+        string? name = await dialogs.PromptAsync(Strings.RenameMenu, Strings.PlayerNameCaption, Strings.PlayerNameCaption,
+            Strings.RenameMenu.TrimEnd('.', '…'), person.Name);
+
+        return name == null || name == person.Name ? Result.Ok("") : Rename(person, name);
+    }
+
+    /// <summary>"Imposta PIN…" o "Cambia PIN…" di un admin.</summary>
+    public async Task SetPinAsync(Person person)
+    {
+        if (!person.IsAdmin)
+            return;
+
+        await dialogs.SetPinAsync(people, person);
+        Done(Result.Ok(""));
+    }
+
+    /// <summary>"Togli il PIN": non chiede quello attuale (un PIN dimenticato si toglie così).</summary>
+    public Result RemovePin(Person person) => Done(people.RemovePin(person.Id));
 
     public Result SetColor(Person person, string color) => Done(people.SetColor(person.Id, color));
 
