@@ -209,9 +209,10 @@ per phase (the phase file names it).
 
 ### Phase R — Fixes after the first try ([R-fixes.md](R-fixes.md)), before Q
 
+- [ ] R0 — One file for the 1.0 compatibility (`V1Compat`)
 - [ ] R1 — Renaming a playthrough keeps its automatic copies
 - [ ] R2 — "Add a game": cancel means cancel
-- [ ] R3 — PIN when a player with a PIN is picked
+- [ ] R3 — PIN for every player, asked when picked; wrong tries per player
 - [ ] R4 — Sidebar: launcher titles apart, no "Games" title, icons in "Other games"
 - [ ] R5 — Long game names: "…" and a slow scroll
 - [ ] R6 — Simple mode tiles: badge under the chip, icon when there's no cover
@@ -220,8 +221,8 @@ per phase (the phase file names it).
 - [ ] R9 — JSON settings files: the format and the app-wide files
 - [ ] R10 — JSON for the per-game files
 - [ ] R11 — Old paths with `\` on Linux
-- [ ] R12 — Screenshots, Linux check
-- [ ] R13 — 👤 Check on the Steam Deck and Windows
+- [ ] R12 — Screenshots, docs, Linux check
+- [ ] R13 — 👤 Check on Windows and the Steam Deck (copy the data folder first)
 
 ### Phase Q — Docs and release ([Q-release.md](Q-release.md))
 

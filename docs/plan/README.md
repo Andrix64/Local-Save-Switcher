@@ -105,6 +105,8 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 - **Names on disk stay Italian**: `Profili`, `Info`, `Backup`, `Savestate`,
   `stato.ini`, `Profilo_<name>`, `Prima_di_...`, `.nuovo`, `.vecchio`,
   `.rinomina`, `partita.ini`, `salvataggi`, `punti`. Don't rename them.
+  Exception, phase R (R9–R10): the settings files become JSON with the same
+  Italian base name (`stato.ini` → `stato.json`...); `cambio.ini` stays.
 - **Documentation for GitHub (README, docs/, CHANGELOG, workflow comments)
   in English.**
 - `Nullable` enabled, file-scoped namespaces (`namespace Lss;`), one public
@@ -122,6 +124,13 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
   deleted later with the checklist in `docs/DEVELOPMENT.md`
   ("Compatibility with Control Save Manager"). If a task needs more of it,
   add it there and add a line to that checklist.
+- **Compatibility with LSS 1.0 only in `V1Compat`** (from task R0). Code
+  that exists only to read, convert or tolerate data written by LSS 1.0.x
+  or by builds before phase R goes in `src/Lss.Core/V1Compat.cs` (tests in
+  `V1CompatTests.cs`); every call to it is marked `// V1Compat: <why>`.
+  `V1CompatBoundaryTests` fails if an old file name appears elsewhere.
+  Removal checklist in `docs/DEVELOPMENT.md` ("Compatibility with LSS
+  1.0").
 - No new NuGet packages except those named in a task, with the exact
   version given.
 
@@ -165,7 +174,7 @@ Order of the phases, each needs the ones before:
 | N | Several save folders per game, scan after every session | changes how a playthrough is stored: before the launchers and the simple mode build on it |
 | O | Epic, GOG, Heroic, any game | they rely on L, M and N for their saves |
 | P | Players, favourites, simple mode | needs games of every launcher with known saves |
-| R | Fixes after the first try (PIN, settings split, JSON files, sidebar...) | found by Andrix trying P; runs before Q |
+| R | Fixes after the first try (1.0 compatibility in one file, PIN for everyone, settings split, JSON files, sidebar...) | found by Andrix trying P; runs before Q |
 | Q | Docs and 2.0 release | |
 
 The Steam Deck works after L (games with Steam Auto-Cloud rules) and M
@@ -189,7 +198,7 @@ are listed under *Other games*). This plan is **2.0**. Phase K starts from
 | Versions | `1.0.0-beta.N` for tests, then `1.0.0`. |
 | Supported games | Until phase L: games with files in `userdata/<AccountID>/<AppID>/` other than `remotecache.vdf` at the top level; others are shown as not supported. From phase L: any game whose save folder passes `SaveFolderSafety` (found in `userdata`, from the launcher's rules, learned from the disk or chosen by hand). From phase N: up to 8 save spots per game (folders or loose files), switched together. |
 | Save locations | Only from the launchers' own data on the PC (Steam `appinfo.vdf` Auto-Cloud rules, Epic `CloudSaveFolder`, Heroic `gogSaves`), then the search on the disk. **No Ludusavi manifest or other third-party list** (decision of 2026-10-24). No network access from the app. |
-| Players and modes | Every playthrough has a player (owner); one favourite per player and game. Players are users or admins (at least one admin; optional 4-digit PIN for admins). Simple mode (player → game cover, always the favourite, "My games" menu to switch) and advanced mode (today's app, playthroughs grouped by player), phase P. Existing users start in advanced; their playthroughs go to a first player named after the OS user. |
+| Players and modes | Every playthrough has a player (owner); one favourite per player and game. Players are users or admins (at least one admin; optional 4-digit PIN for every player, from R3). Simple mode (player → game cover, always the favourite, "My games" menu to switch) and advanced mode (today's app, playthroughs grouped by player), phase P. Existing users start in advanced; their playthroughs go to a first player named after the OS user. |
 | Systems | Windows 10/11 x64; Linux x64 (Ubuntu 22.04+, Debian 12+, Fedora 40+, openSUSE, Arch and derivatives, SteamOS desktop mode). |
 | UI | Avalonia **12.1.4**, CommunityToolkit.Mvvm **8.4.2**, MVVM, compiled bindings. |
 | Data folder | `Environment.SpecialFolder.LocalApplicationData` + `LSS` (Windows `%LOCALAPPDATA%\LSS`, Linux `~/.local/share/LSS`). Until phase F it stays `ControlSaveManager`. |
