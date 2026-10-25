@@ -42,11 +42,18 @@ echo "== Copia di $(git rev-parse --short HEAD) su $target"
 git archive --format=tar HEAD | ssh_run 'rm -rf ~/lss-ci && mkdir -p ~/lss-ci ~/.lss-nuget && tar -x -C ~/lss-ci'
 
 echo "== Test"
-ssh_run "docker run --rm --user \"\$(id -u):\$(id -g)\" \
+# Root dentro il container per installare libfontconfig1 (la dipendenza del
+# pacchetto, che SkiaSharp usa anche nei test delle icone); poi i file in ~/lss-ci
+# tornano al proprietario giusto.
+ssh_run "docker run --rm -e OWNER=\"\$(id -u):\$(id -g)\" \
     -e HOME=/tmp -e DOTNET_CLI_HOME=/tmp -e NUGET_PACKAGES=/nuget \
     -e DOTNET_CLI_TELEMETRY_OPTOUT=1 -e DOTNET_NOLOGO=1 \
-    -v ~/lss-ci:/src -v ~/.lss-nuget:/nuget -w /src $sdk_image \
-    dotnet test tests/Lss.Tests -c Release"
+    -v ~/lss-ci:/src -v ~/.lss-nuget:/nuget -w /src $sdk_image bash -c '
+set -e
+trap \"chown -R \$OWNER /src\" EXIT
+apt-get update -qq >/dev/null && apt-get install -y -qq libfontconfig1 >/dev/null
+dotnet test tests/Lss.Tests -c Release
+'"
 
 [ "$tests_only" -eq 1 ] && exit 0
 
