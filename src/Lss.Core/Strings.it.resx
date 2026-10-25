@@ -386,4 +386,5 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="IgnoredScopeAll" xml:space="preserve"><value>tutti i giochi</value></data>
   <data name="IgnoredRemove" xml:space="preserve"><value>Proponila di nuovo</value></data>
   <data name="IgnoredFoldersLink" xml:space="preserve"><value>Cartelle che non sono salvataggi…</value></data>
+  <data name="LearnFolderChanged" xml:space="preserve"><value>Le partite di {0} sono state fatte con un'altra cartella. Usare comunque la nuova cartella?</value></data>
 </root>

@@ -125,4 +125,66 @@ public sealed class SaveFolderChoiceTests : IDisposable
 
         Assert.True(called);
     }
+
+    // ---- M5: cambiare cartella con partite già fatte ----
+
+    private string GameData => Path.GetDirectoryName(SettingsFile)!;
+
+    private void WithPlaythroughAndOldFolder(string old)
+    {
+        TestFolder.Write(Path.Combine(old, "slot.sav"), "x");
+        TestFolder.Write(Path.Combine(GameData, "Profili", "Profilo_Mario", "partita.ini"), "x");
+        new GameSaveSettings(GameData) { Folder = old, Origin = SaveSource.Chosen }.Save();
+    }
+
+    [Fact]
+    public async Task ChangingTheFolderOfAGameWithPlaythroughsCanBeRefused()
+    {
+        string old = Path.Combine(folder.Root, "old");
+        string chosen = Path.Combine(folder.Root, "mine");
+        WithPlaythroughAndOldFolder(old);
+        TestFolder.Write(Path.Combine(chosen, "slot.sav"), "x");
+        dialogs.FolderToPick = chosen;
+        dialogs.ConfirmAnswer = false;
+
+        bool saved = await SaveFolderChoice.ChooseAsync(dialogs, Game(), Account, Provider());
+
+        Assert.False(saved);
+        var loaded = new GameSaveSettings(GameData);
+        loaded.Load();
+        Assert.Equal(old, loaded.Folder);
+    }
+
+    [Fact]
+    public async Task ChangingTheFolderOfAGameWithPlaythroughsSavesTheNewOneWhenConfirmed()
+    {
+        string old = Path.Combine(folder.Root, "old");
+        string chosen = Path.Combine(folder.Root, "mine");
+        WithPlaythroughAndOldFolder(old);
+        TestFolder.Write(Path.Combine(chosen, "slot.sav"), "x");
+        dialogs.FolderToPick = chosen;
+        dialogs.ConfirmAnswer = true;
+
+        bool saved = await SaveFolderChoice.ChooseAsync(dialogs, Game(), Account, Provider());
+
+        Assert.True(saved);
+        var loaded = new GameSaveSettings(GameData);
+        loaded.Load();
+        Assert.Equal(chosen, loaded.Folder);
+        Assert.Single(dialogs.Calls, call => call.StartsWith("Confirm:", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task SameFolderAsBeforeIsNotAChange()
+    {
+        string old = Path.Combine(folder.Root, "old");
+        WithPlaythroughAndOldFolder(old);
+        dialogs.FolderToPick = old;
+        dialogs.ConfirmAnswer = true;
+
+        bool saved = await SaveFolderChoice.ChooseAsync(dialogs, Game(), Account, Provider());
+
+        Assert.True(saved);
+        Assert.Single(dialogs.Calls, call => call.StartsWith("Confirm:", StringComparison.Ordinal));
+    }
 }

@@ -386,4 +386,5 @@ LSS will look at what changed on the disk.</value></data>
   <data name="IgnoredScopeAll" xml:space="preserve"><value>every game</value></data>
   <data name="IgnoredRemove" xml:space="preserve"><value>Propose it again</value></data>
   <data name="IgnoredFoldersLink" xml:space="preserve"><value>Folders that are not saves…</value></data>
+  <data name="LearnFolderChanged" xml:space="preserve"><value>The playthroughs of {0} were made with another folder. Use the new folder anyway?</value></data>
 </root>
