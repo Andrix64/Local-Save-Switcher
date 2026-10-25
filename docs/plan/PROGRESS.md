@@ -187,7 +187,7 @@ per phase (the phase file names it).
 - [x] O3 — Heroic Games Launcher (7df1fe1)
 - [x] O4 — Any other game, added by hand (ca23683; menu Modifica/Rimuovi e test della vista non fatti, vedi note)
 - [x] O5 — Non-Steam games added to Steam (b3bdde7)
-- [ ] O6 — The same game twice
+- [x] O6 — The same game twice (cb3f550)
 - [ ] O7 — 👤 Checks
 
 ### Phase P — Players, favourites and the two modes ([P-simple-mode.md](P-simple-mode.md))
@@ -216,6 +216,12 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — O6 (Haiku), commit `cb3f550`. `DuplicateGames.Keep` (cartella d'installazione,
+  senza distinguere le maiuscole su Windows): tiene il primo launcher di `Providers.All`, log
+  in italiano. Applicato alla costruzione di `MainWindowViewModel` e alla rilettura
+  (`WithoutDuplicates`). Stesso launcher con due voci sulla stessa cartella: si tengono
+  entrambe (piano: "due giochi di launcher diversi"). Test: `DuplicateGamesTests`,
+  `MainWindowViewModelTests.TheSameGameInTwoLaunchersIsShownOnce`.
 - 2026-10-25 — O5 (Haiku), commit `b3bdde7`. `shortcuts.vdf` letto con `BinaryVdf` (nessun
   formato non verificato: su questo PC non ci sono collegamenti, quindi il file reale non è
   stato visto; la struttura è quella del piano, provata con un file scritto in test).
