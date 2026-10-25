@@ -29,6 +29,7 @@ what to write, how to check it and what to commit.
 | `N-several-folders.md` | Phase N — games with saves in several folders or loose files; a look after every session for folders not detected yet. |
 | `O-launchers.md` | Phase O — Epic, GOG, Heroic, non-Steam shortcuts, any game added by hand. |
 | `P-simple-mode.md` | Phase P — players and favourites; simple mode (pick who's playing, click a game) and advanced mode grouped by player. |
+| `R-fixes.md` | Phase R — fixes after the first try of 2.0 (done by Sonnet 5.5, **before** Q). |
 | `Q-release.md` | Phase Q — docs and release of 2.0, and what comes later. |
 
 Phases A (rename) and B (Avalonia test, `spike/`) are already done.
@@ -67,6 +68,9 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
    ```
    Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
    ```
+
+   Phase R is done by Claude Sonnet 5.5: its tasks use
+   `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 
 5. **Then tick the task** in `PROGRESS.md` (`- [ ]` → `- [x]`) and add the
    short commit hash, in a separate commit `Progress: <task id>`, or in the
@@ -161,6 +165,7 @@ Order of the phases, each needs the ones before:
 | N | Several save folders per game, scan after every session | changes how a playthrough is stored: before the launchers and the simple mode build on it |
 | O | Epic, GOG, Heroic, any game | they rely on L, M and N for their saves |
 | P | Players, favourites, simple mode | needs games of every launcher with known saves |
+| R | Fixes after the first try (PIN, settings split, JSON files, sidebar...) | found by Andrix trying P; runs before Q |
 | Q | Docs and 2.0 release | |
 
 The Steam Deck works after L (games with Steam Auto-Cloud rules) and M
