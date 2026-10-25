@@ -17,6 +17,8 @@ public sealed class FakeProvider : IGameProvider
     public List<GameInfo> Launched { get; } = [];
     public bool LauncherRunning { get; set; }
     public CloudState Cloud { get; set; } = CloudState.Enabled;
+    public List<SaveRule> Rules { get; } = [];
+    public List<RootOverride> Overrides { get; } = [];
 
     public IReadOnlyList<GameAccount> FindAccounts() => Accounts;
     public IReadOnlyList<GameInfo> FindGames(GameAccount account) => Games;
@@ -33,4 +35,6 @@ public sealed class FakeProvider : IGameProvider
 
     public bool IsLauncherRunning() => LauncherRunning;
     public CloudState GetCloudState(GameAccount account, GameInfo game) => Cloud;
+    public IReadOnlyList<SaveRule> SaveRules(GameAccount account, GameInfo game) => Rules;
+    public IReadOnlyList<RootOverride> RootOverrides(GameAccount account, GameInfo game) => Overrides;
 }

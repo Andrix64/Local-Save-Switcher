@@ -11,6 +11,9 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
 {
     public string Id => "steam";
 
+    // Regole lette dall'ultimo FindGames: appinfo.vdf si legge una volta sola.
+    private SteamAppInfo? appInfo;
+
     // Marchio: non si traduce.
     public string DisplayName => "Steam";
 
@@ -55,8 +58,24 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
         if (steam == null)
             return [];
 
-        return SteamLibrary.FindGames(steam, account.Folder);
+        IReadOnlyList<GameInfo> games = SteamLibrary.FindGames(steam, account.Folder);
+
+        appInfo = SteamAppInfo.Load(steam, games.Select(game => game.Id).ToHashSet());
+
+        return games;
     }
+
+    /// <summary>
+    /// Regole Auto-Cloud del gioco, da appinfo.vdf letto dall'ultimo FindGames.
+    /// </summary>
+    public IReadOnlyList<SaveRule> SaveRules(GameAccount account, GameInfo game) =>
+        appInfo?.RulesOf(game.Id) ?? [];
+
+    /// <summary>
+    /// Sostituzioni di radici del gioco, da appinfo.vdf letto dall'ultimo FindGames.
+    /// </summary>
+    public IReadOnlyList<RootOverride> RootOverrides(GameAccount account, GameInfo game) =>
+        appInfo?.OverridesOf(game.Id) ?? [];
 
     public bool CanDetectRunning(GameInfo game) => true;
 

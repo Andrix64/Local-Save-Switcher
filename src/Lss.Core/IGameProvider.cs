@@ -38,4 +38,15 @@ public interface IGameProvider
 
     /// <summary>Stato del cloud di un gioco per un account.</summary>
     CloudState GetCloudState(GameAccount account, GameInfo game);
+
+    /// <summary>
+    /// Regole dei salvataggi che il launcher conosce per il gioco. Vuoto se
+    /// non ne sa niente: il gioco passa dalla ricerca sul disco.
+    /// </summary>
+    IReadOnlyList<SaveRule> SaveRules(GameAccount account, GameInfo game);
+
+    /// <summary>
+    /// Sostituzioni di radici (rootoverrides) per il gioco. Vuoto se non ce ne sono.
+    /// </summary>
+    IReadOnlyList<RootOverride> RootOverrides(GameAccount account, GameInfo game);
 }

@@ -71,7 +71,7 @@ public sealed class SteamAppInfoTests : IDisposable
     /// File appinfo.vdf con i giochi dati. v29: intestazione con l'offset della
     /// tabella delle chiavi in fondo; v28: chiavi come testo.
     /// </summary>
-    private static byte[] AppInfo(bool v29, params (uint Id, Action<BinaryWriter, List<string>?> Vdf)[] apps)
+    internal static byte[] AppInfo(bool v29, params (uint Id, Action<BinaryWriter, List<string>?> Vdf)[] apps)
     {
         var table = v29 ? new List<string>() : null;
 
@@ -129,7 +129,7 @@ public sealed class SteamAppInfoTests : IDisposable
     /// <summary>
     /// Gioco 105600: due savefiles e un rootoverrides. Gioco 123450: senza ufs.
     /// </summary>
-    private static (uint, Action<BinaryWriter, List<string>?>)[] TwoApps() =>
+    internal static (uint, Action<BinaryWriter, List<string>?>)[] TwoApps() =>
     [
         (105600u, (w, t) => Block(w, t, "appinfo", app =>
         {

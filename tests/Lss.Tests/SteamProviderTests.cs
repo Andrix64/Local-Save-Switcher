@@ -113,4 +113,39 @@ public sealed class SteamProviderTests : IDisposable
         Assert.Equal("steam", all[0].Id);
         Assert.Equal("Steam", all[0].DisplayName);
     }
+
+    [Fact]
+    public void SaveRulesComeFromAppInfoReadByFindGames()
+    {
+        TestFolder.Write(Path.Combine(UserData, "111", "105600", "remote", "a.sav"), "x");
+        Directory.CreateDirectory(Path.Combine(SteamRoot, "appcache"));
+        File.WriteAllBytes(
+            Path.Combine(SteamRoot, "appcache", "appinfo.vdf"),
+            SteamAppInfoTests.AppInfo(true, SteamAppInfoTests.TwoApps()));
+
+        var provider = new SteamProvider(platform);
+        GameAccount account = provider.FindAccounts().Single();
+        GameInfo game = provider.FindGames(account).Single(g => g.Id == "105600");
+
+        Assert.Equal(2, provider.SaveRules(account, game).Count);
+        Assert.Equal("WinAppDataLocal", provider.SaveRules(account, game)[0].Root);
+        Assert.Single(provider.RootOverrides(account, game));
+    }
+
+    [Fact]
+    public void SaveRulesAreEmptyBeforeFindGamesAndWithoutAppInfo()
+    {
+        TestFolder.Write(Path.Combine(UserData, "111", "105600", "remote", "a.sav"), "x");
+
+        var provider = new SteamProvider(platform);
+        GameAccount account = provider.FindAccounts().Single();
+        GameInfo game = new("steam", "105600", "Test", "", "", "", "", SupportState.Supported);
+
+        Assert.Empty(provider.SaveRules(account, game));
+        Assert.Empty(provider.RootOverrides(account, game));
+
+        provider.FindGames(account);
+
+        Assert.Empty(provider.SaveRules(account, game));
+    }
 }
