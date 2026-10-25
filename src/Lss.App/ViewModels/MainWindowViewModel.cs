@@ -29,11 +29,11 @@ public partial class MainWindowViewModel : ObservableObject
 
     internal MainWindowViewModel(IReadOnlyList<LauncherGames> launchers, AppSettings settings, IDialogService dialogs)
     {
-        this.launchers = launchers;
+        this.launchers = WithoutDuplicates(launchers);
         this.settings = settings;
         this.dialogs = dialogs;
 
-        FillGames(launchers);
+        FillGames(this.launchers);
 
         ShowSidebar = Games.Count > 1 || OtherGames.Count > 0;
         AccountText = string.Join("  ·  ", launchers.Select(l => l.Account.DisplayName));
@@ -129,6 +129,33 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Toglie i giochi che un launcher prima dell'altro ha già mostrato (vedi DuplicateGames).
+    /// </summary>
+    private static IReadOnlyList<LauncherGames> WithoutDuplicates(IReadOnlyList<LauncherGames> list)
+    {
+        IReadOnlyList<bool> keep = DuplicateGames.Keep(list.SelectMany(l => l.Games).ToList());
+        var result = new List<LauncherGames>(list.Count);
+        int index = 0;
+
+        foreach (LauncherGames launcher in list)
+        {
+            var games = new List<GameInfo>();
+
+            foreach (GameInfo game in launcher.Games)
+            {
+                if (keep[index])
+                    games.Add(game);
+
+                index++;
+            }
+
+            result.Add(new LauncherGames(launcher.Provider, launcher.Account, games));
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Riempie le due colonne dai giochi di ogni launcher: gestibili a sinistra,
     /// gli altri in Altri giochi. Con più launcher ogni gruppo ha la sua intestazione.
     /// </summary>
@@ -172,9 +199,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// </summary>
     private void ReloadGames(string? keepKey, string? changedKey)
     {
-        launchers = launchers
+        launchers = WithoutDuplicates(launchers
             .Select(l => new LauncherGames(l.Provider, l.Account, l.Provider.FindGames(l.Account)))
-            .ToList();
+            .ToList());
 
         if (changedKey != null && gameModels.TryGetValue(changedKey, out GameViewModel? stale) && !stale.IsBusy)
             gameModels.Remove(changedKey);

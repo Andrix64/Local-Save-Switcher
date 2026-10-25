@@ -73,6 +73,25 @@ public sealed class MainWindowViewModelTests : IDisposable
     }
 
     [Fact]
+    public void TheSameGameInTwoLaunchersIsShownOnce()
+    {
+        var steam = new FakeProvider { Id = "steam", DisplayName = "Steam" };
+        var heroic = new FakeProvider { Id = "heroic", DisplayName = "Heroic" };
+        var account = new GameAccount("steam", "111", "Anna", folder.Root, null);
+        string install = Path.Combine(folder.Root, "Hades");
+
+        var inSteam = new GameInfo("steam", "1", "Hades", "", "", install, [], SupportState.NoSaves);
+        var inHeroic = new GameInfo("heroic", "legendary_Hades", "Hades", "", "", install, [], SupportState.NoSaves);
+
+        MainWindowViewModel vm = Create(
+            new LauncherGames(steam, account, [inSteam]),
+            new LauncherGames(heroic, new GameAccount("heroic", "local", "Heroic", folder.Root, null), [inHeroic]));
+
+        Assert.Single(vm.OtherGames);
+        Assert.Equal("steam", vm.OtherGames[0].Info.Provider);
+    }
+
+    [Fact]
     public void OneLauncherHasNoHeaders()
     {
         var provider = new FakeProvider { Id = "steam", DisplayName = "Alfa" };
