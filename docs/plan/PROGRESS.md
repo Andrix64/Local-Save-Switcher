@@ -218,6 +218,20 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Fase P, grafica rifatta come il canvas (Andrix: "la grafica e' molto diversa da
+  quella dell'artifact"), commit `d5e81d4`, `54003d1`, `7df1c1d`. Test Windows: 749 verdi. Linux
+  (`lss-ci`, completo): tutto a posto.
+  - Rifatte: vista semplice (persone, giochi, in gioco), "Le mie partite", "Di chi è?", "Chi sei?" e
+    tastierino PIN, primo avvio (scheda scelta + "Continua con …"), avanzata (schede su una riga,
+    ★ gialla, cartelle in un riquadro chiuso), Giocatori (tabella, menu ⋯), nuova partita
+    (pastiglie del giocatore), partite eliminate (azioni sulla riga).
+  - Mancava in P4a: "Imposta PIN…" / "Cambia PIN…" / "Togli il PIN" nella finestra Giocatori.
+    Aggiunta la finestra "PIN di …"; cambiarlo chiede quello attuale, toglierlo no.
+  - Ora una domanda sola: togliere una persona (dalle a / eliminale) e il cloud per un admin
+    (consenti / solo questa volta / annulla), come nel canvas.
+  - Schermate nuove: 30 togli persona, 34 tastierino, 35 "PIN di …", 36 cloud admin.
+  - Non rifatte: "Aggiungi un gioco" e le finestre delle fasi M/N/O (fuori dalla fase P).
+
 - 2026-10-25 — Fase P, P3 fatta (Haiku, decisione dall'autore del piano, opzione b): commit
   `badb747` (tick `23944ba`). Test Windows: 660 verdi. Nel commit e in `P-simple-mode.md`
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
