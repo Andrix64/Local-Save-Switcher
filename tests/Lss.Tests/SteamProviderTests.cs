@@ -27,7 +27,7 @@ public sealed class SteamProviderTests : IDisposable
         var provider = new SteamProvider(platform);
         IReadOnlyList<GameAccount> accounts = provider.FindAccounts();
 
-        Assert.Equal(SaveManager.FindAccountsWithGames(UserData).Select(a => a.Folder), accounts.Select(a => a.Folder));
+        Assert.Equal(SteamProvider.FindAccountsWithGames(UserData).Select(a => a.Folder), accounts.Select(a => a.Folder));
         Assert.Single(accounts);
         Assert.Equal("steam", accounts[0].Provider);
         Assert.Equal("111", accounts[0].Id);
@@ -40,7 +40,7 @@ public sealed class SteamProviderTests : IDisposable
 
         IReadOnlyList<GameAccount> accounts = new SteamProvider(platform).FindAccounts();
 
-        Assert.Equal(SaveManager.FindAccountsWithAnyGame(UserData).Select(a => a.Folder), accounts.Select(a => a.Folder));
+        Assert.Equal(SteamProvider.FindAccountsWithAnyGame(UserData).Select(a => a.Folder), accounts.Select(a => a.Folder));
         Assert.Single(accounts);
     }
 

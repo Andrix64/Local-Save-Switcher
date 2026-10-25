@@ -87,12 +87,12 @@ public partial class App : Application
         // Prima di cercare gli account: una cartella rimasta come 870780.vecchio le farebbe sparire.
         SaveManager.RecoverAllGameFolders(userData);
 
-        IReadOnlyList<GameAccount> accounts = SaveManager.FindAccountsWithGames(userData);
+        // Fino alla K7 c'è un solo launcher: Steam.
+        IGameProvider provider = Providers.All(Platform.Current)[0];
 
         // Nessun gioco gestibile (per esempio tutti con i salvataggi in Proton):
         // la finestra si apre lo stesso e mostra i giochi con il motivo.
-        if (accounts.Count == 0)
-            accounts = SaveManager.FindAccountsWithAnyGame(userData);
+        IReadOnlyList<GameAccount> accounts = provider.FindAccounts();
 
         if (accounts.Count == 0)
         {
@@ -122,7 +122,7 @@ public partial class App : Application
             settings.Save();
         }
 
-        IReadOnlyList<GameInfo> games = SteamLibrary.FindGames(steam, account.Folder);
+        IReadOnlyList<GameInfo> games = provider.FindGames(account);
 
         var window = new MainWindow
         {

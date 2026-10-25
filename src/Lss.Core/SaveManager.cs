@@ -109,7 +109,7 @@ public sealed partial class SaveManager
         // 870780.vecchio farebbe sparire l'account.
         RecoverGameFolders(userData, GameInfo.ControlAppId);
 
-        IReadOnlyList<GameAccount> accounts = FindAccounts(userData, GameInfo.ControlAppId);
+        IReadOnlyList<GameAccount> accounts = SteamProvider.FindAccounts(userData, GameInfo.ControlAppId);
 
         if (accounts.Count == 0)
         {
@@ -282,156 +282,9 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
-    /// Account in userdata che hanno la cartella di Control, dal più usato di
-    /// recente. Basta la cartella 870780: dopo aver attivato un profilo vuoto o
-    /// creato a mano può mancare la sottocartella remote, e l'account non deve
-    /// sparire per questo.
-    /// </summary>
-    internal static IReadOnlyList<GameAccount> FindAccounts(string userData, string appId)
-    {
-        var accounts = new List<GameAccount>();
-
-        foreach (string dir in Directory.GetDirectories(userData))
-        {
-            string game = Path.Combine(dir, appId);
-
-            if (!Directory.Exists(game))
-                continue;
-
-            DateTime? lastSaved = null;
-
-            try
-            {
-                foreach (string file in Directory.EnumerateFiles(game, "*", SearchOption.AllDirectories))
-                {
-                    // Il file di Steam Cloud non è un salvataggio.
-                    if (Path.GetFileName(file).Equals("remotecache.vdf", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    DateTime time = File.GetLastWriteTime(file);
-
-                    if (lastSaved == null || time > lastSaved)
-                        lastSaved = time;
-                }
-            }
-            catch
-            {
-                // Cartella non leggibile: nessuna data.
-            }
-
-            accounts.Add(new GameAccount("steam", Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
-        }
-
-        return accounts.OrderByDescending(a => a.LastSaved ?? DateTime.MinValue).ToList();
-    }
-
-    /// <summary>
-    /// Account in userdata che hanno almeno un gioco con salvataggi in
-    /// userdata (SupportState.Supported), dal più usato di recente.
-    /// </summary>
-    internal static IReadOnlyList<GameAccount> FindAccountsWithGames(string userData)
-    {
-        var accounts = new List<GameAccount>();
-
-        foreach (string dir in Directory.GetDirectories(userData))
-        {
-            if (!IsNumeric(Path.GetFileName(dir)))
-                continue;
-
-            List<string> games = Directory.GetDirectories(dir)
-                .Where(game => IsNumeric(Path.GetFileName(game)) &&
-                               !SteamLibrary.SystemApps.Contains(Path.GetFileName(game)))
-                .Where(game => SteamLibrary.GetSupport(game) == SupportState.Supported)
-                .ToList();
-
-            if (games.Count == 0)
-                continue;
-
-            DateTime? lastSaved = null;
-
-            try
-            {
-                foreach (string file in games.SelectMany(SaveFilesOf))
-                {
-                    DateTime time = File.GetLastWriteTime(file);
-
-                    if (lastSaved == null || time > lastSaved)
-                        lastSaved = time;
-                }
-            }
-            catch
-            {
-                // Cartella non leggibile: nessuna data.
-            }
-
-            accounts.Add(new GameAccount("steam", Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
-        }
-
-        return accounts.OrderByDescending(a => a.LastSaved ?? DateTime.MinValue).ToList();
-    }
-
-    /// <summary>
-    /// Account in userdata con almeno la cartella di un gioco, anche se nessuno
-    /// è gestibile (per esempio con i salvataggi nel prefisso di Proton): così
-    /// l'app si apre lo stesso e mostra i giochi con il motivo.
-    /// </summary>
-    internal static IReadOnlyList<GameAccount> FindAccountsWithAnyGame(string userData)
-    {
-        var accounts = new List<GameAccount>();
-
-        foreach (string dir in Directory.GetDirectories(userData))
-        {
-            if (!IsNumeric(Path.GetFileName(dir)))
-                continue;
-
-            bool hasGame = Directory.GetDirectories(dir)
-                .Any(game => IsNumeric(Path.GetFileName(game)) &&
-                             !SteamLibrary.SystemApps.Contains(Path.GetFileName(game)));
-
-            if (hasGame)
-                accounts.Add(new GameAccount("steam", Path.GetFileName(dir), ReadPersonaName(dir), dir, null));
-        }
-
-        return accounts;
-    }
-
-    /// <summary>
-    /// I file di salvataggio di una cartella di gioco: tutti tranne
-    /// remotecache.vdf al primo livello (il file di Steam Cloud).
-    /// </summary>
-    private static IEnumerable<string> SaveFilesOf(string game)
-    {
-        string cache = Path.Combine(game, "remotecache.vdf");
-
-        return Directory.EnumerateFiles(game, "*", SearchOption.AllDirectories)
-            .Where(file => !file.Equals(cache, StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <summary>
     /// true se il nome è fatto solo di cifre, come le cartelle degli account e dei giochi.
     /// </summary>
     internal static bool IsNumeric(string name) => name.Length > 0 && name.All(char.IsAsciiDigit);
-
-    /// <summary>
-    /// Nome Steam dell'account, letto da config\localconfig.vdf.
-    /// </summary>
-    private static string ReadPersonaName(string accountFolder)
-    {
-        try
-        {
-            string config = Path.Combine(accountFolder, "config", "localconfig.vdf");
-
-            if (!File.Exists(config))
-                return "";
-
-            Match match = Regex.Match(File.ReadAllText(config), "\"PersonaName\"\\s+\"([^\"]*)\"");
-            return match.Success ? match.Groups[1].Value : "";
-        }
-        catch
-        {
-            return "";
-        }
-    }
 
     public void ReloadState()
     {
