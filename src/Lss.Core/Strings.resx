@@ -445,4 +445,12 @@ LSS will look at what changed on the disk.</value></data>
   <data name="GogExeMissing" xml:space="preserve"><value>GOG doesn&apos;t say which program starts this game.</value></data>
   <data name="ProgramNotStarted" xml:space="preserve"><value>The program didn&apos;t start.</value></data>
   <data name="StartFromHeroic" xml:space="preserve"><value>Start the game from Heroic: LSS can&apos;t start it from here yet.</value></data>
+  <data name="ManualProviderName" xml:space="preserve"><value>This computer</value></data>
+  <data name="ManualCannotStart" xml:space="preserve"><value>LSS can&apos;t start this game from here: the program is not set, or it is a Windows program on Linux.</value></data>
+  <data name="AddGameButton" xml:space="preserve"><value>Add a game…</value></data>
+  <data name="AddGamePickProgram" xml:space="preserve"><value>Choose the program that starts the game (optional)</value></data>
+  <data name="AddGameTitle" xml:space="preserve"><value>Add a game</value></data>
+  <data name="AddGameCaption" xml:space="preserve"><value>NAME OF THE GAME</value></data>
+  <data name="AddGameHint" xml:space="preserve"><value>As it will be shown in LSS.</value></data>
+  <data name="AddGameConfirm" xml:space="preserve"><value>Add</value></data>
 </root>

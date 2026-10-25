@@ -188,6 +188,51 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Aggiunge a mano un gioco (Questo computer): si sceglie il programma (facoltativo)
+    /// e il nome, poi si apre subito la ricerca della cartella dei salvataggi.
+    /// </summary>
+    [RelayCommand]
+    private async Task AddGameAsync()
+    {
+        string? exe = await dialogs.PickFileAsync(Strings.AddGamePickProgram, UserHome());
+
+        string initial = exe is null ? "" : Path.GetFileNameWithoutExtension(exe);
+
+        var window = new TextPromptWindow(new TextPromptViewModel(
+            Strings.AddGameTitle,
+            Strings.AddGameCaption,
+            initial,
+            Strings.AddGameHint,
+            80,
+            Strings.AddGameConfirm));
+
+        string? name = await dialogs.ShowAsync<string>(window);
+
+        if (name is null || name.Trim() == "")
+            return;
+
+        string id = ManualGames.Add(AppData.Root, new ManualGame(name.Trim(), exe ?? "", "", ""));
+
+        // Il launcher "Questo computer" entra nell'elenco la prima volta.
+        if (!launchers.Any(l => l.Provider.Id == "manual"))
+        {
+            var manual = new ManualProvider(Platform.Current);
+            var account = new GameAccount("manual", "local", manual.DisplayName, ManualGames.AccountFolder(AppData.Root), null);
+            launchers = [.. launchers, new LauncherGames(manual, account, [])];
+        }
+
+        string key = "manual/" + id;
+        ReloadGames(key, null);
+
+        GameItemViewModel? added = OtherGames.FirstOrDefault(g => g.Info.Key == key) ?? Games.FirstOrDefault(g => g.Info.Key == key);
+
+        if (added is not null)
+            await FindFolderAsync(added);
+    }
+
+    private static string UserHome() => Platform.Current.GetKnownFolders().Home;
+
+    /// <summary>
     /// Sceglie a mano la cartella dei salvataggi di un gioco di Altri giochi;
     /// se viene salvata, la lista si ricarica.
     /// </summary>

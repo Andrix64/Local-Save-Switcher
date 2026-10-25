@@ -445,4 +445,12 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="GogExeMissing" xml:space="preserve"><value>GOG non dice quale programma avvia questo gioco.</value></data>
   <data name="ProgramNotStarted" xml:space="preserve"><value>Il programma non si è avviato.</value></data>
   <data name="StartFromHeroic" xml:space="preserve"><value>Avvia il gioco da Heroic: LSS per ora non può avviarlo da qui.</value></data>
+  <data name="ManualProviderName" xml:space="preserve"><value>Questo computer</value></data>
+  <data name="ManualCannotStart" xml:space="preserve"><value>LSS non può avviare questo gioco da qui: il programma non è indicato, o è un programma Windows su Linux.</value></data>
+  <data name="AddGameButton" xml:space="preserve"><value>Aggiungi un gioco…</value></data>
+  <data name="AddGamePickProgram" xml:space="preserve"><value>Scegli il programma che avvia il gioco (facoltativo)</value></data>
+  <data name="AddGameTitle" xml:space="preserve"><value>Aggiungi un gioco</value></data>
+  <data name="AddGameCaption" xml:space="preserve"><value>NOME DEL GIOCO</value></data>
+  <data name="AddGameHint" xml:space="preserve"><value>Come sarà mostrato in LSS.</value></data>
+  <data name="AddGameConfirm" xml:space="preserve"><value>Aggiungi</value></data>
 </root>
