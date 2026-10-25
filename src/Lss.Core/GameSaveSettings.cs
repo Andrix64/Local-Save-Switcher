@@ -10,6 +10,7 @@ internal sealed class GameSaveSettings
     private const string FileName = "cartella.ini";
     private const string FolderKey = "CartellaSalvataggi";
     private const string OriginKey = "Origine";
+    private const string ExtraKey = "CartelleExtra";
 
     private readonly string file;
 
@@ -23,6 +24,31 @@ internal sealed class GameSaveSettings
 
     /// <summary>Chosen (scelta da te) o Learned (trovata da LSS).</summary>
     public SaveSource Origin { get; set; } = SaveSource.Chosen;
+
+    /// <summary>
+    /// Altre cartelle in cui cercare il gioco (CartelleExtra, separate da ";"),
+    /// come sono adesso nel file.
+    /// </summary>
+    public IReadOnlyList<string> ExtraFolders =>
+        IniFile.Read(file).GetValueOrDefault(ExtraKey)?
+            .Split(';', StringSplitOptions.RemoveEmptyEntries) ?? [];
+
+    /// <summary>
+    /// Aggiunge una cartella da cercare, senza ripetere una già presente, e salva il file.
+    /// </summary>
+    public void AddExtraFolder(string folder)
+    {
+        List<string> folders = ExtraFolders.ToList();
+
+        if (folders.Contains(folder, StringComparer.OrdinalIgnoreCase))
+            return;
+
+        folders.Add(folder);
+
+        var values = IniFile.Read(file).Where(pair => pair.Key != ExtraKey).ToList();
+        values.Add(new(ExtraKey, string.Join(";", folders)));
+        IniFile.Write(file, values);
+    }
 
     /// <summary>
     /// Legge cartella.ini. Senza file o con valori mancanti: nessuna scelta.

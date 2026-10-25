@@ -12,8 +12,9 @@ namespace Lss.App.ViewModels;
 public sealed class GameItemViewModel
 {
     /// <param name="chooseFolder">Sceglie la cartella dei salvataggi di questo gioco; null = nessuna scelta.</param>
+    /// <param name="findFolder">Procedura "Trova i salvataggi" di questo gioco; null = nessuna.</param>
     public GameItemViewModel(GameInfo info, GameAccount account, IGameProvider provider,
-        Func<GameItemViewModel, Task>? chooseFolder = null)
+        Func<GameItemViewModel, Task>? chooseFolder = null, Func<GameItemViewModel, Task>? findFolder = null)
     {
         Info = info;
         Account = account;
@@ -30,9 +31,8 @@ public sealed class GameItemViewModel
             _ => "",
         };
 
-        // "Trova la cartella" aprirà la procedura di fase M; fino ad allora è la stessa scelta a mano.
         ChooseFolderCommand = new AsyncRelayCommand(() => chooseFolder?.Invoke(this) ?? Task.CompletedTask);
-        FindFolderCommand = ChooseFolderCommand;
+        FindFolderCommand = new AsyncRelayCommand(() => findFolder?.Invoke(this) ?? Task.CompletedTask);
         Icon = LoadIcon(info.IconPath);
     }
 
@@ -63,7 +63,7 @@ public sealed class GameItemViewModel
     /// <summary>Scelta della cartella dei salvataggi a mano.</summary>
     public ICommand ChooseFolderCommand { get; }
 
-    /// <summary>Trova la cartella (fase M); per ora come ChooseFolderCommand.</summary>
+    /// <summary>Trova la cartella dei salvataggi: la procedura "Trova i salvataggi" (fase M).</summary>
     public ICommand FindFolderCommand { get; }
 
     /// <summary>

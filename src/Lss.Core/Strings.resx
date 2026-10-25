@@ -344,4 +344,46 @@ Use it only if it contains just the saves of {1}.</value></data>
   <data name="AddSharedFile" xml:space="preserve"><value>Add file...</value></data>
   <data name="RemoveSharedFile" xml:space="preserve"><value>Remove</value></data>
   <data name="SharedFileOutside" xml:space="preserve"><value>Choose a file inside the game's save folder.</value></data>
+  <data name="LearnTitle" xml:space="preserve"><value>Find the saves of {0}</value></data>
+  <data name="LearnIntroText" xml:space="preserve"><value>LSS doesn't know yet where {0} keeps its saves. Let's find out together:
+1. Start the game.
+2. Save in the game (or play until it saves by itself).
+3. Quit the game.
+LSS will look at what changed on the disk.</value></data>
+  <data name="LearnStart" xml:space="preserve"><value>Start the game</value></data>
+  <data name="LearnStartedByHand" xml:space="preserve"><value>I've started the game</value></data>
+  <data name="LearnStartByHandText" xml:space="preserve"><value>Start {0} yourself now, then press the button.</value></data>
+  <data name="LearnCloseFirst" xml:space="preserve"><value>{0} is open. Quit the game first, then start again from here.</value></data>
+  <data name="LearnPlayingText" xml:space="preserve"><value>Play, save, then quit {0}.</value></data>
+  <data name="LearnPressWhenDone" xml:space="preserve"><value>When you have quit the game, press the button.</value></data>
+  <data name="LearnQuitDone" xml:space="preserve"><value>I've quit the game</value></data>
+  <data name="LearnLooking" xml:space="preserve"><value>Looking for changed files… {0}</value></data>
+  <data name="LearnFilesChanged" xml:space="preserve"><value>{0} files changed</value></data>
+  <data name="LearnUseFolder" xml:space="preserve"><value>Use this folder</value></data>
+  <data name="LearnTryAgain" xml:space="preserve"><value>Try again</value></data>
+  <data name="LearnLookElsewhere" xml:space="preserve"><value>Look in another folder…</value></data>
+  <data name="LearnNothingFound" xml:space="preserve"><value>LSS didn't see any file that looks like a save. Did you save before quitting? You can try again, or choose the folder yourself.</value></data>
+  <data name="LearnPartial" xml:space="preserve"><value>The search took too long and stopped early: the list may be incomplete.</value></data>
+  <data name="LearnRecommended" xml:space="preserve"><value>Recommended</value></data>
+  <data name="LearnUnlikely" xml:space="preserve"><value>Unlikely</value></data>
+  <data name="ReasonGameName" xml:space="preserve"><value>The name contains "{0}"</value></data>
+  <data name="ReasonGameOwned" xml:space="preserve"><value>It belongs to the game (its folder or its Proton/Wine folder)</value></data>
+  <data name="ReasonSaveLikeFile" xml:space="preserve"><value>Files that look like saves ({0})</value></data>
+  <data name="ReasonChangedFiles" xml:space="preserve"><value>{0} files changed while you were playing</value></data>
+  <data name="ReasonSaveLikePath" xml:space="preserve"><value>It has a usual save folder name ("{0}")</value></data>
+  <data name="ReasonOnlySettings" xml:space="preserve"><value>Only settings files changed</value></data>
+  <data name="ReasonOtherProgram" xml:space="preserve"><value>It seems to belong to another program</value></data>
+  <data name="NotSaveFolder" xml:space="preserve"><value>Not a save folder…</value></data>
+  <data name="NotSaveFolderText" xml:space="preserve"><value>LSS won't propose this folder again:
+{0}</value></data>
+  <data name="IgnoreForGame" xml:space="preserve"><value>Only for {0}</value></data>
+  <data name="IgnoreForAll" xml:space="preserve"><value>For every game</value></data>
+  <data name="IgnoredToast" xml:space="preserve"><value>LSS won't propose this folder again.</value></data>
+  <data name="IgnoreUndo" xml:space="preserve"><value>Undo</value></data>
+  <data name="IgnoreCurrentFolder" xml:space="preserve"><value>This is a save folder of {0}: remove it from its save folders first.</value></data>
+  <data name="IgnoredFoldersTitle" xml:space="preserve"><value>Folders that are not saves</value></data>
+  <data name="IgnoredFoldersEmpty" xml:space="preserve"><value>No folders: everything LSS finds can be proposed.</value></data>
+  <data name="IgnoredScopeAll" xml:space="preserve"><value>every game</value></data>
+  <data name="IgnoredRemove" xml:space="preserve"><value>Propose it again</value></data>
+  <data name="IgnoredFoldersLink" xml:space="preserve"><value>Folders that are not saves…</value></data>
 </root>

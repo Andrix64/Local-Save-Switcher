@@ -26,7 +26,7 @@ internal static class SaveFolderChoice
     /// scelta. true se è stata salvata.
     /// </summary>
     public static async Task<bool> ConfirmAndSaveAsync(IDialogService dialogs, string folder, GameInfo game,
-        GameAccount account, IGameProvider provider)
+        GameAccount account, IGameProvider provider, SaveSource origin = SaveSource.Chosen)
     {
         SafetyProblem problem = SaveFolderSafety.Check(
             folder,
@@ -53,7 +53,7 @@ internal static class SaveFolderChoice
         if (!confirmed)
             return false;
 
-        new GameSaveSettings(DataFolder(game, account, provider)) { Folder = folder, Origin = SaveSource.Chosen }.Save();
+        new GameSaveSettings(DataFolder(game, account, provider)) { Folder = folder, Origin = origin }.Save();
         return true;
     }
 
@@ -66,7 +66,7 @@ internal static class SaveFolderChoice
     /// <summary>
     /// Da dove parte il selettore: la cartella utente del prefisso se c'è, altrimenti Documents.
     /// </summary>
-    private static string StartFolder(GameInfo game, GameAccount account, IGameProvider provider)
+    internal static string StartFolder(GameInfo game, GameAccount account, IGameProvider provider)
     {
         SaveContext context = SaveLookup.ContextFor(provider, account, game, Platform.Current.GetKnownFolders());
         string user = SavePathResolver.PrefixUser(context);

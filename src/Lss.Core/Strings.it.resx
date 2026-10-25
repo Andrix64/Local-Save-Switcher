@@ -344,4 +344,46 @@ Usala solo se contiene solo i salvataggi di {1}.</value></data>
   <data name="AddSharedFile" xml:space="preserve"><value>Aggiungi file...</value></data>
   <data name="RemoveSharedFile" xml:space="preserve"><value>Rimuovi</value></data>
   <data name="SharedFileOutside" xml:space="preserve"><value>Scegli un file dentro la cartella dei salvataggi del gioco.</value></data>
+  <data name="LearnTitle" xml:space="preserve"><value>Trova i salvataggi di {0}</value></data>
+  <data name="LearnIntroText" xml:space="preserve"><value>LSS non sa ancora dove {0} tiene i salvataggi. Scopriamolo insieme:
+1. Avvia il gioco.
+2. Salva nel gioco (o gioca finché salva da solo).
+3. Esci dal gioco.
+LSS guarda quali file sono cambiati sul disco.</value></data>
+  <data name="LearnStart" xml:space="preserve"><value>Avvia il gioco</value></data>
+  <data name="LearnStartedByHand" xml:space="preserve"><value>Ho avviato il gioco</value></data>
+  <data name="LearnStartByHandText" xml:space="preserve"><value>Avvia tu {0} adesso, poi premi il pulsante.</value></data>
+  <data name="LearnCloseFirst" xml:space="preserve"><value>{0} è aperto. Chiudi prima il gioco, poi avvia di nuovo da qui.</value></data>
+  <data name="LearnPlayingText" xml:space="preserve"><value>Gioca, salva, poi esci da {0}.</value></data>
+  <data name="LearnPressWhenDone" xml:space="preserve"><value>Quando hai chiuso il gioco, premi il pulsante.</value></data>
+  <data name="LearnQuitDone" xml:space="preserve"><value>Ho chiuso il gioco</value></data>
+  <data name="LearnLooking" xml:space="preserve"><value>Cerco i file cambiati… {0}</value></data>
+  <data name="LearnFilesChanged" xml:space="preserve"><value>{0} file cambiati</value></data>
+  <data name="LearnUseFolder" xml:space="preserve"><value>Usa questa cartella</value></data>
+  <data name="LearnTryAgain" xml:space="preserve"><value>Riprova</value></data>
+  <data name="LearnLookElsewhere" xml:space="preserve"><value>Cerca in un'altra cartella…</value></data>
+  <data name="LearnNothingFound" xml:space="preserve"><value>LSS non ha visto nessun file che sembra un salvataggio. Hai salvato prima di uscire? Puoi riprovare o scegliere tu la cartella.</value></data>
+  <data name="LearnPartial" xml:space="preserve"><value>La ricerca ci ha messo troppo ed è stata fermata presto: la lista può essere incompleta.</value></data>
+  <data name="LearnRecommended" xml:space="preserve"><value>Consigliata</value></data>
+  <data name="LearnUnlikely" xml:space="preserve"><value>Poco probabile</value></data>
+  <data name="ReasonGameName" xml:space="preserve"><value>Il nome contiene "{0}"</value></data>
+  <data name="ReasonGameOwned" xml:space="preserve"><value>Fa parte del gioco (la sua cartella o la cartella Proton/Wine)</value></data>
+  <data name="ReasonSaveLikeFile" xml:space="preserve"><value>File che sembrano salvataggi ({0})</value></data>
+  <data name="ReasonChangedFiles" xml:space="preserve"><value>{0} file cambiati mentre giocavi</value></data>
+  <data name="ReasonSaveLikePath" xml:space="preserve"><value>Ha un nome tipico per i salvataggi ("{0}")</value></data>
+  <data name="ReasonOnlySettings" xml:space="preserve"><value>Sono cambiati solo file di impostazioni</value></data>
+  <data name="ReasonOtherProgram" xml:space="preserve"><value>Sembra di un altro programma</value></data>
+  <data name="NotSaveFolder" xml:space="preserve"><value>Non è una cartella di salvataggi…</value></data>
+  <data name="NotSaveFolderText" xml:space="preserve"><value>LSS non proporrà più questa cartella:
+{0}</value></data>
+  <data name="IgnoreForGame" xml:space="preserve"><value>Solo per {0}</value></data>
+  <data name="IgnoreForAll" xml:space="preserve"><value>Per tutti i giochi</value></data>
+  <data name="IgnoredToast" xml:space="preserve"><value>LSS non proporrà più questa cartella.</value></data>
+  <data name="IgnoreUndo" xml:space="preserve"><value>Annulla</value></data>
+  <data name="IgnoreCurrentFolder" xml:space="preserve"><value>È la cartella dei salvataggi di {0}: prima toglila dalle sue cartelle dei salvataggi.</value></data>
+  <data name="IgnoredFoldersTitle" xml:space="preserve"><value>Cartelle che non sono salvataggi</value></data>
+  <data name="IgnoredFoldersEmpty" xml:space="preserve"><value>Nessuna cartella: LSS può proporre tutto quello che trova.</value></data>
+  <data name="IgnoredScopeAll" xml:space="preserve"><value>tutti i giochi</value></data>
+  <data name="IgnoredRemove" xml:space="preserve"><value>Proponila di nuovo</value></data>
+  <data name="IgnoredFoldersLink" xml:space="preserve"><value>Cartelle che non sono salvataggi…</value></data>
 </root>

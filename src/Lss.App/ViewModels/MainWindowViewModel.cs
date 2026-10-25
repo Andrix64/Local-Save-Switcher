@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lss.App.Services;
+using Lss.App.Views;
 
 namespace Lss.App.ViewModels;
 
@@ -140,7 +141,7 @@ public partial class MainWindowViewModel : ObservableObject
 
             foreach (GameInfo game in launcher.Games)
             {
-                var item = new GameItemViewModel(game, launcher.Account, launcher.Provider, ChooseFolderAsync);
+                var item = new GameItemViewModel(game, launcher.Account, launcher.Provider, ChooseFolderAsync, FindFolderAsync);
 
                 if (game.Support == SupportState.Supported)
                 {
@@ -194,6 +195,23 @@ public partial class MainWindowViewModel : ObservableObject
         bool saved = await SaveFolderChoice.ChooseAsync(dialogs, item.Info, item.Account, item.Provider);
 
         if (saved)
+            ReloadGames(selected?.Info.Key, item.Info.Key);
+    }
+
+    /// <summary>
+    /// Apre "Trova i salvataggi" per un gioco di Altri giochi; se una cartella
+    /// viene salvata, la lista si ricarica.
+    /// </summary>
+    private async Task FindFolderAsync(GameItemViewModel item)
+    {
+        GameItemViewModel? selected = SelectedGame;
+
+        var model = new LearnSavesViewModel(item.Info, item.Account, item.Provider, dialogs, () => DateTime.UtcNow,
+            (since, cancel) => LearnScanner.ScanAsync(item.Info, item.Account, item.Provider, since, cancel));
+
+        bool? saved = await dialogs.ShowAsync<bool>(new LearnSavesWindow(model));
+
+        if (saved == true)
             ReloadGames(selected?.Info.Key, item.Info.Key);
     }
 

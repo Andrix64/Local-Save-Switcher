@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lss.App.Services;
+using Lss.App.Views;
 
 namespace Lss.App.ViewModels;
 
@@ -151,6 +152,19 @@ public partial class SettingsViewModel : ObservableObject
             return;
 
         SharedFiles.Add(new SharedFileItemViewModel(relative, Remove));
+    }
+
+    public string IgnoredFoldersText => Strings.IgnoredFoldersLink;
+
+    /// <summary>
+    /// Le cartelle che non sono salvataggi (per tutti i giochi e per questo): si tolgono da lì.
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenIgnoredFoldersAsync()
+    {
+        string dataFolder = Path.GetDirectoryName(manager.ProfilesPath)!;
+
+        await dialogs.ShowAsync<bool>(new IgnoredFoldersWindow(new IgnoredFoldersViewModel(dataFolder, manager.Game.Name)));
     }
 
     [RelayCommand]

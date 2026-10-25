@@ -1,0 +1,116 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.LearnSavesWindow"
+        x:DataType="vm:LearnSavesViewModel"
+        Title="{Binding Title}"
+        Width="520" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="22,20" Spacing="0">
+
+    <!-- Passo 1: il testo e il pulsante per avviare il gioco -->
+    <StackPanel IsVisible="{Binding IsIntro}" Spacing="12">
+      <TextBlock Text="{Binding IntroText}" TextWrapping="Wrap" />
+      <TextBlock Classes="small" Text="{Binding StartByHandText}" IsVisible="{Binding !CanLaunch}"
+                 Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+      <TextBlock FontSize="12" Text="{Binding Message}" IsVisible="{Binding HasMessage}"
+                 Foreground="{StaticResource Error}" TextWrapping="Wrap" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+        <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" MinWidth="110"
+                Command="{Binding CancelCommand}" />
+        <Button Classes="primary" Content="{Binding StartText}" IsDefault="True" MinWidth="110"
+                Command="{Binding StartCommand}" />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- Passo 2: il gioco è aperto; si aspetta che si chiuda -->
+    <StackPanel IsVisible="{Binding IsPlaying}" Spacing="12">
+      <TextBlock Text="{Binding PlayingText}" TextWrapping="Wrap" />
+      <TextBlock Classes="small" Text="{Binding PressWhenDoneText}" IsVisible="{Binding ShowPressWhenDone}"
+                 Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+        <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" MinWidth="110"
+                Command="{Binding CancelCommand}" />
+        <Button Classes="primary" Content="{loc:Str LearnQuitDone}" IsDefault="True" MinWidth="110"
+                Command="{Binding QuitDoneCommand}" />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- Passo 3: si leggono i file cambiati -->
+    <StackPanel IsVisible="{Binding IsLooking}" Spacing="12">
+      <TextBlock Text="{Binding LookingText}" TextWrapping="Wrap" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+        <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" MinWidth="110"
+                Command="{Binding CancelCommand}" />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- Passo 4: le cartelle trovate, o nessuna -->
+    <StackPanel IsVisible="{Binding IsResult}" Spacing="12">
+      <TextBlock Text="{Binding PartialText}" IsVisible="{Binding Partial}" TextWrapping="Wrap"
+                 Foreground="{StaticResource TextMuted}" />
+      <TextBlock Text="{Binding NothingFoundText}" IsVisible="{Binding NothingFound}" TextWrapping="Wrap" />
+
+      <ScrollViewer MaxHeight="420" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding !NothingFound}">
+        <ItemsControl ItemsSource="{Binding Candidates}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:LearnCandidate">
+              <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}"
+                      BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+                <StackPanel Spacing="6">
+                  <RadioButton GroupName="LearnCandidates" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                               HorizontalAlignment="Stretch">
+                    <StackPanel Spacing="2">
+                      <TextBlock Classes="caption" Text="{Binding Badge}" IsVisible="{Binding HasBadge}" />
+                      <TextBlock Text="{Binding Folder}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </RadioButton>
+                  <TextBlock Classes="small" Text="{Binding ReasonsText}" TextWrapping="Wrap" />
+                  <TextBlock Classes="small" Text="{Binding FilesText}" Foreground="{StaticResource TextMuted}" />
+                  <TextBlock Classes="small" Text="{Binding FileNamesText}" Foreground="{StaticResource TextMuted}"
+                             TextWrapping="Wrap" />
+
+                  <Button Classes="link" Content="{loc:Str NotSaveFolder}" Command="{Binding ToggleIgnoreCommand}"
+                          HorizontalAlignment="Left" />
+                  <StackPanel IsVisible="{Binding ChoosingIgnore}" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="secondary" Content="{Binding IgnoreForGameText}"
+                            Command="{Binding IgnoreForGameCommand}" />
+                    <Button Classes="secondary" Content="{loc:Str IgnoreForAll}"
+                            Command="{Binding IgnoreForAllCommand}" />
+                  </StackPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <!-- Avviso con Annulla dopo "non è una cartella di salvataggi" -->
+      <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
+              CornerRadius="6" Padding="12,8" IsVisible="{Binding HasIgnoredNotice}">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <TextBlock Classes="small" Text="{Binding IgnoredNoticeText}" VerticalAlignment="Center" />
+          <Button Classes="link" Content="{Binding UndoText}" Command="{Binding UndoIgnoredCommand}" />
+        </StackPanel>
+      </Border>
+
+      <TextBlock FontSize="12" Text="{Binding Message}" IsVisible="{Binding HasMessage}" Foreground="{StaticResource Error}" TextWrapping="Wrap" />
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" MinWidth="90"
+                Command="{Binding CancelCommand}" />
+        <Button Classes="secondary" Content="{loc:Str LearnLookElsewhere}" Command="{Binding LookElsewhereCommand}" />
+        <Button Classes="secondary" Content="{loc:Str ChooseSaveFolder}" Command="{Binding ChooseMyselfCommand}" />
+        <Button Classes="secondary" Content="{loc:Str LearnTryAgain}" Command="{Binding TryAgainCommand}" />
+        <Button Classes="primary" Content="{loc:Str LearnUseFolder}" IsDefault="True" MinWidth="110"
+                Command="{Binding UseSelectedCommand}" IsVisible="{Binding !NothingFound}" />
+      </StackPanel>
+    </StackPanel>
+
+  </StackPanel>
+
+</Window>

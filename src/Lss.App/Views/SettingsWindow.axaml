@@ -61,6 +61,8 @@
       <Button Classes="secondary" Content="{Binding OpenFolderText}" Command="{Binding OpenFolderCommand}"
               VerticalAlignment="Center" />
     </StackPanel>
+    <Button Classes="link" Content="{Binding IgnoredFoldersText}" Command="{Binding OpenIgnoredFoldersCommand}"
+            HorizontalAlignment="Left" Margin="0,8,0,0" />
     <TextBlock Classes="small" Text="{Binding AboutText}" Foreground="{StaticResource TextMuted}"
                TextWrapping="Wrap" Margin="2,8,0,0" />
 
