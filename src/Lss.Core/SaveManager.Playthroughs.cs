@@ -568,7 +568,8 @@ public sealed partial class SaveManager
 
             var values = new List<KeyValuePair<string, string>>
             {
-                new("Formato", "2"),
+                new("Formato", "3"),
+                new("Provider", Game.Provider),
                 new("AppId", Game.Id),
                 new("Gioco", Game.Name),
                 new("Nome", ProfileDisplayName(profileName))
@@ -638,7 +639,10 @@ public sealed partial class SaveManager
 
             (string appId, string gameName) = LegacyMigration.ExportedGame(values);
 
-            if (appId != Game.Id)
+            // Formato 1 e 2 non hanno il launcher: sono di Steam.
+            string provider = values.GetValueOrDefault("Provider", "steam");
+
+            if (appId != Game.Id || provider != Game.Provider)
                 return Result<string>.Fail(Loc.F(Strings.ImportOtherGame, gameName, Game.Name));
 
             string name = UniqueName(values.GetValueOrDefault("Nome", "").Trim());

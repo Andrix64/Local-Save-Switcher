@@ -154,17 +154,18 @@ public sealed class PlaythroughTests : IDisposable
     }
 
     [Fact]
-    public void Export_WritesFormat2WithGame()
+    public void Export_WritesFormat3WithGameAndProvider()
     {
         SaveManager manager = TwoPlaythroughs();
-        string zip = Path.Combine(folder.Root, "formato2.zip");
+        string zip = Path.Combine(folder.Root, "formato3.zip");
 
         Assert.True(manager.ExportProfile("Profilo_Mario", zip).Success);
 
         using ZipArchive archive = ZipFile.OpenRead(zip);
         string info = ReadEntry(archive, "partita.ini");
 
-        Assert.Contains("Formato=2", info);
+        Assert.Contains("Formato=3", info);
+        Assert.Contains("Provider=steam", info);
         Assert.Contains("AppId=870780", info);
         Assert.Contains("Gioco=Control", info);
     }
@@ -180,6 +181,34 @@ public sealed class PlaythroughTests : IDisposable
         using ZipArchive archive = ZipFile.OpenRead(zip);
         Assert.NotEmpty(archive.Entries);
         Assert.All(archive.Entries, entry => Assert.DoesNotContain("\\", entry.FullName));
+    }
+
+    [Fact]
+    public void Import_Format2IsSteam()
+    {
+        string zip = WriteZip("formato2.zip", "Formato=2\nAppId=870780\nGioco=Control\nNome=Mario\n");
+        SaveManager control = folder.CreateManager();
+
+        Assert.True(control.ImportProfile(zip).Success);
+        Assert.Contains("Profilo_Mario", control.GetProfiles());
+    }
+
+    [Fact]
+    public void Import_OtherLauncherIsRefused()
+    {
+        string zip = WriteZip("epic.zip", "Formato=3\nProvider=epic\nAppId=870780\nGioco=Control\nNome=Mario\n");
+        var epicControl = new GameInfo("epic", GameInfo.ControlAppId, "Control", "", "", "", folder.Game, SupportState.Supported);
+        SaveManager epic = new(folder.Game, Path.Combine(folder.Root, "epic"), "", epicControl);
+
+        // Lo zip è di epic: entra nel gioco di epic...
+        Assert.True(epic.ImportProfile(zip).Success);
+
+        // ...e non nel Control di Steam, anche con lo stesso AppID.
+        SaveManager steam = folder.CreateManager();
+        Result<string> refused = steam.ImportProfile(zip);
+
+        Assert.False(refused.Success);
+        Assert.Equal(Loc.F(Strings.ImportOtherGame, "Control", "Control"), refused.Message);
     }
 
     [Fact]
