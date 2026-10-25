@@ -123,7 +123,7 @@ per phase (the phase file names it).
 - [x] K3 — Generic platform functions (5bbbfc9; Linux tests 184 passed on lss-ci)
 - [x] K4a — The interface, unused (a82f1bc)
 - [x] K4b — Accounts and games through the provider (e71c853)
-- [ ] K4c — Running, launch and cloud through the provider
+- [x] K4c — Running, launch and cloud through the provider (1562655)
 - [ ] K4d — Clean-up and check
 - [ ] K5 — Data folder per provider
 - [ ] K6 — Export format 3
