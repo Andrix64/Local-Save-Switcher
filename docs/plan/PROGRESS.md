@@ -197,7 +197,7 @@ per phase (the phase file names it).
 - [x] P2a — Owner (e375941)
 - [x] P2b — Favourite (1c15ec6)
 - [x] P2c — Existing playthroughs and export (3553e24)
-- [ ] P3 — Getting a game ready for a player (simple mode)
+- [x] P3 — Getting a game ready for a player (simple mode) (badb747)
 - [ ] P4 — Mode setting and start-up
 - [ ] P4a — Optional PIN for admins
 - [ ] P5 — Advanced mode: playthroughs grouped by player
