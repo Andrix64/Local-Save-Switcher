@@ -151,7 +151,7 @@ per phase (the phase file names it).
 - [x] M1 — Search folders (1d0b994; Linux 327 tests on lss-ci)
 - [x] M2 — Changed files (a554071, test fix 5e7d799; Linux 337 tests on lss-ci)
 - [x] M3 — Candidates and their score (1ef5152; Windows 345 tests before M3b)
-- [ ] M3b — Folders that are never saves
+- [x] M3b — Folders that are never saves (ce2ed78; Linux 353 tests on lss-ci)
 - [ ] M4 — The wizard
 - [ ] M5 — Learning a game that already has playthroughs
 - [ ] M6 — Screenshots
