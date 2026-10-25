@@ -320,6 +320,17 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SpotNotFound" xml:space="preserve"><value>LSS non ha aggiunto questa cartella dei salvataggi.</value></data>
   <data name="SpotBadName" xml:space="preserve"><value>LSS non può usare una cartella il cui percorso contiene "|".</value></data>
   <data name="ImportSpotsSkipped" xml:space="preserve"><value>Alcuni salvataggi non sono stati importati, perché questo gioco qui non usa queste cartelle: {0}</value></data>
+  <data name="SaveFoldersCaption" xml:space="preserve"><value>Cartelle dei salvataggi</value></data>
+  <data name="SpotFiles" xml:space="preserve"><value>{0} (solo {1})</value></data>
+  <data name="AddSpot" xml:space="preserve"><value>Aggiungi un'altra cartella…</value></data>
+  <data name="AddSpotText" xml:space="preserve"><value>LSS cambierà anche questa cartella:&#10;{0}&#10;I suoi file ora appartengono alla partita "{1}". E le altre partite?</value></data>
+  <data name="AddSpotCopy" xml:space="preserve"><value>Dai loro una copia di questi file</value></data>
+  <data name="AddSpotEmpty" xml:space="preserve"><value>Falla partire vuota per loro</value></data>
+  <data name="RemoveSpot" xml:space="preserve"><value>Togli dalle cartelle dei salvataggi</value></data>
+  <data name="RemoveSpotText" xml:space="preserve"><value>LSS smetterà di cambiare questa cartella. I suoi file restano dove sono, e le copie nelle partite restano.</value></data>
+  <data name="LearnUseFolders" xml:space="preserve"><value>Usa queste cartelle</value></data>
+  <data name="SwitchInterruptedTitle" xml:space="preserve"><value>Cambio dei salvataggi interrotto</value></data>
+  <data name="SwitchInterruptedRestored" xml:space="preserve"><value>L'ultimo cambio di {0} è stato interrotto (forse il computer si è spento). LSS ha rimesso i salvataggi come erano prima.</value></data>
   <data name="SupportNotFound" xml:space="preserve"><value>Nessuna cartella dei salvataggi: avvia il gioco e salva almeno una volta.</value></data>
   <data name="SupportUnsure" xml:space="preserve"><value>Questo gioco salva in troppi posti per LSS. Puoi scegliere tu le cartelle.</value></data>
   <data name="SupportUnsafe" xml:space="preserve"><value>La cartella dei salvataggi trovata non si può usare in sicurezza: {0}</value></data>

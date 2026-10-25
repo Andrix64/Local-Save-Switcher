@@ -84,4 +84,36 @@ public sealed class GameViewModelTests : IDisposable
         Assert.Contains("Open", dialogs.Calls);
         Assert.Equal(3, vm.Playthroughs.Count);
     }
+
+    [Fact]
+    public async Task AnAddedSpotIsListedAndCanBeRemoved()
+    {
+        string extra = Path.Combine(folder.Root, "extra");
+        TestFolder.Write(Path.Combine(extra, "a.sav"), "x");
+
+        var stored = new GameSpots(folder.Data);
+        stored.Load();
+        stored.Add(extra, "*.sav", extra, SaveSource.Chosen, recursive: false);
+        stored.Save();
+
+        var game = new GameInfo("steam", "123450", "Test", "", "", "",
+            [
+                new SaveSpot(1, folder.Game, "", true, folder.Game, SaveSource.Chosen),
+                new SaveSpot(2, extra, "*.sav", false, extra, SaveSource.Chosen),
+            ],
+            SupportState.Supported);
+        var vm = new GameViewModel(new SaveManager(folder.Game, folder.Data, "", game), dialogs);
+
+        SpotLine line = Assert.Single(vm.SpotLines);
+        Assert.True(line.Removable);
+        Assert.Contains("*.sav", line.Text);
+
+        dialogs.ConfirmAnswer = true;
+        await line.RemoveCommand!.ExecuteAsync(null);
+
+        Assert.Empty(vm.SpotLines);
+        var after = new GameSpots(folder.Data);
+        after.Load();
+        Assert.DoesNotContain(after.Spots, spot => spot.Id == 2);
+    }
 }

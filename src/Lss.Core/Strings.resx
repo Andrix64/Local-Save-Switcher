@@ -320,6 +320,17 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SpotNotFound" xml:space="preserve"><value>LSS did not add this save folder.</value></data>
   <data name="SpotBadName" xml:space="preserve"><value>LSS can't use a folder whose path contains "|".</value></data>
   <data name="ImportSpotsSkipped" xml:space="preserve"><value>Some saves were not imported, because this game doesn't use these folders here: {0}</value></data>
+  <data name="SaveFoldersCaption" xml:space="preserve"><value>Save folders</value></data>
+  <data name="SpotFiles" xml:space="preserve"><value>{0} (only {1})</value></data>
+  <data name="AddSpot" xml:space="preserve"><value>Add another folder…</value></data>
+  <data name="AddSpotText" xml:space="preserve"><value>LSS will also switch this folder:&#10;{0}&#10;Its files now belong to the playthrough "{1}". What about the other playthroughs?</value></data>
+  <data name="AddSpotCopy" xml:space="preserve"><value>Give them a copy of these files</value></data>
+  <data name="AddSpotEmpty" xml:space="preserve"><value>Start it empty for them</value></data>
+  <data name="RemoveSpot" xml:space="preserve"><value>Remove from the save folders</value></data>
+  <data name="RemoveSpotText" xml:space="preserve"><value>LSS will stop switching this folder. Its files stay where they are, and the copies in the playthroughs are kept.</value></data>
+  <data name="LearnUseFolders" xml:space="preserve"><value>Use these folders</value></data>
+  <data name="SwitchInterruptedTitle" xml:space="preserve"><value>Save switch interrupted</value></data>
+  <data name="SwitchInterruptedRestored" xml:space="preserve"><value>The last switch of {0} was interrupted (maybe the computer turned off). LSS put back the saves as they were before it.</value></data>
   <data name="SupportNotFound" xml:space="preserve"><value>No save folder yet: start the game once and save.</value></data>
   <data name="SupportUnsure" xml:space="preserve"><value>This game saves in too many places for LSS. You can choose its folders yourself.</value></data>
   <data name="SupportUnsafe" xml:space="preserve"><value>The save folder found can't be used safely: {0}</value></data>

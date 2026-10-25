@@ -62,13 +62,13 @@
               <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}"
                       BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
                 <StackPanel Spacing="6">
-                  <RadioButton GroupName="LearnCandidates" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                  <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                HorizontalAlignment="Stretch">
                     <StackPanel Spacing="2">
                       <TextBlock Classes="caption" Text="{Binding Badge}" IsVisible="{Binding HasBadge}" />
                       <TextBlock Text="{Binding Folder}" FontWeight="SemiBold" TextWrapping="Wrap" />
                     </StackPanel>
-                  </RadioButton>
+                  </CheckBox>
                   <TextBlock Classes="small" Text="{Binding ReasonsText}" TextWrapping="Wrap" />
                   <TextBlock Classes="small" Text="{Binding FilesText}" Foreground="{StaticResource TextMuted}" />
                   <TextBlock Classes="small" Text="{Binding FileNamesText}" Foreground="{StaticResource TextMuted}"
@@ -101,7 +101,7 @@
       <TextBlock FontSize="12" Text="{Binding Message}" IsVisible="{Binding HasMessage}" Foreground="{StaticResource Error}" TextWrapping="Wrap" />
 
       <!-- Prima la scelta principale, poi le altre: a capo se non ci stanno in larghezza. -->
-      <Button Classes="primary" Content="{loc:Str LearnUseFolder}" IsDefault="True" MinWidth="150"
+      <Button Classes="primary" Content="{loc:Str LearnUseFolders}" IsDefault="True" MinWidth="150"
               HorizontalAlignment="Right" Command="{Binding UseSelectedCommand}" IsVisible="{Binding !NothingFound}" />
       <WrapPanel>
         <Button Classes="secondary" Content="{loc:Str LearnLookElsewhere}" Command="{Binding LookElsewhereCommand}"

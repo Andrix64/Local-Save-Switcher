@@ -113,6 +113,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private static async Task OpenGameAsync(GameViewModel game)
     {
+        await game.NoticeInterruptedSwitchAsync();
         await game.OfferFirstRunAsync();
         game.ReportIgnoredProfileFolders();
     }

@@ -60,6 +60,30 @@
       </StackPanel>
       <TextBlock Text="{Binding UserdataNotice}" IsVisible="{Binding ShowUserdataNotice}" TextWrapping="Wrap"
                  FontSize="12" Foreground="{StaticResource TextMuted}" />
+      <!-- Altre cartelle dei salvataggi: un posto per riga -->
+      <ItemsControl ItemsSource="{Binding SpotLines}" Margin="0,4,0,0">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:SpotLine">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <Button Classes="link" Content="{Binding Text}" Command="{Binding OpenCommand}" FontSize="12" />
+              <Button Classes="more" IsVisible="{Binding Removable}" AutomationProperties.Name="{loc:Str SaveFolderMenu}">
+                <StackPanel Orientation="Horizontal" Spacing="3">
+                  <Ellipse />
+                  <Ellipse />
+                  <Ellipse />
+                </StackPanel>
+                <Button.Flyout>
+                  <MenuFlyout>
+                    <MenuItem Header="{loc:Str RemoveSpot}" Command="{Binding RemoveCommand}" />
+                  </MenuFlyout>
+                </Button.Flyout>
+              </Button>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Button Classes="link" Content="{loc:Str AddSpot}" Command="{Binding AddSpotCommand}"
+              IsEnabled="{Binding !IsBusy}" FontSize="12" HorizontalAlignment="Left" />
     </StackPanel>
 
     <!-- Le schede delle partite -->

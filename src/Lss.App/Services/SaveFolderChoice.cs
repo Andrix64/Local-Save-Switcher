@@ -80,7 +80,7 @@ internal static class SaveFolderChoice
     /// <summary>
     /// true se nella cartella dei dati c'è almeno una partita (Profili\Profilo_...).
     /// </summary>
-    private static bool HasPlaythroughs(string dataFolder)
+    internal static bool HasPlaythroughs(string dataFolder)
     {
         string profiles = Path.Combine(dataFolder, "Profili");
 

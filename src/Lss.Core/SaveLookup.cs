@@ -51,6 +51,12 @@ internal static class SaveLookup
     /// Contesto per trasformare le regole del gioco in cartelle: cartelle
     /// dell'utente, prefisso, cartella di installazione, account.
     /// </summary>
+    /// <summary>
+    /// Percorso portabile di una cartella per questo gioco, come nei posti (vedi SavePathResolver.ToPortable).
+    /// </summary>
+    public static string PortableFolder(IGameProvider provider, GameAccount account, GameInfo game, string folder) =>
+        SavePathResolver.ToPortable(folder, ContextFor(provider, account, game, Platform.Current.GetKnownFolders()));
+
     public static SaveContext ContextFor(IGameProvider provider, GameAccount account, GameInfo game,
         KnownFolders folders)
     {

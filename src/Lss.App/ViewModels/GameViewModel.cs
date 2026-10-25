@@ -25,6 +25,7 @@ public partial class GameViewModel : ObservableObject
         SaveFolderText = SaveFolderLine(manager);
         ShowUserdataNotice = manager.Game.Source == SaveSource.Userdata;
         ShowAutomaticFolder = manager.Game.Source is SaveSource.Chosen or SaveSource.Learned;
+        RebuildSpotLines();
     }
 
     /// <summary>Cambia la cartella dei salvataggi del gioco (scelta o automatica): la lista va ricaricata.</summary>
@@ -121,6 +122,100 @@ public partial class GameViewModel : ObservableObject
         }.Save();
 
         SaveFolderChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Ricostruisce l'elenco delle cartelle dei salvataggi: il primo posto è la riga
+    /// sopra, gli altri (aggiunti da LSS o trovati dalle regole) sono qui.
+    /// </summary>
+    private void RebuildSpotLines()
+    {
+        SpotLines.Clear();
+
+        foreach (SaveSpot spot in Manager.Game.Spots.Where(spot => spot.Id != 1))
+        {
+            string text = spot.IsWholeFolder ? spot.Folder : Loc.F(Strings.SpotFiles, spot.Folder, spot.Pattern);
+            bool added = spot.Source is SaveSource.Chosen or SaveSource.Learned;
+            IAsyncRelayCommand? remove = added ? new AsyncRelayCommand(() => RemoveSpotAsync(spot.Id)) : null;
+
+            SpotLines.Add(new SpotLine(spot.Id, text, spot.Folder,
+                new AsyncRelayCommand(() => OpenFolder(spot.Folder)), remove));
+        }
+    }
+
+    /// <summary>Cartelle dei salvataggi oltre la prima, una riga per posto.</summary>
+    public ObservableCollection<SpotLine> SpotLines { get; } = [];
+
+    /// <summary>
+    /// Aggiunge un'altra cartella ai posti del gioco: si chiede la cartella, si
+    /// chiede cosa fare nelle altre partite (se ci sono) e si aggiunge.
+    /// </summary>
+    [RelayCommand]
+    private async Task AddSpotAsync()
+    {
+        string? folder = await dialogs.PickFolderAsync(Loc.F(Strings.AddSpot, Manager.Game.Name), Manager.SavePath);
+
+        if (folder == null)
+            return;
+
+        string playthrough = Manager.HasActiveProfile ? SaveManager.ProfileDisplayName(Manager.State.ActiveProfile) : "";
+        string text = Loc.F(Strings.AddSpotText, folder, playthrough);
+        var spot = new SaveSpot(0, folder, "", true, Manager.PortableFolder(folder), SaveSource.Chosen);
+
+        NewSpotFill fill = NewSpotFill.CopyCurrent;
+
+        if (Manager.GetProfiles().Count > 1)
+        {
+            bool copy = await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpotCopy);
+
+            if (!copy)
+            {
+                if (!await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpotEmpty))
+                    return;
+
+                fill = NewSpotFill.Empty;
+            }
+        }
+        else if (!await dialogs.ConfirmAsync(Strings.AddSpot, text, Strings.AddSpot))
+        {
+            return;
+        }
+
+        Result result = Manager.AddSpot(spot, fill);
+
+        if (!result.Success)
+            await dialogs.InformAsync(Strings.TitleOperationFailed, result.Message, InfoKind.Warning);
+
+        RebuildSpotLines();
+    }
+
+    /// <summary>Toglie un posto aggiunto, dopo la conferma. Le copie nelle partite restano.</summary>
+    private async Task RemoveSpotAsync(int id)
+    {
+        bool confirmed = await dialogs.ConfirmAsync(Strings.RemoveSpot, Strings.RemoveSpotText, Strings.RemoveSpot,
+            destructive: true);
+
+        if (!confirmed)
+            return;
+
+        Result result = Manager.RemoveSpot(id);
+
+        if (!result.Success)
+            await dialogs.InformAsync(Strings.TitleOperationFailed, result.Message, InfoKind.Warning);
+
+        RebuildSpotLines();
+    }
+
+    /// <summary>
+    /// Avvisa, una volta, se all'apertura è stato rimesso a posto un cambio interrotto.
+    /// </summary>
+    public async Task NoticeInterruptedSwitchAsync()
+    {
+        if (Manager.SwitchInterruptedRestored)
+        {
+            await dialogs.InformAsync(Strings.SwitchInterruptedTitle,
+                Loc.F(Strings.SwitchInterruptedRestored, Manager.Game.Name), InfoKind.Warning);
+        }
     }
 
     /// <summary>

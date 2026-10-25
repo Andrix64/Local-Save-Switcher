@@ -162,4 +162,10 @@ public sealed partial class SaveManager
 
         return Result.Ok(Strings.SpotRemoved);
     }
+
+    /// <summary>
+    /// Percorso portabile di una cartella di questo gioco (per un posto nuovo: vedi GameSpots).
+    /// </summary>
+    public string PortableFolder(string folder) =>
+        SavePathResolver.ToPortable(folder, SaveLookup.ContextFor(provider, Account, Game, Platform.Current.GetKnownFolders()));
 }

@@ -398,12 +398,48 @@ public sealed partial class LearnSavesViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Usa la cartella scelta con il pulsante radio.
+    /// Usa le cartelle scelte: la prima è la cartella principale, come sempre. Le altre
+    /// diventano posti extra se il gioco non ha ancora partite; con partite si aggiungono
+    /// da "Aggiungi un'altra cartella" (ci vogliono le copie per le partite).
     /// </summary>
     [RelayCommand]
     private async Task UseSelectedAsync()
     {
-        if (Candidates.FirstOrDefault(candidate => candidate.IsSelected) is { } item)
-            await UseCandidateAsync(item);
+        List<LearnCandidate> picked = Candidates.Where(candidate => candidate.IsSelected).ToList();
+
+        if (picked.Count == 0)
+            return;
+
+        if (!await SaveFolderChoice.ConfirmAndSaveAsync(dialogs, picked[0].Folder, game, account, provider,
+                SaveSource.Learned))
+            return;
+
+        if (picked.Count > 1 && SaveFolderChoice.HasPlaythroughs(dataFolder))
+        {
+            Log.Write("Cartelle extra non aggiunte a " + game.Name + ": il gioco ha partite, si aggiungono da Altra cartella.");
+        }
+        else if (picked.Count > 1)
+        {
+            var spots = new GameSpots(dataFolder);
+            spots.Load();
+
+            foreach (LearnCandidate extra in picked.Skip(1))
+            {
+                string portable = SaveLookup.PortableFolder(provider, account, game, extra.Folder);
+
+                try
+                {
+                    spots.Add(extra.Folder, "", portable, SaveSource.Learned);
+                }
+                catch (ArgumentException ex)
+                {
+                    Log.Write("Cartella non aggiunta: " + extra.Folder, ex);
+                }
+            }
+
+            spots.Save();
+        }
+
+        Finished?.Invoke(true);
     }
 }
