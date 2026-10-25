@@ -38,19 +38,28 @@ Games that were tested are listed in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.
 
 Requirements: Windows 10 or 11, 64-bit, and Steam installed.
 
-> **Digital signature.** Releases published on GitHub will be signed by
-> SignPath Foundation (see [CODE_SIGNING.md](CODE_SIGNING.md)) once signing is
-> active: each release page says whether the exe is signed. An unsigned exe
-> may show "Windows protected your PC" (choose *More info → Run anyway*), and
-> Smart App Control, if it's on, may block it. Even when signed, SmartScreen
-> may warn for a while until the program becomes known.
+> **The exe is not digitally signed.** Signing it needs a certificate that
+> costs money every year, and LSS is a free hobby project. What this means:
+>
+> - **SmartScreen** may show "Windows protected your PC": choose
+>   *More info → Run anyway*. It only asks the first time.
+> - **Smart App Control** (Windows 11), if it's on, may refuse to start the
+>   program, with no way to allow it for a single app. If that happens, the
+>   only options are to turn Smart App Control off (Settings → Privacy &
+>   security → Windows Security → App & browser control; it can't be turned
+>   back on without reinstalling Windows) or to use LSS on another computer.
+> - To check that the zip is the one built on GitHub, compare it with the
+>   `.sha256` file next to it on the releases page.
+>
+> Every release is built by GitHub Actions from the code in this repository:
+> anyone can see how.
 
 ## Installation — Linux
 
 Linux x64 only. Steam can be installed natively, as Flatpak or as Snap: all
 three are supported. Pick the file for your distribution from the
 [releases page](https://github.com/Andrix64/Local-Save-Switcher/releases),
-where `<version>` is the version in the file name, for example `1.0.0-beta.1`.
+where `<version>` is the version in the file name, for example `1.0.0`.
 
 | Distribution | File | Command |
 |---|---|---|
@@ -177,8 +186,9 @@ and attach the file `log.txt` from the data folder (see above).
 
 ## License
 
-[MIT](LICENSE). What's new in each version: [CHANGELOG](CHANGELOG.md). For
-developers: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+[MIT](LICENSE). What's new in each version: [CHANGELOG](CHANGELOG.md).
+LSS collects no data: see [PRIVACY.md](PRIVACY.md). For developers:
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 *Steam is a trademark of Valve Corporation. LSS is not affiliated with or
 endorsed by Valve. Game names are trademarks of their owners.*

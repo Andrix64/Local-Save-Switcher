@@ -64,7 +64,7 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
    where the plan says, a test fails twice after fixing, a package version
    doesn't exist): **stop**, don't improvise a large change. Write what you
    found under "Notes" in `PROGRESS.md` and ask Andrix.
-7. **Tasks marked 👤** must be done by Andrix (they touch GitHub, SignPath,
+7. **Tasks marked 👤** must be done by Andrix (they touch GitHub,
    the real game or another computer). Skip them, leave them unticked, and
    continue with the next task that doesn't depend on them.
 8. **Never touch the real Steam folder or the real app data.** Tests work
@@ -122,7 +122,7 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 | Systems | Windows 10/11 x64; Linux x64 (Ubuntu 22.04+, Debian 12+, Fedora 40+, openSUSE, Arch and derivatives, SteamOS desktop mode). |
 | UI | Avalonia **12.1.4**, CommunityToolkit.Mvvm **8.4.2**, MVVM, compiled bindings. |
 | Data folder | `Environment.SpecialFolder.LocalApplicationData` + `LSS` (Windows `%LOCALAPPDATA%\LSS`, Linux `~/.local/share/LSS`). Until phase F it stays `ControlSaveManager`. |
-| Signing | SignPath, Windows only, only `LSS.exe` (the native Avalonia dlls are already signed by Microsoft and AvaloniaUI). |
+| Signing | **None.** SignPath refused the free signing (2026-10-25); 1.0 ships with the Windows exe unsigned, explained in the README. The native Avalonia dlls are already signed by Microsoft and AvaloniaUI. |
 | Linux packages | `.tar.gz`, `.deb`, `.rpm`, AppImage for 1.0; Flatpak and AUR later. |
 
 ## Target layout (after phase G)

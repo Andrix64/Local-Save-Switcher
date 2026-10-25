@@ -13,14 +13,14 @@
     Crea lo zip anche con modifiche non committate.
 
 .PARAMETER Exe
-    Usa questo exe invece di pubblicarne uno nuovo: per esempio quello firmato
-    da SignPath nella build di GitHub Actions.
+    Usa questo exe invece di pubblicarne uno nuovo: per esempio quello già
+    pubblicato dalla build di GitHub Actions.
 
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File scripts\release.ps1
 
 .EXAMPLE
-    pwsh scripts/release.ps1 -SkipTests -Exe signed/LSS.exe
+    pwsh scripts/release.ps1 -SkipTests -Exe bin/publish/win-x64/LSS.exe
 #>
 param(
     [switch]$SkipTests,

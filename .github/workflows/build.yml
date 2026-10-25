@@ -1,18 +1,12 @@
-# Build, test, SignPath signing (version tags only), Linux packages and one release with everything.
+# Build, test, Linux packages and one release with everything.
 #
 # Jobs:
 #   test     Windows and Ubuntu
-#   windows  zip with the exe (signed on version tags)
+#   windows  zip with the exe
 #   linux    tar.gz, deb, rpm and AppImage, smoke-tested in Ubuntu, Fedora and the AppImage
 #   release  draft release with all the files (version tags only)
 #
-# Signing setup (Settings → Secrets and variables → Actions):
-#   secret   SIGNPATH_API_TOKEN            token of the SignPath CI user
-#   variable SIGNPATH_ORGANIZATION_ID      SignPath organization ID
-#   variable SIGNPATH_PROJECT_SLUG         project slug (e.g. local-save-switcher)
-#   variable SIGNPATH_SIGNING_POLICY_SLUG  optional, "release-signing" by default
-# Without SIGNPATH_API_TOKEN the build still works and the zip is not signed.
-# See docs/DEVELOPMENT.md, section "Code signing".
+# The Windows exe is not code-signed (see docs/DEVELOPMENT.md, "Code signing").
 
 name: Build
 
@@ -25,7 +19,6 @@ on:
 
 permissions:
   contents: write   # release on tags
-  actions: read     # SignPath downloads the exe to sign from the artifacts
 
 jobs:
   test:
@@ -51,11 +44,7 @@ jobs:
     needs: test
 
     env:
-      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
       IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
-
-    outputs:
-      signed: ${{ steps.zip.outputs.signed }}
 
     steps:
       - uses: actions/checkout@v7
@@ -79,43 +68,9 @@ jobs:
       - name: Single exe
         run: dotnet publish src/Lss.App/Lss.App.csproj -p:PublishProfile=win-x64 --nologo
 
-      - name: Exe to sign
-        id: unsigned
-        uses: actions/upload-artifact@v7
-        with:
-          name: unsigned-exe
-          path: bin/publish/win-x64/LSS.exe
-          if-no-files-found: error
-
-      # Releases only: every signing request must be approved on SignPath.
-      - name: Sign with SignPath
-        if: env.IS_RELEASE == 'true' && env.SIGNPATH_API_TOKEN != ''
-        uses: signpath/github-action-submit-signing-request@v1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
-          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
-          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: bin/signed
-
-      - name: Check the signature
-        if: env.IS_RELEASE == 'true' && env.SIGNPATH_API_TOKEN != ''
-        shell: pwsh
-        run: |
-          $signature = Get-AuthenticodeSignature bin/signed/LSS.exe
-          "Signature: $($signature.Status) - $($signature.SignerCertificate.Subject)"
-          if ($signature.Status -ne 'Valid') { throw "The signed exe does not have a valid signature." }
-
       - name: Zip
-        id: zip
         shell: pwsh
-        run: |
-          $exe = if (Test-Path bin/signed/LSS.exe) { 'bin/signed/LSS.exe' } else { 'bin/publish/win-x64/LSS.exe' }
-          ./scripts/release.ps1 -SkipTests -Exe $exe
-          $signed = if ($exe -like 'bin/signed/*') { 'true' } else { 'false' }
-          "signed=$signed" >> $env:GITHUB_OUTPUT
+        run: ./scripts/release.ps1 -SkipTests -Exe bin/publish/win-x64/LSS.exe
 
       - name: Zip artifact
         if: always()
@@ -201,8 +156,6 @@ jobs:
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: dist/*
           body: |
-            ${{ needs.windows.outputs.signed == 'true' && 'The Windows exe is signed by SignPath Foundation.' || 'Warning: the Windows exe is NOT signed (SignPath not configured or signing failed).' }}
-
-            The Linux packages are not signed: check each file against its .sha256.
+            The files are not code-signed. On Windows, SmartScreen may say "Windows protected your PC": choose *More info → Run anyway*. With Smart App Control on, Windows may refuse to start it (see the [README](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md#installation--windows)). Check each file against its `.sha256`.
 
             What's new is in the [CHANGELOG](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md).

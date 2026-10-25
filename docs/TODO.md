@@ -4,29 +4,17 @@ What's missing, in order of priority. Bugs are in
 [KNOWN_BUGS.md](KNOWN_BUGS.md); what's already done is in the
 [CHANGELOG](../CHANGELOG.md).
 
-## Before 1.0
+## Known limits of 1.0
 
-- [ ] **Code signing.** Urgent. On 2026-10-23, on the development PC with Smart
-  App Control on, every new build of Control Save Manager was blocked, so
-  anyone with Smart App Control on may not be able to start an unsigned
-  version. A self-signed certificate isn't enough. Chosen path: free signing
-  by SignPath Foundation with the GitHub Actions build, already in place (see
-  [DEVELOPMENT.md](DEVELOPMENT.md#code-signing)). Still missing:
-  - [x] check that the first build on GitHub succeeds;
-  - [x] publish the first version (0.9.0, unsigned);
-  - [ ] apply at [signpath.org](https://signpath.org/);
-  - [ ] configure project and token on SignPath and the secrets/variables on
-    GitHub;
-  - [ ] make a tagged release and check that the signed exe starts with Smart
-    App Control on.
-- [ ] **First beta** (`1.0.0-beta.1`): tag, pre-release, see the plan in
-  `docs/plan/`.
-- [ ] **Real Linux check.** The packages are installed and started in
-  containers on Ubuntu, Debian, Fedora and Arch, but Steam and a desktop were
-  never used. Check on a real desktop: a game started and stopped from LSS,
-  the running-game detection, and the Steam installs (native, Flatpak, Snap).
-- [ ] **Steam Deck** (desktop mode): the AppImage starts, the games list is
-  right, and a playthrough switch works.
+- **The Windows exe is not code-signed.** SignPath Foundation refused the free
+  signing (2026-10-25) and paid signing is not planned. SmartScreen warns the
+  first time; with Smart App Control on, Windows may refuse to start LSS. See
+  the README and [DEVELOPMENT.md](DEVELOPMENT.md#code-signing).
+- **Linux with a real Steam library.** The packages install and start on
+  Ubuntu, Debian, Fedora, Arch and the Steam Deck, and the Deck's games list
+  is right. Not checked yet: a playthrough switch, a game started and stopped
+  from LSS, and Steam as Flatpak or Snap. On the Deck every game saves outside
+  `userdata`, so LSS can't manage any of them there yet (see "After 1.0").
 
 ## Manual checks with the real game
 
@@ -56,8 +44,10 @@ Still to do, because they need actions inside the game or a choice on Steam:
   for the Steam folders, `--socket=wayland`, `--socket=fallback-x11`. Process
   detection works only through `registry.vdf` inside the sandbox.
 - [ ] **AUR** package `lss-bin`.
-- [ ] **Games that save outside `userdata`** (for example in Documents or in the
-  game folder): today LSS lists them as *Other games* and doesn't manage them.
+- [ ] **Games that save outside `userdata`** (for example in Documents, in the
+  game folder or, on Linux and the Steam Deck, inside the Proton prefix):
+  today LSS lists them as *Other games* and doesn't manage them. This is the
+  most important change for 2.0, with other launchers.
 - [ ] **macOS.**
 - [ ] **Desktop shortcut "Play <playthrough>".** One click loads the playthrough
   and starts the game without opening the app. To be checked with Smart App

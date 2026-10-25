@@ -213,25 +213,21 @@ Commit: `Version 1.0.0-beta.1`
 
 ---
 
-## J6 — 👤 SignPath (Andrix)
+## J6 — 👤 SignPath (Andrix) — closed, refused
 
-Follow `docs/DEVELOPMENT.md` → "Code signing", with the new names: apply
-on signpath.org for `Andrix64/Local-Save-Switcher` (link
-`CODE_SIGNING.md`), create the project with an artifact configuration for
-`LSS.exe`, policy `release-signing`, CI user and token; on GitHub the
-secret `SIGNPATH_API_TOKEN` and the variables `SIGNPATH_ORGANIZATION_ID`,
-`SIGNPATH_PROJECT_SLUG`, `SIGNPATH_SIGNING_POLICY_SLUG`. Write in
-`PROGRESS.md` when it's approved.
+The application was sent on 2026-10-24 and **refused** on 2026-10-25.
+Decision with Andrix: release without code signing. The SignPath steps
+were removed from the workflow; the README explains SmartScreen and Smart
+App Control to users; `CODE_SIGNING.md` became `PRIVACY.md` (its privacy
+part); `docs/DEVELOPMENT.md` → "Code signing" says what's left if signing
+is ever wanted (paid only).
 
 ---
 
-## J7 — Further betas
+## J7 — Further betas — skipped
 
-For each fix round: the agent bumps `<Version>` to `1.0.0-beta.N`, adds a
-CHANGELOG section, commits (`Version 1.0.0-beta.N`); 👤 Andrix tags,
-approves the signature on SignPath, checks the draft says "signed by
-SignPath Foundation", tries the signed exe with Smart App Control on, and
-publishes as pre-release.
+Planned only to check the signed exe; without signing, 1.0.0 follows
+beta 1 directly.
 
 ---
 
@@ -240,21 +236,20 @@ publishes as pre-release.
 Release when, all written in `PROGRESS.md`:
 
 - no open bug in `docs/KNOWN_BUGS.md`;
-- G13, H8, I7 done;
-- at least 3 games in `docs/COMPATIBILITY.md`;
-- tried on Windows 11 (Smart App Control on, signed exe), Ubuntu, Fedora,
+- G13, I7 done; H8 as far as the hardware allows (see `docs/TODO.md`,
+  "Known limits of 1.0");
+- tried on Windows 11, Ubuntu, Debian, Fedora, Arch (containers) and the
   Steam Deck;
 - migration from Control Save Manager tried with real data (F4).
 
 Agent: `<Version>1.0.0</Version>`, CHANGELOG `## 1.0.0 — <date>` (summary of
 the betas), metainfo `<release version="1.0.0" date="<date>" />` (remove
-the beta release lines), commit `Version 1.0.0`.
+the beta release lines), commit `Version 1.0.0`, Linux check.
 
-👤 Andrix: merge to `main`, `git tag v1.0.0`, push, approve the signature,
-download every file from the draft and check: `.sha256`, the Windows
-signature (`Get-AuthenticodeSignature`), install of each Linux package;
-publish. In the old `v0.9.0` release add a line "Continued as LSS — Local
-Save Switcher" with the link.
+Andrix (or the agent with `gh`, when Andrix asks): merge to `main`,
+`git tag v1.0.0`, push, check the draft (every file and its `.sha256`),
+publish it as the latest release. In the old `v0.9.0` release add a line
+"Continued as LSS — Local Save Switcher" with the link.
 
 ---
 

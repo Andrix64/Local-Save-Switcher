@@ -3,6 +3,26 @@
 All notable changes, newest first. Versions follow
 [Semantic Versioning](https://semver.org/).
 
+## 1.0.0 — 2026-10-25
+
+First stable release of **LSS — Local Save Switcher**: multiple playthroughs
+for your PC games, on Windows and Linux. Today it works with Steam games that
+keep their saves in Steam's `userdata` folder. Everything in
+1.0.0-beta.1 (below), plus:
+
+- LSS opens even when no game can be managed yet, for example on a Steam
+  Deck where every game saves inside Proton: *Other games* opens by itself
+  and says why each game isn't supported.
+- Clearer message when no game keeps its saves in `userdata`.
+
+Known limits:
+
+- The Windows exe is **not code-signed**. SmartScreen may warn the first time
+  (*More info → Run anyway*); with Smart App Control on, Windows may refuse to
+  start it. See the README.
+- Games that save outside `userdata` (in Documents, in the game folder, inside
+  Proton) and other launchers are not supported yet.
+
 ## 1.0.0-beta.1 — 2026-10-24
 
 First beta of **LSS — Local Save Switcher**, the new name of Control Save

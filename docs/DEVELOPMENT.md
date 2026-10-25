@@ -379,8 +379,8 @@ language) and `Strings.it.resx` (Italian). The language follows the system
 | `scripts/release.sh` | Builds the Linux packages: tar.gz, deb, rpm, AppImage. |
 | `scripts/linux-check.sh` | Tests and packages on a Linux machine with Docker (see below). |
 | `packaging/linux/` | Desktop file, metainfo, icons, `nfpm.yaml` (deb and rpm), `lss.sh`. |
-| `.github/workflows/build.yml` | Tests, Windows and Linux builds, SignPath signing and draft release on GitHub. |
-| `CODE_SIGNING.md` | Signing policy required by SignPath. |
+| `.github/workflows/build.yml` | Tests, Windows and Linux builds and draft release on GitHub. |
+| `PRIVACY.md` | What LSS does and doesn't do with data. |
 | `tests/Lss.Tests/` | xUnit tests (run on Windows and Linux). |
 | `tools/UiScreenshots/` | Pictures of every window with fake data (see below). |
 
@@ -494,56 +494,35 @@ Every file has a `.sha256` next to it. The packages install `lss` in
 
 ## Build on GitHub
 
-The repository is on [GitHub](https://github.com/Andrix64/Local-Save-Switcher)
-(needed for free signing, see below). The `.github/workflows/build.yml`
-workflow runs on every push to `main` and `v*` tags, on every pull request and
-on demand (*Run workflow*):
+The repository is on [GitHub](https://github.com/Andrix64/Local-Save-Switcher).
+The `.github/workflows/build.yml` workflow runs on every push to `main` and
+`v*` tags, on every pull request and on demand (*Run workflow*):
 
 1. `test`: the tests on Windows and Ubuntu;
 2. `windows`: on tags it checks that the tag matches `<Version>`; it publishes
-   the single exe and uploads it as the `unsigned-exe` artifact; **on tags
-   only**, if SignPath is configured, it sends the exe to SignPath, waits for
-   the signature (to be approved manually on SignPath) and checks that it's
-   valid; then it builds the zip with `scripts/release.ps1 -Exe <exe>` and
+   the single exe, builds the zip with `scripts/release.ps1 -Exe <exe>` and
    uploads it as the `lss-windows` artifact, with the test results;
 3. `linux`: on Ubuntu 22.04 it runs `scripts/release.sh` and checks the packages
    by installing them: deb on Ubuntu 24.04, rpm on Fedora 42, AppImage on
    Ubuntu 24.04. The packages are uploaded as `lss-linux`;
 4. `release`: on tags only, it prepares a **draft** release with the zips,
-   the packages and the `.sha256` files, saying whether the exe is signed or not.
-   A tag with `-` (for example `v1.0.0-beta.1`) is a pre-release.
-
-Without SignPath the build works anyway: the zip just isn't signed.
+   the packages and the `.sha256` files. A tag with `-` (for example
+   `v1.0.0-beta.1`) is a pre-release.
 
 ## Code signing
 
-Smart App Control and SmartScreen (see below) require a signature from an
-authority trusted by Microsoft: a self-signed certificate isn't enough.
-Signing is free through [SignPath Foundation](https://signpath.org/), which
-signs open source projects with an OSI license (MIT here) built by an
-automated build in a public repository. The project's signing policy is in
-[CODE_SIGNING.md](../CODE_SIGNING.md). Only `LSS.exe` is signed: the native
-Avalonia dlls are already signed by Microsoft and AvaloniaUI.
+The Windows exe is **not** code-signed. Smart App Control and SmartScreen
+(see below) want a signature from an authority trusted by Microsoft; a
+self-signed certificate isn't enough. Free signing through SignPath
+Foundation was tried and the application was refused (2026-10-25). The
+remaining options cost money every year (for example Azure Trusted Signing or
+a code signing certificate from a certificate authority) and are not planned.
+The README tells users what to do with SmartScreen and Smart App Control.
 
-One-time setup:
-
-1. Publish at least one version (even unsigned) and apply at
-   [signpath.org](https://signpath.org/), pointing to the repository and the
-   [CODE_SIGNING.md](../CODE_SIGNING.md) page.
-2. On SignPath: create the project linked to the GitHub repository, with an
-   *artifact configuration* that signs `LSS.exe` (Authenticode)
-   and the `release-signing` *signing policy*; create a CI user and its token.
-3. On GitHub, in *Settings → Secrets and variables → Actions*:
-   - secret `SIGNPATH_API_TOKEN`: the CI user's token;
-   - variable `SIGNPATH_ORGANIZATION_ID`: the organization ID;
-   - variable `SIGNPATH_PROJECT_SLUG`: the project slug;
-   - variable `SIGNPATH_SIGNING_POLICY_SLUG`: optional, `release-signing` by
-     default.
-
-SignPath gives the exact names (slug, policy) when it approves the project:
-check them and adjust the variables. The name and version of the
-`signpath/github-action-submit-signing-request` action should also be checked
-against their documentation when setting it up.
+The native Avalonia dlls inside the exe (SkiaSharp, HarfBuzz, ANGLE) are
+already signed by Microsoft and AvaloniaUI. If signing is added one day, only
+`LSS.exe` needs it: add a signing step to the `windows` job between
+"Single exe" and "Zip", and pass the signed exe to `release.ps1 -Exe`.
 
 ## Release
 
@@ -562,11 +541,10 @@ against their documentation when setting it up.
    git push origin main v1.0.0-beta.1
    ```
 
-3. On SignPath, approve the signing request (it comes from GitHub Actions).
-4. On GitHub, in **Releases**, check the draft (it must say the exe is signed
-   by SignPath Foundation) and publish it. Pre-releases are published as such.
+3. On GitHub, in **Releases**, check the draft (every file and its `.sha256`)
+   and publish it. Pre-releases are published as such.
 
-Without GitHub, the Windows zip can also be built locally (unsigned):
+Without GitHub, the Windows zip can also be built locally:
 
 ```bash
 powershell -ExecutionPolicy Bypass -File scripts/release.ps1
@@ -592,9 +570,11 @@ of the same sources started. A deterministic build always produces the same
 file, so rebuilding didn't help. That's why Debug builds are not
 deterministic: if one is blocked, rebuild everything (VS Code task `rebuild`,
 or `dotnet build --no-incremental`) and the new file usually passes. On
-2026-10-23 every new build of Control Save Manager was blocked, which is why
-signing is now urgent (see [TODO](TODO.md)). The event log is
-`Microsoft-Windows-CodeIntegrity/Operational` (events 3033 and 3077).
+2026-10-23 every new build of Control Save Manager was blocked; on 2026-10-24
+the unsigned Avalonia `LSS.exe` started with Smart App Control on. Since the
+exe is not signed, users with Smart App Control on may still be blocked: see
+the README. The event log is `Microsoft-Windows-CodeIntegrity/Operational`
+(events 3033 and 3077).
 
 ## Other documents
 
