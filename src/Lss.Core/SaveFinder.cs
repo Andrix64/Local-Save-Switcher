@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Lss;
 
 /// <summary>Cartella in cui cercare i file cambiati, con la profondità massima.</summary>
@@ -5,6 +7,13 @@ namespace Lss;
 /// <param name="MaxDepth">Livelli di sottocartelle da leggere sotto Folder.</param>
 /// <param name="GameOwned">true se tutto quello che sta dentro appartiene a questo gioco.</param>
 public sealed record SearchRoot(string Folder, int MaxDepth, bool GameOwned);
+
+/// <summary>File cambiato dopo l'avvio del gioco.</summary>
+/// <param name="Path">Percorso completo del file.</param>
+/// <param name="Size">Dimensione in byte.</param>
+/// <param name="WrittenUtc">Ultima scrittura (UTC).</param>
+/// <param name="Root">Cartella di ricerca in cui è stato trovato.</param>
+public sealed record ChangedFile(string Path, long Size, DateTime WrittenUtc, SearchRoot Root);
 
 /// <summary>
 /// Trova la cartella dei salvataggi di un gioco guardando i file cambiati
@@ -167,6 +176,193 @@ internal static partial class SaveFinder
     /// </summary>
     private static string Full(string path) =>
         Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+    /// <summary>
+    /// File cambiati dopo sinceUtc nelle cartelle date, senza entrare nelle
+    /// cartelle da saltare. Si ferma dopo timeLimit o se cancel è richiesto:
+    /// partial dice che la lettura non è completa. Non scrive nulla.
+    /// </summary>
+    public static IReadOnlyList<ChangedFile> FindChanged(IReadOnlyList<SearchRoot> roots, DateTime sinceUtc,
+        IReadOnlyList<string> skipFolders, TimeSpan timeLimit, CancellationToken cancel, out bool partial) =>
+        Scan(roots, sinceUtc, skipFolders, timeLimit, cancel, out partial, null);
+
+    /// <summary>
+    /// Come FindChanged; visited, se non è null, riceve le cartelle lette (per i test).
+    /// </summary>
+    internal static IReadOnlyList<ChangedFile> Scan(IReadOnlyList<SearchRoot> roots, DateTime sinceUtc,
+        IReadOnlyList<string> skipFolders, TimeSpan timeLimit, CancellationToken cancel, out bool partial,
+        List<string>? visited)
+    {
+        var walker = new Walker(sinceUtc, skipFolders, timeLimit, cancel, visited);
+
+        foreach (SearchRoot root in roots)
+        {
+            if (!walker.Walk(root.Folder, root, 0))
+                break;
+        }
+
+        partial = walker.Stopped;
+        return walker.Found;
+    }
+
+    // Cartelle che non tengono salvataggi (cache, programmi, log...): non si leggono.
+    private static readonly HashSet<string> SkipNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Temp", "tmp", "Cache", "Caches", ".cache", "cache2", "GPUCache", "Code Cache", "ShaderCache",
+        "shadercache", "D3DSCache", "DXCache", "GLCache", "NVIDIA", "NVIDIA Corporation", "AMD", "Intel",
+        "Microsoft", "Packages", "Google", "Mozilla", "BraveSoftware", "discord", "Spotify", "CrashDumps",
+        "Crashes", "CrashReports", "crashpad", "logs", "htmlcache", "webcache", "mesa_shader_cache",
+        "fontconfig", "pulse", "Trash", ".Trash-1000", "node_modules", ".git"
+    };
+
+    // Cartelle del sistema che si saltano solo direttamente sotto la radice di un disco.
+    private static readonly HashSet<string> DriveRootNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "windows", "Program Files", "Program Files (x86)"
+    };
+
+    // Estensioni di file che non sono salvataggi (log, temporanei, dump, lock).
+    private static readonly HashSet<string> IgnoredExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".log", ".tmp", ".dmp", ".etl", ".lock", ".pid", ".pf"
+    };
+
+    /// <summary>
+    /// Percorre le cartelle di ricerca e raccoglie i file cambiati. Ogni file
+    /// compare una volta sola (vince la prima radice in cui è trovato).
+    /// </summary>
+    private sealed class Walker(DateTime sinceUtc, IReadOnlyList<string> skipFolders, TimeSpan limit,
+        CancellationToken cancel, List<string>? visited)
+    {
+        private readonly Stopwatch clock = Stopwatch.StartNew();
+        private readonly HashSet<string> seen = new(OperatingSystem.IsWindows()
+            ? StringComparer.OrdinalIgnoreCase
+            : StringComparer.Ordinal);
+
+        public List<ChangedFile> Found { get; } = [];
+
+        /// <summary>true se la lettura si è fermata prima della fine.</summary>
+        public bool Stopped { get; private set; }
+
+        /// <summary>
+        /// Legge una cartella e le sottocartelle fino alla profondità della radice.
+        /// false se bisogna fermarsi del tutto.
+        /// </summary>
+        public bool Walk(string folder, SearchRoot root, int level)
+        {
+            if (IsSkipped(folder))
+                return true;
+
+            if (!KeepGoing())
+                return false;
+
+            visited?.Add(folder);
+
+            string[] entries;
+
+            try
+            {
+                entries = Directory.GetFileSystemEntries(folder);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Log.Write("Cartella non letta durante la ricerca: " + folder, ex);
+                return true;
+            }
+
+            foreach (string entry in entries)
+            {
+                if (!KeepGoing())
+                    return false;
+
+                FileAttributes attributes;
+
+                try
+                {
+                    attributes = File.GetAttributes(entry);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    Log.Write("Elemento non letto durante la ricerca: " + entry, ex);
+                    continue;
+                }
+
+                // Mai seguire i collegamenti simbolici né le giunzioni.
+                if (attributes.HasFlag(FileAttributes.ReparsePoint))
+                    continue;
+
+                if (attributes.HasFlag(FileAttributes.Directory))
+                {
+                    if (level < root.MaxDepth && !Walk(entry, root, level + 1))
+                        return false;
+                }
+                else
+                {
+                    Consider(entry, root);
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Aggiunge il file se è cambiato dopo sinceUtc e non è un file da ignorare.
+        /// </summary>
+        private void Consider(string file, SearchRoot root)
+        {
+            string name = Path.GetFileName(file);
+
+            if (name.EndsWith('~') || IgnoredExtensions.Contains(Path.GetExtension(name)))
+                return;
+
+            try
+            {
+                var info = new FileInfo(file);
+                DateTime changed = info.LastWriteTimeUtc > info.CreationTimeUtc ? info.LastWriteTimeUtc : info.CreationTimeUtc;
+
+                if (changed < sinceUtc || !seen.Add(file))
+                    return;
+
+                Found.Add(new ChangedFile(file, info.Length, info.LastWriteTimeUtc, root));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Log.Write("File non letto durante la ricerca: " + file, ex);
+            }
+        }
+
+        /// <summary>
+        /// true se la cartella non si legge: nome di sistema, radice di un disco
+        /// per i nomi di Windows, o dentro una cartella da saltare.
+        /// </summary>
+        private bool IsSkipped(string folder)
+        {
+            string name = Path.GetFileName(folder);
+
+            if (SkipNames.Contains(name))
+                return true;
+
+            if (DriveRootNames.Contains(name) && Path.GetDirectoryName(folder) == Path.GetPathRoot(folder))
+                return true;
+
+            StringComparison comparison = OperatingSystem.IsWindows()
+                ? StringComparison.OrdinalIgnoreCase
+                : StringComparison.Ordinal;
+
+            return skipFolders.Any(skip => string.Equals(folder, skip, comparison) || IsInside(folder, skip, comparison));
+        }
+
+        /// <summary>
+        /// false (e segna Stopped) se la richiesta è annullata o il tempo è finito.
+        /// </summary>
+        private bool KeepGoing()
+        {
+            if (cancel.IsCancellationRequested || clock.Elapsed > limit)
+                Stopped = true;
+
+            return !Stopped;
+        }
+    }
 
     /// <summary>
     /// Cartelle figlie di una cartella, o nessuna se non si legge.
