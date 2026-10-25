@@ -140,4 +140,50 @@ public sealed class SaveManagerSpotsTests : IDisposable
         Assert.False(opened.Value!.SwitchInterruptedRestored);
         AssertGame("before");
     }
+
+    [Fact]
+    public void UnsavedProgressInTheSecondSpotIsDetected()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+        Assert.False(manager.HasUnsavedProgress());
+
+        TestFolder.Write(Path.Combine(Game2, "settings.ini"), "progress");
+
+        Assert.True(manager.HasUnsavedProgress());
+    }
+
+    [Fact]
+    public void AFullRoundKeepsEverySpot()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        WriteGame("second");
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+
+        // Cambio: Anna prende i salvataggi di prima; il gioco diventa "first".
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+        AssertGame("first");
+
+        // Progressi solo nel secondo posto, poi salvataggio nel profilo.
+        TestFolder.Write(Path.Combine(Game2, "settings.ini"), "progress");
+        Assert.True(manager.SaveProgress().Success);
+        Assert.Equal("progress", File.ReadAllText(Path.Combine(ProfileFolder("Anna"), ".lss-posizioni", "2", "settings.ini")));
+
+        // Savestate, poi il gioco cambia e si torna al savestate.
+        Assert.True(manager.CreateSavestate("point").Success);
+        WriteGame("changed");
+        Snapshot point = manager.GetSavestates()[0];
+
+        Assert.True(manager.RestoreSavestate(point).Success);
+        Assert.Equal("progress", File.ReadAllText(Path.Combine(Game2, "settings.ini")));
+        Assert.Equal("first", File.ReadAllText(Path.Combine(Game1, "slot.sav")));
+
+        // Il profilo di Bea si elimina con tutti i suoi posti.
+        Assert.True(manager.DeleteProfile("Profilo_Bea").Success);
+        Assert.False(Directory.Exists(ProfileFolder("Bea")));
+    }
 }

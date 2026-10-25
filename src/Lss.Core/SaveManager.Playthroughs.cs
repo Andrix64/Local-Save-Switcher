@@ -440,7 +440,8 @@ public sealed partial class SaveManager
     // OPZIONI CONDIVISE
 
     /// <summary>
-    /// File da tenere uguali in tutte le partite, relativi a SavePath.
+    /// File da tenere uguali in tutte le partite, relativi a SavePath. Sono solo
+    /// del posto 1: gli altri posti (SaveSet) non hanno file condivisi.
     /// </summary>
     public IReadOnlyList<string> SharedFiles => State.SharedFiles ?? GameDefaults.SharedFiles(Game.Id);
 

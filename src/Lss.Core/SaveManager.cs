@@ -498,7 +498,7 @@ public sealed partial class SaveManager
     /// </summary>
     public bool GameSavesAreEmpty()
     {
-        return FileOps.HasNoSaveFiles(SavePath);
+        return saves.GameIsEmpty();
     }
 
     /// <summary>
@@ -512,9 +512,7 @@ public sealed partial class SaveManager
 
         try
         {
-            return !FileOps.FoldersAreEqual(
-                SavePath,
-                Path.Combine(ProfilesPath, State.ActiveProfile));
+            return !saves.GameEquals(Path.Combine(ProfilesPath, State.ActiveProfile));
         }
         catch
         {
@@ -567,7 +565,7 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, backup);
+            saves.CopyGameTo(backup);
             // Senza partita nel gioco, i salvataggi copiati diventano proprio questa partita.
             WriteBackupInfo(backup, HasActiveProfile ? State.ActiveProfile : profileName, BackupKind.Create, profileName);
         }
@@ -578,7 +576,7 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, profile);
+            saves.CopyGameTo(profile);
         }
         catch (Exception ex)
         {
@@ -857,13 +855,13 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.ReplaceFolder(SavePath, profile);
+            saves.ReplaceSnapshotFromGame(profile);
         }
         catch (Exception ex)
         {
             try
             {
-                FileOps.ReplaceFolder(backup, profile);
+                FileOps.ReplaceFolder(backup, profile, carryExtraSpots: true);
 
                 return Result.Fail(
                     Loc.F(Strings.SaveFailedProfileRestored, ex.Message),
@@ -1034,7 +1032,7 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, path);
+            saves.CopyGameTo(path);
         }
         catch (Exception ex)
         {
