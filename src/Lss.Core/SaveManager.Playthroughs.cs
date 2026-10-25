@@ -690,22 +690,10 @@ public sealed partial class SaveManager
     /// <summary>
     /// Avvia il gioco tramite Steam (che si apre da solo se è chiuso).
     /// </summary>
-    public Result LaunchGame()
-    {
-        try
-        {
-            Platform.Current.OpenSteamUri("steam://rungameid/" + Game.Id);
-            Log.Write("Avvio di " + Game.Name + " tramite Steam");
-            return Result.Ok(Loc.F(Strings.GameLaunching, Game.Name));
-        }
-        catch (Exception ex)
-        {
-            return Log.Write("Avvio di " + Game.Name, Result.Fail(Loc.F(Strings.LaunchFailed, Game.Name, ex.Message)));
-        }
-    }
+    public Result LaunchGame() => provider.Launch(Game);
 
     /// <summary>
     /// Quando è partito il gioco in esecuzione, se si riesce a leggerlo.
     /// </summary>
-    public DateTime? GameStartTime() => Platform.Current.GameStartTime(Game);
+    public DateTime? GameStartTime() => provider.GameStartTime(Game);
 }

@@ -61,12 +61,26 @@ public sealed partial class SaveManager
     /// </summary>
     public string AccountName { get; }
 
+    /// <summary>
+    /// Account del gioco: la cartella sopra SavePath.
+    /// </summary>
+    public GameAccount Account { get; }
+
+    /// <summary>
+    /// Launcher che gestisce il gioco (Steam).
+    /// </summary>
+    private readonly IGameProvider provider;
+
     /// <param name="savePath">Cartella dei salvataggi del gioco (…\870780).</param>
     /// <param name="basePath">Cartella dei dati del gioco per un account (…\LSS\IDAccount\AppID).</param>
     /// <param name="game">Gioco gestito; se manca è Control con savePath.</param>
-    internal SaveManager(string savePath, string basePath, string accountName = "", GameInfo? game = null)
+    /// <param name="provider">Launcher del gioco; se manca è Steam.</param>
+    internal SaveManager(string savePath, string basePath, string accountName = "", GameInfo? game = null, IGameProvider? provider = null)
     {
         Game = game ?? GameInfo.Control(savePath);
+        this.provider = provider ?? new SteamProvider(Platform.Current);
+        string accountFolder = Path.GetDirectoryName(savePath) ?? "";
+        Account = new GameAccount(this.provider.Id, Path.GetFileName(accountFolder), accountName, accountFolder, null);
         SavePath = savePath;
         AccountName = accountName;
         ProfilesPath = Path.Combine(basePath, "Profili");
@@ -147,7 +161,8 @@ public sealed partial class SaveManager
                 savePath,
                 Path.Combine(appData, account.Id, GameInfo.ControlAppId),
                 account.Name,
-                game));
+                game,
+                new SteamProvider(Platform.Current)));
         }
         catch (Exception ex)
         {
@@ -158,7 +173,7 @@ public sealed partial class SaveManager
     /// <summary>
     /// Manager per un gioco di un account: dati in dataRoot/IDAccount/AppID.
     /// </summary>
-    public static Result<SaveManager> Open(string dataRoot, GameAccount account, GameInfo game)
+    public static Result<SaveManager> Open(string dataRoot, GameAccount account, GameInfo game, IGameProvider? provider = null)
     {
         if (game.Support != SupportState.Supported)
             return Result<SaveManager>.Fail(Loc.F(Strings.GameNotSupported, game.Name));
@@ -169,7 +184,8 @@ public sealed partial class SaveManager
                 game.SaveFolder,
                 Path.Combine(dataRoot, account.Id, game.Id),
                 account.Name,
-                game));
+                game,
+                provider));
         }
         catch (Exception ex)
         {
@@ -311,29 +327,7 @@ public sealed partial class SaveManager
     /// non è disattivato esplicitamente, quindi senza impostazione vale Enabled.
     /// L'impostazione generale "Abilita Steam Cloud" non viene letta.
     /// </summary>
-    public CloudState GetCloudState()
-    {
-        try
-        {
-            string? account = Path.GetDirectoryName(SavePath);
-
-            if (account == null)
-                return CloudState.Unknown;
-
-            string config = Path.Combine(account, "7", "remote", "sharedconfig.vdf");
-
-            if (!File.Exists(config))
-                return CloudState.Enabled;
-
-            string? value = Vdf.Find(Vdf.Parse(File.ReadAllText(config)), "apps", Game.Id, "cloudenabled");
-
-            return value == "0" ? CloudState.Disabled : CloudState.Enabled;
-        }
-        catch
-        {
-            return CloudState.Unknown;
-        }
-    }
+    public CloudState GetCloudState() => provider.GetCloudState(Account, Game);
 
     // PROFILI
 
@@ -1165,9 +1159,9 @@ public sealed partial class SaveManager
 
     // CONTROLLI
 
-    public bool IsGameRunning() => Platform.Current.IsGameRunning(Game);
+    public bool IsGameRunning() => provider.IsGameRunning(Game);
 
-    public static bool IsSteamRunning() => Platform.Current.IsSteamRunning();
+    public static bool IsSteamRunning() => new SteamProvider(Platform.Current).IsLauncherRunning();
 
     /// <summary>
     /// Nome di una partita: lettere (anche accentate), cifre, spazi, _ e -,

@@ -30,4 +30,26 @@ public sealed class PlatformTests : IDisposable
         Assert.Contains("steam://rungameid/123450", TestSetup.Fake.OpenedUris);
         Assert.Contains("Test", result.Message);
     }
+
+    [Fact]
+    public void RunningLaunchAndCloudGoThroughTheProvider()
+    {
+        var provider = new FakeProvider
+        {
+            Running = true,
+            StartTime = new DateTime(2026, 10, 25, 9, 0, 0),
+            Cloud = CloudState.Disabled
+        };
+        var manager = new SaveManager(folder.Game, folder.Data, "", null, provider);
+
+        Assert.True(manager.IsGameRunning());
+        Assert.Equal(provider.StartTime, manager.GameStartTime());
+        Assert.Equal(CloudState.Disabled, manager.GetCloudState());
+
+        Result result = manager.LaunchGame();
+
+        Assert.Same(provider.LaunchResult, result);
+        Assert.Single(provider.Launched);
+        Assert.Equal("870780", provider.Launched[0].Id);
+    }
 }
