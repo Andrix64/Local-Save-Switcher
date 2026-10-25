@@ -116,7 +116,7 @@ public partial class GameViewModel : ObservableObject
 
     /// <summary>
     /// Torna alla cartella trovata automaticamente: cancella la scelta in
-    /// cartella.ini e chiede di ricaricare la lista.
+    /// posti.ini e chiede di ricaricare la lista.
     /// </summary>
     [RelayCommand]
     private void UseAutomaticFolder()

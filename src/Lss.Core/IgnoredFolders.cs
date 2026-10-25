@@ -12,13 +12,13 @@ public sealed record IgnoredFolder(string Folder, string PortablePath, string Ga
 /// <summary>
 /// Cartelle che la ricerca non propone mai più: per tutti i giochi
 /// (cartelle-ignorate.ini nella cartella dei dati, chiavi Cartella.n e Aggiunta.n)
-/// o per un gioco solo (cartella.ini del gioco, chiavi Ignorate.n e Aggiunta.n).
+/// o per un gioco solo (posti.ini del gioco, chiavi Ignorate.n e Aggiunta.n).
 /// Non lancia eccezioni: un file illeggibile vale come nessuna cartella.
 /// </summary>
 internal sealed class IgnoredFolders
 {
     private const string FileName = "cartelle-ignorate.ini";
-    private const string GameFileName = "cartella.ini";
+    private const string GameFileName = "posti.ini";
     private const string GlobalKey = "Cartella";
     private const string GameKey = "Ignorate";
     private const string AddedKey = "Aggiunta";
@@ -42,8 +42,11 @@ internal sealed class IgnoredFolders
     }
 
     /// <summary>Cartelle ignorate per un gioco solo, dalla sua cartella dei dati.</summary>
-    public IReadOnlyList<IgnoredFolder> ForGame(string gameDataFolder) =>
-        Read(Path.Combine(gameDataFolder, GameFileName), gameDataFolder, GameKey);
+    public IReadOnlyList<IgnoredFolder> ForGame(string gameDataFolder)
+    {
+        ConvertOldFile(gameDataFolder);
+        return Read(Path.Combine(gameDataFolder, GameFileName), gameDataFolder, GameKey);
+    }
 
     /// <summary>Segna una cartella per tutti i giochi, nel percorso portabile dato. Non ripete una voce già presente.</summary>
     public void AddGlobal(string portablePath)
@@ -60,6 +63,7 @@ internal sealed class IgnoredFolders
     /// <summary>Segna una cartella per un gioco solo, nella sua cartella dei dati.</summary>
     public void AddForGame(string gameDataFolder, string folder)
     {
+        ConvertOldFile(gameDataFolder);
         string path = Path.Combine(gameDataFolder, GameFileName);
         List<IgnoredFolder> entries = Read(path, gameDataFolder, GameKey).ToList();
 
@@ -81,6 +85,7 @@ internal sealed class IgnoredFolders
     /// <summary>Toglie una cartella da quelle di un gioco solo.</summary>
     public void RemoveForGame(string gameDataFolder, string folder)
     {
+        ConvertOldFile(gameDataFolder);
         string path = Path.Combine(gameDataFolder, GameFileName);
         List<IgnoredFolder> entries = Read(path, gameDataFolder, GameKey).ToList();
         entries.RemoveAll(entry => string.Equals(entry.Folder, folder, StringComparison.OrdinalIgnoreCase));
@@ -121,6 +126,12 @@ internal sealed class IgnoredFolders
             string.Equals(folder, ignored, comparison)
             || folder.StartsWith(ignored.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, comparison));
     }
+
+    /// <summary>
+    /// Converte cartella.ini in posti.ini (GameSpots) prima di leggere o scrivere
+    /// le cartelle ignorate del gioco, così non si perdono le voci vecchie.
+    /// </summary>
+    private static void ConvertOldFile(string gameDataFolder) => new GameSpots(gameDataFolder).Load();
 
     /// <summary>
     /// Legge le voci di una famiglia (Cartella.n o Ignorate.n) con le loro date.

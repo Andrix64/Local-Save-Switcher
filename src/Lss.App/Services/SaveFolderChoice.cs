@@ -2,7 +2,7 @@ namespace Lss.App.Services;
 
 /// <summary>
 /// Cartella dei salvataggi scelta a mano: si chiede la cartella, si controlla
-/// che sia sicura, si chiede conferma e si salva in cartella.ini. Lo usano le
+/// che sia sicura, si chiede conferma e si salva in posti.ini. Lo usano le
 /// schede di Altri giochi e, nelle fasi M, N e P, gli altri percorsi.
 /// </summary>
 internal static class SaveFolderChoice
@@ -96,7 +96,7 @@ internal static class SaveFolderChoice
     }
 
     /// <summary>
-    /// Cartella dei dati LSS del gioco (dove sta cartella.ini), come in SaveLookup.
+    /// Cartella dei dati LSS del gioco (dove sta posti.ini), come in SaveLookup.
     /// </summary>
     public static string DataFolder(GameInfo game, GameAccount account, IGameProvider provider) =>
         Path.Combine(AppData.Root, provider.Id, account.Id, game.Id);

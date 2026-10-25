@@ -15,7 +15,7 @@ public sealed partial class IgnoredFoldersViewModel : ObservableObject
     private readonly string dataFolder;
     private readonly string gameName;
 
-    /// <param name="dataFolder">Cartella dei dati del gioco (dove sta cartella.ini).</param>
+    /// <param name="dataFolder">Cartella dei dati del gioco (dove sta posti.ini).</param>
     /// <param name="gameName">Nome del gioco, per l'ambito delle sue cartelle.</param>
     public IgnoredFoldersViewModel(string dataFolder, string gameName)
     {

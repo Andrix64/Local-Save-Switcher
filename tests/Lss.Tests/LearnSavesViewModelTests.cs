@@ -207,7 +207,7 @@ public sealed class LearnSavesViewModelTests : IDisposable
 
         await Run(model.UseSelectedCommand);
 
-        Assert.False(File.Exists(Path.Combine(DataFolder, "cartella.ini")));
+        Assert.False(File.Exists(Path.Combine(DataFolder, "posti.ini")));
     }
 
     [Fact]

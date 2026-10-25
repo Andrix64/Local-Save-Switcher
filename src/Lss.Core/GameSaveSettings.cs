@@ -1,22 +1,18 @@
 namespace Lss;
 
 /// <summary>
-/// Cartella dei salvataggi scelta a mano o trovata da LSS, salvata in
-/// cartella.ini nella cartella dati del gioco. Non lancia eccezioni: un file
-/// illeggibile vale come nessuna scelta, e gli errori di scrittura si registrano.
+/// Cartella dei salvataggi scelta a mano o trovata da LSS, e le cartelle extra
+/// da cercare: sono il posto 1 e le cartelle extra di posti.ini (GameSpots),
+/// nella cartella dati del gioco. Non lancia eccezioni: un file illeggibile
+/// vale come nessuna scelta, e gli errori di scrittura si registrano.
 /// </summary>
 internal sealed class GameSaveSettings
 {
-    private const string FileName = "cartella.ini";
-    private const string FolderKey = "CartellaSalvataggi";
-    private const string OriginKey = "Origine";
-    private const string ExtraKey = "CartelleExtra";
-
-    private readonly string file;
+    private readonly string gameDataFolder;
 
     public GameSaveSettings(string gameDataFolder)
     {
-        file = Path.Combine(gameDataFolder, FileName);
+        this.gameDataFolder = gameDataFolder;
     }
 
     /// <summary>Cartella dei salvataggi scelta o trovata, o "" se non c'è.</summary>
@@ -26,83 +22,61 @@ internal sealed class GameSaveSettings
     public SaveSource Origin { get; set; } = SaveSource.Chosen;
 
     /// <summary>
-    /// Altre cartelle in cui cercare il gioco (CartelleExtra, separate da ";"),
+    /// Altre cartelle in cui cercare il gioco (CartelleExtra in posti.ini),
     /// come sono adesso nel file.
     /// </summary>
-    public IReadOnlyList<string> ExtraFolders =>
-        IniFile.Read(file).GetValueOrDefault(ExtraKey)?
-            .Split(';', StringSplitOptions.RemoveEmptyEntries) ?? [];
+    public IReadOnlyList<string> ExtraFolders => ReadSpots(new GameSpots(gameDataFolder)).ExtraRoots;
 
     /// <summary>
     /// Aggiunge una cartella da cercare, senza ripetere una già presente, e salva il file.
     /// </summary>
     public void AddExtraFolder(string folder)
     {
-        List<string> folders = ExtraFolders.ToList();
+        GameSpots spots = ReadSpots(new GameSpots(gameDataFolder));
 
-        if (folders.Contains(folder, StringComparer.OrdinalIgnoreCase))
+        if (spots.ExtraRoots.Contains(folder, StringComparer.OrdinalIgnoreCase))
             return;
 
-        folders.Add(folder);
-
-        var values = IniFile.Read(file).Where(pair => pair.Key != ExtraKey).ToList();
-        values.Add(new(ExtraKey, string.Join(";", folders)));
-        IniFile.Write(file, values);
+        spots.AddExtraRoot(folder);
+        spots.Save();
     }
 
     /// <summary>
-    /// Legge cartella.ini. Senza file o con valori mancanti: nessuna scelta.
+    /// Legge il posto 1 (cartella e origine). Senza file o con valori mancanti: nessuna scelta.
     /// </summary>
     public void Load()
     {
-        Dictionary<string, string> values = IniFile.Read(file);
+        GameSpots spots = ReadSpots(new GameSpots(gameDataFolder));
+        SaveSpot? primary = spots.Spots.FirstOrDefault(spot => spot.Id == 1);
 
-        Folder = values.GetValueOrDefault(FolderKey) ?? "";
-        Origin = values.GetValueOrDefault(OriginKey) == "imparata" ? SaveSource.Learned : SaveSource.Chosen;
+        Folder = primary?.Folder ?? "";
+        Origin = primary?.Source ?? SaveSource.Chosen;
     }
 
     /// <summary>
-    /// Scrive cartella.ini. Con Folder "" elimina il file, se non ha altre chiavi.
-    /// Le altre chiavi (cartelle ignorate, cartelle extra) restano com'erano.
+    /// Scrive il posto 1 in posti.ini. Con Folder "" lo toglie, ed elimina il file
+    /// se non ha altro. Le altre chiavi (cartelle ignorate, altri posti) restano com'erano.
     /// </summary>
     public void Save()
     {
         try
         {
-            List<KeyValuePair<string, string>> others = OtherValues();
-
-            if (Folder == "" && others.Count == 0)
-            {
-                if (File.Exists(file))
-                    File.Delete(file);
-
-                return;
-            }
-
-            var values = new List<KeyValuePair<string, string>>();
-
-            if (Folder != "")
-            {
-                string origin = Origin == SaveSource.Learned ? "imparata" : "scelta";
-
-                values.Add(new(FolderKey, Folder));
-                values.Add(new(OriginKey, origin));
-            }
-
-            values.AddRange(others);
-            IniFile.Write(file, values);
+            GameSpots spots = ReadSpots(new GameSpots(gameDataFolder));
+            spots.SetPrimary(Folder, Origin);
+            spots.Save();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
         {
-            Log.Write("cartella.ini non salvato: " + file, ex);
+            Log.Write("posti.ini non salvato: " + gameDataFolder, ex);
         }
     }
 
     /// <summary>
-    /// Le chiavi del file diverse da cartella e origine, come sono adesso nel file.
+    /// Legge posti.ini (e converte cartella.ini se serve), restituendo lo stesso oggetto.
     /// </summary>
-    private List<KeyValuePair<string, string>> OtherValues() =>
-        IniFile.Read(file)
-            .Where(pair => pair.Key != FolderKey && pair.Key != OriginKey)
-            .ToList();
+    private static GameSpots ReadSpots(GameSpots spots)
+    {
+        spots.Load();
+        return spots;
+    }
 }
