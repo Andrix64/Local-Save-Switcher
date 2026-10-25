@@ -52,6 +52,27 @@ public sealed class SaveFinderChangedTests : IDisposable
         Assert.Single(Find());
     }
 
+    // Steam Deck: il prefisso di Proton del gioco sta dentro la cartella di Steam, che si salta.
+    [Fact]
+    public void SkippedFolderAroundTheRootDoesNotHideTheRoot()
+    {
+        string steam = Path.Combine(folder.Root, "Steam");
+        string prefix = Path.Combine(steam, "steamapps", "compatdata", "367520", "pfx");
+        string save = Path.Combine(prefix, "drive_c", "users", "steamuser", "user1.dat");
+        TestFolder.Write(save, "x");
+        File.SetLastWriteTimeUtc(save, since.AddSeconds(5));
+        string other = Path.Combine(steam, "logs2", "other.sav");
+        TestFolder.Write(other, "x");
+        File.SetLastWriteTimeUtc(other, since.AddSeconds(5));
+
+        IReadOnlyList<ChangedFile> found = SaveFinder.FindChanged(
+            [new SearchRoot(prefix, 8, true), new SearchRoot(folder.Root, 8, false)], since, [steam],
+            TimeSpan.FromMinutes(1), CancellationToken.None, out _);
+
+        ChangedFile file = Assert.Single(found);
+        Assert.Equal(save, file.Path);
+    }
+
     [Fact]
     public void SystemFolderNamesAreNotRead()
     {

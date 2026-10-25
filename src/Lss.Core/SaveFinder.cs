@@ -546,7 +546,7 @@ internal static partial class SaveFinder
         /// </summary>
         public bool Walk(string folder, SearchRoot root, int level)
         {
-            if (IsSkipped(folder))
+            if (IsSkipped(folder, root))
                 return true;
 
             if (!KeepGoing())
@@ -629,9 +629,12 @@ internal static partial class SaveFinder
 
         /// <summary>
         /// true se la cartella non si legge: nome di sistema, radice di un disco
-        /// per i nomi di Windows, o dentro una cartella da saltare.
+        /// per i nomi di Windows, o dentro una cartella da saltare. Una cartella da
+        /// saltare che contiene la radice stessa non conta: sul Deck il prefisso di
+        /// Proton, l'installazione e la userdata del gioco stanno dentro la cartella
+        /// di Steam, e vanno letti.
         /// </summary>
-        private bool IsSkipped(string folder)
+        private bool IsSkipped(string folder, SearchRoot root)
         {
             string name = Path.GetFileName(folder);
 
@@ -645,7 +648,9 @@ internal static partial class SaveFinder
                 ? StringComparison.OrdinalIgnoreCase
                 : StringComparison.Ordinal;
 
-            return skipFolders.Any(skip => string.Equals(folder, skip, comparison) || IsInside(folder, skip, comparison));
+            return skipFolders
+                .Where(skip => !string.Equals(root.Folder, skip, comparison) && !IsInside(root.Folder, skip, comparison))
+                .Any(skip => string.Equals(folder, skip, comparison) || IsInside(folder, skip, comparison));
         }
 
         /// <summary>
