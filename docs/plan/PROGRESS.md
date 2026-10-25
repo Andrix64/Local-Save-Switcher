@@ -201,7 +201,7 @@ per phase (the phase file names it).
 - [ ] P4 — Mode setting and start-up
 - [x] P4a — Optional PIN for admins (8e81077)
 - [x] P5 — Advanced mode: playthroughs grouped by player (88b01ee)
-- [ ] P5a — Deleted playthroughs: kept until deleted for good
+- [x] P5a — Deleted playthroughs: kept until deleted for good (0d1b427)
 - [ ] P6 — Simple view: players and games
 - [ ] P7 — Simple mode: play, and the "My games" menu
 - [ ] P8 — Screenshots
@@ -223,6 +223,19 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P5a (Haiku), commit `0d1b427`. Test Windows: 720 verdi, 0 warning. Linux
+  (`lss-ci`, `--tests-only`, `0d1b427`): 720 verdi.
+  - **Cambio di comportamento voluto di `PruneBackups`**: prima le partite eliminate entravano nel
+    conteggio e venivano eliminate con le copie vecchie; ora si saltano (né contano né si eliminano).
+    Test nuovo: `DeletedPlaythroughsTests.PruningKeepsDeletedPlaythroughsAndDoesNotCountThem`. Nessun
+    test esistente è cambiato.
+  - Il proprietario di una partita eliminata è nel suo file di backup (`Giocatore`): `DeletedOwnerOf`.
+    Il recupero (`RecoveryOwnerOf`) lo usa, come da P5.
+  - Finestra: "Elimina per sempre…" (la selezionata) ed "Elimina tutte per sempre…" da due partite
+    in su; entrambe chiedono conferma distruttiva. Ogni riga mostra la persona (pallino, nome, "—" se
+    non esiste più) e il tempo di gioco. Il pulsante di eliminazione è rosso solo dal colore del testo
+    (non c'è uno stile "pericolo" nel tema).
+  - Non verificato a schermo: la finestra delle partite eliminate (P8).
 - 2026-10-25 — Fase P, P5 **completata** (Haiku), commit `b52a089` … `88b01ee` (tick nel commit
   successivo). Test Windows: 712 verdi, 0 warning. Deviazioni dal piano, in ordine di importanza:
   - Recupero di una partita eliminata: **nessuna domanda** (il piano diceva "chiede alla persona
