@@ -102,13 +102,22 @@ public partial class GameViewModel : ObservableObject
     /// <summary>
     /// Testo della riga con la cartella dei salvataggi e la sua origine.
     /// </summary>
-    private static string SaveFolderLine(SaveManager manager) => manager.Game.Source switch
+    private static string SaveFolderLine(SaveManager manager)
     {
-        SaveSource.Launcher => Loc.F(Strings.SaveFolderFromLauncher, manager.SavePath, manager.LauncherName),
-        SaveSource.Chosen => Loc.F(Strings.SaveFolderChosen, manager.SavePath),
-        SaveSource.Learned => Loc.F(Strings.SaveFolderLearned, manager.SavePath),
-        _ => Loc.F(Strings.SaveFolderFromSteam, manager.SavePath),
-    };
+        // Il primo posto può essere solo alcuni file della cartella (es. *.owprofile): va detto.
+        SaveSpot? primary = manager.Game.Spots.FirstOrDefault(spot => spot.Id == 1);
+        string folder = primary is { IsWholeFolder: false }
+            ? Loc.F(Strings.SpotFiles, manager.SavePath, primary.Pattern)
+            : manager.SavePath;
+
+        return manager.Game.Source switch
+        {
+            SaveSource.Launcher => Loc.F(Strings.SaveFolderFromLauncher, folder, manager.LauncherName),
+            SaveSource.Chosen => Loc.F(Strings.SaveFolderChosen, folder),
+            SaveSource.Learned => Loc.F(Strings.SaveFolderLearned, folder),
+            _ => Loc.F(Strings.SaveFolderFromSteam, folder),
+        };
+    }
 
     /// <summary>
     /// Apre la cartella dei salvataggi nel file manager.

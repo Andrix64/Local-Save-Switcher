@@ -29,6 +29,21 @@ public sealed class GameViewModelTests : IDisposable
         return manager;
     }
 
+    // Outer Wilds sul Deck: il primo posto è *.owprofile nella cartella, e la riga lo deve dire.
+    [Fact]
+    public void SaveFolderLineShowsThePatternOfTheFirstSpot()
+    {
+        TestFolder.Write(Path.Combine(folder.Game, "a.owprofile"), "x");
+        var game = new GameInfo("steam", "753640", "Outer Wilds", "", "", "",
+            [new SaveSpot(1, folder.Game, "*.owprofile", false, folder.Game, SaveSource.Launcher)],
+            SupportState.Supported, Source: SaveSource.Launcher);
+
+        var vm = new GameViewModel(new SaveManager(folder.Game, folder.Data, "", game), dialogs);
+
+        Assert.Contains("*.owprofile", vm.SaveFolderText);
+        Assert.Contains(folder.Game, vm.SaveFolderText);
+    }
+
     [Fact]
     public void Refresh_PutsActivePlaythroughFirst()
     {
