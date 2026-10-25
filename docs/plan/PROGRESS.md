@@ -140,8 +140,8 @@ per phase (the phase file names it).
 - [x] L6 — From a rule to real paths (92a9a59; Linux 266 tests on lss-ci)
 - [x] L7 — Safety of a save folder (23bd093)
 - [x] L8 — Locate the saves of a game (c362845)
-- [ ] L9 — Folder chosen or learned
-- [ ] L10 — Every provider uses the locator
+- [x] L9 — Folder chosen or learned (f607c24)
+- [x] L10 — Every provider uses the locator (8f9c563; Linux 299 tests on lss-ci)
 - [ ] L11 — `SaveManager` with a folder outside `userdata`
 - [ ] L12 — Interface (advanced mode)
 - [ ] L13 — 👤 Steam Deck and Windows check
