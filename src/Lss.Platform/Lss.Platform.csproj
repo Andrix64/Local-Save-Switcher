@@ -10,6 +10,11 @@
     <AssemblyName>Lss.Platform</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <!-- Come in Lss.App: una dll bloccata da Smart App Control passa ricompilando (hash diverso). -->
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Lss.Core\Lss.Core.csproj" />
   </ItemGroup>

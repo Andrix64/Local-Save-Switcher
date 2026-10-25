@@ -646,8 +646,9 @@ scrollbars); without those calls it started. Better to avoid `DllImport` and
 The verdict is about the single file (its hash), not just the code: a Debug
 build was blocked (`FileLoadException ... 0x800711C7`) while the Release build
 of the same sources started. A deterministic build always produces the same
-file, so rebuilding didn't help. That's why Debug builds are not
-deterministic: if one is blocked, rebuild everything (VS Code task `rebuild`,
+file, so rebuilding didn't help. That's why the Debug builds of `LSS`, `Lss.Core`
+and `Lss.Platform` are not deterministic (2026-10-25: a deterministic
+`Lss.Platform.dll` stayed blocked after every rebuild): if one is blocked, rebuild everything (VS Code task `rebuild`,
 or `dotnet build --no-incremental`) and the new file usually passes. On
 2026-10-23 every new build of Control Save Manager was blocked; on 2026-10-24
 the unsigned Avalonia `LSS.exe` started with Smart App Control on. Since the
