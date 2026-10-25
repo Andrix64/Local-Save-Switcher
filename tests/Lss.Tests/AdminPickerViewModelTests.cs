@@ -31,7 +31,7 @@ public sealed class AdminPickerViewModelTests : IDisposable
     {
         var picker = new AdminPickerViewModel(People());
 
-        AdminTile tile = Assert.Single(picker.Tiles);
+        PersonTile tile = Assert.Single(picker.Tiles);
         Assert.Equal(Admin, tile.Person.Id);
         Assert.Equal("A", tile.Initial);
     }
