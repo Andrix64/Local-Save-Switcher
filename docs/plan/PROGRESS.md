@@ -193,7 +193,7 @@ per phase (the phase file names it).
 
 ### Phase P — Players, favourites and the two modes ([P-simple-mode.md](P-simple-mode.md))
 
-- [ ] P1 — Players
+- [x] P1 — Players (57664e2)
 - [ ] P2a — Owner
 - [ ] P2b — Favourite
 - [ ] P2c — Existing playthroughs and export
