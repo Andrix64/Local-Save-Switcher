@@ -19,7 +19,7 @@
 
     <!-- I posti come saranno scritti nel file -->
     <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
-            CornerRadius="6" Padding="12,10">
+            CornerRadius="6" Padding="12,10" IsVisible="{Binding HasSpots}">
       <TextBlock Text="{Binding SpotsText}" TextWrapping="Wrap" FontFamily="Consolas, Menlo, monospace" />
     </Border>
 

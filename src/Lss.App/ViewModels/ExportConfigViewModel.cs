@@ -49,6 +49,8 @@ public partial class ExportConfigViewModel : ObservableObject
     /// <summary>I posti da scrivere, uno per riga.</summary>
     public string SpotsText { get; }
 
+    public bool HasSpots => SpotsText != "";
+
     /// <summary>I posti che non si esportano (fuori dalle cartelle standard), o vuoto.</summary>
     public string SkippedText { get; }
 

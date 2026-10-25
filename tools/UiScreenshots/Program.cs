@@ -176,6 +176,75 @@ internal static class Program
         Shot(noSupported, "12-no-supported-games");
 
         RenderLearn(root, steamAccount, dialogs);
+        RenderConfigs(root, steamAccount, spottedManager, control, controlSaves, dialogs, english);
+    }
+
+    /// <summary>
+    /// Configurazioni dei salvataggi (N9c) e proposte dopo la partita (N11): l'anteprima
+    /// dell'esportazione con le note, l'importazione con un gioco pronto, uno con un posto
+    /// non ancora qui e uno che non c'è, e la finestra delle proposte.
+    /// </summary>
+    private static void RenderConfigs(string root, GameAccount account, SaveManager spottedManager, GameInfo control,
+        string controlSaves, IDialogService dialogs, bool english)
+    {
+        Shot(new ExportConfigWindow(new ExportConfigViewModel(spottedManager, dialogs)
+        {
+            Notes = english ? "For Andrea: the folders of the Steam version." : "Per Andrea: le cartelle della versione Steam.",
+        }), "20-export-config");
+
+        var spotHere = new SaveConfigSpot("WinAppDataLocal", "Remedy/Control", "", true);
+        var spotLater = new SaveConfigSpot("WinAppDataLocal", "Team17/Hollow", "", true);
+        var spotRefused = new SaveConfigSpot("WinDocuments", "Old Game", "*.sav", false);
+        var spotOther = new SaveConfigSpot("WinDocuments", "Disco", "", true);
+
+        SaveConfigGame controlConfig = new("steam", GameInfo.ControlAppId, "Control Ultimate Edition", "Control", false,
+            [spotHere], english ? "Saves in the Remedy folder." : "Salvataggi nella cartella Remedy.");
+        SaveConfigGame hollowConfig = new("steam", "367520", "Hollow Knight", "Hollow Knight", false,
+            [spotLater, spotRefused], "");
+        SaveConfigGame discoConfig = new("steam", "632470", "Disco Elysium", "Disco Elysium", false,
+            [spotOther], "");
+        var file = new SaveConfigFile("windows", "Windows 11", false, "LSS 2.0", "2026-10-25",
+            [controlConfig, hollowConfig, discoConfig]);
+
+        var hollow = new GameInfo("steam", "367520", "Hollow Knight", "", "", "", [], SupportState.Supported);
+        string notYet = Path.Combine(root, "later", "Hollow");
+        string wide = Path.Combine(root, "home", "Documents", "Old Game");
+
+        var plans = new List<ConfigGamePlan>
+        {
+            new(controlConfig, control, [new ConfigSpotPlan(spotHere, controlSaves, ConfigSpotState.Found, "")], false),
+            new(hollowConfig, hollow,
+            [
+                new ConfigSpotPlan(spotLater, notYet, ConfigSpotState.NotYet, ""),
+                new ConfigSpotPlan(spotRefused, wide, ConfigSpotState.Refused,
+                    english ? "the folder is too wide" : "la cartella è troppo ampia"),
+            ], false),
+            new(discoConfig, null, [], false),
+        };
+
+        Shot(new ImportConfigWindow(new ImportConfigViewModel(file, plans, _ => "Steam", _ => Task.FromResult(0))),
+            "21-import-config");
+
+        string documents = Path.Combine(root, "home", "Documents");
+        string remedy = Path.Combine(documents, "Remedy");
+        string install = Path.Combine(root, "steamapps", "common", "Control");
+
+        var suggestions = new List<SpotSuggestion>
+        {
+            new(remedy, "", 11,
+            [
+                new ScoreReason(ScoreReasonKind.GameName, 6, "Control"),
+                new ScoreReason(ScoreReasonKind.ChangedFiles, 3, "3"),
+                new ScoreReason(ScoreReasonKind.SaveLikePath, 2, "Remedy"),
+            ], DateTime.UtcNow),
+            new(install, "*.sav", 9,
+            [
+                new ScoreReason(ScoreReasonKind.SaveLikeFile, 3, "slot1.sav"),
+            ], DateTime.UtcNow),
+        };
+
+        Shot(new SpotSuggestionsWindow(new SpotSuggestionsViewModel(new GameViewModel(spottedManager, dialogs), suggestions)),
+            "22-spot-suggestions");
     }
 
     /// <summary>

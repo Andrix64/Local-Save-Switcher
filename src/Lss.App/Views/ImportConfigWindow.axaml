@@ -13,7 +13,7 @@
   <StackPanel Margin="22,20" Spacing="12">
 
     <!-- Un blocco per gioco del file -->
-    <ScrollViewer MaxHeight="460" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer MaxHeight="640" HorizontalScrollBarVisibility="Disabled">
       <ItemsControl ItemsSource="{Binding Games}">
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="vm:ConfigGameItem">
