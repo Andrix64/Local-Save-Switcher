@@ -441,6 +441,20 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
+    /// Proprietario per recuperare una partita eliminata: la persona che la aveva, se esiste
+    /// ancora; altrimenti il primo amministratore (come per le partite di prima di LSS 2.0).
+    /// </summary>
+    public string RecoveryOwnerOf(Snapshot deleted)
+    {
+        string before = IniFile.Read(BackupInfoFile(deleted.Path)).GetValueOrDefault("Giocatore", "");
+
+        if (before != "" && OwnerIsKnown(before))
+            return before;
+
+        return Players?.Admins.FirstOrDefault()?.Id ?? "";
+    }
+
+    /// <summary>
     /// name, oppure "name 2", "name 3"... se esiste già una partita con quel nome.
     /// </summary>
     public string UniqueName(string name)

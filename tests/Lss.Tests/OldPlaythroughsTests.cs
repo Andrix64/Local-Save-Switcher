@@ -61,17 +61,53 @@ public sealed class OldPlaythroughsTests : IDisposable
     }
 
     [Fact]
-    public void ASecondRunChangesNothing()
+    public void ASecondRunOnlyGivesOwnerlessPlaythroughsToTheFirstAdmin()
     {
         SaveManager manager = ManagerWithTwoPlayers();
         manager.CreateProfile("Mario", true, TestFolder.Owner);
+        manager.CreateProfile("Luigi", false, Second);
         manager.AssignExistingPlaythroughs();
         Assert.True(OwnersAssignedOnDisk());
 
+        // Dopo ProprietariOk il passo delle preferite non si rifà, ma una partita senza
+        // persona valida va al primo amministratore a ogni apertura (anche una recuperata).
         StripOwner("Profilo_Mario");
         manager.AssignExistingPlaythroughs();
 
-        Assert.Equal("", manager.GetInfo("Profilo_Mario").Owner);
+        Assert.Equal(TestFolder.Owner, manager.GetInfo("Profilo_Mario").Owner);
+        Assert.Equal(Second, manager.GetInfo("Profilo_Luigi").Owner);
+    }
+
+    [Fact]
+    public void RecoveryGoesBackToThePlayerWhenTheyAreStillThere()
+    {
+        SaveManager manager = ManagerWithTwoPlayers();
+        manager.CreateProfile("Luigi", false, Second);
+        Assert.True(manager.DeleteProfile("Profilo_Luigi").Success);
+        Snapshot deleted = Assert.Single(manager.GetDeletedProfiles());
+
+        Assert.Equal(Second, manager.RecoveryOwnerOf(deleted));
+    }
+
+    [Fact]
+    public void RecoveryGoesToTheFirstAdminWhenThePlayerIsGone()
+    {
+        SaveManager manager = ManagerWithTwoPlayers();
+        manager.CreateProfile("Luigi", false, Second);
+        Assert.True(manager.DeleteProfile("Profilo_Luigi").Success);
+        Snapshot deleted = Assert.Single(manager.GetDeletedProfiles());
+
+        // Clara non esiste più: la partita va al primo amministratore, come le partite vecchie.
+        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+            $"Ordine={TestFolder.Owner}\n{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n");
+        var people = new People(folder.Data);
+        people.Load();
+        manager.Players = people;
+
+        Assert.Equal(TestFolder.Owner, manager.RecoveryOwnerOf(deleted));
+        Assert.True(manager.RecoverDeletedProfile(deleted, manager.RecoveryOwnerOf(deleted)).Success);
+        Assert.Equal(TestFolder.Owner, manager.GetInfo("Profilo_Luigi").Owner);
+        Assert.Equal("Profilo_Luigi", manager.FavouriteOf(TestFolder.Owner));
     }
 
     [Fact]

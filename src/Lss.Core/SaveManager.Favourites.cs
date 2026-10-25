@@ -118,16 +118,29 @@ public sealed partial class SaveManager
     {
         Person? first = Players?.Admins.FirstOrDefault();
 
-        if (State.OwnersAssigned || first == null)
+        if (first == null)
             return;
 
         try
         {
-            foreach (string profile in GetProfiles().Where(profile => GetInfo(profile).Owner == ""))
+            // Senza proprietario, o con una persona che non esiste più: va al primo amministratore.
+            // Si controlla a ogni apertura, anche dopo ProprietariOk (una partita recuperata senza
+            // persona non passerebbe più dal passo una tantum).
+            foreach (string profile in GetProfiles())
             {
+                string owner = GetInfo(profile).Owner;
+
+                if (owner != "" && Players!.Find(owner) != null)
+                    continue;
+
                 WriteOwner(profile, first.Id);
-                Log.Write($"Partita {profile} senza persona: data a {first.Name}");
+                Log.Write($"Partita {profile} senza persona valida: data a {first.Name}");
             }
+
+            RepairFavourites();
+
+            if (State.OwnersAssigned)
+                return;
 
             foreach (Person person in Players!.All.Where(person => FavouriteOf(person.Id) == null))
             {
