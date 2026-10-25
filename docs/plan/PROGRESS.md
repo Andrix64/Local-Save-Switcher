@@ -188,7 +188,7 @@ per phase (the phase file names it).
 - [x] O4 — Any other game, added by hand (ca23683; menu Modifica/Rimuovi e test della vista non fatti, vedi note)
 - [x] O5 — Non-Steam games added to Steam (b3bdde7)
 - [x] O6 — The same game twice (cb3f550)
-- [ ] O8 — An icon for every game
+- [x] O8 — An icon for every game (d4c8ef4, 9751449)
 - [ ] O7 — 👤 Checks
 
 ### Phase P — Players, favourites and the two modes ([P-simple-mode.md](P-simple-mode.md))
@@ -217,6 +217,33 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — O8 (Haiku), commit `d4c8ef4` (`ExeIcon`, con test) e `9751449` (`ExecutableOf`,
+  `GameIcons`, vista, test). Test Windows: 612 verdi, 0 errori, 0 warning (prima di O8: 584).
+  Linux (`lss-ci`, `--tests-only`, commit `9751449`): 612 verdi.
+  - Controllato su file veri (sola lettura): il manifest Epic `50089E5FAC31881FE1813CC4DE41CA6F.item`
+    ha il campo `LaunchExecutable` (`FEZ.exe`) con `InstallLocation` (`H:\EpicLibrary\Fez`); il
+    file `FEZ.exe` esiste (1,1 MB) e ha un'icona. `explorer.exe` dà un'icona e il PNG 64×64 (test).
+    Non controllati (launcher non installati su questo PC): il campo `executable` di Heroic
+    (`installed.json`) e `exe` del registro GOG; il codice gestisce il percorso assoluto e quello
+    relativo alla cartella del gioco.
+  - Deviazioni dal piano, in ordine di importanza:
+    - Il test di smoke su `Environment.ProcessPath` non passa: `testhost.exe` non ha icona (solo
+      info di versione e manifest). Il test usa `explorer.exe` nella cartella di Windows (sola lettura).
+    - `AvaloniaTestSetup` chiama `UseSkia()`: senza, `Bitmap.Save` in headless scrive un file vuoto.
+    - `scripts/linux-check.sh`, passo dei test: il contenitore installa `libfontconfig1` (la
+      dipendenza del pacchetto, usata da SkiaSharp) e gira come root con `chown` alla fine, come il
+      passo dei pacchetti. Senza, sulla macchina Linux 47 test falliscono.
+    - Il passaggio alla UI è `GameItemViewModel.ShowIcon`, testato a parte. `LoadIconAsync` non ha
+      un test: un `await` nei test con Avalonia non torna mai, e xUnit1031 vieta il blocco.
+    - Su Linux i `.desktop` si cercano in `~/.local/share/applications` e `/usr/share/applications`;
+      `Icon=` può essere un percorso o un nome del tema (il PNG più grande in hicolor o pixmaps).
+      Le immagini accanto all'eseguibile (`icon.png`, `<nome exe>.png`, `<cartella>.png`) sono solo
+      su Linux, come dice il titolo del punto 3 del piano. Non provato su un desktop Linux vero.
+    - Per i collegamenti Steam, `icon` può essere un'immagine o un `.exe`: `IconPath` li accetta entrambi.
+    - La cache: un PNG più recente della sua fonte si riusa. Con più fonti, un PNG da una fonte di
+      priorità più bassa resta valido finché la fonte prioritaria non è più recente (caso raro).
+  - Non visto a schermo: `tools/UiScreenshots` usa dati finti senza giochi con un eseguibile, quindi
+    non mostra un'icona estratta. La XAML non è cambiata (immagine 32×32 con sorgente 64 px).
 - 2026-10-25 — Fine fase O (Haiku). O1–O6 committati su `v2` (da `67d1031` a `cb3f550`), ogni
   task con il suo tick in un commit `Progress:`. O7 non fatto (👤). Test Windows: 584 verdi, 0
   warning (prima di O: 526). Linux (`lss-ci`, `--tests-only`, a fine fase): 584 verdi.
