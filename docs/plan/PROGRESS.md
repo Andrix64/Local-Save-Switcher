@@ -128,7 +128,7 @@ per phase (the phase file names it).
 - [x] K5 — Data folder per provider (24931b1)
 - [x] K6 — Export format 3 (9a4d94a)
 - [x] K7 — Start-up and games list for several providers (8cd4ede)
-- [ ] K8 — 👤 Check
+- [x] K8 — 👤 Check (2026-10-25, Andrix: tested, works)
 
 ### Phase L — Save folders known by the launchers ([L-save-locations.md](L-save-locations.md))
 
