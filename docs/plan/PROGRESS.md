@@ -143,7 +143,7 @@ per phase (the phase file names it).
 - [x] L9 — Folder chosen or learned (f607c24)
 - [x] L10 — Every provider uses the locator (8f9c563; Linux 299 tests on lss-ci)
 - [x] L11 — `SaveManager` with a folder outside `userdata` (18202c0; Linux 304 tests on lss-ci)
-- [ ] L12 — Interface (advanced mode)
+- [x] L12 — Interface (advanced mode) (71f4d18; Linux 311 tests on lss-ci)
 - [ ] L13 — 👤 Steam Deck and Windows check
 
 ### Phase M — Learn the save folder ([M-learn-saves.md](M-learn-saves.md))
@@ -215,6 +215,67 @@ per phase (the phase file names it).
 
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
+
+- 2026-10-25 — Fine fase L (Haiku), L1–L12 committati su `v2` (da `91e2f90` a
+  `71f4d18`, tick in commit `Progress:`). L13 non fatto (👤). Test Windows: 311
+  verdi, 0 warning. Linux (`lss-ci`, `scripts/linux-check.sh lss-ci@192.168.1.3
+  --tests-only`, su `71f4d18`): 311 verdi. Nessuna asserzione di un test già
+  esistente è cambiata; sono cambiati solo costruttori/helper di test (FakePlatform,
+  FakeProvider, FakeDialogService, TestSetup) e l'attributo `[Collection("AppData")]`
+  su `MainWindowViewModelTests` (vedi sotto).
+  - Deviazioni dal piano e scelte da sapere:
+    - L3: `BinaryVdf.ReadCString` è `internal` (L4 la riusa). Il tick di L3 è finito
+      nel commit di L4 (`eefb435`), e il tick di L5 in quello di L6 (`92a9a59`): un
+      `git add -A` con il PROGRESS modificato. Da qui in poi i tick hanno commit suo.
+    - L7: `SafetyProblem` ha in più `Unreadable` (cartella che non si legge, con
+      testo `SafetyUnreadable`); nel piano non c'era, e senza il valore un errore
+      di lettura sarebbe finito in un'altra voce. `SaveFolderSafety.Describe` dà il
+      testo. Il confronto dei percorsi ignora le maiuscole su Windows e quando
+      `IgnoreCase` è vero (su Linux: nei prefissi). Radice di disco rifiutata prima
+      della normalizzazione (`7a899da`: su Linux la radice diventa "", e il primo
+      test Linux ha trovato il problema).
+    - L8: `SaveLocator.Locate` riceve la cartella scelta e la sua origine
+      (`string chosenFolder, SaveSource chosenSource`) invece di `GameSaveSettings`,
+      che è di L9. Per `Unsafe` il `Reason` è il nome di `SafetyProblem` (la UI lo
+      traduce con `Describe`). Per `NotFound` resta il `SaveFolder` del gioco.
+    - L8/L9: regole con maschera (`*.sav`), anche non ricorsive, danno file, non
+      cartelle: `Locate` le tratta come `Unsure` (il piano le dice così).
+    - L6: la radice `Absolute` (Heroic, fase O) non è ancora supportata: la regola
+      viene saltata e registrata nel log. `WinUserProfile` (Epic) sì.
+    - L10/L11: `Apply` non riceve `launcherFolders` né il prefisso come nel piano:
+      li chiede al provider. Per questo `IGameProvider` ha due membri in più:
+      `PrefixOf(game)` e `LauncherFolders(account)` (aggiunti in L11, con
+      `SaveLookup.ContextFor`, perché `SaveManager.Open` deve ripetere il controllo
+      di sicurezza e non ha il contesto). `lssDataRoot` è `AppData.Root`.
+    - L11: il costruttore di `SaveManager` riceve l'account; prima lo ricavava da
+      `Path.GetDirectoryName(SavePath)`, che fuori da `userdata` dà una cartella
+      sbagliata. Il grep richiesto: resta solo il ramo di riserva di quel costruttore
+      (usato da Control e dai test, senza account) e i riferimenti a userdata in
+      `SteamProvider`/`SteamLibrary` (sono Steam). `GameNotSupported` dice ancora
+      "userdata": lo mostra `Open` per i giochi non gestiti. Non è nella lista di L12:
+      da decidere con Andrix.
+    - L11: i test che cambiano `AppData.Root` (`MainWindowViewModelTests`,
+      `SaveLookupTests`, `SaveFolderChoiceTests`) hanno `[Collection("AppData")]`,
+      perché xUnit esegue le classi in parallelo: senza, un test leggeva il
+      `cartella.ini` di un altro. `TestSetup` imposta una `AppData.Root` temporanea,
+      così nessun test legge i dati veri.
+    - L12: `UserdataNotice` si mostra solo per i giochi con la cartella in userdata
+      (il piano non lo dice). Il testo "Trova la cartella" è lo stesso di "Scelgo io
+      la cartella" fino alla fase M. Per `Unsafe` in Altri giochi il motivo è tradotto
+      da `GameItemViewModel`. Aggiunta la chiave `SaveFolderMenu` (testo del ⋯).
+      Non coperto da test: il ricaricamento della lista dopo la scelta (`ReloadGames`)
+      e il ritorno alla cartella automatica (`UseAutomaticFolder`): da provare a mano.
+      Limite noto: cambiare cartella mentre il gioco è aperto non è controllato;
+      la `GameViewModel` si butta solo se non è occupata.
+  - Test nuovi: `BinaryVdfTests`, `SteamAppInfoTests`, `SavePathResolverTests`,
+    `GlobTests`, `SaveFolderSafetyTests`, `SaveLocatorTests`, `GameSaveSettingsTests`,
+    `SaveLookupTests`, `ExternalSavesTests`, `SaveFolderChoiceTests`, più quelli
+    aggiunti a `LinuxPlatformTests`, `SteamLibraryTests`, `SteamProviderTests`. Il test dei
+    giochi Proton gira solo su Linux (`ProtonSaveFolderIsFoundThroughTheRule`), la
+    scelta con Documents solo su Windows.
+  - Da fare con Andrix (L13, 👤): numeri di `appinfo.vdf` del Deck (quanti giochi
+    Proton hanno regole), la prova di una scelta di cartella e del ⋯ "cartella
+    automatica", e la scelta di `GameNotSupported`.
 
 - 2026-10-25 — Fine fase K (Haiku). K1–K7 committati su `v2` con i tick. Test
   Windows: 204 verdi, 0 warning. Linux (`lss-ci`, `scripts/linux-check.sh
