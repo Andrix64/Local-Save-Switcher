@@ -840,7 +840,9 @@ public sealed partial class SaveManager
         if (IsGameRunning())
             return Result.Fail(Loc.F(Strings.CloseGameFirst, Game.Name));
 
-        if (!allowEmptySaves && GameSavesAreEmpty())
+        // Come nella 1.0: con la cartella principale vuota non si salva, anche se un
+        // altro posto ha file (per esempio solo le impostazioni), per non svuotare la partita.
+        if (!allowEmptySaves && (GameSavesAreEmpty() || saves.PrimaryIsEmpty()))
         {
             return Result.Fail(Strings.GameSavesEmptyWouldClear);
         }

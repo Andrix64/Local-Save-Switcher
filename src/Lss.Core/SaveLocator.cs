@@ -83,14 +83,28 @@ internal static class SaveLocator
 
         // Posti aggiunti a mano prima di quelli trovati dalle regole. Ogni posto si controlla, anche quelli che poi si sovrappongono.
         List<SaveSpot> candidates = chosenExtras.Concat(found).ToList();
+        var dropped = new List<SaveSpot>();
 
         foreach (SaveSpot spot in candidates.Prepend(primary).Where(spot => spot.Source != SaveSource.Userdata))
         {
             SafetyProblem problem = CheckSpot(spot, context, launcherFolders, lssDataRoot);
 
-            if (problem != SafetyProblem.None)
-                return new SaveLocation([spot], spot.Source, SupportState.Unsafe, problem.ToString());
+            if (problem == SafetyProblem.None)
+                continue;
+
+            // Un gioco gestito con la userdata (come nella 1.0) resta gestito: una cartella
+            // in più delle regole che non passa il controllo si lascia fuori, non blocca il gioco.
+            if (primary.Source == SaveSource.Userdata && spot.Source == SaveSource.Launcher)
+            {
+                Log.Write($"Cartella delle regole di {game.Name} lasciata fuori ({problem}): {spot.Folder}");
+                dropped.Add(spot);
+                continue;
+            }
+
+            return new SaveLocation([spot], spot.Source, SupportState.Unsafe, problem.ToString());
         }
+
+        candidates.RemoveAll(dropped.Contains);
 
         List<SaveSpot> kept = WithoutOverlaps(primary, candidates);
 
