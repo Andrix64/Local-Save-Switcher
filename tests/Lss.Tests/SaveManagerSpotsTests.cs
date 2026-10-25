@@ -146,7 +146,7 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
         Assert.False(manager.HasUnsavedProgress());
 
@@ -161,7 +161,7 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
 
         File.Delete(Path.Combine(Game1, "slot.sav"));
@@ -177,9 +177,9 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
         WriteGame("second");
-        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true, TestFolder.Owner).Success);
 
         // Cambio: Anna prende i salvataggi di prima; il gioco diventa "first".
         Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
@@ -215,8 +215,8 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
-        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
         TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
 
@@ -232,8 +232,8 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
-        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
         TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
 
@@ -261,8 +261,8 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
-        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
         TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
 
@@ -280,7 +280,7 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
         TestFolder.Write(Path.Combine(NewSpot, "n.sav"), "new");
         Assert.True(manager.AddSpot(NewSpotSpec(), NewSpotFill.CopyCurrent).Success);
@@ -306,10 +306,10 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ExportProfile("Profilo_Anna", Zip).Success);
 
-        Result<string> imported = manager.ImportProfile(Zip);
+        Result<string> imported = manager.ImportProfile(Zip, TestFolder.Owner);
 
         Assert.True(imported.Success);
         AssertProfile(Path.Combine(folder.Data, "Profili", imported.Value!), "first");
@@ -320,7 +320,7 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ExportProfile("Profilo_Anna", Zip).Success);
 
         // Un altro computer: gli stessi percorsi portabili, altre cartelle vere.
@@ -334,7 +334,7 @@ public sealed class SaveManagerSpotsTests : IDisposable
             SupportState.Supported);
         var pc2 = new SaveManager(Path.Combine(other, "a"), Path.Combine(folder.Root, "pc2-data"), "", pc2Game);
 
-        Result<string> imported = pc2.ImportProfile(Zip);
+        Result<string> imported = pc2.ImportProfile(Zip, TestFolder.Owner);
 
         Assert.True(imported.Success);
         Assert.Equal("", imported.Message);
@@ -346,7 +346,7 @@ public sealed class SaveManagerSpotsTests : IDisposable
     {
         WriteGame("first");
         SaveManager manager = Manager();
-        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true).Success);
+        Assert.True(manager.CreateProfile("Anna", copyCurrentSaves: true, TestFolder.Owner).Success);
         Assert.True(manager.ExportProfile("Profilo_Anna", Zip).Success);
 
         // Questo computer non ha il secondo posto.
@@ -358,7 +358,7 @@ public sealed class SaveManagerSpotsTests : IDisposable
             SupportState.Supported);
         var pc3 = new SaveManager(Path.Combine(folder.Root, "pc3", "a"), Path.Combine(folder.Root, "pc3-data"), "", pc3Game);
 
-        Result<string> imported = pc3.ImportProfile(Zip);
+        Result<string> imported = pc3.ImportProfile(Zip, TestFolder.Owner);
 
         Assert.True(imported.Success);
         Assert.Contains(Game2, imported.Message);

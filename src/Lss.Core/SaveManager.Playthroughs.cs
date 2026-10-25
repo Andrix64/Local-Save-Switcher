@@ -24,9 +24,10 @@ public static class BackupKind
 /// <param name="Note">Nota libera dell'utente, anche vuota.</param>
 /// <param name="PlayTime">Tempo di gioco misurato dall'app.</param>
 /// <param name="LastSession">Fine dell'ultima sessione di gioco misurata, se c'è.</param>
-public sealed record PlaythroughInfo(string Note, TimeSpan PlayTime, DateTime? LastSession)
+/// <param name="Owner">Id della persona a cui appartiene la partita; "" se manca.</param>
+public sealed record PlaythroughInfo(string Note, TimeSpan PlayTime, DateTime? LastSession, string Owner = "")
 {
-    public static readonly PlaythroughInfo Empty = new("", TimeSpan.Zero, null);
+    public static readonly PlaythroughInfo Empty = new("", TimeSpan.Zero, null, "");
 }
 
 /// <summary>
@@ -76,7 +77,7 @@ public sealed partial class SaveManager
             ? date
             : null;
 
-        return new PlaythroughInfo(note, playTime, last);
+        return new PlaythroughInfo(note, playTime, last, values.GetValueOrDefault("Giocatore", ""));
     }
 
     private static IEnumerable<KeyValuePair<string, string>> FormatInfo(PlaythroughInfo info)
@@ -85,6 +86,7 @@ public sealed partial class SaveManager
         yield return new("TempoDiGioco", ((long)info.PlayTime.TotalSeconds).ToString(CultureInfo.InvariantCulture));
         yield return new("UltimaSessione",
             info.LastSession?.ToString(InfoDateFormat, CultureInfo.InvariantCulture) ?? "");
+        yield return new("Giocatore", info.Owner);
     }
 
     public Result SetNote(string profileName, string note)
@@ -191,6 +193,63 @@ public sealed partial class SaveManager
             Log.Write("Informazioni di " + profileName + " non conservate", ex);
         }
     }
+
+    // PROPRIETARIO DELLE PARTITE
+
+    /// <summary>
+    /// Persone di LSS. Con l'elenco, il proprietario deve esistere; senza
+    /// (test, casi senza persone), basta un id non vuoto. Lo impostano Open e Initialize.
+    /// </summary>
+    internal People? Players { get; set; }
+
+    /// <summary>
+    /// Id del primo giocatore: proprietario delle partite nuove finché
+    /// l'interfaccia non ne sceglie uno. "" se non ci sono persone.
+    /// </summary>
+    public string DefaultOwnerId => Players?.All.FirstOrDefault()?.Id ?? "";
+
+    private bool OwnerIsKnown(string personId) =>
+        personId != "" && (Players == null || Players.Find(personId) != null);
+
+    /// <summary>
+    /// Scrive il proprietario nelle informazioni della partita, senza toccare il resto.
+    /// </summary>
+    private void WriteOwner(string profileName, string personId) =>
+        IniFile.Write(InfoFile(profileName), FormatInfo(GetInfo(profileName) with { Owner = personId }));
+
+    /// <summary>
+    /// Dà la partita a una persona. Il proprietario dei salvataggi non cambia.
+    /// </summary>
+    public Result SetOwner(string profileName, string personId)
+    {
+        return Log.Write($"Proprietario di {profileName}: {personId}", SetOwnerCore(profileName, personId));
+    }
+
+    private Result SetOwnerCore(string profileName, string personId)
+    {
+        if (!OwnerIsKnown(personId))
+            return Result.Fail(Strings.PlayerNotFound);
+
+        if (!ProfileExists(profileName))
+            return Result.Fail(Strings.ProfileNotFound);
+
+        try
+        {
+            WriteOwner(profileName, personId);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(Loc.F(Strings.ErrorWithMessage, ex.Message));
+        }
+
+        return Result.Ok("");
+    }
+
+    /// <summary>
+    /// Partite di una persona, per nome di cartella.
+    /// </summary>
+    public IReadOnlyList<string> GetProfilesOf(string personId) =>
+        GetProfiles().Where(profile => GetInfo(profile).Owner == personId).ToList();
 
     // BACKUP: PROPRIETARIO E DESCRIZIONE
 
@@ -328,20 +387,24 @@ public sealed partial class SaveManager
     /// Rimette tra le partite una partita eliminata, con la sua nota e il suo
     /// tempo di gioco. Se il nome è stato riusato ne prende uno libero.
     /// </summary>
-    public Result RecoverDeletedProfile(Snapshot deleted)
+    public Result RecoverDeletedProfile(Snapshot deleted, string ownerId)
     {
-        return Finish("Recupera " + deleted.Owner, RecoverDeletedProfileCore(deleted));
+        return Finish("Recupera " + deleted.Owner, RecoverDeletedProfileCore(deleted, ownerId));
     }
 
-    private Result RecoverDeletedProfileCore(Snapshot deleted)
+    private Result RecoverDeletedProfileCore(Snapshot deleted, string ownerId)
     {
+        if (!OwnerIsKnown(ownerId))
+            return Result.Fail(Strings.PlayerNotFound);
+
         if (deleted.Kind != BackupKind.Delete || !IsInside(deleted.Path, BackupPath) || !Directory.Exists(deleted.Path))
             return Result.Fail(Loc.F(Strings.FolderNotFound, deleted.Path));
 
         string name = UniqueName(ProfileDisplayName(deleted.Owner));
         string profileName = ProfileFolderName(name);
 
-        PlaythroughInfo info = ParseInfo(IniFile.Read(BackupInfoFile(deleted.Path)));
+        // Il proprietario è quello scelto ora: quello di prima può non esistere più.
+        PlaythroughInfo info = ParseInfo(IniFile.Read(BackupInfoFile(deleted.Path))) with { Owner = ownerId };
 
         try
         {
@@ -356,8 +419,7 @@ public sealed partial class SaveManager
 
         try
         {
-            if (info != PlaythroughInfo.Empty)
-                IniFile.Write(InfoFile(profileName), FormatInfo(info));
+            IniFile.Write(InfoFile(profileName), FormatInfo(info));
         }
         catch (Exception ex)
         {
@@ -394,9 +456,9 @@ public sealed partial class SaveManager
     /// Salva i salvataggi che il gioco ha adesso come nuova partita e la
     /// segna come quella nel gioco, senza toccare la cartella del gioco.
     /// </summary>
-    public Result AdoptGameSaves(string name)
+    public Result AdoptGameSaves(string name, string ownerId)
     {
-        Result created = CreateProfile(name, copyCurrentSaves: true);
+        Result created = CreateProfile(name, copyCurrentSaves: true, ownerId);
 
         if (!created.Success)
             return created;
@@ -627,14 +689,16 @@ public sealed partial class SaveManager
     /// Aggiunge una partita da un file zip creato da ExportProfile. Se il nome
     /// è già usato ne prende uno libero. Il valore è il nome della cartella.
     /// </summary>
-    public Result<string> ImportProfile(string zipPath)
+    public Result<string> ImportProfile(string zipPath, string ownerId)
     {
-        Result<string> result = ImportProfileCore(zipPath);
+        Result<string> result = OwnerIsKnown(ownerId)
+            ? ImportProfileCore(zipPath, ownerId)
+            : Result<string>.Fail(Strings.PlayerNotFound);
         Log.Write($"Importa {zipPath}: " + (result.Success ? result.Value : "ERRORE " + result.Message));
         return result;
     }
 
-    private Result<string> ImportProfileCore(string zipPath)
+    private Result<string> ImportProfileCore(string zipPath, string ownerId)
     {
         string temp = Path.Combine(Path.GetTempPath(), "lss_importa_" + Guid.NewGuid().ToString("N"));
 
@@ -686,10 +750,9 @@ public sealed partial class SaveManager
             if (Directory.Exists(savestates))
                 FileOps.CopyFolderVerified(savestates, Path.Combine(SavestatePath, profileName));
 
-            PlaythroughInfo info = ParseInfo(values);
-
-            if (info != PlaythroughInfo.Empty)
-                IniFile.Write(InfoFile(profileName), FormatInfo(info));
+            // Il proprietario è quello scelto qui, non il Giocatore dello zip.
+            PlaythroughInfo info = ParseInfo(values) with { Owner = ownerId };
+            IniFile.Write(InfoFile(profileName), FormatInfo(info));
 
             if (skipped.Count == 0)
                 return Result<string>.Ok(profileName);

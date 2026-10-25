@@ -114,7 +114,7 @@ public partial class DeletedViewModel : ObservableObject
         if (Selected is not DeletedItemViewModel item)
             return;
 
-        await RunAsync(Strings.BusyRecovering, () => manager.RecoverDeletedProfile(item.Snapshot));
+        await RunAsync(Strings.BusyRecovering, () => manager.RecoverDeletedProfile(item.Snapshot, manager.DefaultOwnerId));
     }
 
     [RelayCommand]

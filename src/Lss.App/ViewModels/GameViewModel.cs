@@ -621,7 +621,7 @@ public partial class GameViewModel : ObservableObject
 
         Result result = await RunBusyAsync(Strings.BusyImporting, () =>
         {
-            Result<string> import = Manager.ImportProfile(path);
+            Result<string> import = Manager.ImportProfile(path, Manager.DefaultOwnerId);
 
             if (!import.Success)
                 return Result.Fail(import.Message);
@@ -672,7 +672,7 @@ public partial class GameViewModel : ObservableObject
             return;
 
         Result result = await RunBusyAsync(Strings.BusyCreating,
-            () => Manager.CreateProfile(choice.Name, choice.CopyCurrentSaves));
+            () => Manager.CreateProfile(choice.Name, choice.CopyCurrentSaves, Manager.DefaultOwnerId));
 
         await ShowResult(result);
 
@@ -764,7 +764,7 @@ public partial class GameViewModel : ObservableObject
         if (name == null)
             return;
 
-        Result result = await RunBusyAsync(Strings.BusyCreating, () => Manager.AdoptGameSaves(name));
+        Result result = await RunBusyAsync(Strings.BusyCreating, () => Manager.AdoptGameSaves(name, Manager.DefaultOwnerId));
 
         await ShowResult(result);
     }

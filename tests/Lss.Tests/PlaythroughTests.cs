@@ -20,9 +20,9 @@ public sealed class PlaythroughTests : IDisposable
     private SaveManager TwoPlaythroughs()
     {
         SaveManager manager = folder.CreateManager("L");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         TestFolder.Write(folder.SaveFile, "M");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         return manager;
     }
@@ -104,9 +104,9 @@ public sealed class PlaythroughTests : IDisposable
         Assert.Equal("Partita «Luigi» eliminata", SaveManager.BackupDescription(deleted));
 
         // Nel frattempo il nome è stato riusato.
-        manager.CreateProfile("Luigi", false);
+        manager.CreateProfile("Luigi", false, TestFolder.Owner);
 
-        Result result = manager.RecoverDeletedProfile(deleted);
+        Result result = manager.RecoverDeletedProfile(deleted, TestFolder.Owner);
 
         Assert.True(result.Success, result.Message);
         Assert.Contains("Profilo_Luigi 2", manager.GetProfiles());
@@ -128,7 +128,7 @@ public sealed class PlaythroughTests : IDisposable
         Assert.True(exported.Success, exported.Message);
 
         // Importata nello stesso account: il nome è già usato.
-        Result<string> imported = manager.ImportProfile(zip);
+        Result<string> imported = manager.ImportProfile(zip, TestFolder.Owner);
 
         Assert.True(imported.Success, imported.Message);
         Assert.Equal("Profilo_Mario 2", imported.Value);
@@ -148,8 +148,8 @@ public sealed class PlaythroughTests : IDisposable
         using (ZipArchive archive = ZipFile.Open(zip, ZipArchiveMode.Create))
             archive.CreateEntry("leggimi.txt");
 
-        Assert.False(manager.ImportProfile(zip).Success);
-        Assert.False(manager.ImportProfile(Path.Combine(folder.Root, "non-esiste.zip")).Success);
+        Assert.False(manager.ImportProfile(zip, TestFolder.Owner).Success);
+        Assert.False(manager.ImportProfile(Path.Combine(folder.Root, "non-esiste.zip"), TestFolder.Owner).Success);
         Assert.Equal(2, manager.GetProfiles().Count);
     }
 
@@ -189,7 +189,7 @@ public sealed class PlaythroughTests : IDisposable
         string zip = WriteZip("formato2.zip", "Formato=2\nAppId=870780\nGioco=Control\nNome=Mario\n");
         SaveManager control = folder.CreateManager();
 
-        Assert.True(control.ImportProfile(zip).Success);
+        Assert.True(control.ImportProfile(zip, TestFolder.Owner).Success);
         Assert.Contains("Profilo_Mario", control.GetProfiles());
     }
 
@@ -201,11 +201,11 @@ public sealed class PlaythroughTests : IDisposable
         SaveManager epic = new(folder.Game, Path.Combine(folder.Root, "epic"), "", epicControl);
 
         // Lo zip è di epic: entra nel gioco di epic...
-        Assert.True(epic.ImportProfile(zip).Success);
+        Assert.True(epic.ImportProfile(zip, TestFolder.Owner).Success);
 
         // ...e non nel Control di Steam, anche con lo stesso AppID.
         SaveManager steam = folder.CreateManager();
-        Result<string> refused = steam.ImportProfile(zip);
+        Result<string> refused = steam.ImportProfile(zip, TestFolder.Owner);
 
         Assert.False(refused.Success);
         Assert.Equal(Loc.F(Strings.ImportOtherGame, "Control", "Control"), refused.Message);
@@ -217,11 +217,11 @@ public sealed class PlaythroughTests : IDisposable
         string zip = WriteZip("formato1.zip", "Formato=1\nNome=Mario\n");
         SaveManager control = folder.CreateManager();
 
-        Assert.True(control.ImportProfile(zip).Success);
+        Assert.True(control.ImportProfile(zip, TestFolder.Owner).Success);
         Assert.Contains("Profilo_Mario", control.GetProfiles());
 
         SaveManager other = new(folder.Game, Path.Combine(folder.Root, "altro"), "", OtherGame);
-        Result<string> refused = other.ImportProfile(zip);
+        Result<string> refused = other.ImportProfile(zip, TestFolder.Owner);
 
         Assert.False(refused.Success);
         Assert.Equal(Loc.F(Strings.ImportOtherGame, "Control", "Test"), refused.Message);
@@ -233,13 +233,13 @@ public sealed class PlaythroughTests : IDisposable
     {
         TestFolder.Write(folder.SaveFile, "partita");
         SaveManager other = new(folder.Game, Path.Combine(folder.Root, "altro"), "", OtherGame);
-        other.CreateProfile("Mario", copyCurrentSaves: false);
+        other.CreateProfile("Mario", copyCurrentSaves: false, TestFolder.Owner);
         string zip = Path.Combine(folder.Root, "altro_gioco.zip");
 
         Assert.True(other.ExportProfile("Profilo_Mario", zip).Success);
 
         SaveManager control = folder.CreateManager();
-        Result<string> refused = control.ImportProfile(zip);
+        Result<string> refused = control.ImportProfile(zip, TestFolder.Owner);
 
         Assert.False(refused.Success);
         Assert.Empty(control.GetProfiles());
@@ -272,7 +272,7 @@ public sealed class PlaythroughTests : IDisposable
     {
         SaveManager manager = folder.CreateManager("partita");
 
-        Result result = manager.AdoptGameSaves("Partita principale");
+        Result result = manager.AdoptGameSaves("Partita principale", TestFolder.Owner);
 
         Assert.True(result.Success, result.Message);
         Assert.Equal("Profilo_Partita principale", manager.State.ActiveProfile);
@@ -348,9 +348,9 @@ public sealed class PlaythroughTests : IDisposable
         manager.State.Save();
 
         TestFolder.Write(folder.SaveFile, "L");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         TestFolder.Write(folder.SaveFile, "M");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
 
         TestFolder.Write(Path.Combine(folder.Game, "remote", "a.cfg"), "a adesso");
@@ -371,7 +371,7 @@ public sealed class PlaythroughTests : IDisposable
         manager.State.SharedFiles = new[] { "../evil.txt" };
         manager.State.SharePreferences = true;
         manager.State.Save();
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
 
         manager.ActivateProfile("Profilo_Luigi");
 

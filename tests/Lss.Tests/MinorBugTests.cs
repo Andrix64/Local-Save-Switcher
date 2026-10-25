@@ -72,7 +72,7 @@ public sealed class MinorBugTests : IDisposable
     public void IgnoredProfileFoldersAreListed()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", false);
+        manager.CreateProfile("Mario", false, TestFolder.Owner);
         Directory.CreateDirectory(Path.Combine(manager.ProfilesPath, "Profilo_Mio.Nome"));
         Directory.CreateDirectory(Path.Combine(manager.ProfilesPath, "Altro"));
 
@@ -84,7 +84,7 @@ public sealed class MinorBugTests : IDisposable
     public void NoIgnoredFoldersWhenAllAreValid()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", false);
+        manager.CreateProfile("Mario", false, TestFolder.Owner);
 
         Assert.Empty(manager.GetIgnoredProfileFolders());
     }

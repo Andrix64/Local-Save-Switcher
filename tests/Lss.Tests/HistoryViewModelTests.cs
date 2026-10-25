@@ -20,7 +20,7 @@ public sealed class HistoryViewModelTests : IDisposable
     public void SavePoint_ValidName_CanSave()
     {
         SaveManager manager = folder.CreateManager("L");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Luigi");
         HistoryViewModel vm = History(manager);
 
@@ -34,7 +34,7 @@ public sealed class HistoryViewModelTests : IDisposable
     public void SavePoint_InvalidName_CannotSave()
     {
         SaveManager manager = folder.CreateManager("L");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Luigi");
         HistoryViewModel vm = History(manager);
 
@@ -48,7 +48,7 @@ public sealed class HistoryViewModelTests : IDisposable
     public void SavePoint_WhileGameRuns_CannotSave()
     {
         SaveManager manager = folder.CreateManager("L");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Luigi");
         HistoryViewModel vm = History(manager);
         vm.SaveName = "Prima del boss";

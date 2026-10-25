@@ -22,9 +22,9 @@ public sealed class GameViewModelTests : IDisposable
     private SaveManager TwoPlaythroughs()
     {
         SaveManager manager = folder.CreateManager("L");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         TestFolder.Write(folder.SaveFile, "M");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         return manager;
     }

@@ -188,18 +188,33 @@ public sealed partial class SaveManager
             GameInfo game = steamProvider.FindGames(account)
                 .FirstOrDefault(g => g.Id == GameInfo.ControlAppId) ?? GameInfo.Control(savePath);
 
-            return Result<SaveManager>.Ok(new SaveManager(
+            var manager = new SaveManager(
                 savePath,
                 Path.Combine(appData, account.Provider, account.Id, GameInfo.ControlAppId),
                 account.Name,
                 game,
                 new SteamProvider(Platform.Current),
-                account));
+                account)
+            {
+                Players = LoadPeople(appData)
+            };
+
+            return Result<SaveManager>.Ok(manager);
         }
         catch (Exception ex)
         {
             return Result<SaveManager>.Fail(Loc.F(Strings.InitError, ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Le persone di LSS, da persone.ini in dataRoot. Se il file manca, ne crea una.
+    /// </summary>
+    private static People LoadPeople(string dataRoot)
+    {
+        var people = new People(dataRoot);
+        people.Load();
+        return people;
     }
 
     /// <summary>
@@ -240,7 +255,10 @@ public sealed partial class SaveManager
                 account.Name,
                 game,
                 provider,
-                account);
+                account)
+            {
+                Players = LoadPeople(dataRoot)
+            };
 
             manager.RecoverInterruptedSwitch();
 
@@ -534,18 +552,21 @@ public sealed partial class SaveManager
     /// <summary>
     /// Crea un profilo. Non lo attiva: per farlo chiamare ActivateProfile.
     /// </summary>
-    public Result CreateProfile(string name, bool copyCurrentSaves)
+    public Result CreateProfile(string name, bool copyCurrentSaves, string ownerId)
     {
         string operation = "Crea profilo " + ProfileFolderName(name) +
                            (copyCurrentSaves ? " (copia dei salvataggi)" : " (vuoto)");
 
-        return Finish(operation, CreateProfileCore(name, copyCurrentSaves));
+        return Finish(operation, CreateProfileCore(name, copyCurrentSaves, ownerId));
     }
 
-    private Result CreateProfileCore(string name, bool copyCurrentSaves)
+    private Result CreateProfileCore(string name, bool copyCurrentSaves, string ownerId)
     {
         if (!IsValidName(name))
             return Result.Fail(Strings.InvalidName);
+
+        if (!OwnerIsKnown(ownerId))
+            return Result.Fail(Strings.PlayerNotFound);
 
         string profileName = ProfileFolderName(name);
         string profile = Path.Combine(ProfilesPath, profileName);
@@ -558,6 +579,7 @@ public sealed partial class SaveManager
             try
             {
                 Directory.CreateDirectory(Path.Combine(profile, "remote"));
+                WriteOwner(profileName, ownerId);
                 return Result.Ok(Strings.EmptyProfileCreated);
             }
             catch (Exception ex)
@@ -587,6 +609,7 @@ public sealed partial class SaveManager
         try
         {
             saves.CopyGameTo(profile);
+            WriteOwner(profileName, ownerId);
         }
         catch (Exception ex)
         {

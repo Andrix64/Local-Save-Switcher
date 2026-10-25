@@ -56,7 +56,7 @@ public sealed class RecoveryTests : IDisposable
     public void InterruptedProfileSwap_IsRecoveredAtStartup()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
 
         // Spegnimento durante "Salva progressi": il profilo è rimasto come .vecchio.
@@ -75,7 +75,7 @@ public sealed class RecoveryTests : IDisposable
     public void InterruptedCaseOnlyRename_IsRecoveredAtStartup()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
 
         // Spegnimento a metà di Mario -> MARIO: resta solo il nome intermedio.
         string profile = Path.Combine(manager.ProfilesPath, "Profilo_Mario");

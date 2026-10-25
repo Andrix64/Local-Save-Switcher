@@ -92,10 +92,10 @@ internal static class Program
         string error = english ? "The file is in use by another program." : "Il file è in uso da un altro programma.";
 
         SaveManager manager = SaveManager.Open(AppData.Root, steamAccount, control).Value!;
-        manager.CreateProfile(second, true);
+        manager.CreateProfile(second, true, manager.DefaultOwnerId);
         manager.SetNote(SaveManager.ProfileFolderName(second), note);
-        manager.CreateProfile(first, true);
-        manager.CreateProfile(removed, false);
+        manager.CreateProfile(first, true, manager.DefaultOwnerId);
+        manager.CreateProfile(removed, false, manager.DefaultOwnerId);
         manager.ActivateProfile(SaveManager.ProfileFolderName(first));
         manager.CreateSavestate(english ? "Before the boss" : "Prima del boss");
         manager.DeleteProfile(SaveManager.ProfileFolderName(removed));

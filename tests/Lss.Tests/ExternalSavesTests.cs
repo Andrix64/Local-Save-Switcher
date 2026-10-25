@@ -41,9 +41,9 @@ public sealed class ExternalSavesTests : IDisposable
         TestFolder.Write(Path.Combine(Documents, "Other", "keep.txt"), "x");
 
         SaveManager manager = Open(Saves).Value!;
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, manager.DefaultOwnerId);
         TestFolder.Write(Slot, "M");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, manager.DefaultOwnerId);
 
         Assert.True(manager.ActivateProfile("Profilo_Luigi").Success);
         Assert.Equal("L", File.ReadAllText(Slot));

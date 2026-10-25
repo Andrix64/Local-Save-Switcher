@@ -9,6 +9,9 @@ namespace Lss.Tests;
 /// </summary>
 public sealed class TestFolder : IDisposable
 {
+    /// <summary>Proprietario usato dai test che creano partite (senza elenco di persone).</summary>
+    public const string Owner = "a1b2c3d4";
+
     public string Root { get; } = Path.Combine(Path.GetTempPath(), "csm_test_" + Guid.NewGuid().ToString("N"));
 
     public string Game => Path.Combine(Root, "870780");
@@ -39,7 +42,21 @@ public sealed class TestFolder : IDisposable
     {
         Write(SaveFile, saveContent);
         Write(CacheFile, "cache");
-        return new SaveManager(Game, Data);
+        return new SaveManager(Game, Data) { Players = OnePlayer() };
+    }
+
+    /// <summary>
+    /// Persone del test: una sola, amministratore, con id Owner. Le partite
+    /// create dai test hanno così un proprietario che esiste davvero.
+    /// </summary>
+    private People OnePlayer()
+    {
+        Write(Path.Combine(Data, "persone.ini"),
+            $"Ordine={Owner}\n{Owner}.Nome=Test\n{Owner}.Ruolo=admin\n");
+
+        var people = new People(Data);
+        people.Load();
+        return people;
     }
 
     public void Dispose()
