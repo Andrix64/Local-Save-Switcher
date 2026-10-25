@@ -15,6 +15,12 @@
       <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
         <StackPanel Orientation="Horizontal" Spacing="10">
           <TextBlock Classes="cardTitle" Text="{Binding Name}" VerticalAlignment="Center" />
+          <!-- La preferita è piena; le altre hanno il contorno e si cliccano per farle preferite. -->
+          <Button Classes="link" Content="☆" Command="{Binding SetFavouriteCommand}"
+                  IsVisible="{Binding !IsFavourite}" VerticalAlignment="Center"
+                  ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
+          <TextBlock Text="★" VerticalAlignment="Center" IsVisible="{Binding IsFavourite}"
+                     ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
           <Border Classes="pill" IsVisible="{Binding IsActive}" VerticalAlignment="Center">
             <TextBlock Text="{loc:Str InGameNow}" />
           </Border>

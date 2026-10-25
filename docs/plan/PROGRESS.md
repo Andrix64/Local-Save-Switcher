@@ -223,6 +223,25 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P5 **parziale** (Haiku): fatto (non spuntato, mancano sotto):
+  - Partite per persona (`GameViewModel.PlayerGroups`, `PlayerGroup`): nell'ordine delle persone,
+    la preferita per prima, poi dalla più recente; le persone senza partite del gioco non compaiono.
+    Test: `PlayerGroupsTests` (6).
+  - ★ sulla scheda: una persona con la partita non preferita vede ☆ e la clicca
+    (`GameViewModel.SetFavouriteAsync`); la preferita ha ★ (tooltip `FavouriteTooltip`).
+  - `GameViewModel.GiveToAsync(profile, personId)`: dà la partita a un'altra persona
+    (`SaveManager.SetOwner`, con le regole della preferita). Test: `GiveToMovesThePlaythroughToAnotherPlayer`.
+  - Blocco "Cartelle dei salvataggi (n)": parte chiuso, si apre con l'intestazione; lo stato
+    è statico (vale per tutti i giochi finché l'app è aperta, non si salva). I suggerimenti
+    restano visibili sotto il blocco.
+  - Fix del punto aperto di P2b: una partita recuperata senza persona valida va al primo
+    amministratore (vedi il commit `b84b0fe`).
+  - **Non fatto**: (1) la voce "Dai a…" nel menu ⋯ della scheda (serve una finestra di scelta della
+    persona, la stessa di "Rimuovi giocatore"); (2) la finestra "Giocatori…" (rinomina, colore,
+    ordine, Admin, aggiungi, rimuovi): rimuovere una persona tocca le partite di tutti i giochi, cioè
+    serve un'operazione a livello di app (`MainWindowViewModel`), non solo di un gioco; (3) il campo
+    "Giocatore" nella finestra "Nuova partita" e la scelta dell'autore all'importazione; (4) il
+    pulsante "Consenti anche in modalità semplice" con `CloudConsentito` (in `stato.ini`, `AppState`).
 - 2026-10-25 — Fase P, P4a (Haiku): PIN facoltativo per gli admin. `People.SetPin` / `RemovePin` /
   `CheckPin`: PBKDF2-SHA256, 100 000 iterazioni, sale di 16 byte, hash di 32, in `persone.ini`
   come `<id>.Pin=<sale>:<hash>` (mai in chiaro). Un utente non ha PIN; diventare utente toglie il

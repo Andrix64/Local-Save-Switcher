@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -55,6 +56,9 @@ public partial class GameViewModel : ObservableObject
     public ToastViewModel Toast { get; } = new();
 
     public ObservableCollection<PlaythroughViewModel> Playthroughs { get; } = [];
+
+    /// <summary>Le partite per persona, nell'ordine delle persone (modalità avanzata, P5).</summary>
+    public ObservableCollection<PlayerGroup> PlayerGroups { get; } = [];
 
     // Nota sotto l'elenco: quali file LSS copia (vedi OnlyUserdataNotice).
     public string UserdataNotice { get; }
@@ -412,6 +416,8 @@ public partial class GameViewModel : ObservableObject
             Toast.Show(InfoKind.Error, Loc.F(Strings.CannotReadProfiles, ex.Message));
         }
 
+        RebuildPlayerGroups();
+
         int deleted = 0;
 
         try
@@ -679,6 +685,85 @@ public partial class GameViewModel : ObservableObject
         if (result.Success && choice.ActivateNow)
             await PlayAsync(SaveManager.ProfileFolderName(choice.Name), Manager.State.LaunchGame);
     }
+
+    /// <summary>
+    /// Le partite raggruppate per persona, nell'ordine delle persone: prima la
+    /// preferita, poi le altre dalla più recente. Senza partite di questo gioco una
+    /// persona non compare.
+    /// </summary>
+    private void RebuildPlayerGroups()
+    {
+        PlayerGroups.Clear();
+
+        if (Manager.Players == null)
+            return;
+
+        foreach (Person person in Manager.Players.All)
+        {
+            List<PlaythroughViewModel> cards = Playthroughs
+                .Where(card => card.Owner == person.Id)
+                .OrderByDescending(card => card.IsFavourite)
+                .ThenByDescending(card => Manager.GetProfileLastModified(card.ProfileName) ?? DateTime.MinValue)
+                .ThenBy(card => card.Name)
+                .ToList();
+
+            if (cards.Count == 0)
+                continue;
+
+            string initial = person.Name.Length > 0 ? char.ToUpperInvariant(person.Name[0]).ToString() : "?";
+            PlayerGroups.Add(new PlayerGroup(person, initial,
+                new SolidColorBrush(Color.Parse(person.Color)), cards));
+        }
+    }
+
+    /// <summary>Sceglie la preferita della sua persona: la ★ di una scheda.</summary>
+    public async Task SetFavouriteAsync(PlaythroughViewModel card)
+    {
+        if (IsBusy)
+            return;
+
+        Result result = Manager.SetFavourite(card.Owner, card.ProfileName);
+        Refresh();
+
+        if (!result.Success)
+            await ShowResult(result);
+    }
+
+    /// <summary>
+    /// Dà una partita a un'altra persona. Se era la preferita, la preferita passa alla
+    /// sua partita più recente (regole di SaveManager).
+    /// </summary>
+    public async Task GiveToAsync(string profile, string personId)
+    {
+        Result result = await RunBusyAsync(Strings.GiveToBusy, () => Manager.SetOwner(profile, personId));
+        Refresh();
+
+        if (!result.Success)
+            await ShowResult(result);
+    }
+
+    // Il blocco delle cartelle dei salvataggi parte chiuso. Com'è lasciato resta per tutti i
+    // giochi finché l'app è aperta (non si salva su disco).
+    private static bool saveFoldersOpen;
+
+    public bool SaveFoldersOpen
+    {
+        get => saveFoldersOpen;
+        set
+        {
+            if (saveFoldersOpen == value)
+                return;
+
+            saveFoldersOpen = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>"Cartelle dei salvataggi (2)": il numero dei posti del gioco.</summary>
+    public string SaveFoldersHeader => Loc.F(Strings.SaveFoldersCount, 1 + SpotLines.Count);
+
+    [RelayCommand]
+    private void ToggleSaveFolders() => SaveFoldersOpen = !SaveFoldersOpen;
 
     public async Task RenameAsync(string profile)
     {

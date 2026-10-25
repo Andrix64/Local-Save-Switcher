@@ -484,4 +484,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="PinRepeat" xml:space="preserve"><value>Repeat the new PIN</value></data>
   <data name="PinMismatch" xml:space="preserve"><value>The two PINs are different.</value></data>
   <data name="PinOptional" xml:space="preserve"><value>Optional. With a PIN, only you can use your admin rights.</value></data>
+  <data name="GiveToBusy" xml:space="preserve"><value>Changing the player...</value></data>
+  <data name="SaveFoldersCount" xml:space="preserve"><value>Save folders ({0})</value></data>
+  <data name="FavouriteTooltip" xml:space="preserve"><value>Favourite: the one used in simple mode</value></data>
 </root>

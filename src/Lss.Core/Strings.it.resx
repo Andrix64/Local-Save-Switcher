@@ -484,4 +484,7 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="PinRepeat" xml:space="preserve"><value>Ripeti il nuovo PIN</value></data>
   <data name="PinMismatch" xml:space="preserve"><value>I due PIN sono diversi.</value></data>
   <data name="PinOptional" xml:space="preserve"><value>Facoltativo. Con un PIN, solo tu puoi usare i tuoi diritti di admin.</value></data>
+  <data name="GiveToBusy" xml:space="preserve"><value>Cambio il giocatore...</value></data>
+  <data name="SaveFoldersCount" xml:space="preserve"><value>Cartelle dei salvataggi ({0})</value></data>
+  <data name="FavouriteTooltip" xml:space="preserve"><value>Preferita: quella usata nella modalità semplice</value></data>
 </root>
