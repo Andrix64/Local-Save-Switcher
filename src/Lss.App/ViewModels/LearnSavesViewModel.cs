@@ -68,6 +68,9 @@ public sealed partial class LearnSavesViewModel : ObservableObject
         context = SaveLookup.ContextFor(provider, account, game, Platform.Current.GetKnownFolders());
         dataFolder = SaveFolderChoice.DataFolder(game, account, provider);
         ignored = new IgnoredFolders(AppData.Root);
+
+        // Fino all'avvio (StartAsync) l'ora di partenza è questa: così la ricerca non ha date impossibili.
+        startedUtc = utcNow();
     }
 
     /// <summary>Chiede alla finestra di chiudersi. true se una cartella è stata salvata.</summary>

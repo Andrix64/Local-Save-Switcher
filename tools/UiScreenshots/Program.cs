@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.Input;
 using Lss;
 using Lss.App.Services;
 using Lss.App.ViewModels;
@@ -156,6 +157,90 @@ internal static class Program
             ])], settings, dialogs)
         };
         Shot(noSupported, "12-no-supported-games");
+
+        RenderLearn(root, steamAccount, dialogs);
+    }
+
+    /// <summary>
+    /// Trova i salvataggi: i quattro passi, tre cartelle trovate, nessuna cartella,
+    /// e le cartelle che non sono salvataggi. I passi si impostano a mano; la
+    /// ricerca finta restituisce le cartelle del disegno, senza leggere nulla.
+    /// </summary>
+    private static void RenderLearn(string root, GameAccount account, IDialogService dialogs)
+    {
+        var provider = new SteamProvider(new FakePlatform());
+        var game = new GameInfo("steam", "367520", "Hollow Knight", "", "", "", "", SupportState.NotFound);
+        string documents = Path.Combine(root, "home", "Documents");
+        string dataFolder = Path.Combine(AppData.Root, "steam", account.Id, game.Id);
+
+        LearnSavesViewModel Model(LearnResult result) => new(game, account, provider, dialogs, () => DateTime.UtcNow,
+            (_, _) => Task.FromResult(result));
+
+        Shot(new LearnSavesWindow(Model(new LearnResult([], false))), "13-learn-intro");
+
+        LearnSavesViewModel playing = Model(new LearnResult([], false));
+        playing.Step = LearnStep.Playing;
+        Shot(new LearnSavesWindow(playing), "14-learn-playing");
+
+        LearnSavesViewModel looking = Model(new LearnResult([], false));
+        looking.Step = LearnStep.Looking;
+        Shot(new LearnSavesWindow(looking), "15-learn-looking");
+
+        // Tre cartelle: la prima consigliata, una dei salvataggi generici, una poco probabile.
+        var docs = new SearchRoot(documents, 6, false);
+        string saves = Path.Combine(documents, "My Games", "Hollow Knight");
+        ChangedFile Changed(string path) => new(path, 2048, DateTime.UtcNow, docs);
+
+        var best = new SaveCandidate(saves, 15,
+        [
+            Changed(Path.Combine(saves, "Saves", "user1.dat")),
+            Changed(Path.Combine(saves, "Saves", "user2.dat")),
+            Changed(Path.Combine(saves, "Saves", "settings.dat")),
+        ],
+        [
+            new ScoreReason(ScoreReasonKind.GameName, 6, "Hollow Knight"),
+            new ScoreReason(ScoreReasonKind.SaveLikeFile, 3, "user1.dat"),
+            new ScoreReason(ScoreReasonKind.ChangedFiles, 3, "3"),
+            new ScoreReason(ScoreReasonKind.SaveLikePath, 3, "Saves, My Games"),
+        ]);
+
+        string quick = Path.Combine(documents, "Saves");
+        var second = new SaveCandidate(quick, 6,
+        [
+            Changed(Path.Combine(quick, "slot1.sav")),
+        ],
+        [
+            new ScoreReason(ScoreReasonKind.SaveLikeFile, 3, "slot1.sav"),
+            new ScoreReason(ScoreReasonKind.ChangedFiles, 1, "1"),
+            new ScoreReason(ScoreReasonKind.SaveLikePath, 2, "Saves"),
+        ]);
+
+        string downloads = Path.Combine(documents, "Downloads");
+        var weak = new SaveCandidate(downloads, 5,
+        [
+            Changed(Path.Combine(downloads, "progress.bin")),
+            Changed(Path.Combine(downloads, "readme.txt")),
+        ],
+        [
+            new ScoreReason(ScoreReasonKind.ChangedFiles, 2, "2"),
+            new ScoreReason(ScoreReasonKind.SaveLikeFile, 3, "progress.bin"),
+        ]);
+
+        LearnSavesViewModel found = Model(new LearnResult([best, second, weak], false));
+        found.Step = LearnStep.Playing;
+        ((IAsyncRelayCommand)found.QuitDoneCommand).ExecuteAsync(null).GetAwaiter().GetResult();
+        Shot(new LearnSavesWindow(found), "16-learn-result");
+
+        LearnSavesViewModel nothing = Model(new LearnResult([], false));
+        nothing.Step = LearnStep.Playing;
+        ((IAsyncRelayCommand)nothing.QuitDoneCommand).ExecuteAsync(null).GetAwaiter().GetResult();
+        Shot(new LearnSavesWindow(nothing), "17-learn-nothing");
+
+        // Cartelle che non sono salvataggi: una per tutti i giochi, una per questo solo.
+        var ignored = new IgnoredFolders(AppData.Root);
+        ignored.AddGlobal("{WinAppDataLocal}/Discord");
+        ignored.AddForGame(dataFolder, Path.Combine(documents, "Launcher Logs"));
+        Shot(new IgnoredFoldersWindow(new IgnoredFoldersViewModel(dataFolder, game.Name)), "18-ignored-folders");
     }
 
     private static void Shot(Window window, string name)

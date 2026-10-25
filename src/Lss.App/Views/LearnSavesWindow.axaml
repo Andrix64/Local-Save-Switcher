@@ -100,15 +100,19 @@
 
       <TextBlock FontSize="12" Text="{Binding Message}" IsVisible="{Binding HasMessage}" Foreground="{StaticResource Error}" TextWrapping="Wrap" />
 
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-        <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" MinWidth="90"
-                Command="{Binding CancelCommand}" />
-        <Button Classes="secondary" Content="{loc:Str LearnLookElsewhere}" Command="{Binding LookElsewhereCommand}" />
-        <Button Classes="secondary" Content="{loc:Str ChooseSaveFolder}" Command="{Binding ChooseMyselfCommand}" />
-        <Button Classes="secondary" Content="{loc:Str LearnTryAgain}" Command="{Binding TryAgainCommand}" />
-        <Button Classes="primary" Content="{loc:Str LearnUseFolder}" IsDefault="True" MinWidth="110"
-                Command="{Binding UseSelectedCommand}" IsVisible="{Binding !NothingFound}" />
-      </StackPanel>
+      <!-- Prima la scelta principale, poi le altre: a capo se non ci stanno in larghezza. -->
+      <Button Classes="primary" Content="{loc:Str LearnUseFolder}" IsDefault="True" MinWidth="150"
+              HorizontalAlignment="Right" Command="{Binding UseSelectedCommand}" IsVisible="{Binding !NothingFound}" />
+      <WrapPanel>
+        <Button Classes="secondary" Content="{loc:Str LearnLookElsewhere}" Command="{Binding LookElsewhereCommand}"
+                Margin="0,0,8,8" />
+        <Button Classes="secondary" Content="{loc:Str ChooseSaveFolder}" Command="{Binding ChooseMyselfCommand}"
+                Margin="0,0,8,8" />
+        <Button Classes="secondary" Content="{loc:Str LearnTryAgain}" Command="{Binding TryAgainCommand}"
+                Margin="0,0,8,8" />
+        <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" Command="{Binding CancelCommand}"
+                Margin="0,0,8,8" />
+      </WrapPanel>
     </StackPanel>
 
   </StackPanel>
