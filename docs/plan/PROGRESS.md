@@ -216,6 +216,21 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-25 — Review of phase N (Opus), merged from `v2-review`:
+  `de476eb` an extra spot whose folder is missing on disk (SD card out,
+  folder deleted) is left as it is: before, saving progress emptied its copy
+  in the playthrough and the backup before every switch failed; `1a2d26e`
+  N6 decision with Andrix: a Steam game managed through `userdata` (as in
+  1.0) is no longer made Unsafe by an unsafe folder from Steam's rules: that
+  folder is left out with a log line (folders added by hand still make it
+  Unsafe); `30c271e` saving progress is refused when spot 1 is empty, as in
+  1.0 (before, a settings file in another spot was enough to empty the main
+  copy on a save on exit). The rest of the switch code (journal, rollback,
+  recovery) checked and kept. Then the open point of the N9c/N11 note:
+  "Not saves" on a loose-file suggestion now dismisses that suggestion
+  (`Scartata.n` in `proposte.ini`) instead of ignoring the whole install
+  folder, and "For every game" is not offered for it.
+
 - 2026-10-25 — Completate le parti semplificate di N9c e N11 (sessione dedicata
   all'interfaccia; nessuna modifica a `SaveSet`, `FileOps`, `SaveLocator`, `SaveLookup`
   né al cambio/salvataggio di `SaveManager`). Commit su `v2`: `8f153af` anteprima con
