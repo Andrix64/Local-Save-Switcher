@@ -49,6 +49,10 @@ internal sealed class SaveSet
     /// </summary>
     public void ReplaceGameFrom(string snapshot, string backup, string journal)
     {
+        // Lo snapshot deve avere il posto 1: senza, non si tocca nulla.
+        if (!Directory.Exists(snapshot))
+            throw new DirectoryNotFoundException("Snapshot non trovato: " + snapshot);
+
         IReadOnlyList<SaveSpot> planned = spots
             .Where(spot => Directory.Exists(SnapshotFolder(snapshot, spot)))
             .ToList();
@@ -153,6 +157,14 @@ internal sealed class SaveSet
         IReadOnlyList<int> planned = IdsOf(values.GetValueOrDefault(PlannedKey) ?? "")
             .Union(IdsOf(values.GetValueOrDefault(DoneKey) ?? "")).ToList();
         List<SaveSpot> toRestore = spots.Where(spot => planned.Contains(spot.Id)).ToList();
+
+        // Un posto del journal che il gioco non ha più (per esempio tolto): il
+        // journal resta, così non si perde l'informazione.
+        if (planned.Any(id => toRestore.All(spot => spot.Id != id)))
+        {
+            Log.Write("Cambio di salvataggi interrotto con posti non più noti: il journal resta " + journal);
+            return recovered;
+        }
 
         RestoreFromBackup(toRestore, recordedBackup);
         File.Delete(journal);

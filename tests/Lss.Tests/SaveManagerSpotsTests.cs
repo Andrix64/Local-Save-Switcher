@@ -1,0 +1,143 @@
+namespace Lss.Tests;
+
+/// <summary>
+/// SaveManager con un gioco di tre posti (una cartella, una seconda cartella e
+/// un pattern *.sav in una terza): cambio di profilo, ripristino di backup e di
+/// savestate spostano tutti i posti, e un cambio interrotto si rimette a posto
+/// all'apertura del gioco.
+/// </summary>
+public sealed class SaveManagerSpotsTests : IDisposable
+{
+    private readonly TestFolder folder = new();
+
+    public void Dispose() => folder.Dispose();
+
+    private string Game1 => folder.Game;
+    private string Game2 => Path.Combine(folder.Root, "second");
+    private string Game3 => Path.Combine(folder.Root, "loose");
+
+    private GameInfo Game() => new("steam", "123450", "Test", "", "", "",
+        [
+            new SaveSpot(1, Game1, "", true, Game1, SaveSource.Chosen),
+            new SaveSpot(2, Game2, "", true, Game2, SaveSource.Chosen),
+            new SaveSpot(3, Game3, "*.sav", true, Game3, SaveSource.Chosen),
+        ],
+        SupportState.Supported);
+
+    private SaveSet Set() => new(Game().Spots);
+
+    private SaveManager Manager() => new(Game1, folder.Data, "", Game());
+
+    private string ProfileFolder(string name) => Path.Combine(folder.Data, "Profili", "Profilo_" + name);
+
+    private void WriteGame(string value)
+    {
+        TestFolder.Write(Path.Combine(Game1, "slot.sav"), value);
+        TestFolder.Write(Path.Combine(Game2, "settings.ini"), value);
+        TestFolder.Write(Path.Combine(Game3, "slot.sav"), value);
+        TestFolder.Write(Path.Combine(Game3, "config.ini"), "keep");
+    }
+
+    private void AssertGame(string value)
+    {
+        Assert.Equal(value, File.ReadAllText(Path.Combine(Game1, "slot.sav")));
+        Assert.Equal(value, File.ReadAllText(Path.Combine(Game2, "settings.ini")));
+        Assert.Equal(value, File.ReadAllText(Path.Combine(Game3, "slot.sav")));
+        Assert.Equal("keep", File.ReadAllText(Path.Combine(Game3, "config.ini")));
+    }
+
+    [Fact]
+    public void ActivatingAProfileMovesEverySpot()
+    {
+        WriteGame("anna");
+        Set().CopyGameTo(ProfileFolder("Anna"));
+        WriteGame("changed");
+        TestFolder.Write(Path.Combine(Game3, "extra.sav"), "only now");
+
+        Result result = Manager().ActivateProfile("Profilo_Anna");
+
+        Assert.True(result.Success);
+        AssertGame("anna");
+        Assert.False(File.Exists(Path.Combine(Game3, "extra.sav")));
+    }
+
+    [Fact]
+    public void RestoringABackupMovesEverySpotBack()
+    {
+        WriteGame("before");
+        Set().CopyGameTo(ProfileFolder("Anna"));
+        WriteGame("changed");
+        SaveManager manager = Manager();
+
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+        AssertGame("before");
+
+        Snapshot backup = manager.GetBackups()[0];
+
+        Assert.True(manager.RestoreBackup(backup).Success);
+        AssertGame("changed");
+    }
+
+    [Fact]
+    public void RestoringASavestateMovesEverySpot()
+    {
+        WriteGame("anna");
+        Set().CopyGameTo(ProfileFolder("Anna"));
+        SaveManager manager = Manager();
+        Assert.True(manager.ActivateProfile("Profilo_Anna").Success);
+
+        string savestate = Path.Combine(folder.Data, "Savestate", "Profilo_Anna", "2026-10-25_10-00-00");
+        WriteGame("point");
+        Set().CopyGameTo(savestate);
+        WriteGame("changed");
+
+        Snapshot point = manager.GetSavestates()[0];
+
+        Assert.True(manager.RestoreSavestate(point).Success);
+        AssertGame("point");
+    }
+
+    [Fact]
+    public void InterruptedActivationIsUndoneWhenTheGameIsOpened()
+    {
+        string dataRoot = Path.Combine(folder.Root, "lss");
+        string basePath = Path.Combine(dataRoot, "steam", "111", "123450");
+        string backup = Path.Combine(folder.Root, "backup-before");
+
+        WriteGame("before");
+        Set().CopyGameTo(backup);
+
+        // Cambio a metà: il primo posto è già cambiato, il secondo è tra i due spostamenti.
+        TestFolder.Write(Path.Combine(Game1, "slot.sav"), "anna");
+        Directory.Move(Game2, Game2 + FileOps.OldSuffix);
+        Directory.CreateDirectory(basePath);
+        File.WriteAllLines(Path.Combine(basePath, "cambio.ini"),
+        [
+            "Snapshot=" + Path.Combine(folder.Root, "anna"),
+            "Backup=" + backup,
+            "Posti=1,2,3",
+            "Fatti=1",
+        ]);
+
+        var account = new GameAccount("steam", "111", "Andrea", Path.Combine(folder.Root, "userdata", "111"), null);
+        Result<SaveManager> opened = SaveManager.Open(dataRoot, account, Game());
+
+        Assert.True(opened.Success);
+        Assert.True(opened.Value!.SwitchInterruptedRestored);
+        AssertGame("before");
+        Assert.False(File.Exists(Path.Combine(basePath, "cambio.ini")));
+    }
+
+    [Fact]
+    public void OpeningAGameWithoutAnInterruptedSwitchSetsNoFlag()
+    {
+        WriteGame("before");
+        var account = new GameAccount("steam", "111", "Andrea", Path.Combine(folder.Root, "userdata", "111"), null);
+
+        Result<SaveManager> opened = SaveManager.Open(Path.Combine(folder.Root, "lss"), account, Game());
+
+        Assert.True(opened.Success);
+        Assert.False(opened.Value!.SwitchInterruptedRestored);
+        AssertGame("before");
+    }
+}

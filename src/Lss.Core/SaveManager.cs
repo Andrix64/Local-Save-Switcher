@@ -76,6 +76,21 @@ public sealed partial class SaveManager
     /// </summary>
     private readonly IGameProvider provider;
 
+    /// <summary>
+    /// I posti dei salvataggi del gioco: si cambiano e si salvano tutti insieme.
+    /// SavePath è il posto 1.
+    /// </summary>
+    private readonly SaveSet saves;
+
+    // Journal del cambio di salvataggi, nella cartella dati del gioco.
+    private readonly string switchJournal;
+
+    /// <summary>
+    /// true se all'apertura è stato rimesso a posto un cambio di salvataggi
+    /// interrotto (per esempio dallo spegnimento del computer).
+    /// </summary>
+    public bool SwitchInterruptedRestored { get; private set; }
+
     /// <param name="savePath">Cartella dei salvataggi del gioco (…\870780).</param>
     /// <param name="basePath">Cartella dei dati del gioco per un account (…\LSS\IDAccount\AppID).</param>
     /// <param name="game">Gioco gestito; se manca è Control con savePath.</param>
@@ -91,6 +106,8 @@ public sealed partial class SaveManager
         string accountFolder = Path.GetDirectoryName(savePath) ?? "";
         Account = account ?? new GameAccount(this.provider.Id, Path.GetFileName(accountFolder), accountName, accountFolder, null);
         SavePath = savePath;
+        saves = new SaveSet(Game.Spots.Count > 0 ? Game.Spots : GameInfo.SpotsOf(savePath, SaveSource.Userdata));
+        switchJournal = Path.Combine(basePath, "cambio.ini");
         AccountName = accountName;
         ProfilesPath = Path.Combine(basePath, "Profili");
         BackupPath = Path.Combine(basePath, "Backup");
@@ -210,18 +227,31 @@ public sealed partial class SaveManager
                 }
             }
 
-            return Result<SaveManager>.Ok(new SaveManager(
+            var manager = new SaveManager(
                 game.SaveFolder,
                 Path.Combine(dataRoot, account.Provider, account.Id, game.Id),
                 account.Name,
                 game,
                 provider,
-                account));
+                account);
+
+            manager.RecoverInterruptedSwitch();
+
+            return Result<SaveManager>.Ok(manager);
         }
         catch (Exception ex)
         {
             return Result<SaveManager>.Fail(Loc.F(Strings.InitError, ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Rimette a posto un cambio di salvataggi interrotto, se cambio.ini c'è,
+    /// e segna che è successo (l'interfaccia lo dice una volta).
+    /// </summary>
+    private void RecoverInterruptedSwitch()
+    {
+        SwitchInterruptedRestored = saves.RecoverInterrupted(switchJournal, null);
     }
 
     /// <summary>
@@ -876,7 +906,7 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, backup);
+            saves.CopyGameTo(backup);
             WriteBackupInfo(backup, owner, kind, detail);
         }
         catch (Exception ex)
@@ -886,13 +916,13 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.ReplaceFolder(source, SavePath);
+            saves.ReplaceGameFrom(source, backup, switchJournal);
         }
         catch (Exception ex)
         {
             try
             {
-                FileOps.ReplaceFolder(backup, SavePath);
+                saves.ReplaceGameFrom(backup, backup, switchJournal);
 
                 return Result.Fail(
                     Loc.F(Strings.ReplaceFailedRestored, ex.Message),
