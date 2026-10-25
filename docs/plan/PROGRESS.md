@@ -198,11 +198,11 @@ per phase (the phase file names it).
 - [x] P2b — Favourite (1c15ec6)
 - [x] P2c — Existing playthroughs and export (3553e24)
 - [x] P3 — Getting a game ready for a player (simple mode) (badb747)
-- [ ] P4 — Mode setting and start-up
+- [x] P4 — Mode setting and start-up (dc7b761)
 - [x] P4a — Optional PIN for admins (8e81077)
 - [x] P5 — Advanced mode: playthroughs grouped by player (88b01ee)
 - [x] P5a — Deleted playthroughs: kept until deleted for good (0d1b427)
-- [ ] P6 — Simple view: players and games
+- [x] P6 — Simple view: players and games (dc7b761)
 - [ ] P7 — Simple mode: play, and the "My games" menu
 - [ ] P8 — Screenshots
 - [ ] P9 — 👤 Check with real people
@@ -223,6 +223,24 @@ Andrix, and results of the 👤 checks. Newest first, with the date.
   (passo 4) la frase "e **non** preferita" è sostituita dal comportamento deciso.
   Lo stesso per il ramo "i salvataggi sono di un altro giocatore P": P prende la sua come
   preferita, il giocatore attuale una nuova.
+- 2026-10-25 — Fase P, P4 e P6 (Haiku), commit `dc7b761` (tick nel commit successivo). Test
+  Windows: 730 verdi, 0 warning. Cosa c'è: modalità in `lss.ini`; intestazione "Modalità semplice";
+  vista semplice con le persone (piastrelle da 140 px, scudo per gli admin, "Aggiungi giocatore":
+  admin, poi nome) e con i giochi del giocatore (copertina o piastrella generata, launcher, ultima
+  partita, avviso cloud, sbiadito con "Da sistemare" se non è pronto, disattivato mentre gira);
+  "⚙" torna alla modalità avanzata chiedendo un admin (con PIN se c'è).
+  - **Non fatto, spostato in P7**: giocare un gioco pronto dalla modalità semplice (oggi il clic non
+    fa niente, `MainWindowViewModel.PlaySimpleAsync`) e il menu ⋯ "Le mie partite" con il pulsante
+    della copertina (44 px).
+  - Deviazioni: la pagina "Chi gioca?" usa lo stesso `PersonTile` della finestra admin; "Aggiungi un
+    gioco" usa la procedura della modalità avanzata (`AddGameAsync`) dopo il controllo admin. Il
+    collegamento "Passa alla modalità semplice" delle Impostazioni (canvas `Settings`) non c'è: il
+    pulsante dell'intestazione lo sostituisce.
+  - `IDialogService` e `People` sono pubblici (la finestra di scelta admin ha bisogno di `People`):
+    `People` era `internal`.
+  - Costo: scegliere un giocatore apre il gioco di ogni tile (`GameFor`), per avere l'ultima partita
+    e lo stato cloud. Con molti giochi la prima apertura sarà lenta: da misurare (P8).
+  - Non verificato a schermo: la vista semplice (P8).
 - 2026-10-25 — Fase P, P5a (Haiku), commit `0d1b427`. Test Windows: 720 verdi, 0 warning. Linux
   (`lss-ci`, `--tests-only`, `0d1b427`): 720 verdi.
   - **Cambio di comportamento voluto di `PruneBackups`**: prima le partite eliminate entravano nel
