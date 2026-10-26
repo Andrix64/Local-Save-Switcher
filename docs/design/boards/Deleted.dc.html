@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Partite eliminate</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 28px">
+  <div role="dialog" aria-labelledby="del-title" style="width: 640px; box-sizing: border-box; padding: 24px 28px; border-radius: 12px; background: #0F0F10; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 14px">
+    <h1 id="del-title" style="margin: 0; font-size: 19px; font-weight: 700">Partite eliminate · Terraria</h1>
+    <p style="margin: 0; color: #A8A8AE; line-height: 1.5">Le partite eliminate restano qui finché non le recuperi o le elimini per sempre.</p>
+    <div style="display: flex; flex-direction: column; border-radius: 8px; border: 1px solid #2E2E33; overflow: hidden">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid {{r.line}}">
+          <div title="{{r.owner}}" style="width: 28px; height: 28px; flex: none; border-radius: 14px; background: {{r.color}}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #FFFFFF">{{r.initial}}</div>
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+            <strong style="font-size: 14px">{{r.name}}</strong>
+            <span style="font-size: 12px; color: #96969C">{{r.owner}} · eliminata {{r.when}} · {{r.time}}</span>
+          </div>
+          <button style="height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600; flex: none">Recupera</button>
+          <button style="height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid #7A2A24; background: transparent; color: #FFB4AD; font-family: inherit; font-weight: 600; flex: none">Elimina per sempre…</button>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <button style="height: 30px; padding: 0 4px; border: 0; background: transparent; color: #FF8076; font-family: inherit; font-weight: 600">Elimina tutte per sempre…</button>
+      <div style="flex: 1"></div>
+      <button style="height: 34px; padding: 0 14px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Apri cartella</button>
+      <button style="height: 34px; padding: 0 18px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 700">Chiudi</button>
+    </div>
+  </div>
+  <div role="alertdialog" aria-labelledby="purge-title" style="width: 400px; box-sizing: border-box; padding: 22px 24px; border-radius: 12px; background: #0F0F10; border: 1px solid #7A2A24; display: flex; flex-direction: column; gap: 14px">
+    <h2 id="purge-title" style="margin: 0; font-size: 17px; font-weight: 700">Eliminare per sempre?</h2>
+    <p style="margin: 0; color: #D6D6DA; font-size: 14px; line-height: 1.5">"Prova hardmode" verrà eliminata per sempre. Non si può annullare.</p>
+    <div style="display: flex; justify-content: flex-end; gap: 8px">
+      <button style="height: 34px; padding: 0 16px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 700">Annulla</button>
+      <button style="height: 34px; padding: 0 16px; border-radius: 6px; border: 0; background: #B3261E; color: #FFFFFF; font-family: inherit; font-weight: 700">Elimina per sempre</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const r = (name, owner, color, when, time, first) => ({ name, owner, color, initial: owner === '—' ? '?' : owner.charAt(0), when, time, line: first ? 'transparent' : '#2E2E33' });
+    return {
+      rows: [
+        r('Prova hardmode', 'Andrea', '#C2410C', 'oggi alle 16:20', '3 ore di gioco', true),
+        r('Mondo di prova', 'Clara', '#1D6FD0', 'il 20/10/2026', '45 minuti di gioco', false),
+        r('Vecchio mondo', '—', '#4A4A50', 'il 02/09/2026', '12 ore di gioco', false)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

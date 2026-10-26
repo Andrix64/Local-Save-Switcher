@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>In gioco</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #0F0F10; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="height: 72px; box-sizing: border-box; padding: 0 24px; background: #0A0A0B; display: flex; align-items: center">
+    <div style="display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 16px 0 8px; border-radius: 26px; background: #19191B">
+      <div style="width: 38px; height: 38px; border-radius: 19px; background: #C2410C; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #FFFFFF">A</div>
+      <span style="font-size: 18px; font-weight: 600">Andrea</span>
+    </div>
+  </header>
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center">
+    <div style="display: flex; gap: 48px; align-items: center; padding: 48px; border-radius: 20px; background: #19191B; border: 1px solid #2E2E33; max-width: 880px">
+      <div style="width: 200px; height: 300px; flex: none; border-radius: 14px; background: #7A1E2B; display: flex; align-items: flex-end; box-sizing: border-box; padding: 18px">
+        <div style="font-size: 26px; font-weight: 800; color: #FFFFFF">Hades</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 20px">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #4CC38A">
+          <div style="width: 10px; height: 10px; border-radius: 5px; background: #4CC38A"></div>
+          <span>Hades è aperto</span>
+        </div>
+        <h1 style="margin: 0; font-size: 40px; font-weight: 800; line-height: 1.1">Buon divertimento, Andrea!</h1>
+        <p style="margin: 0; font-size: 20px; line-height: 1.5; color: #A8A8AE">Quando chiudi Hades, LSS salva la tua partita da solo. Non devi fare niente.</p>
+        <sc-if value="{{showFinished}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; flex-direction: column; gap: 12px; padding-top: 8px">
+            <p style="margin: 0; font-size: 15px; color: #96969C">LSS non riesce a vedere quando chiudi questo gioco: quando hai finito, premi qui.</p>
+            <a href="Games.dc.html" style="align-self: flex-start; display: flex; align-items: center; height: 52px; padding: 0 28px; border-radius: 12px; background: {{accent}}; color: #FFFFFF; font-size: 18px; font-weight: 700">Ho finito di giocare</a>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"showFinished":{"editor":"boolean","default":true},"accent":{"editor":"color","default":"#E0261B"},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { showFinished: this.props.showFinished ?? true, accent: this.props.accent ?? '#E0261B' };
+  }
+}
+</script>
+</body>
+</html>

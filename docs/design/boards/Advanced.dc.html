@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>LSS avanzata</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #0F0F10; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; flex-direction: column">
+  <header style="height: 68px; flex: none; box-sizing: border-box; padding: 0 20px; background: #0A0A0B; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <div style="width: 4px; height: 34px; background: #E0261B"></div>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 21px; font-weight: 800">LSS</div>
+        <div style="font-size: 11px; font-weight: 600; color: #96969C; letter-spacing: 0.5px">LOCAL SAVE SWITCHER · v2.0.0</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px">
+      <button style="height: 34px; padding: 0 14px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600">Giocatori…</button>
+      <button style="height: 34px; padding: 0 14px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600">Modalità semplice</button>
+      <button style="height: 34px; padding: 0 14px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600">Impostazioni</button>
+    </div>
+  </header>
+  <div style="flex: 1; display: flex; min-height: 0">
+    <nav aria-label="Giochi" style="width: 250px; flex: none; box-sizing: border-box; padding: 16px 12px; background: #0A0A0B; display: flex; flex-direction: column; gap: 4px; overflow: hidden">
+      <sc-for list="{{groups}}" as="grp" hint-placeholder-count="4">
+        <div style="font-size: 11px; font-weight: 700; color: #96969C; letter-spacing: 0.6px; padding: 12px 6px 6px">{{grp.name}}</div>
+        <sc-for list="{{grp.games}}" as="g" hint-placeholder-count="2">
+          <button style="display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 10px; border-radius: 6px; border: 0; border-left: 3px solid {{g.bar}}; background: {{g.back}}; color: #F2F2F2; font-family: inherit; font-size: 13px; text-align: left">
+            <div style="width: 26px; height: 26px; flex: none; border-radius: 5px; background: #232326; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">{{g.initial}}</div>
+            <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{g.name}}</span>
+            <sc-if value="{{g.dot}}" hint-placeholder-val="{{false}}"><div aria-label="Cartelle da controllare" style="width: 8px; height: 8px; border-radius: 4px; background: #7FB0F0"></div></sc-if>
+          </button>
+        </sc-for>
+      </sc-for>
+      <div style="flex: 1"></div>
+      <button style="height: 40px; border-radius: 6px; border: 1px solid #2E2E33; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600">+ Aggiungi un gioco</button>
+      <button style="height: 40px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 6px; border: 1px solid #2E2E33; background: transparent; color: #A8A8AE; font-family: inherit; font-size: 13px">Altri giochi (14)<span aria-hidden="true">⌄</span></button>
+    </nav>
+    <main style="flex: 1; min-width: 0; box-sizing: border-box; padding: 18px 26px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+      <div style="display: flex; align-items: center; gap: 12px">
+        <h1 style="margin: 0; font-size: 21px; font-weight: 700">Terraria</h1>
+        <span style="padding: 3px 8px; border-radius: 5px; background: #232326; font-size: 11px; font-weight: 700; color: #A8A8AE">STEAM</span>
+      </div>
+      <div role="status" style="display: flex; align-items: center; gap: 16px; padding: 12px 14px; border-radius: 8px; background: #1B2230; border: 1px solid #34507A">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px">
+          <strong style="font-size: 13px">Dopo l'ultima partita LSS ha trovato una possibile cartella di salvataggi</strong>
+          <span style="color: #C9D6EA">File di Terraria cambiati in una cartella che LSS non cambia ancora.</span>
+        </div>
+        <a href="Suggestions.dc.html" style="height: 32px; display: flex; align-items: center; padding: 0 14px; border-radius: 6px; background: #2C2C30; color: #F2F2F2; font-weight: 600">Guarda</a>
+      </div>
+      <section aria-labelledby="folders" style="display: flex; flex-direction: column; gap: 6px; padding: 8px 14px; border-radius: 8px; background: #19191B; border: 1px solid #2E2E33">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <button onClick="{{toggleFolders}}" aria-expanded="{{foldersOpen}}" style="display: flex; align-items: center; gap: 8px; height: 28px; padding: 0; border: 0; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">
+            <span aria-hidden="true" style="width: 12px; color: #96969C">{{chevron}}</span>
+            <span id="folders">Cartelle dei salvataggi (3)</span>
+          </button>
+          <sc-if value="{{foldersOpen}}" hint-placeholder-val="{{false}}">
+            <button style="height: 28px; padding: 0 10px; border-radius: 6px; border: 0; background: transparent; color: #FF8076; font-family: inherit; font-size: 12px; font-weight: 600">+ Aggiungi un'altra cartella…</button>
+          </sc-if>
+        </div>
+        <sc-if value="{{foldersOpen}}" hint-placeholder-val="{{false}}">
+        <sc-for list="{{spots}}" as="s" hint-placeholder-count="3">
+          <div style="display: flex; align-items: center; gap: 10px; min-height: 26px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#96969C" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"></path></svg>
+            <span style="flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #D6D6DA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.path}}</span>
+            <span style="font-size: 12px; color: #96969C">{{s.origin}}</span>
+          </div>
+        </sc-for>
+        </sc-if>
+      </section>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 4px">
+        <h2 style="margin: 0; font-size: 19px; font-weight: 700">Le tue partite</h2>
+        <div style="display: flex; gap: 8px">
+          <button style="height: 32px; padding: 0 12px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Importa…</button>
+          <button style="height: 32px; padding: 0 12px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 600">Nuova partita</button>
+        </div>
+      </div>
+      <sc-for list="{{players}}" as="p" hint-placeholder-count="2">
+        <section style="display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 2px 2px 0">
+            <div style="width: 20px; height: 20px; border-radius: 10px; background: {{p.color}}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #FFFFFF">{{p.initial}}</div>
+            <h3 style="margin: 0; font-size: 13px; font-weight: 700">{{p.name}}</h3>
+            <span style="font-size: 12px; color: #96969C">{{p.count}}</span>
+          </div>
+          <sc-for list="{{p.runs}}" as="r" hint-placeholder-count="2">
+            <article style="display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; border-radius: 8px; background: #19191B; border: 1px solid {{r.border}}">
+              <div style="display: flex; align-items: center; gap: 10px">
+                <button aria-label="{{r.starLabel}}" title="{{r.starLabel}}" style="width: 28px; height: 28px; flex: none; border: 0; border-radius: 6px; background: transparent; color: {{r.starColor}}; font-size: 18px; line-height: 1; cursor: pointer">{{r.star}}</button>
+                <strong style="font-size: 15px">{{r.name}}</strong>
+                <sc-if value="{{r.active}}" hint-placeholder-val="{{false}}"><span style="padding: 2px 7px; border-radius: 4px; background: #E0261B; font-size: 11px; font-weight: 700; color: #FFFFFF">NEL GIOCO ORA</span></sc-if>
+                <span style="flex: 1; font-size: 12px; color: #96969C">{{r.meta}}</span>
+                <sc-if value="{{r.active}}" hint-placeholder-val="{{false}}">
+                  <div style="display: flex; gap: 6px">
+                    <button style="height: 28px; padding: 0 10px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Salva un punto</button>
+                    <button style="height: 28px; padding: 0 10px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Cronologia</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{r.inactive}}" hint-placeholder-val="{{true}}">
+                  <button style="height: 28px; padding: 0 12px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 600">Gioca questa</button>
+                </sc-if>
+                <button aria-label="Altre azioni" style="height: 28px; width: 36px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 700">···</button>
+              </div>
+            </article>
+          </sc-for>
+        </section>
+      </sc-for>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const g = (name, sel, dot) => ({ name, initial: name.charAt(0), back: sel ? '#3E1816' : 'transparent', bar: sel ? '#E0261B' : 'transparent', dot: !!dot });
+    const open = !!(this.state && this.state.foldersOpen);
+    return {
+      foldersOpen: open,
+      chevron: open ? '▾' : '▸',
+      toggleFolders: () => this.setState({ foldersOpen: !open }),
+      groups: [
+        { name: 'STEAM', games: [g('Control Ultimate Edition'), g('Hades'), g('Terraria', true, true)] },
+        { name: 'EPIC GAMES', games: [g('Alan Wake 2')] },
+        { name: 'GOG', games: [g('The Witcher 3')] },
+        { name: 'AGGIUNTI A MANO', games: [g('Minecraft')] }
+      ],
+      players: [
+        { name: 'Andrea', initial: 'A', color: '#C2410C', count: '2 partite', runs: [
+          { name: 'Mondo principale', meta: 'salvata oggi alle 16:52 · 2 punti salvati', star: '★', starColor: '#F5B83D', starLabel: 'Preferita: è quella della modalità semplice', border: '#E0261B', active: true, inactive: false },
+          { name: 'Prova hardmode', meta: 'salvata 5 giorni fa', star: '☆', starColor: '#96969C', starLabel: 'Rendi preferita', border: '#2E2E33', active: false, inactive: true }
+        ] },
+        { name: 'Clara', initial: 'C', color: '#1D6FD0', count: '1 partita', runs: [
+          { name: 'Esperto, mondo grande', meta: 'salvata ieri alle 21:10', star: '★', starColor: '#F5B83D', starLabel: 'Preferita: è quella della modalità semplice', border: '#2E2E33', active: false, inactive: true }
+        ] }
+      ],
+      spots: [
+        { path: 'C:\\Program Files (x86)\\Steam\\userdata\\405015118\\105600\\remote', origin: 'Steam' },
+        { path: 'C:\\Users\\andrea\\Documents\\My Games\\Terraria\\Worlds', origin: 'da Steam' },
+        { path: 'C:\\Users\\andrea\\Documents\\My Games\\Terraria\\Players  (solo *.plr)', origin: 'trovata da LSS' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

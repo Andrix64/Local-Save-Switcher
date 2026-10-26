@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Le mie partite</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; align-items: center; justify-content: center">
+  <div role="dialog" aria-labelledby="mine-title" style="width: 640px; box-sizing: border-box; padding: 36px; border-radius: 20px; background: #19191B; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; align-items: center; gap: 16px">
+      <div style="width: 48px; height: 72px; flex: none; border-radius: 8px; background: #7A1E2B"></div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 6px">
+        <h1 id="mine-title" style="margin: 0; font-size: 26px; font-weight: 800">Le tue partite di Hades</h1>
+        <p style="margin: 0; font-size: 15px; color: #A8A8AE">Andrea · tocca una partita per giocarla</p>
+      </div>
+      <a href="Games.dc.html" aria-label="Chiudi" style="width: 44px; height: 44px; border-radius: 22px; background: #232326; color: #F2F2F2; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </a>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{runs}}" as="r" hint-placeholder-count="3">
+        <a href="Playing.dc.html" style="display: flex; align-items: center; gap: 16px; min-height: 68px; box-sizing: border-box; padding: 12px 18px; border-radius: 14px; background: #232326; border: 2px solid {{r.border}}; color: #F2F2F2">
+          <span style="width: 28px; font-size: 24px; color: {{r.starColor}}" aria-hidden="true">{{r.star}}</span>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-size: 18px; font-weight: 700">{{r.name}}</span>
+            <span style="font-size: 14px; color: #96969C">{{r.meta}}</span>
+          </div>
+          <sc-if value="{{r.fav}}" hint-placeholder-val="{{false}}">
+            <span style="padding: 4px 10px; border-radius: 6px; background: #2A2110; color: #F5B83D; font-size: 13px; font-weight: 700">Quella che giochi</span>
+          </sc-if>
+        </a>
+      </sc-for>
+      <a href="Playing.dc.html" style="display: flex; align-items: center; gap: 16px; min-height: 64px; box-sizing: border-box; padding: 12px 18px; border-radius: 14px; border: 2px dashed #3A3A40; color: #F2F2F2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        <span style="font-size: 18px; font-weight: 700">Inizia una partita nuova</span>
+      </a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      runs: [
+        { name: 'Andrea', meta: 'Giocata ieri · 14 ore', star: '★', starColor: '#F5B83D', border: '#E0261B', fav: true },
+        { name: 'Andrea 2 — senza armi', meta: 'Giocata 2 settimane fa · 3 ore', star: '', starColor: '#96969C', border: 'transparent', fav: false }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Importa configurazione dei salvataggi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center">
+  <div role="dialog" aria-labelledby="imp-title" style="width: 880px; height: 720px; box-sizing: border-box; padding: 26px 30px; border-radius: 12px; background: #0F0F10; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 id="imp-title" style="margin: 0; font-size: 21px; font-weight: 700">Importa configurazione dei salvataggi</h1>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #96969C">Giochi di Marco - SteamOS.lss-config.json · creato con LSS 2.0.0 il 24/10/2026</div>
+    </div>
+    <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+      <sc-for list="{{games}}" as="g" hint-placeholder-count="3">
+        <section style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 8px; background: #19191B; border: 1px solid {{g.border}}; opacity: {{g.opacity}}">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <input type="checkbox" id="{{g.id}}" checked="{{g.checked}}" disabled="{{g.disabled}}" style="width: 18px; height: 18px; margin: 0; accent-color: #E0261B">
+            <label for="{{g.id}}" style="font-size: 15px; font-weight: 700">{{g.name}}</label>
+            <span style="padding: 2px 7px; border-radius: 4px; background: #232326; font-size: 11px; font-weight: 700; color: #A8A8AE">{{g.store}}</span>
+            <span style="flex: 1; text-align: right; font-size: 12px; color: #96969C">{{g.madeOn}}</span>
+          </div>
+          <sc-if value="{{g.note}}" hint-placeholder-val="{{false}}">
+            <div style="padding: 8px 10px; border-radius: 6px; background: #1B2230; border: 1px solid #34507A; color: #C9D6EA">{{g.note}}</div>
+          </sc-if>
+          <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{g.spots}}" as="s" hint-placeholder-count="2">
+              <li style="display: flex; align-items: center; gap: 10px">
+                <span style="width: 16px; font-weight: 700; color: {{s.color}}" aria-hidden="true">{{s.mark}}</span>
+                <span style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #D6D6DA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.path}}</span>
+                <span style="font-size: 12px; color: {{s.color}}">{{s.state}}</span>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <span style="flex: 1; color: #96969C">Ogni cartella viene controllata come quelle trovate da LSS. Nessun salvataggio viene copiato.</span>
+      <button style="height: 34px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; color: #A8A8AE; font-family: inherit; font-weight: 600">Annulla</button>
+      <button style="height: 34px; padding: 0 16px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 700">Importa 2 giochi</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = (path) => ({ mark: '✓', color: '#4CC38A', state: 'trovata', path });
+    const later = (path) => ({ mark: '⏳', color: '#F5B83D', state: 'non ancora: verrà usata quando il gioco la crea', path });
+    const no = (path, why) => ({ mark: '✗', color: '#FF5C5C', state: 'rifiutata: ' + why, path });
+    return {
+      games: [
+        { id: 'g1', name: 'Hollow Knight', store: 'STEAM', madeOn: 'Fatta su SteamOS (Steam Deck)', checked: true, disabled: false, border: '#E0261B', opacity: 1, note: '',
+          spots: [ok('…/compatdata/367520/pfx/drive_c/users/steamuser/AppData/LocalLow/Team Cherry/Hollow Knight')] },
+        { id: 'g2', name: 'Celeste', store: 'STEAM', madeOn: 'Fatta su SteamOS (Steam Deck)', checked: true, disabled: false, border: '#E0261B', opacity: 1, note: 'Nota di Marco: la seconda cartella sono i file delle mod.',
+          spots: [ok('~/.local/share/Celeste/Saves'), later('~/.local/share/Celeste/Mods/Settings')] },
+        { id: 'g3', name: 'Stardew Valley', store: 'GOG', madeOn: 'Non è su questo computer', checked: false, disabled: true, border: '#2E2E33', opacity: 0.55, note: '',
+          spots: [no('{LinuxHome}/.config', 'è una cartella di sistema, non dei salvataggi')] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

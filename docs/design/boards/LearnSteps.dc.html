@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Trova i salvataggi: i primi passi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 24px">
+  <sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+    <div role="dialog" aria-label="{{s.title}}" style="width: 360px; height: 460px; box-sizing: border-box; padding: 22px 24px; border-radius: 12px; background: #0F0F10; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 700">Trova i salvataggi di Hollow Knight</h2>
+      <ol aria-label="Passaggi" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+        <sc-for list="{{s.bars}}" as="b" hint-placeholder-count="4">
+          <li style="height: 4px; border-radius: 2px; background: {{b.color}}"></li>
+        </sc-for>
+      </ol>
+      <div style="font-size: 12px; font-weight: 700; color: #96969C; letter-spacing: 0.4px">{{s.title}}</div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #D6D6DA; white-space: pre-line">{{s.text}}</p>
+      <sc-if value="{{s.showBar}}" hint-placeholder-val="{{false}}">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="height: 6px; border-radius: 3px; background: #2E2E33; overflow: hidden"><div style="width: 62%; height: 6px; background: #E0261B"></div></div>
+          <span style="font-size: 12px; color: #96969C">AppData\LocalLow\Team Cherry…</span>
+        </div>
+      </sc-if>
+      <div style="flex: 1"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px">
+        <button style="height: 34px; padding: 0 14px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Annulla</button>
+        <sc-if value="{{s.hasMain}}" hint-placeholder-val="{{true}}">
+          <button style="height: 34px; padding: 0 16px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 700">{{s.main}}</button>
+        </sc-if>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const bars = (n) => [0, 1, 2, 3].map((i) => ({ color: i < n ? '#7A2A24' : i === n ? '#E0261B' : '#2E2E33' }));
+    return {
+      steps: [
+        { title: '1 · AVVIA IL GIOCO', bars: bars(0), showBar: false, hasMain: true, main: 'Avvia il gioco',
+          text: 'LSS non sa ancora dove Hollow Knight tiene i salvataggi. Scopriamolo insieme:\n1. Avvia il gioco.\n2. Salva nel gioco (o gioca finché salva da solo).\n3. Esci dal gioco.\nLSS guarderà cosa è cambiato sul disco.' },
+        { title: '2 · GIOCA, SALVA, ESCI', bars: bars(1), showBar: false, hasMain: true, main: 'Sono uscito dal gioco',
+          text: 'Gioca, salva, poi esci da Hollow Knight.\n\nQuando sei uscito dal gioco, premi il pulsante.' },
+        { title: '3 · LSS CERCA', bars: bars(2), showBar: true, hasMain: false, main: '',
+          text: 'Cerco i file cambiati…\nNon scrivo niente: guardo soltanto.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

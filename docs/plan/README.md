@@ -34,6 +34,34 @@ what to write, how to check it and what to commit.
 
 Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 
+## Starting a session (any Claude account)
+
+Everything needed is in the repository: this folder (`docs/plan/`), the
+design boards (`docs/design/`, see its README) and `docs/DEVELOPMENT.md`.
+Nothing depends on a previous conversation.
+
+- **Where.** The repository is `H:\Projects\Control Savegame Switcher` on
+  Andrix's PC. The branch `v2` exists only there (it is not pushed), and
+  it is checked out in a git worktree: run `git worktree list` and work in
+  the folder that shows `[v2]`. Git refuses to check out `v2` in a second
+  folder while that one exists. On another PC there is no `v2`: stop and
+  ask Andrix.
+- **Check first.** `git status` clean, `git log -1` matches the last commit
+  named in `PROGRESS.md`, then build and test (rule 3) before changing
+  anything. If the tests already fail, stop and write it in the Notes.
+- **Prompt to start a phase R session** (paste it as the first message):
+
+  > Work in the LSS repository, branch `v2` (the folder `git worktree
+  > list` shows with `[v2]`). Read `docs/plan/README.md` first, then
+  > `docs/plan/PROGRESS.md` and `docs/plan/R-fixes.md`. Do the first task of
+  > phase R that is not ticked, exactly as written, following every rule of
+  > the README: build and tests green, commit on `v2` with the trailer of
+  > phase R, tick it in `PROGRESS.md`, never push. If something doesn't
+  > match the plan, stop and write it in the Notes of `PROGRESS.md`. When
+  > the task is committed, stop and tell me what you did.
+
+  One task per session keeps each session small; Andrix starts the next one.
+
 ## How to work (rules for the agent)
 
 1. **One task at a time, in order.** Open `PROGRESS.md`, take the first task
@@ -85,11 +113,14 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 8. **Never touch the real Steam folder or the real app data.** Tests work
    only in temporary folders (see `TestFolder`). Don't run the app against
    real saves unless a 👤 task says so.
-   **Linux checks:** if the brief of your session gives you an SSH host
-   for Linux checks, run `bash scripts/linux-check.sh <host>` after every
-   task that touches Linux code, packaging or tests (`--tests-only` when
-   packaging didn't change). It only uses temporary containers on that
-   machine; never run anything else there.
+   **Linux checks:** run `bash scripts/linux-check.sh lss-ci@192.168.1.3`
+   after every task that touches Linux code, packaging or tests (add
+   `--tests-only` **after** the host when packaging didn't change). That
+   host is a machine on Andrix's network: SSH with the key already set up
+   on Andrix's PC, Docker only, no root. Use it **only** through that
+   script (temporary containers); never run anything else there. If it
+   can't be reached (another PC, the machine is off), write it in the task's
+   note in `PROGRESS.md` and go on: Andrix runs the check later.
 9. **Keep the existing style.** Read the file before editing it and write
    code like the code around it.
 

@@ -30,9 +30,9 @@ What Andrix found trying phase P (2026-10-25), and the task for each:
 | 13 | A full screen button in the simple mode (and back), never over the game | R7a |
 | — | **Everything that exists only for data of LSS 1.0 (or of builds before this phase) goes in one separate file**, so it can be deleted in one go when 1.0 is gone (Andrix is the only user) | R0, and R9–R11 put their migrations there |
 
-The design canvas (https://claude.ai/artifact/YEykCPUor96ApEYdzMnmRS) stays
-the reference for every screen. Where this file says something different
-(R6, R7, R8), this file wins.
+The design boards in [`docs/design/boards/`](../design/README.md) (how to read them:
+[`docs/design/README.md`](../design/README.md)) stay the reference for every screen.
+Where this file says something different (R6, R7, R8), this file wins.
 
 ## Rules for this phase (on top of README.md)
 
@@ -264,7 +264,7 @@ name, no icon.
    `ListBoxItem`s are not focusable and not hit-testable for selection
    (style on the header type), so arrow keys and clicks skip them.
    Everything else keeps binding to `SelectedGame` as today.
-3. Look of the canvas board **Advanced**: header 11 px bold muted,
+3. Look of the design board `Advanced.dc.html`: header 11 px bold muted,
    letter spacing 0.6, padding `12 6 6`; game rows 40 px, 26 px icon (or
    the initial in a 26 px rounded square), 3 px red bar on the left of the
    selected one, selected background `#3E1816`.
@@ -316,7 +316,7 @@ Commit: `Long game names: ellipsis and slow scroll when hovered or selected`
 1. The status badge ("ASK AN ADMIN", "TO SET UP", "PLAYING") goes **under
    the launcher chip, on the left**: a vertical `StackPanel` at the top
    left with the chip, then the badge, 6 px apart. Nothing top right any
-   more. (Replaces the canvas, where the badge is top right.)
+   more. (Replaces the board `Games.dc.html`, where the badge is top right.)
 2. A tile without a cover (`!HasCover`) shows the **game's icon** in the
    middle (64 px), with the name at the bottom as today. No icon → the
    initial in a 64 px rounded square. No tile is empty.
@@ -432,7 +432,7 @@ about).
    Keep existing `resx` keys where they fit; new ones in both files.
 2. **Advanced mode:** the header "Settings" button opens LSS settings; the
    game page gets "Game settings" (a small button in the game's title row,
-   as on the canvas board Advanced).
+   as on the board `Advanced.dc.html`).
 3. **Simple mode:**
    - The ⋯ on a game cover opens a small menu: **My games** (everyone) and
      **Game settings…** (shown to everyone, asks an admin with R3's rules,
@@ -574,12 +574,12 @@ Commit: `Fix old saved paths with backslashes on Linux`
 1. `tools/UiScreenshots`: sidebar (01), simple tiles with icon and badge
    under the chip (24), switch in both headers, both settings windows, the
    ⋯ menu, the PIN pad on "Who's playing?", the full screen button. Regenerate and look at each
-   one next to the canvas.
+   one next to its board in `docs/design/boards/`.
 2. `docs/DEVELOPMENT.md`: the JSON files (names, where), `V1Compat`
    section (R0) up to date.
-3. `bash scripts/linux-check.sh lss-ci@192.168.1.3` (full, packages
+3. The Linux check of README rule 8 (full, packages
    included).
-4. Notes in `PROGRESS.md`: what differs from the canvas on purpose (R6
+4. Notes in `PROGRESS.md`: what differs from the design boards on purpose (R6
    badge, R7 switch, R8 windows).
 
 Commit: `Screenshots and docs for phase R`
