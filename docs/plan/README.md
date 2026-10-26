@@ -41,11 +41,13 @@ design boards (`docs/design/`, see its README) and `docs/DEVELOPMENT.md`.
 Nothing depends on a previous conversation.
 
 - **Where.** The repository is `H:\Projects\Control Savegame Switcher` on
-  Andrix's PC. The branch `v2` exists only there (it is not pushed), and
-  it is checked out in a git worktree: run `git worktree list` and work in
-  the folder that shows `[v2]`. Git refuses to check out `v2` in a second
-  folder while that one exists. On another PC there is no `v2`: stop and
-  ask Andrix.
+  Andrix's PC (GitHub: `Andrix64/Local-Save-Switcher`). Work on the branch
+  `v2`. On Andrix's PC it may be checked out in a git worktree: run
+  `git worktree list` and work in the folder that shows `[v2]` (git refuses
+  to check out `v2` in a second folder while that one exists). On another
+  PC: clone, `git checkout v2`; check that `git log -1` matches the last
+  commit in `PROGRESS.md`, and stop and ask Andrix if it doesn't (the
+  GitHub copy can be older: Andrix pushes it, agents never do).
 - **Check first.** `git status` clean, `git log -1` matches the last commit
   named in `PROGRESS.md`, then build and test (rule 3) before changing
   anything. If the tests already fail, stop and write it in the Notes.

@@ -62,8 +62,10 @@ Where this file says something different (R6, R7, R8), this file wins.
 ## R0 — One file for the 1.0 compatibility
 
 **Goal.** When 1.0 is retired, removing its compatibility must be: delete
-`V1Compat.cs` and `V1CompatTests.cs`, delete the lines marked
-`// V1Compat`, build, done. Today it is spread over many classes.
+`src/Lss.Core/V1Compat.cs` and its tests (`V1CompatTests.cs`, and later
+`V1CompatBoundaryTests.cs` from this task and `V1UpgradeTests.cs` from
+R10), delete the lines marked `// V1Compat`, build, done. Today it is
+spread over many classes.
 
 **What counts.** Code that would be dead if every user started 2.0 with an
 empty data folder. **Not** compatibility: crash recovery (`SaveSet`
@@ -109,8 +111,9 @@ empty" in `SaveManager`), Control Save Manager (`LegacyMigration`).
    comes from one `V1Compat` method.
 4. Add to `docs/DEVELOPMENT.md` a section **"Compatibility with LSS 1.0"**
    like the Control Save Manager one: what `V1Compat` does, and the
-   removal checklist (delete the two files, grep `V1Compat`, delete the
-   `resx` keys used only there — list them —, run the tests).
+   removal checklist (delete `V1Compat.cs` and every `V1Compat*Tests.cs` /
+   `V1UpgradeTests.cs`, grep `V1Compat`, delete the `resx` keys used only
+   there — list them —, run the tests). R9–R11 add their lines to it.
 5. **Boundary test** `V1CompatBoundaryTests`: walks `src/` from the
    repository root (find `LSS.slnx` going up from the test's folder) and
    fails if an old file name (`"lss.ini"`, `"persone.ini"`,
@@ -489,7 +492,7 @@ Commit: `Settings split: game settings and LSS settings`
 **Tests** (`JsonFileTests`, `V1CompatTests`, the classes' own tests):
 round trip; conversion of a real `.ini` sample of each file gives the same
 values (players with PIN and order, last account, mode, look after playing,
-ignored folders, manual game with exe); `.ini.precedente` left; second run
+full screen of R7a, ignored folders, manual game with exe); `.ini.precedente` left; second run
 does nothing; `.json` and `.ini` both there → JSON wins; broken JSON →
 defaults and `.rotto`.
 
@@ -558,7 +561,10 @@ made on Windows. New paths are right; old ones stay wrong.
    `Glob` / `SaveRule` / `ToLocal` use separators first, and normalise them
    only if those places compare them with the system separator.
 3. Old data: in the R9/R10 conversion (`V1Compat`), so the JSON files are
-   clean; logged with the file and the number of paths fixed.
+   clean; logged with the file and the number of paths fixed. **Also** a
+   pass over the JSON files that already exist (a build between R10 and
+   R11 may have converted them with the `\` inside): `V1Compat` fixes them
+   at start-up, after the conversion; doing it again changes nothing.
 4. New data from elsewhere (an imported `.lss-config.json` made on
    Windows): `Normalize` on import, in the normal code (that is not 1.0
    compatibility).
@@ -573,14 +579,14 @@ Commit: `Fix old saved paths with backslashes on Linux`
 
 1. `tools/UiScreenshots`: sidebar (01), simple tiles with icon and badge
    under the chip (24), switch in both headers, both settings windows, the
-   ⋯ menu, the PIN pad on "Who's playing?", the full screen button. Regenerate and look at each
-   one next to its board in `docs/design/boards/`.
+   ⋯ menu, the PIN pad on "Who's playing?", the full screen button.
+   Regenerate and look at each one next to its board in
+   `docs/design/boards/`.
 2. `docs/DEVELOPMENT.md`: the JSON files (names, where), `V1Compat`
    section (R0) up to date.
-3. The Linux check of README rule 8 (full, packages
-   included).
-4. Notes in `PROGRESS.md`: what differs from the design boards on purpose (R6
-   badge, R7 switch, R8 windows).
+3. The Linux check of README rule 8 (full, packages included).
+4. Notes in `PROGRESS.md`: what differs from the design boards on purpose
+   (R6 badge, R7 switch, R7a button, R8 windows).
 
 Commit: `Screenshots and docs for phase R`
 
