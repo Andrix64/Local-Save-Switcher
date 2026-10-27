@@ -218,7 +218,7 @@ per phase (the phase file names it).
 - [x] R6 — Simple mode tiles: badge under the chip, icon when there's no cover (25d2f7d)
 - [x] R7 — A Simple / Advanced switch instead of ⚙ (25cecad)
 - [x] R7a — Full screen button in the simple mode (f1215da)
-- [ ] R8 — Two settings windows: the game's and LSS's
+- [x] R8 — Two settings windows: the game's and LSS's (e9f72fb)
 - [ ] R9 — JSON settings files: the format and the app-wide files
 - [ ] R10 — JSON for the per-game files
 - [ ] R11 — Old paths with `\` on Linux
