@@ -219,7 +219,7 @@ per phase (the phase file names it).
 - [x] R7 — A Simple / Advanced switch instead of ⚙ (25cecad)
 - [x] R7a — Full screen button in the simple mode (f1215da)
 - [x] R8 — Two settings windows: the game's and LSS's (e9f72fb)
-- [ ] R9 — JSON settings files: the format and the app-wide files
+- [x] R9 — JSON settings files: the format and the app-wide files (d479f5a)
 - [ ] R10 — JSON for the per-game files
 - [ ] R11 — Old paths with `\` on Linux
 - [ ] R12 — Screenshots, docs, Linux check
