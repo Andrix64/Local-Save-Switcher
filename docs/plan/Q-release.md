@@ -16,9 +16,12 @@ Requires phases K–P. Branch: `release-2.0`. Rules in [README.md](README.md).
 - `docs/DEVELOPMENT.md`: how to add a provider; where each launcher's save
   rules come from (Steam `appinfo.vdf`, Epic `CloudSaveFolder`, Heroic
   `gogSaves`) and the root table of L6; the learn weights (M3).
-- `docs/KNOWN_BUGS.md` or the README's help section: how to remove a
-  forgotten admin PIN (delete the `<id>.Pin=` line of `persone.ini` with
-  LSS closed; where the data folder is on each system).
+- `docs/KNOWN_BUGS.md` or the README's help section: a forgotten PIN (any
+  player can have one, from R3) is removed by an admin in Players (⋯ →
+  Remove PIN). If the only admin forgot theirs: with LSS closed, edit the
+  players file (`persone.json` after R9; before that `persone.ini`) and delete
+  the `Pin` field of that player (the `<id>.Pin=` line in the `.ini`); say
+  where the data folder is on each system.
 - New `docs/SAVE_CONFIG.md`: the save configuration format (N9a), the
   rules of the import check (N9b) and how to share a file, so people can
   write or fix one by hand.
