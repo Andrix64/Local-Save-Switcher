@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="using:Lss.App.Localization"
              xmlns:vm="using:Lss.App.ViewModels"
+             xmlns:ctl="using:Lss.App.Controls"
              x:Class="Lss.App.Views.SimpleView"
              x:DataType="vm:SimpleViewModel">
 
@@ -205,7 +206,8 @@
                       </Border>
                     </Button>
                     <StackPanel Spacing="4">
-                      <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+                      <ctl:MarqueeText Text="{Binding Name}" Foreground="{StaticResource Text}" FontSize="16"
+                                       FontWeight="SemiBold" />
                       <TextBlock Text="{Binding SubText}" FontSize="13" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
                     </StackPanel>
                   </StackPanel>

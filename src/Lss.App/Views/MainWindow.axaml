@@ -3,6 +3,7 @@
         xmlns:loc="using:Lss.App.Localization"
         xmlns:vm="using:Lss.App.ViewModels"
         xmlns:views="using:Lss.App.Views"
+        xmlns:ctl="using:Lss.App.Controls"
         x:Class="Lss.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Local Save Switcher"
@@ -59,8 +60,8 @@
                         <TextBlock Text="{Binding Initial}" HorizontalAlignment="Center" VerticalAlignment="Center"
                                    FontWeight="Bold" />
                       </Border>
-                      <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
-                                 VerticalAlignment="Center" />
+                      <ctl:MarqueeText Text="{Binding Name}" Foreground="{StaticResource TextMuted}" FontSize="13"
+                                       Width="160" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock Classes="small" Text="{Binding SupportText}" TextWrapping="Wrap" />
                     <Button Classes="secondary" Content="{loc:Str FindSaveFolder}" Command="{Binding FindFolderCommand}"
@@ -89,8 +90,15 @@
                   <TextBlock Text="{Binding Initial}" HorizontalAlignment="Center" VerticalAlignment="Center"
                              FontWeight="Bold" />
                 </Border>
-                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
-                           MaxWidth="170" />
+                <ctl:MarqueeText Text="{Binding Name}" Foreground="{StaticResource Text}" FontSize="13"
+                                 Width="150" VerticalAlignment="Center">
+                  <ctl:MarqueeText.IsActive>
+                    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                      <Binding Path="$parent[ListBoxItem].IsSelected" />
+                      <Binding Path="$parent[ListBoxItem].IsPointerOver" />
+                    </MultiBinding>
+                  </ctl:MarqueeText.IsActive>
+                </ctl:MarqueeText>
               </StackPanel>
             </DataTemplate>
           </ListBox.DataTemplates>
