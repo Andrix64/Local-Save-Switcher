@@ -111,6 +111,55 @@ To remove it:
 8. `grep -rn "LegacyMigration\|ControlSaveManager\|account.txt" src tests`
    must print nothing.
 
+## Compatibility with LSS 1.0
+
+Everything that exists only to read or tolerate data written by LSS 1.0.x (or
+by builds before phase R) is in **`src/Lss.Core/V1Compat.cs`**, with its tests in
+**`tests/Lss.Tests/V1CompatTests.cs`**, **`V1CompatBoundaryTests.cs`** and (from
+phase R10) **`V1UpgradeTests.cs`**. Every call to it from the rest of the code
+is marked with the comment `// V1Compat: <why>`. `V1CompatBoundaryTests` fails
+if the name of an old file (`lss.ini`, `persone.ini`...) shows up in `src/`
+outside `V1Compat.cs` and `LegacyMigration.cs` (the exceptions it lists are
+removed by R10).
+
+What it does:
+
+- **Data folders.** `V1Compat.MoveBetaLayout` moves the account folders of the
+  betas (`dati\<AccountID>`) under `dati\steam\`.
+- **Settings.** `V1Compat.IsSteamIdWithoutProvider`: a last account or game
+  stored without the launcher (before K5) is a Steam one (`AppSettings.Refers`).
+- **Settings files.** `V1Compat.ConvertAppFiles` (called at start-up, after
+  `LegacyMigration.Run` and `V1Compat.MoveBetaLayout`, before the settings are
+  read) turns the `.ini` files of the app into JSON, same folder and name:
+  `lss`, `persone`, `cartelle-ignorate`, and the `gioco` of every manual game.
+  The `.ini` is renamed `<name>.ini.precedente` (never deleted, never
+  `.vecchio`); if the `.json` already exists it wins. `V1Compat.ConvertIniFile`
+  is the one engine for this (R10 uses it for the per-game files).
+- **Playthroughs and copies.** `V1Compat.AssignFirstFavourites` gives a first
+  favourite to the players of playthroughs made before players existed
+  (`ProprietariOk` in `stato.ini`). `V1Compat.BackupFromName` describes a copy
+  without info file from its folder name; `OldBackupReasonText` is the text of
+  the oldest one; `BackupsWithoutOwner` feeds the "copies from before" section
+  of the History window.
+- **Export zips.** `V1Compat.ZipProvider`: zips of format 1 and 2 have no
+  launcher and are Steam's.
+- **Spots.** `V1Compat.ConvertOldSpots` turns `cartella.ini` into `posti.ini`.
+
+To remove it:
+
+1. Delete `src/Lss.Core/V1Compat.cs`, `tests/Lss.Tests/V1CompatTests.cs`,
+   `V1CompatBoundaryTests.cs` and `V1UpgradeTests.cs`.
+2. `grep -rn V1Compat src tests`: delete or simplify each marked line
+   (`App.axaml.cs`, both calls: `MoveBetaLayout` and `ConvertAppFiles`;
+   `AppSettings.Refers`, `GameSpots.Load`, `SaveManager.WithBackupInfo`,
+   `SaveManager.BackupReasonText`, `SaveManager.AssignExistingPlaythroughs`,
+   `ImportProfileCore`, `HistoryViewModel.Reload`). The "copies from before"
+   section of the History window (`LegacyCopies`, `ShowLegacy`) goes with them.
+3. `AppState.OwnersAssigned` (`ProprietariOk`) is no longer needed.
+4. Texts used only there: `CaptionLegacyCopies`, `ConfirmLegacyHeading`,
+   `ConfirmLegacyText`, `ReasonBeforeSavingOld` (both resx files).
+5. Build and run the tests.
+
 ## Accounts and games
 
 If more than one Steam account has saves for a game, the app asks which one to
