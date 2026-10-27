@@ -63,7 +63,15 @@
     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
       <Border Width="48" Height="72" CornerRadius="8" ClipToBounds="True"
               Background="{Binding Tile.TileBrush, FallbackValue={StaticResource SurfaceSelected}}">
+      <Panel>
         <Image Source="{Binding Tile.Cover}" Stretch="UniformToFill" />
+        <!-- Senza copertina: l'icona del gioco, o la sua iniziale -->
+        <Panel IsVisible="{Binding !Tile.HasCover}">
+          <Image Source="{Binding Tile.Item.Icon}" IsVisible="{Binding Tile.Item.HasIcon}" Width="28" Height="28" />
+          <TextBlock Text="{Binding Tile.Item.Initial}" IsVisible="{Binding !Tile.Item.HasIcon}" FontSize="22" FontWeight="ExtraBold"
+                     Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Panel>
+      </Panel>
       </Border>
       <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
         <TextBlock Text="{Binding Title}" FontSize="26" FontWeight="ExtraBold" TextWrapping="Wrap" />

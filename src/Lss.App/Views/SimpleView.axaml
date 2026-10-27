@@ -178,30 +178,38 @@
                       <Border Width="170" Height="252" CornerRadius="14" ClipToBounds="True" Background="{Binding TileBrush}">
                         <Grid>
                           <Image Source="{Binding Cover}" IsVisible="{Binding HasCover}" Stretch="UniformToFill" />
+                          <StackPanel IsVisible="{Binding !HasCover}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Margin="0,0,0,40">
+                            <Image Source="{Binding Item.Icon}" IsVisible="{Binding Item.HasIcon}" Width="64" Height="64" />
+                            <Border Width="64" Height="64" CornerRadius="14" Background="#33FFFFFF" IsVisible="{Binding !Item.HasIcon}">
+                              <TextBlock Text="{Binding Item.Initial}" FontSize="30" FontWeight="ExtraBold" Foreground="White"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                          </StackPanel>
                           <TextBlock Text="{Binding Name}" IsVisible="{Binding !HasCover}" FontSize="22" FontWeight="ExtraBold"
                                      Foreground="White" TextWrapping="Wrap" LineHeight="25"
                                      VerticalAlignment="Bottom" Margin="16" />
                           <!-- Da preparare: bordo tratteggiato -->
                           <Rectangle RadiusX="14" RadiusY="14" Stroke="#5A5A60" StrokeThickness="2" StrokeDashArray="3,2"
                                      IsVisible="{Binding ShowSetupBadge}" />
-                          <!-- Launcher in alto a sinistra -->
-                          <Border CornerRadius="6" Background="#BF0A0A0B" Padding="8,4"
-                                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10">
-                            <TextBlock Classes="chip" Text="{Binding LauncherChip}" Foreground="#D6D6DA" FontWeight="SemiBold" />
-                          </Border>
-                          <!-- Un'etichetta in alto a destra -->
-                          <Border CornerRadius="6" Background="{StaticResource Accent}" Padding="8,4"
-                                  HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" IsVisible="{Binding ShowRunningBadge}">
-                            <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="White" />
-                          </Border>
-                          <Border CornerRadius="6" Background="#2A2110" Padding="8,4"
-                                  HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" IsVisible="{Binding ShowSetupBadge}">
-                            <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="{StaticResource Warning}" />
-                          </Border>
-                          <Border CornerRadius="6" Background="#1B2230" Padding="8,4"
-                                  HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" IsVisible="{Binding ShowCloudBadge}">
-                            <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="#7FB0F0" />
-                          </Border>
+                          <!-- Launcher e, sotto, l'etichetta (in gioco, da preparare o cloud): in alto a sinistra -->
+                          <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Spacing="6">
+                            <Border CornerRadius="6" Background="#BF0A0A0B" Padding="8,4" HorizontalAlignment="Left">
+                              <TextBlock Classes="chip" Text="{Binding LauncherChip}" Foreground="#D6D6DA" FontWeight="SemiBold" />
+                            </Border>
+                            <Border CornerRadius="6" Background="{StaticResource Accent}" Padding="8,4"
+                                    HorizontalAlignment="Left" IsVisible="{Binding ShowRunningBadge}">
+                              <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="White" />
+                            </Border>
+                            <Border CornerRadius="6" Background="#2A2110" Padding="8,4"
+                                    HorizontalAlignment="Left" IsVisible="{Binding ShowSetupBadge}">
+                              <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="{StaticResource Warning}" />
+                            </Border>
+                            <Border CornerRadius="6" Background="#1B2230" Padding="8,4"
+                                    HorizontalAlignment="Left" IsVisible="{Binding ShowCloudBadge}">
+                              <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="#7FB0F0" />
+                            </Border>
+                          </StackPanel>
                         </Grid>
                       </Border>
                     </Button>
@@ -268,6 +276,14 @@
                   Background="{Binding PlayingTile.TileBrush}" VerticalAlignment="Center">
             <Grid>
               <Image Source="{Binding PlayingTile.Cover}" IsVisible="{Binding PlayingTile.HasCover}" Stretch="UniformToFill" />
+              <StackPanel IsVisible="{Binding !PlayingTile.HasCover}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Margin="0,0,0,60">
+                <Image Source="{Binding PlayingTile.Item.Icon}" IsVisible="{Binding PlayingTile.Item.HasIcon}" Width="64" Height="64" />
+                <Border Width="64" Height="64" CornerRadius="14" Background="#33FFFFFF" IsVisible="{Binding !PlayingTile.Item.HasIcon}">
+                  <TextBlock Text="{Binding PlayingTile.Item.Initial}" FontSize="30" FontWeight="ExtraBold" Foreground="White"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+              </StackPanel>
               <TextBlock Text="{Binding PlayingTile.Name}" IsVisible="{Binding !PlayingTile.HasCover}" FontSize="26"
                          FontWeight="ExtraBold" Foreground="White" TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="18" />
             </Grid>

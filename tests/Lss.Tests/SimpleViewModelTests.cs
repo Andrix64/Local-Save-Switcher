@@ -255,4 +255,36 @@ public sealed class SimpleViewModelTests : IDisposable
 
         Assert.Equal(2, dialogs.Calls.Count(call => call == "CheckPin: Andrea"));
     }
+
+    // Un PNG 1×1 valido, perché Avalonia lo deve poter leggere davvero.
+    private static readonly byte[] Png = Convert.FromBase64String(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==");
+
+    [Fact]
+    public void ATileWithoutACoverShowsTheIconOfItsGameAlsoWhenItArrivesLater()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        GameItemViewModel item = Item("Mario", SupportState.Supported);
+        SimpleViewModel model = Model(manager, people, new FakeDialogService(), item);
+        model.SelectPlayer(people.Find(Second)!);
+
+        SimpleGameTile tile = model.Games.Single();
+        Assert.False(tile.HasCover);
+        Assert.False(tile.Item.HasIcon);
+        Assert.Equal("M", tile.Item.Initial);
+
+        var changed = new List<string?>();
+        tile.Item.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+        string png = Path.Combine(folder.Root, "icona.png");
+        File.WriteAllBytes(png, Png);
+
+        // L'icona arriva dopo che la piastrella è stata costruita: la stessa piastrella la vede.
+        item.ShowIcon(png);
+
+        Assert.Same(item, tile.Item);
+        Assert.True(tile.Item.HasIcon);
+        Assert.NotNull(tile.Item.Icon);
+        Assert.Contains(nameof(GameItemViewModel.HasIcon), changed);
+        Assert.Contains(nameof(GameItemViewModel.Icon), changed);
+    }
 }
