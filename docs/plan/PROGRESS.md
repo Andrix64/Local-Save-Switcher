@@ -209,7 +209,7 @@ per phase (the phase file names it).
 
 ### Phase R — Fixes after the first try ([R-fixes.md](R-fixes.md)), before Q
 
-- [ ] R0 — One file for the 1.0 compatibility (`V1Compat`)
+- [x] R0 — One file for the 1.0 compatibility (`V1Compat`) (df2204a)
 - [ ] R1 — Renaming a playthrough keeps its automatic copies
 - [ ] R2 — "Add a game": cancel means cancel
 - [ ] R3 — PIN for every player, asked when picked; wrong tries per player
