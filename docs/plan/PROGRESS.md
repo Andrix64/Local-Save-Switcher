@@ -211,7 +211,7 @@ per phase (the phase file names it).
 
 - [x] R0 — One file for the 1.0 compatibility (`V1Compat`) (df2204a)
 - [x] R1 — Renaming a playthrough keeps its automatic copies (e024d06)
-- [ ] R2 — "Add a game": cancel means cancel
+- [x] R2 — "Add a game": cancel means cancel (e0cc394)
 - [ ] R3 — PIN for every player, asked when picked; wrong tries per player
 - [ ] R4 — Sidebar: launcher titles apart, no "Games" title, icons in "Other games"
 - [ ] R5 — Long game names: "…" and a slow scroll
