@@ -2,8 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="using:Lss.App.Localization"
         xmlns:vm="using:Lss.App.ViewModels"
-        x:Class="Lss.App.Views.SettingsWindow"
-        x:DataType="vm:SettingsViewModel"
+        x:Class="Lss.App.Views.GameSettingsWindow"
+        x:DataType="vm:GameSettingsViewModel"
         Title="{Binding Title}"
         Width="560" SizeToContent="Height"
         CanResize="False"
@@ -53,27 +53,8 @@
     </StackPanel>
     <TextBlock Classes="small" Text="{Binding KeepHint}" Margin="2,0,0,18" TextWrapping="Wrap" />
 
-    <!-- Dopo ogni partita: altre cartelle dei salvataggi (impostazione di tutto il programma) -->
-    <CheckBox Content="{Binding LookAfterPlayingText}" IsChecked="{Binding LookAfterPlaying, Mode=TwoWay}"
-              FontWeight="SemiBold" />
-    <TextBlock Classes="hint" Text="{Binding LookAfterPlayingHint}" Margin="28,0,0,18" />
-
-    <!-- Cartella dei dati e informazioni -->
-    <TextBlock Classes="caption" Text="{Binding CaptionData}" Margin="2,0,0,6" />
-    <StackPanel Orientation="Horizontal" Spacing="12">
-      <TextBlock Text="{Binding DataFolderText}" Classes="small" TextWrapping="Wrap" MaxWidth="400"
-                 VerticalAlignment="Center" HorizontalAlignment="Left" />
-      <Button Classes="secondary" Content="{Binding OpenFolderText}" Command="{Binding OpenFolderCommand}"
-              VerticalAlignment="Center" />
-    </StackPanel>
     <Button Classes="link" Content="{Binding IgnoredFoldersText}" Command="{Binding OpenIgnoredFoldersCommand}"
-            HorizontalAlignment="Left" Margin="0,8,0,0" />
-    <Button Classes="link" Content="{Binding ExportAllText}" Command="{Binding ExportAllCommand}"
-            HorizontalAlignment="Left" Margin="0,4,0,0" />
-    <Button Classes="link" Content="{Binding PlayersText}" Command="{Binding OpenPlayersCommand}"
-            HorizontalAlignment="Left" Margin="0,4,0,0" />
-    <TextBlock Classes="small" Text="{Binding AboutText}" Foreground="{StaticResource TextMuted}"
-               TextWrapping="Wrap" Margin="2,8,0,0" />
+            HorizontalAlignment="Left" Margin="0,0,0,0" />
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,22,0,0">
       <Button Classes="secondary" Content="{Binding CancelText}" IsCancel="True" MinWidth="110"

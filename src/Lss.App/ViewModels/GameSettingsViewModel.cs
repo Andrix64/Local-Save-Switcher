@@ -21,42 +21,32 @@ public sealed class SharedFileItemViewModel
 }
 
 /// <summary>
-/// Impostazioni della partita e dell'app (SettingsForm in WinForms), con i
-/// file condivisi tra le partite.
+/// Impostazioni di un gioco (R8): avviare il gioco, salvare alla chiusura, opzioni condivise tra le
+/// partite, quante copie tenere e le cartelle ignorate per questo gioco. Quelle di LSS stanno in
+/// LssSettingsViewModel.
 /// </summary>
-public partial class SettingsViewModel : ObservableObject
+public partial class GameSettingsViewModel : ObservableObject
 {
     private readonly SaveManager manager;
     private readonly IDialogService dialogs;
-    private readonly Func<Task>? exportAll;
-    private readonly AppSettings? settings;
-    private readonly Func<Task>? openPlayers;
 
-    /// <summary>
-    /// exportAll esporta la configurazione di tutti i giochi (vedi ExportAllCommand); settings
-    /// sono le impostazioni dell'app (lss.ini), dove sta CercaDopoPartita.
-    /// </summary>
-    internal SettingsViewModel(SaveManager manager, IDialogService dialogs, Func<Task>? exportAll = null,
-        AppSettings? settings = null, Func<Task>? openPlayers = null)
+    internal GameSettingsViewModel(SaveManager manager, IDialogService dialogs)
     {
         this.manager = manager;
         this.dialogs = dialogs;
-        this.exportAll = exportAll;
-        this.settings = settings;
-        this.openPlayers = openPlayers;
 
         AppState state = manager.State;
         launchGame = state.LaunchGame;
         saveOnExit = state.SaveOnGameExit;
         shareOptions = state.SharePreferences;
         keepCopies = Math.Min(999, state.BackupsToKeep);
-        lookAfterPlaying = settings?.LookAfterPlaying ?? true;
 
         foreach (string file in manager.SharedFiles)
             SharedFiles.Add(new SharedFileItemViewModel(file, Remove));
     }
 
-    public string Title => Strings.SettingsTitle;
+    /// <summary>"Impostazioni di {gioco}".</summary>
+    public string Title => Loc.F(Strings.GameSettingsTitle, manager.Game.Name);
 
     public string LaunchText => Loc.F(Strings.SettingLaunch, manager.Game.Name);
 
@@ -80,18 +70,9 @@ public partial class SettingsViewModel : ObservableObject
 
     public string KeepHint => Strings.SettingKeepCopiesHint;
 
-    public string DataFolderText => Loc.F(Strings.SettingDataFolder, AppData.Root);
-
-    public string OpenFolderText => Strings.OpenFolder;
-
-    public string AboutText => Loc.F(Strings.SettingAbout,
-        manager.AccountName == "" ? "—" : manager.AccountName, Program.Version);
-
     public string CaptionGame => Strings.CaptionGame;
 
     public string CaptionCopies => Strings.CaptionCopies;
-
-    public string CaptionData => Strings.CaptionData;
 
     public string SaveText => Strings.SaveButton;
 
@@ -108,13 +89,6 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private decimal keepCopies;
-
-    [ObservableProperty]
-    private bool lookAfterPlaying;
-
-    public string LookAfterPlayingText => Strings.LookAfterPlaying;
-
-    public string LookAfterPlayingHint => Strings.LookAfterPlayingHint;
 
     public ObservableCollection<SharedFileItemViewModel> SharedFiles { get; } = [];
 
@@ -140,13 +114,6 @@ public partial class SettingsViewModel : ObservableObject
         {
             await dialogs.InformAsync(Strings.TitleOperationFailed, result.Message, InfoKind.Warning);
             return false;
-        }
-
-        // Impostazione dell'app, non di questo gioco: vale subito per tutti i giochi.
-        if (settings != null)
-        {
-            settings.LookAfterPlaying = LookAfterPlaying;
-            settings.Save();
         }
 
         return true;
@@ -180,46 +147,19 @@ public partial class SettingsViewModel : ObservableObject
         SharedFiles.Add(new SharedFileItemViewModel(relative, Remove));
     }
 
-    public string ExportAllText => Strings.ExportAllConfigs;
-
-    public string PlayersText => Strings.PlayersButton;
-
-    /// <summary>"Giocatori…": la finestra delle persone di LSS.</summary>
-    [RelayCommand]
-    private async Task OpenPlayersAsync()
-    {
-        if (openPlayers != null)
-            await openPlayers();
-    }
-
-    /// <summary>Esporta in un file le configurazioni di tutti i giochi con cartelle scelte, imparate o importate.</summary>
-    [RelayCommand]
-    private async Task ExportAllAsync()
-    {
-        if (exportAll != null)
-            await exportAll();
-    }
-
     public string IgnoredFoldersText => Strings.IgnoredFoldersLink;
 
     /// <summary>
-    /// Le cartelle che non sono salvataggi (per tutti i giochi e per questo): si tolgono da lì.
+    /// Le cartelle che non sono salvataggi di questo gioco: si tolgono da lì (quelle di tutti i giochi
+    /// stanno nelle impostazioni di LSS).
     /// </summary>
     [RelayCommand]
     private async Task OpenIgnoredFoldersAsync()
     {
         string dataFolder = Path.GetDirectoryName(manager.ProfilesPath)!;
 
-        await dialogs.ShowAsync<bool>(new IgnoredFoldersWindow(new IgnoredFoldersViewModel(dataFolder, manager.Game.Name)));
-    }
-
-    [RelayCommand]
-    private async Task OpenFolderAsync()
-    {
-        string folder = Path.GetDirectoryName(manager.ProfilesPath)!;
-
-        if (!await dialogs.OpenFolderAsync(folder))
-            await dialogs.InformAsync(Strings.TitleOperationFailed, Loc.F(Strings.CannotOpenFolder, folder), InfoKind.Warning);
+        await dialogs.ShowAsync<bool>(new IgnoredFoldersWindow(
+            new IgnoredFoldersViewModel(dataFolder, manager.Game.Name, IgnoredScope.Game)));
     }
 
     private void Remove(SharedFileItemViewModel item) => SharedFiles.Remove(item);

@@ -131,7 +131,8 @@ internal static class Program
         Shot(new HistoryWindow(new HistoryViewModel(manager, dialogs,
             () => Task.FromResult(true), () => Task.FromResult(false)), focusSave: false), "07-history");
 
-        Shot(new SettingsWindow(new SettingsViewModel(manager, dialogs)), "08-settings");
+        Shot(new GameSettingsWindow(new GameSettingsViewModel(manager, dialogs)), "08-settings");
+        Shot(new LssSettingsWindow(new LssSettingsViewModel(new AppSettings(Path.Combine(root, "lss.ini")), dialogs)), "08b-lss-settings");
         Shot(new FirstRunWindow(new FirstRunViewModel(manager, CloudState.Enabled)), "09-first-run");
 
         Shot(new AccountWindow(

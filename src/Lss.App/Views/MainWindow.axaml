@@ -29,7 +29,7 @@
           <Button Classes="secondary" Content="{loc:Str AddGameButton}" Command="{Binding AddGameCommand}" />
           <Button Classes="secondary" Content="{loc:Str ImportConfig}" Command="{Binding ImportConfigCommand}" />
           <Button Classes="secondary" Content="{loc:Str SettingsButton}"
-                  Command="{Binding CurrentGame.SettingsCommand}" />
+                  Command="{Binding OpenLssSettingsCommand}" />
           <views:ModeSwitch DataContext="{Binding Mode}" Margin="8,0,0,0" />
         </StackPanel>
       </Grid>

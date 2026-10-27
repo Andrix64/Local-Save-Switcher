@@ -6,18 +6,18 @@ using Lss.App.ViewModels;
 namespace Lss.App.Views;
 
 /// <summary>
-/// Impostazioni. Il risultato è true se sono state salvate.
+/// Impostazioni di un gioco. Il risultato è true se sono state salvate.
 /// </summary>
-public partial class SettingsWindow : Window
+public partial class GameSettingsWindow : Window
 {
-    public SettingsWindow() => InitializeComponent();
+    public GameSettingsWindow() => InitializeComponent();
 
-    public SettingsWindow(SettingsViewModel viewModel) : this()
+    public GameSettingsWindow(GameSettingsViewModel viewModel) : this()
     {
         DataContext = viewModel;
     }
 
-    private SettingsViewModel ViewModel => (SettingsViewModel)DataContext!;
+    private GameSettingsViewModel ViewModel => (GameSettingsViewModel)DataContext!;
 
     private async void Save_Click(object? sender, RoutedEventArgs e)
     {

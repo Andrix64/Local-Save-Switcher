@@ -301,6 +301,10 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Comandi, audio e sottotitoli restano uguali quando cambi partita, anche in una partita nuova.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Impostazioni</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Impostazioni</value></data>
+  <data name="GameSettingsTitle" xml:space="preserve"><value>Impostazioni di {0}</value></data>
+  <data name="GameSettingsButton" xml:space="preserve"><value>Impostazioni del gioco</value></data>
+  <data name="GameSettingsMenu" xml:space="preserve"><value>Impostazioni del gioco…</value></data>
+  <data name="IgnoredFoldersAllLink" xml:space="preserve"><value>Cartelle che non sono salvataggi, per tutti i giochi…</value></data>
   <data name="StartAnyway" xml:space="preserve"><value>Avvia comunque</value></data>
   <data name="StartingWith" xml:space="preserve"><value>Avvio {0} con «{1}»...</value></data>
   <data name="Undo" xml:space="preserve"><value>Annulla</value></data>

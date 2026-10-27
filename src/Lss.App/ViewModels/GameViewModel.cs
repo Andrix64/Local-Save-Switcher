@@ -38,12 +38,6 @@ public partial class GameViewModel : ObservableObject
 
     public SaveManager Manager { get; }
 
-    /// <summary>Esporta la configurazione di tutti i giochi (dalle Impostazioni): lo fa la finestra principale.</summary>
-    public Func<Task>? ExportAll { get; set; }
-
-    /// <summary>"Giocatori…" dalle Impostazioni del gioco (la finestra è del MainWindowViewModel).</summary>
-    public Func<Task>? OpenPlayers { get; set; }
-
     /// <summary>Dove sono i salvataggi del gioco, da dove li ha trovati LSS.</summary>
     public string SaveFolderText { get; }
 
@@ -888,16 +882,15 @@ public partial class GameViewModel : ObservableObject
         Refresh();
     }
     /// <summary>
-    /// Impostazioni della partita. true se sono state salvate: aggiorna le schede e avvisa.
+    /// Impostazioni del gioco. true se sono state salvate: aggiorna le schede e avvisa.
     /// </summary>
     [RelayCommand]
-    public async Task<bool> SettingsAsync()
+    public async Task<bool> GameSettingsAsync()
     {
         if (IsBusy)
             return false;
 
-        bool saved = await dialogs.ShowAsync<bool>(new SettingsWindow(new SettingsViewModel(Manager, dialogs, ExportAll,
-            Settings, OpenPlayers)));
+        bool saved = await dialogs.ShowAsync<bool>(new GameSettingsWindow(new GameSettingsViewModel(Manager, dialogs)));
 
         if (saved)
         {
@@ -955,7 +948,7 @@ public partial class GameViewModel : ObservableObject
 
         var history = new HistoryViewModel(Manager, dialogs,
             () => ConfirmCloudAsync(launching: false),
-            SettingsAsync);
+            GameSettingsAsync);
 
         await dialogs.ShowAsync<bool>(new HistoryWindow(history, focusSave));
 

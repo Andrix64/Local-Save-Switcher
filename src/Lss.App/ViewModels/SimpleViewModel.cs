@@ -166,6 +166,12 @@ public sealed partial class SimpleViewModel : ObservableObject
     /// <summary>Il pulsante dello schermo intero dell'intestazione (lo possiede il MainWindowViewModel).</summary>
     public FullScreenViewModel? FullScreen { get; set; }
 
+    /// <summary>"Impostazioni" dell'intestazione: apre le impostazioni di LSS (dopo un admin).</summary>
+    public Func<Task>? LssSettings { get; set; }
+
+    /// <summary>"Impostazioni del gioco…" dal menu di una copertina (dopo un admin).</summary>
+    public Func<GameItemViewModel, Task>? GameSettings { get; set; }
+
     [RelayCommand]
     private Task SelectPlayerTile(PersonTile tile) => SelectPlayerAsync(tile.Person);
 
@@ -316,6 +322,27 @@ public sealed partial class SimpleViewModel : ObservableObject
         if (name != null)
             people.Add(name);
 
+        Refresh();
+    }
+
+    /// <summary>"Impostazioni": un admin, poi le impostazioni di LSS.</summary>
+    [RelayCommand]
+    private async Task OpenSettingsAsync()
+    {
+        if (LssSettings == null || !await EnsureAdminAsync())
+            return;
+
+        await LssSettings();
+        Refresh();
+    }
+
+    /// <summary>"Impostazioni del gioco…": un admin, poi le impostazioni di quel gioco.</summary>
+    public async Task OpenGameSettingsAsync(SimpleGameTile tile)
+    {
+        if (GameSettings == null || !await EnsureAdminAsync())
+            return;
+
+        await GameSettings(tile.Item);
         Refresh();
     }
 

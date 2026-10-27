@@ -70,4 +70,18 @@ public sealed class IgnoredFoldersViewModelTests : IDisposable
         Assert.True(model.IsEmpty);
         Assert.Equal(Strings.IgnoredFoldersEmpty, model.EmptyText);
     }
+
+    [Fact]
+    public void TheGameWindowShowsOnlyTheGameFoldersAndTheLssOneOnlyTheGlobalOnes()
+    {
+        var store = new IgnoredFolders(folder.Data);
+        store.AddGlobal("{WinAppDataLocal}/Discord");
+        store.AddForGame(DataFolder, Path.Combine(folder.Root, "logs"));
+
+        var game = new IgnoredFoldersViewModel(DataFolder, "Sandfall", IgnoredScope.Game);
+        var all = new IgnoredFoldersViewModel("", "", IgnoredScope.All);
+
+        Assert.Equal("Sandfall", Assert.Single(game.Items).Scope);
+        Assert.Equal("{WinAppDataLocal}/Discord", Assert.Single(all.Items).Folder);
+    }
 }

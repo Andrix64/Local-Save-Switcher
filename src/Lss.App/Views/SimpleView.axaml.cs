@@ -23,8 +23,14 @@ public partial class SimpleView : UserControl
 
     private void MyGames_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button { Tag: SimpleGameTile tile } && ViewModel != null)
+        if (sender is MenuItem { Tag: SimpleGameTile tile } && ViewModel != null)
             _ = ViewModel.OpenMyGamesAsync(tile);
+    }
+
+    private void GameSettings_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { Tag: SimpleGameTile tile } && ViewModel != null)
+            _ = ViewModel.OpenGameSettingsAsync(tile);
     }
 
     private void Game_Click(object? sender, RoutedEventArgs e)

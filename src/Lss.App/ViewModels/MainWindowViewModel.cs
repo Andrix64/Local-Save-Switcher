@@ -74,6 +74,8 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 Mode = Mode,
                 FullScreen = FullScreen,
+                LssSettings = OpenLssSettingsAsync,
+                GameSettings = OpenGameSettingsFromSimpleAsync,
                 MyGames = OpenMyGamesAsync,
             };
 
@@ -611,6 +613,29 @@ public partial class MainWindowViewModel : ObservableObject
         return item.Provider.LauncherFolders(item.Account);
     }
 
+    /// <summary>"Impostazioni" di LSS (non di un gioco): cercare dopo aver giocato, giocatori, esportazione, dati.</summary>
+    [RelayCommand]
+    public async Task OpenLssSettingsAsync()
+    {
+        await dialogs.ShowAsync<bool>(new LssSettingsWindow(
+            new LssSettingsViewModel(settings, dialogs, ExportAllConfigsAsync, OpenPlayersAsync, AccountText)));
+    }
+
+    /// <summary>
+    /// "Impostazioni del gioco…" dal menu di una copertina della modalità semplice. Un gioco non pronto
+    /// (senza salvataggi trovati) non ha ancora impostazioni da mostrare: si apre la ricerca dei salvataggi.
+    /// </summary>
+    private async Task OpenGameSettingsFromSimpleAsync(GameItemViewModel item)
+    {
+        if (ManagerOrNull(item) == null)
+        {
+            await FindFolderAsync(item);
+            return;
+        }
+
+        await GameFor(item).GameSettingsAsync();
+    }
+
     /// <summary>"Giocatori…": la finestra con le persone di LSS.</summary>
     [RelayCommand]
     private async Task OpenPlayersAsync()
@@ -702,8 +727,6 @@ public partial class MainWindowViewModel : ObservableObject
         var created = new GameViewModel(open.Value!, dialogs)
         {
             Settings = settings,
-            ExportAll = ExportAllConfigsAsync,
-            OpenPlayers = OpenPlayersAsync,
         };
         created.Refresh();
 

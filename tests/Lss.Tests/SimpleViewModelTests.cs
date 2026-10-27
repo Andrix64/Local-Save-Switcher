@@ -287,4 +287,47 @@ public sealed class SimpleViewModelTests : IDisposable
         Assert.Contains(nameof(GameItemViewModel.HasIcon), changed);
         Assert.Contains(nameof(GameItemViewModel.Icon), changed);
     }
+
+    [Fact]
+    public async Task TheSettingsButtonAsksAnAdminBeforeOpeningTheLssSettings()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        var dialogs = new FakeDialogService { ChosenAdmin = null };
+        SimpleViewModel model = Model(manager, people, dialogs);
+        int opened = 0;
+        model.LssSettings = () => { opened++; return Task.CompletedTask; };
+        model.SelectPlayer(people.Find(Second)!);
+
+        await model.OpenSettingsCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, opened);
+        Assert.Contains("Admin", dialogs.Calls);
+
+        dialogs.ChosenAdmin = people.Find(TestFolder.Owner);
+        await model.OpenSettingsCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, opened);
+    }
+
+    [Fact]
+    public async Task GameSettingsFromTheMenuAsksAnAdminAndOpensThatGame()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        var dialogs = new FakeDialogService { ChosenAdmin = null };
+        SimpleViewModel model = Model(manager, people, dialogs,
+            Item("Mario", SupportState.Supported), Item("Zelda", SupportState.NotFound));
+        var opened = new List<string>();
+        model.GameSettings = item => { opened.Add(item.Name); return Task.CompletedTask; };
+        model.SelectPlayer(people.Find(Second)!);
+        SimpleGameTile notReady = model.Games.Single(tile => tile.Name == "Zelda");
+
+        // Il menu c'è anche per un gioco non pronto.
+        await model.OpenGameSettingsAsync(notReady);
+        Assert.Empty(opened);
+
+        dialogs.ChosenAdmin = people.Find(TestFolder.Owner);
+        await model.OpenGameSettingsAsync(notReady);
+
+        Assert.Equal(["Zelda"], opened);
+    }
 }

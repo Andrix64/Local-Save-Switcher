@@ -95,6 +95,8 @@
                     Data="M9 4 V9 H4 M15 4 V9 H20 M20 15 H15 V20 M4 15 H9 V20" />
             </Panel>
           </Button>
+          <Button Classes="secondary" Content="{loc:Str SettingsButton}" Command="{Binding OpenSettingsCommand}"
+                  VerticalAlignment="Center" />
           <views:ModeSwitch DataContext="{Binding Mode}" VerticalAlignment="Center" />
         </StackPanel>
       </Grid>
@@ -192,7 +194,7 @@
                           </StackPanel>
                           <TextBlock Text="{Binding Name}" IsVisible="{Binding !HasCover}" FontSize="22" FontWeight="ExtraBold"
                                      Foreground="White" TextWrapping="Wrap" LineHeight="25"
-                                     VerticalAlignment="Bottom" Margin="16" />
+                                     VerticalAlignment="Bottom" Margin="16,16,62,16" />
                           <!-- Da preparare: bordo tratteggiato -->
                           <Rectangle RadiusX="14" RadiusY="14" Stroke="#5A5A60" StrokeThickness="2" StrokeDashArray="3,2"
                                      IsVisible="{Binding ShowSetupBadge}" />
@@ -224,15 +226,21 @@
                     </StackPanel>
                   </StackPanel>
 
-                  <!-- ⋯ Le mie partite, sopra la copertina in basso a destra -->
-                  <Button Classes="flat" Tag="{Binding}" Click="MyGames_Click" IsVisible="{Binding Ready}"
-                          Width="44" Height="44" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,198,10,0"
-                          AutomationProperties.Name="{loc:Str SimpleMyGames}" ToolTip.Tip="{loc:Str SimpleMyGames}">
+                  <!-- ⋯ menu sopra la copertina in basso a destra: Le mie partite e Impostazioni del gioco -->
+                  <Button Classes="flat" Width="44" Height="44" HorizontalAlignment="Right" VerticalAlignment="Top"
+                          Margin="0,198,10,0" AutomationProperties.Name="{loc:Str GameSettingsMenu}">
                     <Border Width="44" Height="44" CornerRadius="22" Background="#D10A0A0B">
                       <TextBlock Text="···" FontSize="20" FontWeight="Bold" Foreground="{StaticResource Text}"
                                  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-4,0,0" />
                     </Border>
+                    <Button.Flyout>
+                      <MenuFlyout>
+                        <MenuItem Header="{loc:Str SimpleMyGames}" Tag="{Binding}" Click="MyGames_Click" IsVisible="{Binding Ready}" />
+                        <MenuItem Header="{loc:Str GameSettingsMenu}" Tag="{Binding}" Click="GameSettings_Click" />
+                      </MenuFlyout>
+                    </Button.Flyout>
                   </Button>
+
                 </Grid>
               </DataTemplate>
 

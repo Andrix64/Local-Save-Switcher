@@ -3,15 +3,15 @@ using Lss.App.ViewModels;
 namespace Lss.Tests;
 
 /// <summary>
-/// Impostazioni del gioco: il pulsante "Esporta tutte" chiama la funzione data dalla
-/// finestra principale (che sa di tutti i giochi).
+/// Impostazioni di LSS: il pulsante "Esporta tutte" chiama la funzione data dalla finestra principale
+/// (che sa di tutti i giochi); cercare dopo aver giocato si salva in lss.ini.
 /// </summary>
-public sealed class SettingsViewModelTests : IDisposable
+public sealed class LssSettingsViewModelTests : IDisposable
 {
     private readonly TestFolder folder = new();
     private readonly FakeDialogService dialogs = new();
 
-    public SettingsViewModelTests() => TestApp.Ensure();
+    public LssSettingsViewModelTests() => TestApp.Ensure();
 
     public void Dispose() => folder.Dispose();
 
@@ -19,7 +19,7 @@ public sealed class SettingsViewModelTests : IDisposable
     public async Task ExportAllRunsTheExporter()
     {
         bool exported = false;
-        var vm = new SettingsViewModel(folder.CreateManager("L"), dialogs, () =>
+        var vm = new LssSettingsViewModel(new AppSettings(Path.Combine(folder.Root, "lss.ini")), dialogs, () =>
         {
             exported = true;
             return Task.CompletedTask;
@@ -31,11 +31,27 @@ public sealed class SettingsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task PlayersOpensTheWindowOfPlayers()
+    {
+        bool opened = false;
+        var vm = new LssSettingsViewModel(new AppSettings(Path.Combine(folder.Root, "lss.ini")), dialogs,
+            openPlayers: () =>
+            {
+                opened = true;
+                return Task.CompletedTask;
+            });
+
+        await vm.OpenPlayersCommand.ExecuteAsync(null);
+
+        Assert.True(opened);
+    }
+
+    [Fact]
     public async Task LookAfterPlayingIsOnByDefaultAndSavedInLssIni()
     {
         string ini = Path.Combine(folder.Root, "lss.ini");
         var settings = new AppSettings(ini);
-        var vm = new SettingsViewModel(folder.CreateManager("L"), dialogs, settings: settings);
+        var vm = new LssSettingsViewModel(settings, dialogs);
         Assert.True(vm.LookAfterPlaying);
 
         vm.LookAfterPlaying = false;

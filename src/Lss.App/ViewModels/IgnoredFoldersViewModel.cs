@@ -4,6 +4,19 @@ using Lss.App.Services;
 
 namespace Lss.App.ViewModels;
 
+/// <summary>Quali cartelle ignorate mostra la finestra.</summary>
+public enum IgnoredScope
+{
+    /// <summary>Quelle di tutti i giochi e quelle del gioco.</summary>
+    Both,
+
+    /// <summary>Solo quelle del gioco (impostazioni del gioco).</summary>
+    Game,
+
+    /// <summary>Solo quelle di tutti i giochi (impostazioni di LSS).</summary>
+    All,
+}
+
 /// <summary>
 /// Le cartelle che non sono salvataggi: quelle di tutti i giochi e quelle del
 /// gioco aperto nelle impostazioni. "Proponila di nuovo" le toglie dalla lista
@@ -14,13 +27,16 @@ public sealed partial class IgnoredFoldersViewModel : ObservableObject
     private readonly IgnoredFolders store = new(AppData.Root);
     private readonly string dataFolder;
     private readonly string gameName;
+    private readonly IgnoredScope scope;
 
     /// <param name="dataFolder">Cartella dei dati del gioco (dove sta posti.ini).</param>
     /// <param name="gameName">Nome del gioco, per l'ambito delle sue cartelle.</param>
-    public IgnoredFoldersViewModel(string dataFolder, string gameName)
+    /// <param name="scope">Quali cartelle mostrare: di tutti i giochi, del gioco o tutte e due.</param>
+    public IgnoredFoldersViewModel(string dataFolder, string gameName, IgnoredScope scope = IgnoredScope.Both)
     {
         this.dataFolder = dataFolder;
         this.gameName = gameName;
+        this.scope = scope;
         Refresh();
     }
 
@@ -43,11 +59,17 @@ public sealed partial class IgnoredFoldersViewModel : ObservableObject
         Items.Clear();
         store.Load();
 
-        foreach (IgnoredFolder entry in store.Global)
-            Items.Add(new IgnoredFolderItem(entry, Strings.IgnoredScopeAll, Remove));
+        if (scope != IgnoredScope.Game)
+        {
+            foreach (IgnoredFolder entry in store.Global)
+                Items.Add(new IgnoredFolderItem(entry, Strings.IgnoredScopeAll, Remove));
+        }
 
-        foreach (IgnoredFolder entry in store.ForGame(dataFolder))
-            Items.Add(new IgnoredFolderItem(entry, gameName, Remove));
+        if (scope != IgnoredScope.All)
+        {
+            foreach (IgnoredFolder entry in store.ForGame(dataFolder))
+                Items.Add(new IgnoredFolderItem(entry, gameName, Remove));
+        }
 
         IsEmpty = Items.Count == 0;
     }

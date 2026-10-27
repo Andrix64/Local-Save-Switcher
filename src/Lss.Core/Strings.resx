@@ -301,6 +301,10 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Controls, audio and subtitles stay the same when you switch playthrough, even in a new one.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Settings</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
+  <data name="GameSettingsTitle" xml:space="preserve"><value>Settings of {0}</value></data>
+  <data name="GameSettingsButton" xml:space="preserve"><value>Game settings</value></data>
+  <data name="GameSettingsMenu" xml:space="preserve"><value>Game settings…</value></data>
+  <data name="IgnoredFoldersAllLink" xml:space="preserve"><value>Folders that are not saves, for all games…</value></data>
   <data name="StartAnyway" xml:space="preserve"><value>Start anyway</value></data>
   <data name="StartingWith" xml:space="preserve"><value>Starting {0} with “{1}”...</value></data>
   <data name="Undo" xml:space="preserve"><value>Undo</value></data>
