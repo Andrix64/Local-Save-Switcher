@@ -210,7 +210,7 @@ per phase (the phase file names it).
 ### Phase R — Fixes after the first try ([R-fixes.md](R-fixes.md)), before Q
 
 - [x] R0 — One file for the 1.0 compatibility (`V1Compat`) (df2204a)
-- [ ] R1 — Renaming a playthrough keeps its automatic copies
+- [x] R1 — Renaming a playthrough keeps its automatic copies (e024d06)
 - [ ] R2 — "Add a game": cancel means cancel
 - [ ] R3 — PIN for every player, asked when picked; wrong tries per player
 - [ ] R4 — Sidebar: launcher titles apart, no "Games" title, icons in "Other games"
