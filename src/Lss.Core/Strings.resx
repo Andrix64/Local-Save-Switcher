@@ -566,7 +566,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="PinAgain" xml:space="preserve"><value>Repeat the new PIN</value></data>
   <data name="PinDigits" xml:space="preserve"><value>4 digits</value></data>
   <data name="PinSave" xml:space="preserve"><value>Save the PIN</value></data>
-  <data name="PinSetHint" xml:space="preserve"><value>Optional. With a PIN, only you can use the admin rights. If you forget it, another admin can remove it.</value></data>
+  <data name="PinSetHint" xml:space="preserve"><value>Optional. With a PIN, only you can play under your name; if you are an admin, also with the admin rights. If you forget it, an admin can remove it.</value></data>
   <data name="PinSetMenu" xml:space="preserve"><value>Set PIN…</value></data>
   <data name="PinChangeMenu" xml:space="preserve"><value>Change PIN…</value></data>
   <data name="PinRemoveMenu" xml:space="preserve"><value>Remove PIN</value></data>

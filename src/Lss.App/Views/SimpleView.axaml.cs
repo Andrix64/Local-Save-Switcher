@@ -18,7 +18,7 @@ public partial class SimpleView : UserControl
     private void Player_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: PersonTile tile })
-            ViewModel?.SelectPlayer(tile.Person);
+            _ = ViewModel?.SelectPlayerAsync(tile.Person);
     }
 
     private void MyGames_Click(object? sender, RoutedEventArgs e)

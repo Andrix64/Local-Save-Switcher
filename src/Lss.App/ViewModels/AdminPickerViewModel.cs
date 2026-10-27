@@ -47,11 +47,12 @@ public partial class AdminPickerViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Autorizza senza finestra: l'admin noto e senza PIN. Null se serve la
-    /// finestra (scelta tra più admin, o il PIN).
+    /// Autorizza senza finestra: l'admin noto e senza PIN, o che ha già messo il suo
+    /// PIN scegliendo il giocatore (unlocked). Null se serve la finestra (scelta tra
+    /// più admin, o il PIN).
     /// </summary>
-    public static Person? WithoutWindow(People people, Person? current) =>
-        KnownAdmin(people, current) is { HasPin: false } admin ? admin : null;
+    public static Person? WithoutWindow(People people, Person? current, bool unlocked = false) =>
+        KnownAdmin(people, current) is { } admin && (!admin.HasPin || (unlocked && current?.Id == admin.Id)) ? admin : null;
 
     /// <summary>true se si chiede solo il PIN dell'admin noto: annullarlo chiude tutto.</summary>
     public bool OnlyPin { get; }

@@ -566,7 +566,7 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="PinAgain" xml:space="preserve"><value>Ripeti il nuovo PIN</value></data>
   <data name="PinDigits" xml:space="preserve"><value>4 cifre</value></data>
   <data name="PinSave" xml:space="preserve"><value>Salva il PIN</value></data>
-  <data name="PinSetHint" xml:space="preserve"><value>Facoltativo. Con un PIN, solo tu puoi usare i permessi di admin. Se lo dimentichi, un altro admin può toglierlo.</value></data>
+  <data name="PinSetHint" xml:space="preserve"><value>Facoltativo. Con un PIN, solo tu puoi giocare con il tuo nome; se sei admin, anche i permessi di admin. Se lo dimentichi, un admin può toglierlo.</value></data>
   <data name="PinSetMenu" xml:space="preserve"><value>Imposta PIN…</value></data>
   <data name="PinChangeMenu" xml:space="preserve"><value>Cambia PIN…</value></data>
   <data name="PinRemoveMenu" xml:space="preserve"><value>Togli il PIN</value></data>

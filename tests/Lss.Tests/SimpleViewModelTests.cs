@@ -191,4 +191,68 @@ public sealed class SimpleViewModelTests : IDisposable
 
         Assert.False(model.OnGamesPage);
     }
+
+    [Fact]
+    public async Task APlayerWithAPinMustTypeItToBePicked()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        people.SetPin(Second, "1234");
+        var dialogs = new FakeDialogService { PinCheckAnswer = false };
+        SimpleViewModel model = Model(manager, people, dialogs);
+
+        await model.SelectPlayerAsync(people.Find(Second)!);
+
+        Assert.Null(model.Current);
+        Assert.Contains("CheckPin: Clara", dialogs.Calls);
+
+        dialogs.PinCheckAnswer = true;
+        await model.SelectPlayerAsync(people.Find(Second)!);
+
+        Assert.Equal(Second, model.Current?.Id);
+        Assert.True(model.OnGamesPage);
+    }
+
+    [Fact]
+    public async Task APlayerWithoutAPinIsPickedWithoutAsking()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        var dialogs = new FakeDialogService();
+        SimpleViewModel model = Model(manager, people, dialogs);
+
+        await model.SelectPlayerAsync(people.Find(Second)!);
+
+        Assert.Equal(Second, model.Current?.Id);
+        Assert.DoesNotContain(dialogs.Calls, call => call.StartsWith("CheckPin"));
+    }
+
+    [Fact]
+    public async Task AnAdminWhoTypedThePinIsNotAskedAgainUntilTheyGoBack()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        people.SetPin(TestFolder.Owner, "1234");
+        var dialogs = new FakeDialogService { PinCheckAnswer = true, ChosenAdmin = null };
+        SimpleViewModel model = Model(manager, people, dialogs);
+
+        await model.SelectPlayerAsync(people.Find(TestFolder.Owner)!);
+        await model.AddGameCommand.ExecuteAsync(null);
+
+        // Il PIN è già stato messo: "Aggiungi un gioco" non lo chiede di nuovo.
+        Assert.Equal(1, added);
+        Assert.DoesNotContain("Admin", dialogs.Calls);
+
+        // Tornando a "Chi gioca?" si chiude: la volta dopo il PIN si chiede (due volte in tutto)
+        // e senza averlo messo l'azione chiede di nuovo l'admin.
+        model.ChangePlayer();
+        Assert.False(model.Unlocked);
+        model.SelectPlayer(people.Find(TestFolder.Owner)!);
+        await model.AddGameCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, added);
+        Assert.Contains("Admin", dialogs.Calls);
+
+        model.ChangePlayer();
+        await model.SelectPlayerAsync(people.Find(TestFolder.Owner)!);
+
+        Assert.Equal(2, dialogs.Calls.Count(call => call == "CheckPin: Andrea"));
+    }
 }

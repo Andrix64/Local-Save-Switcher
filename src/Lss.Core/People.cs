@@ -5,7 +5,7 @@ namespace Lss;
 /// <summary>
 /// Una persona che gioca. Non è un account di Windows né di Steam.
 /// </summary>
-/// <param name="HasPin">true se l'amministratore ha un PIN (vedi People.SetPin).</param>
+/// <param name="HasPin">true se la persona ha un PIN (vedi People.SetPin).</param>
 public sealed record Person(string Id, string Name, string Color, bool IsAdmin, bool HasPin = false);
 
 /// <summary>
@@ -33,8 +33,11 @@ public sealed class People
     private readonly string path;
     private readonly List<Person> all = [];
 
-    // Id persona -> "salt:hash" in base64, per gli amministratori con PIN.
+    // Id persona -> "salt:hash" in base64, per le persone con PIN.
     private readonly Dictionary<string, string> pins = [];
+
+    /// <summary>I PIN sbagliati di ogni persona, condivisi da tutte le finestre del PIN.</summary>
+    public PinGuard Guard { get; } = new();
 
     public People(string dataRoot)
     {
@@ -79,8 +82,7 @@ public sealed class People
             bool isAdmin = values.TryGetValue(id + ".Ruolo", out string? role) &&
                            role == "admin";
 
-            // Un utente non ha PIN: se il file ne ha uno, si ignora.
-            if (isAdmin && values.TryGetValue(id + ".Pin", out string? pin) && IsStoredPin(pin))
+            if (values.TryGetValue(id + ".Pin", out string? pin) && IsStoredPin(pin))
                 pins[id] = pin;
 
             all.Add(new Person(id, cleanName, color, isAdmin, pins.ContainsKey(id)));
@@ -180,11 +182,8 @@ public sealed class People
         if (!isAdmin && all[index].IsAdmin && Admins.Count == 1)
             return Result.Fail(Strings.LastAdmin);
 
-        // Diventare utente toglie il PIN.
-        if (!isAdmin)
-            pins.Remove(id);
-
-        all[index] = all[index] with { IsAdmin = isAdmin, HasPin = isAdmin && pins.ContainsKey(id) };
+        // Il PIN resta, anche diventando utente.
+        all[index] = all[index] with { IsAdmin = isAdmin };
         return Save();
     }
 
@@ -243,8 +242,8 @@ public sealed class People
     }
 
     /// <summary>
-    /// Imposta o cambia il PIN di un amministratore: 4 cifre, salvate con PBKDF2.
-    /// Il PIN non è obbligatorio: senza, l'amministratore si sceglie da solo.
+    /// Imposta o cambia il PIN di una persona: 4 cifre, salvate con PBKDF2.
+    /// Il PIN non è obbligatorio: senza, la persona si sceglie da sola.
     /// </summary>
     public Result SetPin(string id, string pin)
     {
@@ -252,9 +251,6 @@ public sealed class People
 
         if (index < 0)
             return Result.Fail(Strings.PlayerNotFound);
-
-        if (!all[index].IsAdmin)
-            return Result.Fail(Strings.AdminOnlyText);
 
         if (!IsPinFormat(pin))
             return Result.Fail(Strings.PinFormat);

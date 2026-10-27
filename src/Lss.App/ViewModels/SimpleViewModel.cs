@@ -108,6 +108,12 @@ public sealed partial class SimpleViewModel : ObservableObject
     /// <summary>Il giocatore attuale, o null sulla prima pagina.</summary>
     public Person? Current { get; private set; }
 
+    /// <summary>
+    /// true se il giocatore attuale ha messo il suo PIN scegliendosi: le azioni che chiedono il suo
+    /// PIN (di admin) non lo richiedono più, finché resta scelto. Solo in memoria.
+    /// </summary>
+    public bool Unlocked { get; private set; }
+
     /// <summary>La piastrella del giocatore attuale (il suo pallino nella pagina dei giochi), o null.</summary>
     public PersonTile? CurrentTile { get; private set; }
 
@@ -120,6 +126,9 @@ public sealed partial class SimpleViewModel : ObservableObject
     public void Refresh()
     {
         Current = Current == null ? null : people.Find(Current.Id);
+
+        if (Current == null)
+            Unlocked = false;
 
         Players.Clear();
 
@@ -162,14 +171,32 @@ public sealed partial class SimpleViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SelectPlayerTile(PersonTile tile) => SelectPlayer(tile.Person);
+    private Task SelectPlayerTile(PersonTile tile) => SelectPlayerAsync(tile.Person);
 
     [RelayCommand]
     private Task ActivateGameTile(SimpleGameTile tile) => ActivateAsync(tile);
 
-    /// <summary>Chi gioca: si va alla pagina dei giochi di quella persona.</summary>
+    /// <summary>
+    /// Chi gioca, come lo sceglie l'utente: se ha un PIN lo si chiede prima. PIN sbagliato o
+    /// annullato: si resta su "Chi gioca?".
+    /// </summary>
+    public async Task SelectPlayerAsync(Person person)
+    {
+        Person? found = people.Find(person.Id);
+
+        if (found == null || !await dialogs.CheckPinAsync(people, found))
+            return;
+
+        SelectPlayer(found);
+        Unlocked = true;
+    }
+
+    /// <summary>Chi gioca: si va alla pagina dei giochi di quella persona (il PIN è già stato controllato).</summary>
     public void SelectPlayer(Person person)
     {
+        if (Current?.Id != person.Id)
+            Unlocked = false;
+
         Current = people.Find(person.Id);
         Refresh();
     }
@@ -178,6 +205,7 @@ public sealed partial class SimpleViewModel : ObservableObject
     public void ChangePlayer()
     {
         Current = null;
+        Unlocked = false;
         Refresh();
     }
 
@@ -281,7 +309,7 @@ public sealed partial class SimpleViewModel : ObservableObject
     [RelayCommand]
     private async Task AddPlayerAsync()
     {
-        Person? admin = await dialogs.ChooseAdminAsync(people, Current);
+        Person? admin = await dialogs.ChooseAdminAsync(people, Current, Unlocked);
 
         if (admin == null)
             return;
@@ -311,7 +339,7 @@ public sealed partial class SimpleViewModel : ObservableObject
     /// altrimenti un admin. True se c'è un'autorizzazione.
     /// </summary>
     public async Task<bool> EnsureAdminAsync() =>
-        await dialogs.ChooseAdminAsync(people, Current) != null;
+        await dialogs.ChooseAdminAsync(people, Current, Unlocked) != null;
 
     private List<SimpleGameTile> BuildGames(Person player)
     {

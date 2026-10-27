@@ -35,13 +35,25 @@ public sealed class FakeDialogService : IDialogService
     public Person? ChosenAdmin { get; set; }
 
     // Come il servizio vero: un admin noto e senza PIN non apre la finestra.
-    public Task<Person?> ChooseAdminAsync(People people, Person? current = null)
+    public Task<Person?> ChooseAdminAsync(People people, Person? current = null, bool unlocked = false)
     {
-        if (AdminPickerViewModel.WithoutWindow(people, current) is Person known)
+        if (AdminPickerViewModel.WithoutWindow(people, current, unlocked) is Person known)
             return Task.FromResult<Person?>(known);
 
         Calls.Add("Admin");
         return Task.FromResult(ChosenAdmin);
+    }
+
+    /// <summary>Il PIN dato nel tastierino di CheckPinAsync è giusto (false = sbagliato o annullato).</summary>
+    public bool PinCheckAnswer { get; set; }
+
+    public Task<bool> CheckPinAsync(People people, Person person)
+    {
+        if (people.Find(person.Id) is not { HasPin: true })
+            return Task.FromResult(people.Find(person.Id) != null);
+
+        Calls.Add("CheckPin: " + person.Name);
+        return Task.FromResult(PinCheckAnswer);
     }
 
     /// <summary>Il testo che l'utente scrive nella finestra di richiesta (null = annulla).</summary>

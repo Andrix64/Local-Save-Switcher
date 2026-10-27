@@ -80,7 +80,7 @@
                             ToolTip.Tip="{loc:Str PlayerAdminTooltip}" Tag="{Binding}" Click="Admin_Click"
                             VerticalAlignment="Center" />
                   <Button Grid.Column="3" Classes="link" Content="{Binding PinActionText}" Tag="{Binding}"
-                          Click="Pin_Click" IsVisible="{Binding Person.IsAdmin}" VerticalAlignment="Center" />
+                          Click="Pin_Click" VerticalAlignment="Center" />
                   <ItemsControl Grid.Column="4" ItemsSource="{Binding Swatches}" VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>
                       <ItemsPanelTemplate>

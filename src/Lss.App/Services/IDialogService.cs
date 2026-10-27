@@ -27,8 +27,15 @@ public interface IDialogService
     /// <summary>
     /// Chi è l'amministratore che autorizza: l'admin scelto (con PIN se ce l'ha), o null. Se
     /// l'admin è già noto (chi gioca è admin, o c'è un solo admin) non si chiede "Chi sei?": solo il PIN, se c'è.
+    /// Con unlocked, chi gioca ha già messo il suo PIN scegliendo il giocatore: non lo richiede.
     /// </summary>
-    Task<Person?> ChooseAdminAsync(People people, Person? current = null);
+    Task<Person?> ChooseAdminAsync(People people, Person? current = null, bool unlocked = false);
+
+    /// <summary>
+    /// Il PIN della persona: true subito se non ne ha; altrimenti il tastierino di quella persona,
+    /// true se il PIN è giusto, false se si annulla.
+    /// </summary>
+    Task<bool> CheckPinAsync(People people, Person person);
 
     /// <summary>Chiede un testo (un nome), partendo da initial: il testo, o null se si annulla.</summary>
     Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "", int maxLength = 30);

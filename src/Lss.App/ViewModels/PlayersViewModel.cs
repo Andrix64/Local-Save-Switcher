@@ -34,7 +34,7 @@ public sealed partial class PlayerRow : ObservableObject
     /// <summary>"Admin" o "Utente", accanto alla casella.</summary>
     public string RoleText => Person.IsAdmin ? Strings.PlayerAdmin : Strings.PlayerUser;
 
-    /// <summary>"Imposta PIN…" o "Cambia PIN…": solo per un admin.</summary>
+    /// <summary>"Imposta PIN…" o "Cambia PIN…": per ogni persona.</summary>
     public string PinActionText => Person.HasPin ? Strings.PinChangeMenu : Strings.PinSetMenu;
 
     /// <summary>Il nome che l'utente sta scrivendo (si salva con Rinomina).</summary>
@@ -114,12 +114,9 @@ public sealed partial class PlayersViewModel : ObservableObject
         return name == null || name == person.Name ? Result.Ok("") : Rename(person, name);
     }
 
-    /// <summary>"Imposta PIN…" o "Cambia PIN…" di un admin.</summary>
+    /// <summary>"Imposta PIN…" o "Cambia PIN…" di una persona.</summary>
     public async Task SetPinAsync(Person person)
     {
-        if (!person.IsAdmin)
-            return;
-
         await dialogs.SetPinAsync(people, person);
         Done(Result.Ok(""));
     }

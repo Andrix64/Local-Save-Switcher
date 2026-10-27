@@ -22,13 +22,25 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
     public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null) =>
         ShowAsync<Person>(new PlayerChoiceWindow(new PlayerChoiceViewModel(title, text, people, cancelText)));
 
-    public async Task<Person?> ChooseAdminAsync(People people, Person? current = null)
+    public async Task<Person?> ChooseAdminAsync(People people, Person? current = null, bool unlocked = false)
     {
-        if (AdminPickerViewModel.WithoutWindow(people, current) is Person admin)
+        if (AdminPickerViewModel.WithoutWindow(people, current, unlocked) is Person admin)
             return admin;
 
         return await ShowAsync<Person>(new AdminPickerWindow(
             new AdminPickerViewModel(people, AdminPickerViewModel.KnownAdmin(people, current))));
+    }
+
+    public async Task<bool> CheckPinAsync(People people, Person person)
+    {
+        if (people.Find(person.Id) is not { } known)
+            return false;
+
+        if (!known.HasPin)
+            return true;
+
+        // La finestra "Chi sei?" nella forma del solo PIN di quella persona.
+        return await ShowAsync<Person>(new AdminPickerWindow(new AdminPickerViewModel(people, known))) != null;
     }
 
     public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "", int maxLength = 30) =>

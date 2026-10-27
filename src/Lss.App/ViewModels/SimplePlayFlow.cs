@@ -22,7 +22,7 @@ internal sealed class SimpleQuestions(IDialogService dialogs) : ISimpleQuestions
 /// Il giro di una partita dalla modalità semplice: copertura cloud (solo un admin
 /// la consente), preparazione (SimplePlay), avvio, attesa della fine, salvataggio.
 /// </summary>
-internal sealed class SimplePlayFlow(IDialogService dialogs, People people)
+internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func<bool>? playerUnlocked = null)
 {
     /// <summary>Controlli e avvio. Null se non si gioca (annullato, errore già mostrato).</summary>
     internal async Task<PlaySession?> StartAsync(SaveManager manager, GameItemViewModel item, Person player,
@@ -102,7 +102,7 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people)
         }
 
         // Chi gioca, se è admin, mette solo il suo PIN (se ce l'ha); altrimenti si sceglie un admin.
-        if (await dialogs.ChooseAdminAsync(people, player) == null)
+        if (await dialogs.ChooseAdminAsync(people, player, playerUnlocked?.Invoke() ?? false) == null)
             return false;
 
         // Un admin decide, in una domanda sola: consentire il gioco, o giocarlo solo questa volta.

@@ -111,23 +111,28 @@ public sealed class PinTests : IDisposable
     }
 
     [Fact]
-    public void AUserCannotHaveAPin()
+    public void AUserCanHaveAPin()
     {
         People people = Load();
 
-        Assert.False(people.SetPin(User, "4821").Success);
-        Assert.False(people.CheckPin(User, "4821"));
+        Assert.True(people.SetPin(User, "4821").Success);
+
+        Assert.True(people.Find(User)!.HasPin);
+        Assert.True(Reread().Find(User)!.HasPin);
+        Assert.True(Reread().CheckPin(User, "4821"));
+        Assert.False(Reread().CheckPin(User, "0000"));
     }
 
     [Fact]
-    public void DemotingRemovesThePin()
+    public void DemotingKeepsThePin()
     {
         People people = Load();
         people.SetPin(OtherAdmin, "4821");
 
         Assert.True(people.SetAdmin(OtherAdmin, false).Success);
 
-        Assert.False(Reread().Find(OtherAdmin)!.HasPin);
-        Assert.False(Reread().CheckPin(OtherAdmin, "4821"));
+        Assert.True(people.Find(OtherAdmin)!.HasPin);
+        Assert.True(Reread().Find(OtherAdmin)!.HasPin);
+        Assert.True(Reread().CheckPin(OtherAdmin, "4821"));
     }
 }

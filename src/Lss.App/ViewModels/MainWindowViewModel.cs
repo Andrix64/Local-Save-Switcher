@@ -69,7 +69,7 @@ public partial class MainWindowViewModel : ObservableObject
                 MyGames = OpenMyGamesAsync,
             };
 
-            simpleFlow = new SimplePlayFlow(dialogs, people);
+            simpleFlow = new SimplePlayFlow(dialogs, people, () => Simple?.Unlocked ?? false);
         }
         SelectedGame = Games.FirstOrDefault(g => AppSettings.Refers(settings.LastGame, g.Info.Provider, g.Info.Id)) ?? Games.FirstOrDefault();
     }
@@ -111,7 +111,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (people == null)
             return;
 
-        Person? admin = await dialogs.ChooseAdminAsync(people, Simple?.Current);
+        Person? admin = await dialogs.ChooseAdminAsync(people, Simple?.Current, Simple?.Unlocked ?? false);
 
         if (admin == null)
             return;

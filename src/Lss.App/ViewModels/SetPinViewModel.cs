@@ -4,9 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace Lss.App.ViewModels;
 
 /// <summary>
-/// "PIN di …" dalla finestra Giocatori: nuovo PIN due volte. Se l'admin ha già un
+/// "PIN di …" dalla finestra Giocatori: nuovo PIN due volte. Se la persona ha già un
 /// PIN, per cambiarlo serve quello attuale (per toglierlo no: è la via d'uscita
-/// di un PIN dimenticato, dal menu ⋯ di un altro admin).
+/// di un PIN dimenticato, dal menu ⋯ della finestra Giocatori, che apre un admin).
 /// </summary>
 public sealed partial class SetPinViewModel : ObservableObject
 {

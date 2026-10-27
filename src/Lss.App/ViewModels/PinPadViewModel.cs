@@ -3,18 +3,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace Lss.App.ViewModels;
 
 /// <summary>
-/// Il tastierino del PIN di un amministratore (P4a). Dopo cinque errori di
-/// fila si aspetta 30 secondi. Il contatore sta in memoria: riparte al riavvio.
+/// Il tastierino del PIN di una persona (P4a). Dopo cinque errori di
+/// fila si aspetta 30 secondi: gli errori sono per persona (People.Guard), non per
+/// finestra, e restano in memoria fino al riavvio.
 /// </summary>
 public partial class PinPadViewModel : ObservableObject
 {
-    internal const int MaxWrongTries = 5;
-    internal const int WaitSeconds = 30;
+    internal const int MaxWrongTries = PinGuard.MaxWrongTries;
+    internal const int WaitSeconds = PinGuard.WaitSeconds;
 
     private readonly People people;
     private readonly Func<DateTime> now;
-    private int wrongTries;
-    private DateTime waitUntil = DateTime.MinValue;
     private string digits = "";
 
     internal PinPadViewModel(People people, Person admin, Func<DateTime>? clock = null)
@@ -83,26 +82,20 @@ public partial class PinPadViewModel : ObservableObject
     public void Tick() => Refresh();
 
     /// <summary>true durante l'attesa dopo cinque errori.</summary>
-    public bool Waiting => now() < waitUntil;
+    public bool Waiting => people.Guard.IsWaiting(Admin.Id, now());
 
     private void Verify()
     {
         if (people.CheckPin(Admin.Id, digits))
         {
             Accepted = true;
-            wrongTries = 0;
+            people.Guard.Right(Admin.Id);
             return;
         }
 
         digits = "";
         IsWrong = true;
-        wrongTries++;
-
-        if (wrongTries >= MaxWrongTries)
-        {
-            waitUntil = now().AddSeconds(WaitSeconds);
-            wrongTries = 0;
-        }
+        people.Guard.Wrong(Admin.Id, now());
 
         Refresh();
     }
@@ -113,7 +106,7 @@ public partial class PinPadViewModel : ObservableObject
         DotFilled = Enumerable.Range(0, 4).Select(index => index < digits.Length).ToArray();
 
         WaitText = Waiting
-            ? Loc.F(Strings.PinWait, (int)Math.Ceiling((waitUntil - now()).TotalSeconds))
+            ? Loc.F(Strings.PinWait, (int)Math.Ceiling((people.Guard.WaitUntil(Admin.Id) - now()).TotalSeconds))
             : "";
     }
 }
