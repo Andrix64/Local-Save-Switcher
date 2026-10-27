@@ -1,7 +1,7 @@
 namespace Lss.Tests;
 
 /// <summary>
-/// GameSpots: posti.ini nella cartella dati di un gioco, e la conversione di cartella.ini.
+/// GameSpots: posti.ini nella cartella dati di un gioco.
 /// </summary>
 public sealed class GameSpotsTests : IDisposable
 {
@@ -9,7 +9,6 @@ public sealed class GameSpotsTests : IDisposable
 
     private string Data => Path.Combine(folder.Root, "game-data");
     private string Posti => Path.Combine(Data, "posti.ini");
-    private string Cartella => Path.Combine(Data, "cartella.ini");
 
     public void Dispose() => folder.Dispose();
 
@@ -64,40 +63,6 @@ public sealed class GameSpotsTests : IDisposable
 
         Assert.Equal(4, added.Id);
         Assert.Equal([3, 4], loaded.Spots.Select(spot => spot.Id));
-    }
-
-    [Fact]
-    public void ChosenFolderFromCartellaIniBecomesSpotOneAndTheFileGoes()
-    {
-        Directory.CreateDirectory(Data);
-        string saves = Path.Combine(folder.Root, "saves");
-        string ignored = Path.Combine(folder.Root, "ignored");
-        string extra = Path.Combine(folder.Root, "extra");
-        string when = new DateTime(2026, 10, 25, 10, 0, 0, DateTimeKind.Utc).ToString("O");
-        File.WriteAllLines(Cartella,
-        [
-            "CartellaSalvataggi=" + saves,
-            "Origine=imparata",
-            "CartelleExtra=" + extra,
-            "Ignorate.0=" + ignored,
-            "Aggiunta.0=" + when,
-        ]);
-
-        var spots = new GameSpots(Data);
-        spots.Load();
-
-        SaveSpot primary = Assert.Single(spots.Spots);
-        Assert.Equal(1, primary.Id);
-        Assert.Equal(saves, primary.Folder);
-        Assert.Equal(SaveSource.Learned, primary.Source);
-        Assert.Equal([extra], spots.ExtraRoots);
-        Assert.False(File.Exists(Cartella));
-
-        string text = File.ReadAllText(Posti);
-        Assert.Contains("Ignorate.0=" + ignored, text);
-        Assert.Contains("Aggiunta.0=" + when, text);
-
-        Assert.Equal(ignored, Assert.Single(new IgnoredFolders(folder.Root).ForGame(Data)).Folder);
     }
 
     [Fact]

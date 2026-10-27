@@ -41,10 +41,10 @@ public sealed partial class SaveManager
     private const string SavestateDateFormat = "yyyy-MM-dd_HH-mm-ss";
 
     // Prefissi dei nomi dei backup, letti da BackupReasonText.
-    private const string ActivateBackupPrefix = "Prima_di_";
-    private const string SaveBackupPrefix = "Prima_salvataggio_";
-    private const string RestoreBackupName = "Prima_ripristino";
-    private const string DeletedBackupPrefix = "Eliminato_";
+    internal const string ActivateBackupPrefix = "Prima_di_";
+    internal const string SaveBackupPrefix = "Prima_salvataggio_";
+    internal const string RestoreBackupName = "Prima_ripristino";
+    internal const string DeletedBackupPrefix = "Eliminato_";
 
     // Nome intermedio di una rinomina solo di maiuscole.
     private const string RenameSuffix = ".rinomina";
@@ -1183,9 +1183,12 @@ public sealed partial class SaveManager
         if (reason.StartsWith(SaveBackupPrefix))
             return Loc.F(Strings.ReasonBeforeSaving, ProfileDisplayName(reason[SaveBackupPrefix.Length..]));
 
+        // V1Compat: motivo dei backup della 1.0
+        if (V1Compat.OldBackupReasonText(reason) is { } oldText)
+            return oldText;
+
         return reason switch
         {
-            "Prima_salvataggio" => Strings.ReasonBeforeSavingOld,
             "Prima_nuovo_posto" => Strings.ReasonBeforeAddingSpot,
             "Prima_creazione" => Strings.ReasonBeforeCreating,
             RestoreBackupName => Strings.ReasonBeforeRestoring,

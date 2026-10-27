@@ -236,6 +236,32 @@ per phase (the phase file names it).
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
 
+- 2026-10-27 — Fase R, R0 (Sonnet 5.5). Inventario di ciò che è compatibilità 1.0 e dove è andato:
+  - `DataLayoutMigration` (intera) → `V1Compat.MoveBetaLayout` / `MoveAccount`; chiamata in `App.axaml.cs`.
+  - `AppSettings.Refers` (valori senza launcher, prima della K5) → `V1Compat.IsSteamIdWithoutProvider`.
+    `AppSettings.FirstStart`: nessun codice 1.0, solo il commento (tolto); la regola resta.
+  - Partite senza proprietario: la parte "persona non valida → primo admin" **resta** in
+    `SaveManager.AssignExistingPlaythroughs` (serve anche per le partite recuperate: non è 1.0); il passo
+    una tantum delle preferite (`ProprietariOk`) → `V1Compat.AssignFirstFavourites`. `AppState.OwnersAssigned`
+    resta in `AppState` (campo di `stato.ini`), da togliere con la checklist.
+  - Copie senza proprietario: `GetBackupsWithoutOwner` → `V1Compat.BackupsWithoutOwner`; nomi di cartella dei
+    backup senza .ini (`WithBackupInfo`) → `V1Compat.BackupFromName`; `"Prima_salvataggio"` in
+    `BackupReasonText` → `V1Compat.OldBackupReasonText`. `HistoryViewModel` chiama `V1Compat` per i dati.
+  - Zip di formato 1 e 2: solo il "Provider" mancante → `V1Compat.ZipProvider`. Lo zip senza `posizioni.ini`
+    **non** è 1.0 (lo scrivono anche gli export di oggi per un gioco con un posto solo): resta. La parte di
+    Control Save Manager resta in `LegacyMigration.ExportedGame`.
+  - `GameSpots` `cartella.ini` → `V1Compat.ConvertOldSpots` (`GameSpots.Load` la chiama). `IgnoredFolders`
+    continua a passare da `GameSpots.Load`.
+  - `SaveLocator` "gioco gestito con la userdata (come nella 1.0)": **resta dov'è**, è comportamento di oggi
+    (una cartella delle regole che non passa il controllo non blocca un gioco già gestito), non un vecchio dato.
+  - `SaveManager` "Come nella 1.0: con la cartella principale vuota non si salva": regola di sicurezza, resta.
+  - Test: `DataLayoutMigrationTests` → `V1CompatTests`; spostati lì il test di `cartella.ini` (da
+    `GameSpotsTests`) e quello dei valori senza launcher (da `AppSettingsTests`); nuovi per `ZipProvider`,
+    `BackupFromName`, `BackupsWithoutOwner`. `OldPlaythroughsTests` e `Import_Format2IsSteam` restano dove sono
+    (provano il comportamento di `SaveManager`). Nuovo `V1CompatBoundaryTests` con le eccezioni "fino a R9/R10".
+  - Windows: 764 test verdi. Nota: `dotnet build | grep -c` seguito da `dotnet test` nello stesso comando si è
+    bloccato una volta; i due comandi separati vanno bene.
+
 - 2026-10-25 — Fase P, grafica rifatta come il canvas (Andrix: "la grafica e' molto diversa da
   quella dell'artifact"), commit `d5e81d4`, `54003d1`, `7df1c1d`. Test Windows: 749 verdi. Linux
   (`lss-ci`, completo): tutto a posto.

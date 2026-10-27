@@ -297,7 +297,7 @@ public sealed partial class SaveManager
 
     /// <summary>
     /// Completa un backup con il proprietario e l'operazione: dal suo file .ini,
-    /// o dal nome della cartella per i backup delle versioni precedenti.
+    /// o dal nome della cartella per i backup senza (V1Compat).
     /// </summary>
     private static Snapshot WithBackupInfo(Snapshot backup)
     {
@@ -313,24 +313,8 @@ public sealed partial class SaveManager
             };
         }
 
-        string reason = backup.Name;
-
-        if (reason.StartsWith(ActivateBackupPrefix))
-            return backup with { Kind = BackupKind.Activate, Detail = reason[ActivateBackupPrefix.Length..] };
-
-        if (reason.StartsWith(SaveBackupPrefix))
-            return backup with { Kind = BackupKind.Save, Owner = reason[SaveBackupPrefix.Length..] };
-
-        if (reason.StartsWith(DeletedBackupPrefix))
-            return backup with { Kind = BackupKind.Delete, Owner = reason[DeletedBackupPrefix.Length..] };
-
-        return reason switch
-        {
-            "Prima_salvataggio" => backup with { Kind = BackupKind.Save },
-            "Prima_creazione" => backup with { Kind = BackupKind.Create },
-            RestoreBackupName => backup with { Kind = BackupKind.Restore },
-            _ => backup
-        };
+        // V1Compat: backup senza file .ini, descritti dal nome della cartella
+        return V1Compat.BackupFromName(backup);
     }
 
     /// <summary>
@@ -364,18 +348,6 @@ public sealed partial class SaveManager
     {
         return GetBackups()
             .Where(b => b.Owner == profileName && b.Kind != BackupKind.Delete)
-            .ToList();
-    }
-
-    /// <summary>
-    /// Backup di cui non si sa a quale partita appartengano (tranne le
-    /// partite eliminate): quelli delle versioni precedenti, senza file .ini, e
-    /// quelli fatti quando nessuna partita era nel gioco.
-    /// </summary>
-    public IReadOnlyList<Snapshot> GetBackupsWithoutOwner()
-    {
-        return GetBackups()
-            .Where(b => b.Owner == "" && b.Kind != BackupKind.Delete)
             .ToList();
     }
 
@@ -809,8 +781,8 @@ public sealed partial class SaveManager
 
             (string appId, string gameName) = LegacyMigration.ExportedGame(values);
 
-            // Formato 1 e 2 non hanno il launcher: sono di Steam.
-            string provider = values.GetValueOrDefault("Provider", "steam");
+            // V1Compat: gli zip di formato 1 e 2 non hanno il launcher
+            string provider = V1Compat.ZipProvider(values);
 
             if (appId != Game.Id || provider != Game.Provider)
                 return Result<string>.Fail(Loc.F(Strings.ImportOtherGame, gameName, Game.Name));

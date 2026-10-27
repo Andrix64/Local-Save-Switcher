@@ -15,7 +15,7 @@ internal sealed class AppSettings
     /// <summary>Modalità semplice (chi gioca sceglie il gioco).</summary>
     public const string SimpleMode = "semplice";
 
-    /// <summary>Modalità avanzata (tutto, come in 1.0).</summary>
+    /// <summary>Modalità avanzata (tutto).</summary>
     public const string AdvancedMode = "avanzata";
 
     private readonly string path;
@@ -31,7 +31,6 @@ internal sealed class AppSettings
 
     /// <summary>
     /// true se lss.ini non c'era: alla prima partenza si chiede la modalità.
-    /// Chi ha già lss.ini (1.0) resta in avanzata senza domande.
     /// </summary>
     public bool FirstStart { get; private set; }
 
@@ -41,11 +40,11 @@ internal sealed class AppSettings
     }
 
     /// <summary>
-    /// true se il valore salvato (provider/id) è quell'account o quel gioco. I
-    /// valori di prima della K5 non hanno il launcher: sono di Steam.
+    /// true se il valore salvato (provider/id) è quell'account o quel gioco.
     /// </summary>
     public static bool Refers(string stored, string provider, string id) =>
-        stored.Contains('/') ? stored == provider + "/" + id : provider == "steam" && stored == id;
+        stored == provider + "/" + id
+        || V1Compat.IsSteamIdWithoutProvider(stored, provider, id); // V1Compat: valori di prima della K5, senza launcher
 
     /// <summary>
     /// Legge lss.ini. Se manca o non si legge, i valori restano vuoti.

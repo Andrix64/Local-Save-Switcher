@@ -122,10 +122,10 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
-    /// Partite fatte prima delle persone: senza proprietario le dà al primo
-    /// amministratore, e a ogni persona senza preferita dà la partita attiva (o
-    /// quella salvata per ultima). Si fa una volta per gioco (ProprietariOk in
-    /// stato.ini); se fallisce, la volta dopo riprova. Non lancia eccezioni.
+    /// Partite senza proprietario (o con una persona che non esiste più): le dà al
+    /// primo amministratore e rimette a posto le preferite. Poi V1Compat dà una
+    /// preferita alle persone delle partite fatte prima delle persone. Non lancia
+    /// eccezioni.
     /// </summary>
     internal void AssignExistingPlaythroughs()
     {
@@ -152,25 +152,8 @@ public sealed partial class SaveManager
 
             RepairFavourites();
 
-            if (State.OwnersAssigned)
-                return;
-
-            foreach (Person person in Players!.All.Where(person => FavouriteOf(person.Id) == null))
-            {
-                List<string> mine = GetProfilesOf(person.Id).ToList();
-
-                if (mine.Count == 0)
-                    continue;
-
-                string chosen = mine.FirstOrDefault(profile => profile == State.ActiveProfile)
-                                ?? mine.MaxBy(profile => GetProfileLastModified(profile) ?? DateTime.MinValue)!;
-
-                SetFavourite(person.Id, chosen);
-            }
-
-            State.OwnersAssigned = true;
-            State.Save();
-            Log.Write("Partite esistenti: persone e preferite assegnate");
+            // V1Compat: le partite fatte prima delle persone non hanno una preferita
+            V1Compat.AssignFirstFavourites(this);
         }
         catch (Exception ex)
         {

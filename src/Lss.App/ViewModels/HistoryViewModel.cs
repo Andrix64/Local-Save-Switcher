@@ -238,7 +238,7 @@ public partial class HistoryViewModel : ObservableObject
         {
             IReadOnlyList<Snapshot> points = manager.GetSavestates();
             IReadOnlyList<Snapshot> copies = manager.GetBackupsOf(profileName);
-            IReadOnlyList<Snapshot> legacy = manager.GetBackupsWithoutOwner();
+            IReadOnlyList<Snapshot> legacy = V1Compat.BackupsWithoutOwner(manager); // V1Compat: copie senza partita della 1.0
 
             foreach (Snapshot point in points)
             {

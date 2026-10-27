@@ -7,20 +7,17 @@ namespace Lss;
 /// gli id dei posti dei launcher. I posti dei launcher (userdata, regole) non
 /// si salvano: si ritrovano a ogni avvio, ma la riga Launcher.&lt;percorso&gt;
 /// fa tenere loro lo stesso id.
-/// Un cartella.ini (L9) si converte alla prima lettura nel posto 1 e si elimina.
+/// Un cartella.ini della 1.0 si converte alla prima lettura (V1Compat).
 /// Le chiavi che non sono di questa classe (Ignorate.n, Aggiunta.n) restano com'erano.
 /// Non lancia eccezioni in lettura: un file illeggibile vale come vuoto.
 /// </summary>
 internal sealed class GameSpots
 {
     private const string FileName = "posti.ini";
-    private const string OldFileName = "cartella.ini";
     private const string NextKey = "Prossimo";
     private const string SpotPrefix = "Posto.";
     private const string LauncherPrefix = "Launcher.";
     private const string ExtraKey = "CartelleExtra";
-    private const string OldFolderKey = "CartellaSalvataggi";
-    private const string OldOriginKey = "Origine";
     private const string ScelteText = "scelta";
     private const string ImparateText = "imparata";
     private const string ImportateText = "importata";
@@ -28,7 +25,6 @@ internal sealed class GameSpots
     private const int FirstExtraId = 2;
 
     private readonly string file;
-    private readonly string oldFile;
     private readonly List<SaveSpot> spots = [];
     private readonly Dictionary<string, int> launcherIds = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> extraRoots = [];
@@ -38,8 +34,10 @@ internal sealed class GameSpots
     public GameSpots(string gameDataFolder)
     {
         file = Path.Combine(gameDataFolder, FileName);
-        oldFile = Path.Combine(gameDataFolder, OldFileName);
     }
+
+    /// <summary>Percorso di posti.ini.</summary>
+    internal string FilePath => file;
 
     /// <summary>Cartella dati del gioco, dove stanno posti.ini e proposte.ini.</summary>
     public string GameDataFolder => Path.GetDirectoryName(file) ?? "";
@@ -51,7 +49,7 @@ internal sealed class GameSpots
     public IReadOnlyList<string> ExtraRoots => extraRoots;
 
     /// <summary>
-    /// Legge posti.ini. Se non c'è ma c'è cartella.ini, lo converte e lo elimina.
+    /// Legge posti.ini. Se non c'è ma c'è un cartella.ini della 1.0, lo converte.
     /// </summary>
     public void Load()
     {
@@ -60,11 +58,9 @@ internal sealed class GameSpots
         extraRoots.Clear();
         next = FirstExtraId;
 
-        if (!File.Exists(file) && File.Exists(oldFile))
-        {
-            Migrate();
+        // V1Compat: cartella.ini della 1.0 diventa posti.ini
+        if (V1Compat.ConvertOldSpots(this))
             return;
-        }
 
         Dictionary<string, string> values = IniFile.Read(file);
 
@@ -158,6 +154,9 @@ internal sealed class GameSpots
         return Write(others.ToList());
     }
 
+    /// <summary>Come Save, ma con le chiavi di altre classi date (per V1Compat).</summary>
+    internal bool Save(List<KeyValuePair<string, string>> others) => Write(others);
+
     private void ReadValue(string key, string value)
     {
         if (key == NextKey && int.TryParse(value, out int nextId))
@@ -197,7 +196,7 @@ internal sealed class GameSpots
         return new SaveSpot(id, parts[0], parts[2], parts[3] == "1", portable, OriginOf(parts[4]));
     }
 
-    private static SaveSource OriginOf(string text) =>
+    internal static SaveSource OriginOf(string text) =>
         text == ImparateText ? SaveSource.Learned : text == ImportateText ? SaveSource.Imported : SaveSource.Chosen;
 
     private static string TextOf(SaveSource source) =>
@@ -214,47 +213,6 @@ internal sealed class GameSpots
         || key.StartsWith(SpotPrefix, StringComparison.OrdinalIgnoreCase)
         || key.StartsWith(LauncherPrefix, StringComparison.OrdinalIgnoreCase)
         || key == ExtraKey;
-
-    /// <summary>
-    /// Converte cartella.ini: la cartella e la sua origine diventano il posto 1, le
-    /// cartelle extra e le altre chiavi passano a posti.ini. Poi cartella.ini si elimina,
-    /// solo se posti.ini è stato scritto.
-    /// </summary>
-    private void Migrate()
-    {
-        Dictionary<string, string> old = IniFile.Read(oldFile);
-        string folder = old.GetValueOrDefault(OldFolderKey) ?? "";
-
-        // Un percorso con "|" non entra in posti.ini: cartella.ini resta com'è.
-        if (folder.Contains('|'))
-        {
-            Log.Write("cartella.ini con un percorso che contiene '|': non convertito: " + oldFile);
-            return;
-        }
-
-        if (folder != "")
-            SetPrimary(folder, OriginOf(old.GetValueOrDefault(OldOriginKey) ?? ""));
-
-        if (old.TryGetValue(ExtraKey, out string? extra))
-            extraRoots.AddRange(extra.Split(';', StringSplitOptions.RemoveEmptyEntries));
-
-        IEnumerable<KeyValuePair<string, string>> others = old
-            .Where(pair => pair.Key != OldFolderKey && pair.Key != OldOriginKey && pair.Key != ExtraKey);
-
-        if (!Write(others.ToList()))
-            return;
-
-        try
-        {
-            File.Delete(oldFile);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            Log.Write("cartella.ini non eliminato dopo la conversione: " + oldFile, ex);
-        }
-
-        Log.Write("cartella.ini convertito in posti.ini: " + file);
-    }
 
     /// <summary>
     /// Scrive posti.ini con le chiavi di questa classe e le altre date. Senza

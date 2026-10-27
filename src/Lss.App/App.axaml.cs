@@ -62,7 +62,7 @@ public partial class App : Application
         (LegacyMigration.MoveResult moved, string moveDetail) = LegacyMigration.Run();
 
         // Cartelle degli account sotto steam\ (dalle beta): prima di leggere i dati.
-        DataLayoutMigration.Run(AppData.Root);
+        V1Compat.MoveBetaLayout(AppData.Root); // V1Compat: cartelle dati della 1.0 e delle beta
 
         Log.Write("Avvio versione " + Program.Version);
 
