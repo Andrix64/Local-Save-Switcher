@@ -356,30 +356,16 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Aggiunge a mano un gioco (Questo computer): si sceglie il programma (facoltativo)
+    /// Aggiunge a mano un gioco (Questo computer): si sceglie il programma (obbligatorio)
     /// e il nome, poi si apre subito la ricerca della cartella dei salvataggi.
     /// </summary>
     [RelayCommand]
     private async Task AddGameAsync()
     {
-        string? exe = await dialogs.PickFileAsync(Strings.AddGamePickProgram, UserHome());
+        string? id = await new AddGameFlow(dialogs).AddAsync(AppData.Root, UserHome());
 
-        string initial = exe is null ? "" : Path.GetFileNameWithoutExtension(exe);
-
-        var window = new TextPromptWindow(new TextPromptViewModel(
-            Strings.AddGameTitle,
-            Strings.AddGameCaption,
-            initial,
-            Strings.AddGameHint,
-            80,
-            Strings.AddGameConfirm));
-
-        string? name = await dialogs.ShowAsync<string>(window);
-
-        if (name is null || name.Trim() == "")
+        if (id is null)
             return;
-
-        string id = ManualGames.Add(AppData.Root, new ManualGame(name.Trim(), exe ?? "", "", ""));
 
         // Il launcher "Questo computer" entra nell'elenco la prima volta.
         if (!launchers.Any(l => l.Provider.Id == "manual"))

@@ -31,8 +31,8 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
             new AdminPickerViewModel(people, AdminPickerViewModel.KnownAdmin(people, current))));
     }
 
-    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "") =>
-        ShowAsync<string>(new TextPromptWindow(new TextPromptViewModel(title, caption, initial, hint, 30, confirm)));
+    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "", int maxLength = 30) =>
+        ShowAsync<string>(new TextPromptWindow(new TextPromptViewModel(title, caption, initial, hint, maxLength, confirm)));
 
     public Task<RemovalChoice?> ChooseRemovalAsync(Person person, IReadOnlyList<Person> others) =>
         ShowAsync<RemovalChoice>(new RemovePlayerWindow(new RemovePlayerViewModel(person, others)));

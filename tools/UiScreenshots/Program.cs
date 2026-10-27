@@ -458,7 +458,7 @@ internal sealed class NoDialogs : IDialogService
     public Task<T?> ShowAsync<T>(Window dialog) => Task.FromResult(default(T));
     public Task<Person?> ChoosePersonAsync(string title, string text, IReadOnlyList<Person> people, string? cancelText = null) => Task.FromResult<Person?>(null);
     public Task<Person?> ChooseAdminAsync(People people, Person? current = null) => Task.FromResult<Person?>(null);
-    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "") => Task.FromResult<string?>(null);
+    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "", int maxLength = 30) => Task.FromResult<string?>(null);
     public Task<bool> SetPinAsync(People people, Person admin) => Task.FromResult(false);
     public Task<int> ChooseAsync(string heading, string text, IReadOnlyList<string> options, InfoKind kind = InfoKind.Warning) => Task.FromResult(-1);
     public Task<RemovalChoice?> ChooseRemovalAsync(Person person, IReadOnlyList<Person> others) => Task.FromResult<RemovalChoice?>(null);

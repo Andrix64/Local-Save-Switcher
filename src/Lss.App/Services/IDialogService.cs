@@ -31,7 +31,7 @@ public interface IDialogService
     Task<Person?> ChooseAdminAsync(People people, Person? current = null);
 
     /// <summary>Chiede un testo (un nome), partendo da initial: il testo, o null se si annulla.</summary>
-    Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "");
+    Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "", int maxLength = 30);
 
     /// <summary>"Rimuovere …?": a chi dare le partite (o eliminarle); null se si annulla.</summary>
     Task<RemovalChoice?> ChooseRemovalAsync(Person person, IReadOnlyList<Person> others);

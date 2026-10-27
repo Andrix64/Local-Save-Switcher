@@ -47,7 +47,7 @@ public sealed class FakeDialogService : IDialogService
     /// <summary>Il testo che l'utente scrive nella finestra di richiesta (null = annulla).</summary>
     public string? PromptAnswer { get; set; }
 
-    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "")
+    public Task<string?> PromptAsync(string title, string caption, string hint, string confirm, string initial = "", int maxLength = 30)
     {
         Calls.Add("Prompt: " + title);
         return Task.FromResult(PromptAnswer);
