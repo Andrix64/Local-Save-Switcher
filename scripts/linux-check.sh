@@ -39,7 +39,10 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 echo "== Copia di $(git rev-parse --short HEAD) su $target"
-git archive --format=tar HEAD | ssh_run 'rm -rf ~/lss-ci && mkdir -p ~/lss-ci ~/.lss-nuget && tar -x -C ~/lss-ci'
+# Se una prova precedente è stata interrotta, in ~/lss-ci restano file di root: allora
+# si pulisce con lo stesso container (solo ~/lss-ci), senza bisogno di root sulla macchina.
+ssh_run "rm -rf ~/lss-ci 2>/dev/null || docker run --rm -v ~:/home-lss $sdk_image rm -rf /home-lss/lss-ci"
+git archive --format=tar HEAD | ssh_run 'mkdir -p ~/lss-ci ~/.lss-nuget && tar -x -C ~/lss-ci'
 
 echo "== Test"
 # Root dentro il container per installare libfontconfig1 (la dipendenza del
