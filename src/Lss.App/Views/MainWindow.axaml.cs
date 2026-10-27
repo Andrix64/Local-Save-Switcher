@@ -30,9 +30,31 @@ public partial class MainWindow : Window
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
+        ViewModel.AttachWindow(new WindowControl(this));
         WindowFit.Apply(this);
         ViewModel.Monitor.Start();
         _ = ViewModel.OnOpenedAsync();
+    }
+
+    // F11 entra e esce dallo schermo intero (modalità semplice); Esc ne esce. I dialoghi hanno le loro finestre:
+    // con uno aperto i tasti non arrivano qui.
+    protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Handled || !ViewModel.IsSimple)
+            return;
+
+        if (e.Key == Avalonia.Input.Key.F11)
+        {
+            ViewModel.FullScreen.Toggle();
+            e.Handled = true;
+        }
+        else if (e.Key == Avalonia.Input.Key.Escape && ViewModel.FullScreen.IsFullScreen)
+        {
+            ViewModel.FullScreen.Leave();
+            e.Handled = true;
+        }
     }
 
     // Non interrompere una copia a metà.

@@ -19,6 +19,10 @@ internal static class WindowFit
     /// <summary>Da chiamare quando la finestra è aperta (serve la cornice).</summary>
     public static void Apply(Window window)
     {
+        // A schermo intero la finestra è già grande quanto lo schermo: non si tocca.
+        if (window.WindowState == WindowState.FullScreen)
+            return;
+
         Screen? screen = window.Screens.ScreenFromWindow(window) ?? window.Screens.Primary;
 
         if (screen is null)

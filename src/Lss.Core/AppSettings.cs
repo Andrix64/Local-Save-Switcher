@@ -11,6 +11,7 @@ internal sealed class AppSettings
     private const string GameKey = "UltimoGioco";
     private const string LookKey = "CercaDopoPartita";
     private const string ModeKey = "Modalita";
+    private const string FullScreenKey = "SchermoIntero";
 
     /// <summary>Modalità semplice (chi gioca sceglie il gioco).</summary>
     public const string SimpleMode = "semplice";
@@ -25,6 +26,9 @@ internal sealed class AppSettings
 
     /// <summary>Dopo una partita cerca altre cartelle dei salvataggi (CercaDopoPartita).</summary>
     public bool LookAfterPlaying { get; set; } = true;
+
+    /// <summary>Schermo intero nella modalità semplice (SchermoIntero): LSS riparte così. Mai nell'avanzata.</summary>
+    public bool FullScreen { get; set; }
 
     /// <summary>Modalita: <see cref="SimpleMode"/> o <see cref="AdvancedMode"/>. Senza chiave è avanzata.</summary>
     public string Mode { get; set; } = AdvancedMode;
@@ -61,6 +65,7 @@ internal sealed class AppSettings
             LastGame = values.GetValueOrDefault(GameKey, "");
             LookAfterPlaying = values.GetValueOrDefault(LookKey, "1") != "0";
             Mode = values.GetValueOrDefault(ModeKey, AdvancedMode) == SimpleMode ? SimpleMode : AdvancedMode;
+            FullScreen = values.GetValueOrDefault(FullScreenKey, "0") == "1";
         }
         catch (Exception ex)
         {
@@ -80,7 +85,8 @@ internal sealed class AppSettings
                 new(AccountKey, LastAccount),
                 new(GameKey, LastGame),
                 new(LookKey, LookAfterPlaying ? "1" : "0"),
-                new(ModeKey, Mode)
+                new(ModeKey, Mode),
+                new(FullScreenKey, FullScreen ? "1" : "0")
             ]);
         }
         catch (Exception ex)

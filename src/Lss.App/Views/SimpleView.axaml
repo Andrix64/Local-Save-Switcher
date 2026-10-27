@@ -82,7 +82,21 @@
         </Button>
 
         <!-- Interruttore Semplice | Avanzata -->
-        <views:ModeSwitch Grid.Column="1" DataContext="{Binding Mode}" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <!-- Schermo intero e ritorno: due icone, mai sopra il gioco (nessun Topmost) -->
+          <Button Classes="gear" CornerRadius="24" Command="{Binding FullScreen.ToggleCommand}"
+                  ToolTip.Tip="{Binding FullScreen.Tip}" AutomationProperties.Name="{Binding FullScreen.Tip}">
+            <Panel>
+              <Path IsVisible="{Binding FullScreen.IsWindowed}" Width="24" Height="24" Stretch="Uniform"
+                    Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round"
+                    Data="M4 9 V4 H9 M15 4 H20 V9 M20 15 V20 H15 M9 20 H4 V15" />
+              <Path IsVisible="{Binding FullScreen.IsFullScreen}" Width="24" Height="24" Stretch="Uniform"
+                    Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1.8" StrokeLineCap="Round" StrokeJoin="Round"
+                    Data="M9 4 V9 H4 M15 4 V9 H20 M20 15 H15 V20 M4 15 H9 V20" />
+            </Panel>
+          </Button>
+          <views:ModeSwitch DataContext="{Binding Mode}" VerticalAlignment="Center" />
+        </StackPanel>
       </Grid>
     </Border>
 

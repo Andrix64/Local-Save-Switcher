@@ -58,6 +58,11 @@ public partial class MainWindowViewModel : ObservableObject
         isSimple = settings.Mode == AppSettings.SimpleMode;
 
         Mode = new ModeSwitchViewModel(isSimple, SwitchToSimpleAsync, SwitchToAdvancedAsync, CanSwitchMode);
+        FullScreen.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(FullScreenViewModel.IsFullScreen))
+                RememberFullScreen();
+        };
 
         if (people != null)
         {
@@ -68,6 +73,7 @@ public partial class MainWindowViewModel : ObservableObject
                 () => AddGameAsync())
             {
                 Mode = Mode,
+                FullScreen = FullScreen,
                 MyGames = OpenMyGamesAsync,
             };
 
@@ -128,6 +134,19 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>L'interruttore Semplice | Avanzata, uguale nelle due intestazioni.</summary>
     public ModeSwitchViewModel Mode { get; }
 
+    /// <summary>Lo schermo intero della modalità semplice (R7a): il pulsante e la finestra che comanda.</summary>
+    public FullScreenViewModel FullScreen { get; } = new();
+
+    /// <summary>La vista dà la finestra quando è pronta.</summary>
+    internal void AttachWindow(IWindowControl window) => FullScreen.Window = window;
+
+    // Ricorda lo schermo intero solo nella modalità semplice: l'avanzata riparte sempre in finestra.
+    private void RememberFullScreen()
+    {
+        settings.FullScreen = FullScreen.IsFullScreen && IsSimple;
+        settings.Save();
+    }
+
     partial void OnIsSimpleChanged(bool value) => Mode.IsSimple = value;
 
     /// <summary>Il cambio di modalità è spento mentre si gioca dalla modalità semplice e durante un'operazione.</summary>
@@ -156,6 +175,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (admin == null)
             return;
 
+        FullScreen.Leave();
         SetMode(AppSettings.AdvancedMode);
         IsSimple = false;
     }
@@ -233,11 +253,19 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        Task finished = simple.BeginPlaying(session);
-        await simpleFlow.WaitForEndAsync(session, finished);
+        // A schermo intero LSS si riduce a icona mentre gira il gioco, senza prendere il primo piano,
+        // e torna davanti (a schermo intero) a gioco chiuso e salvataggio fatto.
+        Result done = Result.Ok("");
 
-        Result done = await simpleFlow.FinishAsync(session);
-        simple.EndPlaying();
+        await FullScreen.WhileAwayAsync(async () =>
+        {
+            Task finished = simple.BeginPlaying(session);
+            await simpleFlow.WaitForEndAsync(session, finished);
+
+            done = await simpleFlow.FinishAsync(session);
+            simple.EndPlaying();
+        });
+
         simple.Message = done.Message;
 
         // Come nella modalità avanzata: dopo la partita si cercano altre cartelle dei salvataggi.

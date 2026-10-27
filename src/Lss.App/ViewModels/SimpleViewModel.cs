@@ -163,6 +163,9 @@ public sealed partial class SimpleViewModel : ObservableObject
     /// <summary>L'interruttore Semplice | Avanzata dell'intestazione (lo possiede il MainWindowViewModel).</summary>
     public ModeSwitchViewModel? Mode { get; set; }
 
+    /// <summary>Il pulsante dello schermo intero dell'intestazione (lo possiede il MainWindowViewModel).</summary>
+    public FullScreenViewModel? FullScreen { get; set; }
+
     [RelayCommand]
     private Task SelectPlayerTile(PersonTile tile) => SelectPlayerAsync(tile.Person);
 

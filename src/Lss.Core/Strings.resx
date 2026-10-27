@@ -529,6 +529,8 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SimpleNeedsSetup" xml:space="preserve"><value>To set up</value></data>
   <data name="SimpleNeedsSetupOnce" xml:space="preserve"><value>Needs setting up once</value></data>
   <data name="SimpleCloudLabel" xml:space="preserve"><value>Ask an admin</value></data>
+  <data name="FullScreenOn" xml:space="preserve"><value>Full screen</value></data>
+  <data name="FullScreenOff" xml:space="preserve"><value>Leave full screen</value></data>
   <data name="SwitchToSimple" xml:space="preserve"><value>Simple mode</value></data>
   <data name="SwitchToAdvanced" xml:space="preserve"><value>Advanced mode</value></data>
   <data name="SimpleWhoIsPlaying" xml:space="preserve"><value>Who's playing?</value></data>

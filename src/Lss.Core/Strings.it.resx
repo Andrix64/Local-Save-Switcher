@@ -529,6 +529,8 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="SimpleNeedsSetup" xml:space="preserve"><value>Da preparare</value></data>
   <data name="SimpleNeedsSetupOnce" xml:space="preserve"><value>Da preparare una volta</value></data>
   <data name="SimpleCloudLabel" xml:space="preserve"><value>Chiedi a un admin</value></data>
+  <data name="FullScreenOn" xml:space="preserve"><value>Schermo intero</value></data>
+  <data name="FullScreenOff" xml:space="preserve"><value>Esci dallo schermo intero</value></data>
   <data name="SwitchToSimple" xml:space="preserve"><value>Modalità semplice</value></data>
   <data name="SwitchToAdvanced" xml:space="preserve"><value>Modalità avanzata</value></data>
   <data name="SimpleWhoIsPlaying" xml:space="preserve"><value>Chi gioca?</value></data>

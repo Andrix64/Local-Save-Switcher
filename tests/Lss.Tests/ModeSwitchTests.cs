@@ -139,4 +139,35 @@ public sealed class ModeSwitchTests : IDisposable
         Assert.True(model.Mode.Enabled);
         Assert.True(model.Mode.ShowAdvancedCommand.CanExecute(null));
     }
+
+    [Fact]
+    public async Task SwitchingToAdvancedLeavesFullScreenAndForgetsIt()
+    {
+        People people = People();
+        (MainWindowViewModel model, AppSettings settings) = Create(AppSettings.SimpleMode, people);
+        var window = new FakeWindowControl();
+        model.AttachWindow(window);
+        model.FullScreen.Toggle();
+        Assert.True(settings.FullScreen);
+
+        await model.Mode.ShowAdvancedCommand.ExecuteAsync(null);
+
+        Assert.False(window.IsFullScreen);
+        Assert.False(model.FullScreen.IsFullScreen);
+        Assert.False(settings.FullScreen);
+        Assert.False(model.IsSimple);
+    }
+
+    [Fact]
+    public void FullScreenIsRememberedOnlyInTheSimpleMode()
+    {
+        People people = People();
+        (MainWindowViewModel model, AppSettings settings) = Create(AppSettings.AdvancedMode, people);
+        model.AttachWindow(new FakeWindowControl());
+
+        model.FullScreen.Toggle();
+
+        Assert.True(model.FullScreen.IsFullScreen);
+        Assert.False(settings.FullScreen);
+    }
 }
