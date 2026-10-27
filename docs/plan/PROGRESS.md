@@ -213,7 +213,7 @@ per phase (the phase file names it).
 - [x] R1 — Renaming a playthrough keeps its automatic copies (e024d06)
 - [x] R2 — "Add a game": cancel means cancel (e0cc394)
 - [x] R3 — PIN for every player, asked when picked; wrong tries per player (8502cfa)
-- [ ] R4 — Sidebar: launcher titles apart, no "Games" title, icons in "Other games"
+- [x] R4 — Sidebar: launcher titles apart, no "Games" title, icons in "Other games" (8005ebc)
 - [ ] R5 — Long game names: "…" and a slow scroll
 - [ ] R6 — Simple mode tiles: badge under the chip, icon when there's no cover
 - [ ] R7 — A Simple / Advanced switch instead of ⚙
