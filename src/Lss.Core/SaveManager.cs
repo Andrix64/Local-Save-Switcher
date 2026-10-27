@@ -696,6 +696,9 @@ public sealed partial class SaveManager
 
         MoveInfo(profileName, newProfileName, caseOnly);
 
+        // Le copie automatiche appartengono a una partita per nome: passano al nuovo.
+        savestateError += MoveBackupOwner(profileName, newProfileName);
+
         if (State.ActiveProfile == profileName)
         {
             State.ActiveProfile = newProfileName;
@@ -714,6 +717,33 @@ public sealed partial class SaveManager
         return savestateError == ""
             ? Result.Ok(Strings.ProfileRenamed)
             : Result.Fail(Strings.ProfileRenamed + savestateError);
+    }
+
+    /// <summary>
+    /// Scrive il nuovo nome come proprietario delle copie automatiche della partita
+    /// (nel loro file .ini, che una copia senza file riceve). Le copie delle partite
+    /// eliminate con quel nome sono di un'altra partita e non si toccano. Ritorna il
+    /// testo da aggiungere al risultato, "" se è andato tutto bene.
+    /// </summary>
+    private string MoveBackupOwner(string oldName, string newName)
+    {
+        var failed = new List<string>();
+
+        try
+        {
+            foreach (Snapshot backup in GetBackupsOf(oldName))
+            {
+                if (!WriteBackupInfo(backup.Path, newName, backup.Kind, backup.Detail))
+                    failed.Add(Path.GetFileName(backup.Path));
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Copie automatiche di " + oldName + " non passate a " + newName, ex);
+            failed.Add(ex.Message);
+        }
+
+        return failed.Count == 0 ? "" : Loc.F(Strings.BackupsNotMoved, string.Join(", ", failed));
     }
 
     private static void MoveFolder(string source, string destination, bool caseOnly)

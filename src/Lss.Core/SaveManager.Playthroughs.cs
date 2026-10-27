@@ -264,9 +264,9 @@ public sealed partial class SaveManager
     /// <summary>
     /// Scrive accanto al backup a quale partita appartiene il contenuto e
     /// quale operazione l'ha creato. Non lancia eccezioni: senza il file il
-    /// backup resta valido, solo meno descritto.
+    /// backup resta valido, solo meno descritto. Ritorna false se non riesce a scrivere.
     /// </summary>
-    private static void WriteBackupInfo(string backup, string owner, string kind, string detail)
+    private static bool WriteBackupInfo(string backup, string owner, string kind, string detail)
     {
         try
         {
@@ -276,10 +276,13 @@ public sealed partial class SaveManager
                 new("Motivo", kind),
                 new("Dettaglio", detail)
             });
+
+            return true;
         }
         catch (Exception ex)
         {
             Log.Write("Informazioni del backup " + backup, ex);
+            return false;
         }
     }
 

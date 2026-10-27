@@ -31,6 +31,8 @@ Avvia il gioco almeno una volta.</value></data>
 I suoi punti salvati non sono stati spostati: {0}
 Sono ancora in:
 {1}</value></data>
+  <data name="BackupsNotMoved" xml:space="preserve"><value>
+Alcune copie automatiche (cronologia) non sono passate al nuovo nome: {0}</value></data>
   <data name="RenamedStateNotSaved" xml:space="preserve"><value>Partita rinominata, ma lo stato non è stato salvato: {0}</value></data>
   <data name="ProfileRenamed" xml:space="preserve"><value>Partita rinominata.</value></data>
   <data name="CannotDeleteActive" xml:space="preserve"><value>Non si può eliminare la partita che è nel gioco.

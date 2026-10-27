@@ -31,6 +31,8 @@ Start the game at least once.</value></data>
 Its saved points were not moved: {0}
 They are still in:
 {1}</value></data>
+  <data name="BackupsNotMoved" xml:space="preserve"><value>
+Some automatic copies (history) were not moved to the new name: {0}</value></data>
   <data name="RenamedStateNotSaved" xml:space="preserve"><value>Playthrough renamed, but the state was not saved: {0}</value></data>
   <data name="ProfileRenamed" xml:space="preserve"><value>Playthrough renamed.</value></data>
   <data name="CannotDeleteActive" xml:space="preserve"><value>The playthrough in the game can&apos;t be deleted.
