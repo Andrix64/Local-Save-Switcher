@@ -30,6 +30,7 @@
           <Button Classes="secondary" Content="{loc:Str ImportConfig}" Command="{Binding ImportConfigCommand}" />
           <Button Classes="secondary" Content="{loc:Str SettingsButton}"
                   Command="{Binding CurrentGame.SettingsCommand}" />
+          <views:ModeSwitch DataContext="{Binding Mode}" Margin="8,0,0,0" />
         </StackPanel>
       </Grid>
     </Border>

@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lss.App.ViewModels"
+             x:Class="Lss.App.Views.ModeSwitch"
+             x:DataType="vm:ModeSwitchViewModel">
+
+  <!-- Due pulsanti in una pastiglia: quello della modalità attuale è pieno, con l'accento. -->
+  <UserControl.Styles>
+    <Style Selector="Button.mode">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="17" />
+      <Setter Property="Padding" Value="16,0" />
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.mode:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource SurfaceHover}" />
+    </Style>
+    <Style Selector="Button.mode.current /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="Button.mode.current">
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+  </UserControl.Styles>
+
+  <Border CornerRadius="20" Background="{StaticResource Surface}" Padding="3" VerticalAlignment="Center">
+    <StackPanel Orientation="Horizontal" Spacing="2">
+      <Button Classes="mode" Classes.current="{Binding IsSimple}" Content="{Binding SimpleText}"
+              Command="{Binding ShowSimpleCommand}" ToolTip.Tip="{Binding SimpleTip}"
+              AutomationProperties.Name="{Binding SimpleTip}" />
+      <Button Classes="mode" Classes.current="{Binding IsAdvanced}" Content="{Binding AdvancedText}"
+              Command="{Binding ShowAdvancedCommand}" ToolTip.Tip="{Binding AdvancedTip}"
+              AutomationProperties.Name="{Binding AdvancedTip}" />
+    </StackPanel>
+  </Border>
+
+</UserControl>

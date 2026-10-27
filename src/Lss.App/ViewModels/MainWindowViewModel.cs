@@ -57,6 +57,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         isSimple = settings.Mode == AppSettings.SimpleMode;
 
+        Mode = new ModeSwitchViewModel(isSimple, SwitchToSimpleAsync, SwitchToAdvancedAsync, CanSwitchMode);
+
         if (people != null)
         {
             Simple = new SimpleViewModel(people, dialogs, Games,
@@ -65,11 +67,16 @@ public partial class MainWindowViewModel : ObservableObject
                 item => PlaySimpleAsync(item),
                 () => AddGameAsync())
             {
-                ToAdvanced = SwitchToAdvancedAsync,
+                Mode = Mode,
                 MyGames = OpenMyGamesAsync,
             };
 
             simpleFlow = new SimplePlayFlow(dialogs, people, () => Simple?.Unlocked ?? false);
+            Simple.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(SimpleViewModel.IsPlaying))
+                    Mode.Refresh();
+            };
         }
         SelectedGame = Games.FirstOrDefault(g => AppSettings.Refers(settings.LastGame, g.Info.Provider, g.Info.Id)) ?? Games.FirstOrDefault();
     }
@@ -118,19 +125,30 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>La vista semplice, o null se non ci sono persone.</summary>
     public SimpleViewModel? Simple { get; }
 
-    /// <summary>"Passa alla modalità semplice" dalle Impostazioni di un gioco.</summary>
+    /// <summary>L'interruttore Semplice | Avanzata, uguale nelle due intestazioni.</summary>
+    public ModeSwitchViewModel Mode { get; }
+
+    partial void OnIsSimpleChanged(bool value) => Mode.IsSimple = value;
+
+    /// <summary>Il cambio di modalità è spento mentre si gioca dalla modalità semplice e durante un'operazione.</summary>
+    private bool CanSwitchMode() => Simple is not { IsPlaying: true } && !IsAnyBusy;
+
+    /// <summary>"Semplice" dall'interruttore: non serve nessuna autorizzazione.</summary>
     private Task SwitchToSimpleAsync()
     {
+        if (Simple == null || !CanSwitchMode())
+            return Task.CompletedTask;
+
         SetMode(AppSettings.SimpleMode);
         IsSimple = true;
-        Simple?.Refresh();
+        Simple.Refresh();
         return Task.CompletedTask;
     }
 
-    /// <summary>"Modalità avanzata" dalla vista semplice: chiede un admin (il PIN se ce l'ha).</summary>
+    /// <summary>"Avanzata" dall'interruttore della vista semplice: chiede un admin (il PIN se ce l'ha).</summary>
     private async Task SwitchToAdvancedAsync()
     {
-        if (people == null)
+        if (people == null || !CanSwitchMode())
             return;
 
         Person? admin = await dialogs.ChooseAdminAsync(people, Simple?.Current, Simple?.Unlocked ?? false);
@@ -658,12 +676,17 @@ public partial class MainWindowViewModel : ObservableObject
             Settings = settings,
             ExportAll = ExportAllConfigsAsync,
             OpenPlayers = OpenPlayersAsync,
-            SwitchToSimple = SwitchToSimpleAsync,
         };
         created.Refresh();
 
         // Tornare alla cartella automatica cambia il gioco: la lista si rilegge (vedi ReloadGames).
         created.SaveFolderChanged += () => ReloadGames(SelectedGame?.Info.Key, item.Info.Key);
+
+        created.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(GameViewModel.IsBusy))
+                Mode.Refresh();
+        };
 
         gameModels[item.Info.Key] = created;
         return created;

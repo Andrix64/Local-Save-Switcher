@@ -160,15 +160,8 @@ public sealed partial class SimpleViewModel : ObservableObject
         OnPropertyChanged(nameof(CurrentTile));
     }
 
-    /// <summary>"⚙": si passa alla modalità avanzata (chi autorizza lo decide il MainWindowViewModel).</summary>
-    public Func<Task>? ToAdvanced { get; set; }
-
-    [RelayCommand]
-    private async Task ToAdvancedAsync()
-    {
-        if (ToAdvanced != null)
-            await ToAdvanced();
-    }
+    /// <summary>L'interruttore Semplice | Avanzata dell'intestazione (lo possiede il MainWindowViewModel).</summary>
+    public ModeSwitchViewModel? Mode { get; set; }
 
     [RelayCommand]
     private Task SelectPlayerTile(PersonTile tile) => SelectPlayerAsync(tile.Person);

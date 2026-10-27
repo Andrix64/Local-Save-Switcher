@@ -3,6 +3,7 @@
              xmlns:loc="using:Lss.App.Localization"
              xmlns:vm="using:Lss.App.ViewModels"
              xmlns:ctl="using:Lss.App.Controls"
+             xmlns:views="using:Lss.App.Views"
              x:Class="Lss.App.Views.SimpleView"
              x:DataType="vm:SimpleViewModel">
 
@@ -80,19 +81,8 @@
           </Border>
         </Button>
 
-        <!-- ⚙: modalità avanzata (chiede un admin) -->
-        <Button Grid.Column="1" Classes="gear" Command="{Binding ToAdvancedCommand}"
-                ToolTip.Tip="{loc:Str SwitchToAdvanced}" AutomationProperties.Name="{loc:Str SwitchToAdvanced}">
-          <Viewbox Width="24" Height="24">
-            <Canvas Width="24" Height="24">
-              <Ellipse Canvas.Left="9" Canvas.Top="9" Width="6" Height="6"
-                       Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1.8" />
-              <Path Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1.8" StrokeLineCap="Round"
-                    StrokeJoin="Round"
-                    Data="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
-            </Canvas>
-          </Viewbox>
-        </Button>
+        <!-- Interruttore Semplice | Avanzata -->
+        <views:ModeSwitch Grid.Column="1" DataContext="{Binding Mode}" VerticalAlignment="Center" />
       </Grid>
     </Border>
 
