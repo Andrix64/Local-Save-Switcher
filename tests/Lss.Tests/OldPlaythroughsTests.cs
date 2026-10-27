@@ -14,7 +14,7 @@ public sealed class OldPlaythroughsTests : IDisposable
     private SaveManager ManagerWithTwoPlayers()
     {
         SaveManager manager = folder.CreateManager("A1");
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={TestFolder.Owner},{Second}\n" +
             $"{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n" +
             $"{Second}.Nome=Clara\n{Second}.Ruolo=utente\n");
@@ -98,7 +98,7 @@ public sealed class OldPlaythroughsTests : IDisposable
         Snapshot deleted = Assert.Single(manager.GetDeletedProfiles());
 
         // Clara non esiste più: la partita va al primo amministratore, come le partite vecchie.
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={TestFolder.Owner}\n{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n");
         var people = new People(folder.Data);
         people.Load();

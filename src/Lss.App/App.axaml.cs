@@ -63,6 +63,7 @@ public partial class App : Application
 
         // Cartelle degli account sotto steam\ (dalle beta): prima di leggere i dati.
         V1Compat.MoveBetaLayout(AppData.Root); // V1Compat: cartelle dati della 1.0 e delle beta
+        V1Compat.ConvertAppFiles(AppData.Root); // V1Compat: impostazioni .ini della 1.0 in JSON
 
         Log.Write("Avvio versione " + Program.Version);
 
@@ -92,10 +93,10 @@ public partial class App : Application
         // Prima di cercare gli account: una cartella rimasta come 870780.vecchio le farebbe sparire.
         SaveManager.RecoverAllGameFolders(userData);
 
-        var settings = new AppSettings(Path.Combine(AppData.Root, "lss.ini"));
+        var settings = new AppSettings(AppSettings.FileIn(AppData.Root));
         settings.Load();
 
-        // Primo avvio (non c'era lss.ini): semplice o avanzata. Chi ha già lss.ini resta com'è.
+        // Primo avvio (non c'era lss.json, nemmeno da convertire): semplice o avanzata.
         if (settings.FirstStart)
         {
             var modeWindow = new ModeChoiceWindow();

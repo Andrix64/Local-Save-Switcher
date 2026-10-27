@@ -4,7 +4,7 @@ namespace Lss.Tests;
 
 /// <summary>
 /// Impostazioni di LSS: il pulsante "Esporta tutte" chiama la funzione data dalla finestra principale
-/// (che sa di tutti i giochi); cercare dopo aver giocato si salva in lss.ini.
+/// (che sa di tutti i giochi); cercare dopo aver giocato si salva in lss.json.
 /// </summary>
 public sealed class LssSettingsViewModelTests : IDisposable
 {
@@ -19,7 +19,7 @@ public sealed class LssSettingsViewModelTests : IDisposable
     public async Task ExportAllRunsTheExporter()
     {
         bool exported = false;
-        var vm = new LssSettingsViewModel(new AppSettings(Path.Combine(folder.Root, "lss.ini")), dialogs, () =>
+        var vm = new LssSettingsViewModel(new AppSettings(Path.Combine(folder.Root, "lss.json")), dialogs, () =>
         {
             exported = true;
             return Task.CompletedTask;
@@ -34,7 +34,7 @@ public sealed class LssSettingsViewModelTests : IDisposable
     public async Task PlayersOpensTheWindowOfPlayers()
     {
         bool opened = false;
-        var vm = new LssSettingsViewModel(new AppSettings(Path.Combine(folder.Root, "lss.ini")), dialogs,
+        var vm = new LssSettingsViewModel(new AppSettings(Path.Combine(folder.Root, "lss.json")), dialogs,
             openPlayers: () =>
             {
                 opened = true;
@@ -49,7 +49,7 @@ public sealed class LssSettingsViewModelTests : IDisposable
     [Fact]
     public async Task LookAfterPlayingIsOnByDefaultAndSavedInLssIni()
     {
-        string ini = Path.Combine(folder.Root, "lss.ini");
+        string ini = Path.Combine(folder.Root, "lss.json");
         var settings = new AppSettings(ini);
         var vm = new LssSettingsViewModel(settings, dialogs);
         Assert.True(vm.LookAfterPlaying);

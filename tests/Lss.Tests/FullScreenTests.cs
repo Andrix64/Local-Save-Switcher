@@ -120,13 +120,13 @@ public sealed class FullScreenTests : IDisposable
     [Fact]
     public void FullScreenIsSavedAndReadBack()
     {
-        var written = new AppSettings(Path.Combine(folder.Root, "lss.ini")) { Mode = AppSettings.SimpleMode, FullScreen = true };
+        var written = new AppSettings(Path.Combine(folder.Root, "lss.json")) { Mode = AppSettings.SimpleMode, FullScreen = true };
         written.Save();
 
-        var read = new AppSettings(Path.Combine(folder.Root, "lss.ini"));
+        var read = new AppSettings(Path.Combine(folder.Root, "lss.json"));
         read.Load();
 
         Assert.True(read.FullScreen);
-        Assert.False(new AppSettings(Path.Combine(folder.Root, "nuovo.ini")).FullScreen);
+        Assert.False(new AppSettings(Path.Combine(folder.Root, "nuovo.json")).FullScreen);
     }
 }

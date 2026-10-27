@@ -82,7 +82,7 @@ public sealed record GameInfo(
     /// <summary>true se il gioco è installato in una libreria trovata.</summary>
     public bool IsInstalled => InstallDir != "" && LibraryPath != "";
 
-    /// <summary>Chiave salvata in lss.ini: provider/id.</summary>
+    /// <summary>Chiave salvata in lss.json: provider/id.</summary>
     public string Key => Provider + "/" + Id;
 
     /// <summary>Cartella del primo posto, o "" se il gioco non ne ha.</summary>

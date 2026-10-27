@@ -3,7 +3,7 @@ namespace Lss.Tests;
 /// <summary>
 /// I nomi dei file della 1.0 non devono comparire fuori da V1Compat.cs e
 /// LegacyMigration.cs: così il codice nuovo non rimette in giro i vecchi formati.
-/// Le eccezioni di oggi sono elencate una per una e le toglie la fase R (R9, R10).
+/// Le eccezioni di oggi sono elencate una per una e le toglie la fase R (R10).
 /// </summary>
 public sealed class V1CompatBoundaryTests
 {
@@ -19,11 +19,8 @@ public sealed class V1CompatBoundaryTests
     // Eccezioni di oggi: file -> nomi. Ogni riga dice quale task la toglie.
     private static readonly Dictionary<string, string[]> Exceptions = new()
     {
-        ["App.axaml.cs"] = ["lss.ini"], // fino a R9
-        ["SaveManager.cs"] = ["lss.ini", "stato.ini"], // fino a R9 (lss.ini) e R10 (stato.ini)
-        ["People.cs"] = ["persone.ini"], // fino a R9
-        ["IgnoredFolders.cs"] = ["cartelle-ignorate.ini", "posti.ini"], // fino a R9 (cartelle-ignorate.ini) e R10 (posti.ini)
-        ["ManualGames.cs"] = ["gioco.ini"], // fino a R9
+        ["SaveManager.cs"] = ["stato.ini"], // fino a R10
+        ["IgnoredFolders.cs"] = ["posti.ini"], // fino a R10
         ["MainWindowViewModel.cs"] = ["stato.ini"], // fino a R10
         ["GameSpots.cs"] = ["posti.ini"], // fino a R10
         ["SaveManager.Favourites.cs"] = ["preferite.ini"], // fino a R10

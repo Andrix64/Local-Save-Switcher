@@ -1,23 +1,40 @@
+using System.Text.Json.Serialization;
+
 namespace Lss;
 
+/// <summary>Come lss.json è scritto: nomi corti in italiano.</summary>
+internal sealed class AppSettingsFile
+{
+    [JsonPropertyName("UltimoAccount")]
+    public string LastAccount { get; set; } = "";
+
+    [JsonPropertyName("UltimoGioco")]
+    public string LastGame { get; set; } = "";
+
+    [JsonPropertyName("CercaDopoPartita")]
+    public bool LookAfterPlaying { get; set; } = true;
+
+    [JsonPropertyName("Modalita")]
+    public string Mode { get; set; } = AppSettings.AdvancedMode;
+
+    [JsonPropertyName("SchermoIntero")]
+    public bool FullScreen { get; set; }
+}
+
 /// <summary>
-/// Impostazioni generali dell'app in lss.ini nella cartella dei dati:
-/// ultimo account e ultimo gioco usati. Non lancia eccezioni: sono solo
+/// Impostazioni generali dell'app in lss.json nella cartella dei dati:
+/// ultimo account e ultimo gioco usati, modalità, schermo intero. Non lancia eccezioni: sono solo
 /// comodità.
 /// </summary>
 internal sealed class AppSettings
 {
-    private const string AccountKey = "UltimoAccount";
-    private const string GameKey = "UltimoGioco";
-    private const string LookKey = "CercaDopoPartita";
-    private const string ModeKey = "Modalita";
-    private const string FullScreenKey = "SchermoIntero";
-
     /// <summary>Modalità semplice (chi gioca sceglie il gioco).</summary>
     public const string SimpleMode = "semplice";
 
     /// <summary>Modalità avanzata (tutto).</summary>
     public const string AdvancedMode = "avanzata";
+
+    private const string FileName = "lss.json";
 
     private readonly string path;
 
@@ -30,11 +47,11 @@ internal sealed class AppSettings
     /// <summary>Schermo intero nella modalità semplice (SchermoIntero): LSS riparte così. Mai nell'avanzata.</summary>
     public bool FullScreen { get; set; }
 
-    /// <summary>Modalita: <see cref="SimpleMode"/> o <see cref="AdvancedMode"/>. Senza chiave è avanzata.</summary>
+    /// <summary>Modalita: <see cref="SimpleMode"/> o <see cref="AdvancedMode"/>. Senza il valore è avanzata.</summary>
     public string Mode { get; set; } = AdvancedMode;
 
     /// <summary>
-    /// true se lss.ini non c'era: alla prima partenza si chiede la modalità.
+    /// true se lss.json non c'era (dopo la conversione dei file vecchi): alla prima partenza si chiede la modalità.
     /// </summary>
     public bool FirstStart { get; private set; }
 
@@ -42,6 +59,9 @@ internal sealed class AppSettings
     {
         this.path = path;
     }
+
+    /// <summary>Il file delle impostazioni nella cartella dei dati.</summary>
+    public static string FileIn(string dataRoot) => Path.Combine(dataRoot, FileName);
 
     /// <summary>
     /// true se il valore salvato (provider/id) è quell'account o quel gioco.
@@ -51,7 +71,7 @@ internal sealed class AppSettings
         || V1Compat.IsSteamIdWithoutProvider(stored, provider, id); // V1Compat: valori di prima della K5, senza launcher
 
     /// <summary>
-    /// Legge lss.ini. Se manca o non si legge, i valori restano vuoti.
+    /// Legge lss.json. Se manca o non si legge, i valori restano quelli di partenza.
     /// </summary>
     public void Load()
     {
@@ -59,13 +79,14 @@ internal sealed class AppSettings
 
         try
         {
-            Dictionary<string, string> values = IniFile.Read(path);
+            if (JsonFile.Read<AppSettingsFile>(path) is not { } file)
+                return;
 
-            LastAccount = values.GetValueOrDefault(AccountKey, "");
-            LastGame = values.GetValueOrDefault(GameKey, "");
-            LookAfterPlaying = values.GetValueOrDefault(LookKey, "1") != "0";
-            Mode = values.GetValueOrDefault(ModeKey, AdvancedMode) == SimpleMode ? SimpleMode : AdvancedMode;
-            FullScreen = values.GetValueOrDefault(FullScreenKey, "0") == "1";
+            LastAccount = file.LastAccount ?? "";
+            LastGame = file.LastGame ?? "";
+            LookAfterPlaying = file.LookAfterPlaying;
+            Mode = file.Mode == SimpleMode ? SimpleMode : AdvancedMode;
+            FullScreen = file.FullScreen;
         }
         catch (Exception ex)
         {
@@ -74,20 +95,20 @@ internal sealed class AppSettings
     }
 
     /// <summary>
-    /// Scrive lss.ini. Un errore viene solo registrato.
+    /// Scrive lss.json. Un errore viene solo registrato.
     /// </summary>
     public void Save()
     {
         try
         {
-            IniFile.Write(path,
-            [
-                new(AccountKey, LastAccount),
-                new(GameKey, LastGame),
-                new(LookKey, LookAfterPlaying ? "1" : "0"),
-                new(ModeKey, Mode),
-                new(FullScreenKey, FullScreen ? "1" : "0")
-            ]);
+            JsonFile.Write(path, new AppSettingsFile
+            {
+                LastAccount = LastAccount,
+                LastGame = LastGame,
+                LookAfterPlaying = LookAfterPlaying,
+                Mode = Mode,
+                FullScreen = FullScreen,
+            });
         }
         catch (Exception ex)
         {

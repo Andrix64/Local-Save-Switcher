@@ -18,7 +18,7 @@ public sealed class PlayersViewModelTests : IDisposable
 
     private People People()
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Admin},{User}\n" +
             $"{Admin}.Nome=Andrea\n{Admin}.Ruolo=admin\n" +
             $"{User}.Nome=Clara\n{User}.Ruolo=utente\n");

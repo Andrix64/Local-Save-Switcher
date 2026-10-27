@@ -20,7 +20,7 @@ public sealed class SimpleViewModelTests : IDisposable
     private (SaveManager Manager, People People) ManagerWithTwoPlayers(string dataFolder)
     {
         SaveManager manager = new SaveManager(folder.Game, dataFolder, "", null, new FakeProvider());
-        TestFolder.Write(Path.Combine(dataFolder, "persone.ini"),
+        TestFolder.WritePeople(dataFolder,
             $"Ordine={TestFolder.Owner},{Second}\n" +
             $"{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n" +
             $"{Second}.Nome=Clara\n{Second}.Ruolo=utente\n");
@@ -164,7 +164,7 @@ public sealed class SimpleViewModelTests : IDisposable
     {
         // Il gioco è aperto: la piastrella è disattivata e un clic non fa niente.
         SaveManager manager = new(folder.Game, folder.Data, "", null, new FakeProvider { Running = true });
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={TestFolder.Owner}\n{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n");
         var people = new People(folder.Data);
         people.Load();

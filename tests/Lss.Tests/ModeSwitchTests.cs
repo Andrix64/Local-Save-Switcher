@@ -30,7 +30,7 @@ public sealed class ModeSwitchTests : IDisposable
 
     private People People(bool adminHasPin = false)
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Admin},{User}\n" +
             $"{Admin}.Nome=Andrea\n{Admin}.Ruolo=admin\n" +
             $"{User}.Nome=Clara\n{User}.Ruolo=utente\n");
@@ -46,7 +46,7 @@ public sealed class ModeSwitchTests : IDisposable
 
     private (MainWindowViewModel Model, AppSettings Settings) Create(string mode, People people)
     {
-        var settings = new AppSettings(Path.Combine(folder.Root, "lss.ini")) { Mode = mode };
+        var settings = new AppSettings(Path.Combine(folder.Root, "lss.json")) { Mode = mode };
         var provider = new FakeProvider { Id = "steam", DisplayName = "Steam" };
         var account = new GameAccount("steam", "111", "Anna", folder.Root, null);
         var game = new GameInfo("steam", "1", "Uno", "", "", "",

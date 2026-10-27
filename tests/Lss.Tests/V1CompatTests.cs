@@ -173,4 +173,158 @@ public sealed class V1CompatTests : IDisposable
         Snapshot orphan = Assert.Single(V1Compat.BackupsWithoutOwner(manager));
         Assert.Equal("Prima_salvataggio", orphan.Name);
     }
+
+    // Da .ini a .json (R9)
+
+    [Fact]
+    public void EveryAppFileIsConvertedAndTheIniKept()
+    {
+        TestFolder.Write(Path.Combine(Root, "lss.ini"),
+            "UltimoAccount=steam/111\nUltimoGioco=steam/870780\nCercaDopoPartita=0\nModalita=semplice\nSchermoIntero=1\n");
+        TestFolder.Write(Path.Combine(Root, "persone.ini"),
+            "Ordine=bbbbbbbb,aaaaaaaa\n" +
+            "aaaaaaaa.Nome=Andrea\naaaaaaaa.Colore=#C2410C\naaaaaaaa.Ruolo=admin\naaaaaaaa.Pin=c2FsdA==:aGFzaA==\n" +
+            "bbbbbbbb.Nome=Clara\nbbbbbbbb.Colore=#1D6FD0\nbbbbbbbb.Ruolo=utente\n");
+        TestFolder.Write(Path.Combine(Root, "cartelle-ignorate.ini"),
+            "Cartella.0={WinAppDataLocal}/Discord\nAggiunta.0=2026-10-25T10:00:00.0000000\nCartella.1={WinUserProfile}/Altro\n");
+        TestFolder.Write(Path.Combine(ManualGames.AccountFolder(Root), "abcd1234", "gioco.ini"),
+            "Nome=Il mio gioco\nEseguibile=C:\\Giochi\\gioco.exe\nArgomenti=-w\nPrefisso=\n");
+
+        V1Compat.ConvertAppFiles(Root);
+
+        var settings = new AppSettings(Path.Combine(Root, "lss.json"));
+        settings.Load();
+        Assert.False(settings.FirstStart);
+        Assert.Equal("steam/111", settings.LastAccount);
+        Assert.Equal("steam/870780", settings.LastGame);
+        Assert.False(settings.LookAfterPlaying);
+        Assert.Equal(AppSettings.SimpleMode, settings.Mode);
+        Assert.True(settings.FullScreen);
+
+        var people = new People(Root);
+        people.Load();
+        Assert.Equal(new[] { "Clara", "Andrea" }, people.All.Select(person => person.Name));
+        Assert.True(people.Find("aaaaaaaa")!.IsAdmin);
+
+        var ignored = new IgnoredFolders(Root);
+        ignored.Load();
+        Assert.Equal(["{WinAppDataLocal}/Discord", "{WinUserProfile}/Altro"], ignored.Global.Select(entry => entry.PortablePath));
+        Assert.Equal(new DateTime(2026, 10, 25, 10, 0, 0), ignored.Global[0].Added);
+
+        (string id, ManualGame game) = Assert.Single(ManualGames.ReadAll(Root));
+        Assert.Equal("abcd1234", id);
+        Assert.Equal("Il mio gioco", game.Name);
+        Assert.Equal(@"C:\Giochi\gioco.exe", game.Exe);
+        Assert.Equal("-w", game.Arguments);
+
+        foreach (string ini in new[] { "lss.ini", "persone.ini", "cartelle-ignorate.ini" })
+        {
+            Assert.False(File.Exists(Path.Combine(Root, ini)));
+            Assert.True(File.Exists(Path.Combine(Root, ini + ".precedente")));
+        }
+
+        Assert.True(File.Exists(Path.Combine(ManualGames.AccountFolder(Root), "abcd1234", "gioco.ini.precedente")));
+    }
+
+    [Fact]
+    public void ThePinOfAUserSurvivesTheConversion()
+    {
+        TestFolder.Write(Path.Combine(Root, "persone.ini"),
+            "Ordine=aaaaaaaa,bbbbbbbb\naaaaaaaa.Nome=Andrea\naaaaaaaa.Ruolo=admin\n" +
+            "bbbbbbbb.Nome=Clara\nbbbbbbbb.Ruolo=utente\nbbbbbbbb.Pin=c2FsdHNhbHRzYWx0c2FsdA==:aGFzaGhhc2hoYXNoaGFzaGhhc2hoYXNoaGFzaGhhc2g=\n");
+
+        V1Compat.ConvertAppFiles(Root);
+
+        var people = new People(Root);
+        people.Load();
+        Assert.True(people.Find("bbbbbbbb")!.HasPin);
+    }
+
+    [Fact]
+    public void ConvertingTwiceChangesNothing()
+    {
+        TestFolder.Write(Path.Combine(Root, "lss.ini"), "UltimoAccount=steam/111\n");
+        V1Compat.ConvertAppFiles(Root);
+        string json = File.ReadAllText(Path.Combine(Root, "lss.json"));
+        string[] files = Directory.GetFiles(Root);
+
+        V1Compat.ConvertAppFiles(Root);
+
+        Assert.Equal(json, File.ReadAllText(Path.Combine(Root, "lss.json")));
+        Assert.Equal(files, Directory.GetFiles(Root));
+    }
+
+    [Fact]
+    public void WhenBothExistTheJsonWinsAndTheIniIsSetAside()
+    {
+        TestFolder.Write(Path.Combine(Root, "lss.ini"), "UltimoAccount=steam/vecchio\n");
+        TestFolder.Write(Path.Combine(Root, "lss.json"), "{\"UltimoAccount\":\"steam/nuovo\"}");
+
+        V1Compat.ConvertAppFiles(Root);
+
+        var settings = new AppSettings(Path.Combine(Root, "lss.json"));
+        settings.Load();
+        Assert.Equal("steam/nuovo", settings.LastAccount);
+        Assert.False(File.Exists(Path.Combine(Root, "lss.ini")));
+        Assert.Equal("UltimoAccount=steam/vecchio\n", File.ReadAllText(Path.Combine(Root, "lss.ini.precedente")));
+    }
+
+    [Fact]
+    public void AnInterruptedConversionIsFinishedAtTheNextStart()
+    {
+        // Il .json è stato scritto ma il .ini non è stato ancora messo da parte.
+        TestFolder.Write(Path.Combine(Root, "lss.ini"), "UltimoAccount=steam/111\n");
+        TestFolder.Write(Path.Combine(Root, "lss.json"), "{\"UltimoAccount\":\"steam/111\"}");
+
+        V1Compat.ConvertAppFiles(Root);
+
+        Assert.False(File.Exists(Path.Combine(Root, "lss.ini")));
+        Assert.True(File.Exists(Path.Combine(Root, "lss.ini.precedente")));
+    }
+
+    [Fact]
+    public void AnEmptyIniIsNotConvertedAndStaysWhereItIs()
+    {
+        TestFolder.Write(Path.Combine(Root, "persone.ini"), "questo non è un file di persone");
+
+        V1Compat.ConvertAppFiles(Root);
+
+        Assert.True(File.Exists(Path.Combine(Root, "persone.ini")));
+        Assert.False(File.Exists(Path.Combine(Root, "persone.json")));
+    }
+
+    [Fact]
+    public void AnOldIniPrecedenteIsNeverOverwritten()
+    {
+        TestFolder.Write(Path.Combine(Root, "lss.ini.precedente"), "prima");
+        TestFolder.Write(Path.Combine(Root, "lss.ini"), "UltimoAccount=steam/111\n");
+
+        V1Compat.ConvertAppFiles(Root);
+
+        Assert.Equal("prima", File.ReadAllText(Path.Combine(Root, "lss.ini.precedente")));
+        Assert.Equal("UltimoAccount=steam/111\n", File.ReadAllText(Path.Combine(Root, "lss.ini.precedente.2")));
+    }
+
+    [Fact]
+    public void WithoutAnyFileTheFirstStartIsStillAFirstStart()
+    {
+        V1Compat.ConvertAppFiles(Root);
+
+        var settings = new AppSettings(Path.Combine(Root, "lss.json"));
+        settings.Load();
+        Assert.True(settings.FirstStart);
+    }
+
+    [Fact]
+    public void BrokenJsonGivesDefaultsAndRotto()
+    {
+        TestFolder.Write(Path.Combine(Root, "lss.json"), "{ rotto");
+
+        var settings = new AppSettings(Path.Combine(Root, "lss.json"));
+        settings.Load();
+
+        Assert.Equal("", settings.LastAccount);
+        Assert.True(settings.LookAfterPlaying);
+        Assert.True(File.Exists(Path.Combine(Root, "lss.json.rotto")));
+    }
 }

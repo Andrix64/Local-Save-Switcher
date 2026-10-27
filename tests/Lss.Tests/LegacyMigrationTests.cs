@@ -114,7 +114,7 @@ public sealed class LegacyMigrationTests : IDisposable
         Assert.Equal("backup", File.ReadAllText(Path.Combine(Lss, "111", "870780", "Backup", "x", "a")));
         Assert.True(File.Exists(Path.Combine(Lss, "111", "870780", "stato.ini")));
         Assert.Equal("registro", File.ReadAllText(Path.Combine(Lss, "log.txt")));
-        var settings = new AppSettings(Path.Combine(Lss, "lss.ini"));
+        var settings = new AppSettings(Path.Combine(Lss, "lss.json"));
         settings.Load();
         Assert.Equal("111", settings.LastAccount);
         Assert.False(File.Exists(Path.Combine(Lss, "account.txt")));

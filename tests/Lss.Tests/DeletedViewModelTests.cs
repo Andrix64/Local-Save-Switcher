@@ -79,7 +79,7 @@ public sealed class DeletedViewModelTests : IDisposable
         Assert.Equal("Test", model.Items.Single().OwnerText);
 
         // Il giocatore non esiste più: la riga dice "—".
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Second}\n{Second}.Nome=Clara\n{Second}.Ruolo=admin\n");
         var people = new People(folder.Data);
         people.Load();

@@ -16,7 +16,7 @@ public sealed class AdminPickerViewModelTests : IDisposable
     /// <summary>Persone: Andrea (admin, colore arancio) e Clara (utente).</summary>
     private People People()
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Admin},{User}\n" +
             $"{Admin}.Nome=Andrea\n{Admin}.Colore=#C2410C\n{Admin}.Ruolo=admin\n" +
             $"{User}.Nome=Clara\n{User}.Colore=#1D6FD0\n{User}.Ruolo=utente\n");

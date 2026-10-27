@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Lss;
 
 /// <summary>
@@ -235,4 +237,152 @@ internal static class V1Compat
 
         return true;
     }
+    // DA .INI A .JSON (R9, R10)
+
+    private const string PreviousSuffix = ".precedente";
+
+    /// <summary>
+    /// Dati della 1.0: i file .ini delle impostazioni di tutta l'app diventano .json, nella stessa cartella e con
+    /// lo stesso nome (lss, persone, cartelle-ignorate, e gioco di ogni gioco aggiunto a mano). Gira a ogni avvio,
+    /// dopo LegacyMigration e prima di leggere le impostazioni.
+    /// </summary>
+    public static void ConvertAppFiles(string root)
+    {
+        ConvertIniFile(Path.Combine(root, "lss.ini"), Path.Combine(root, "lss.json"), AppSettingsFromIni);
+        ConvertIniFile(Path.Combine(root, "persone.ini"), Path.Combine(root, "persone.json"), PeopleFromIni);
+        ConvertIniFile(Path.Combine(root, "cartelle-ignorate.ini"), Path.Combine(root, "cartelle-ignorate.json"), IgnoredFromIni);
+
+        string manual = ManualGames.AccountFolder(root);
+
+        if (!Directory.Exists(manual))
+            return;
+
+        foreach (string dir in Directory.GetDirectories(manual))
+            ConvertIniFile(Path.Combine(dir, "gioco.ini"), Path.Combine(dir, "gioco.json"), ManualGameFromIni);
+    }
+
+    /// <summary>
+    /// Converte un .ini in .json. Se il .json c'è già vince lui (il .ini, se c'è ancora, si mette da parte).
+    /// Solo il .ini: si legge, si scrive il .json (file temporaneo e spostamento) e solo dopo il .ini diventa
+    /// &lt;nome&gt;.ini.precedente, mai eliminato. Un arresto in mezzo lascia usabile il .ini o il .json: il
+    /// prossimo avvio finisce il lavoro. Un .ini vuoto o illeggibile non si converte. true se ha convertito.
+    /// </summary>
+    internal static bool ConvertIniFile<T>(string iniPath, string jsonPath, Func<Dictionary<string, string>, T?> convert)
+        where T : class
+    {
+        if (File.Exists(jsonPath))
+        {
+            SetAside(iniPath);
+            return false;
+        }
+
+        if (!File.Exists(iniPath))
+            return false;
+
+        try
+        {
+            Dictionary<string, string> values = IniFile.Read(iniPath);
+
+            if (values.Count == 0 || convert(values) is not { } converted)
+            {
+                Log.Write("File .ini vuoto o illeggibile, non convertito: " + iniPath);
+                return false;
+            }
+
+            JsonFile.Write(jsonPath, converted);
+            SetAside(iniPath);
+            Log.Write("File .ini convertito in JSON: " + iniPath + " → " + jsonPath);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Conversione di " + iniPath, ex);
+            return false;
+        }
+    }
+
+    // Il .ini diventa <nome>.ini.precedente (con un numero se ce n'è già uno): non si elimina mai.
+    private static void SetAside(string iniPath)
+    {
+        if (!File.Exists(iniPath))
+            return;
+
+        try
+        {
+            string target = iniPath + PreviousSuffix;
+
+            for (int n = 2; File.Exists(target); n++)
+                target = iniPath + PreviousSuffix + "." + n.ToString(CultureInfo.InvariantCulture);
+
+            File.Move(iniPath, target);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Write("File .ini non messo da parte: " + iniPath, ex);
+        }
+    }
+
+    private static AppSettingsFile AppSettingsFromIni(Dictionary<string, string> values) => new()
+    {
+        LastAccount = values.GetValueOrDefault("UltimoAccount", ""),
+        LastGame = values.GetValueOrDefault("UltimoGioco", ""),
+        LookAfterPlaying = values.GetValueOrDefault("CercaDopoPartita", "1") != "0",
+        Mode = values.GetValueOrDefault("Modalita", AppSettings.AdvancedMode),
+        FullScreen = values.GetValueOrDefault("SchermoIntero", "0") == "1",
+    };
+
+    // Le persone nell'ordine di "Ordine"; PIN, colore e ruolo come sono (i controlli li fa People.Load).
+    private static PeopleFile PeopleFromIni(Dictionary<string, string> values)
+    {
+        var file = new PeopleFile();
+        string[] order = values.TryGetValue("Ordine", out string? ordine)
+            ? ordine.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            : [];
+
+        foreach (string id in order)
+        {
+            if (!values.TryGetValue(id + ".Nome", out string? name) || file.People.Any(person => person.Id == id))
+                continue;
+
+            file.People.Add(new PersonEntry
+            {
+                Id = id,
+                Name = name,
+                Color = values.GetValueOrDefault(id + ".Colore", ""),
+                Role = values.GetValueOrDefault(id + ".Ruolo", "utente"),
+                Pin = values.GetValueOrDefault(id + ".Pin", ""),
+            });
+        }
+
+        return file;
+    }
+
+    private static IgnoredFile IgnoredFromIni(Dictionary<string, string> values)
+    {
+        var file = new IgnoredFile();
+
+        for (int n = 0; values.TryGetValue("Cartella." + n, out string? folder); n++)
+        {
+            file.Folders.Add(new IgnoredEntry
+            {
+                Folder = folder,
+                Added = values.GetValueOrDefault("Aggiunta." + n, ""),
+            });
+        }
+
+        return file;
+    }
+
+    private static ManualGameFile? ManualGameFromIni(Dictionary<string, string> values) =>
+        values.TryGetValue("Nome", out string? name)
+            ? new ManualGameFile
+            {
+                Name = name,
+                Exe = values.GetValueOrDefault("Eseguibile", ""),
+                Arguments = values.GetValueOrDefault("Argomenti", ""),
+                Prefix = values.GetValueOrDefault("Prefisso", ""),
+            }
+            : null;
+
 }

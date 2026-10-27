@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace Lss;
 
@@ -9,17 +10,34 @@ namespace Lss;
 /// <param name="Added">Quando è stata segnata.</param>
 public sealed record IgnoredFolder(string Folder, string PortablePath, string GameKey, DateTime Added);
 
+/// <summary>Una cartella ignorata come è scritta in cartelle-ignorate.json.</summary>
+internal sealed class IgnoredEntry
+{
+    [JsonPropertyName("Cartella")]
+    public string Folder { get; set; } = "";
+
+    /// <summary>Quando è stata segnata, in formato "O"; vuoto se non si sa.</summary>
+    [JsonPropertyName("Aggiunta")]
+    public string Added { get; set; } = "";
+}
+
+/// <summary>Come cartelle-ignorate.json è scritto.</summary>
+internal sealed class IgnoredFile
+{
+    [JsonPropertyName("Cartelle")]
+    public List<IgnoredEntry> Folders { get; set; } = [];
+}
+
 /// <summary>
 /// Cartelle che la ricerca non propone mai più: per tutti i giochi
-/// (cartelle-ignorate.ini nella cartella dei dati, chiavi Cartella.n e Aggiunta.n)
+/// (cartelle-ignorate.json nella cartella dei dati)
 /// o per un gioco solo (posti.ini del gioco, chiavi Ignorate.n e Aggiunta.n).
 /// Non lancia eccezioni: un file illeggibile vale come nessuna cartella.
 /// </summary>
 internal sealed class IgnoredFolders
 {
-    private const string FileName = "cartelle-ignorate.ini";
+    private const string FileName = "cartelle-ignorate.json";
     private const string GameFileName = "posti.ini";
-    private const string GlobalKey = "Cartella";
     private const string GameKey = "Ignorate";
     private const string AddedKey = "Aggiunta";
 
@@ -34,11 +52,11 @@ internal sealed class IgnoredFolders
     /// <summary>Cartelle ignorate per tutti i giochi, come sono nel file (dopo Load).</summary>
     public IReadOnlyList<IgnoredFolder> Global => global;
 
-    /// <summary>Legge cartelle-ignorate.ini.</summary>
+    /// <summary>Legge cartelle-ignorate.json.</summary>
     public void Load()
     {
         global.Clear();
-        global.AddRange(Read(file, "", GlobalKey));
+        global.AddRange(ReadGlobal());
     }
 
     /// <summary>Cartelle ignorate per un gioco solo, dalla sua cartella dei dati.</summary>
@@ -57,7 +75,7 @@ internal sealed class IgnoredFolders
             return;
 
         global.Add(new IgnoredFolder(portablePath, portablePath, "", DateTime.Now));
-        Write(file, GlobalKey, global);
+        WriteGlobal();
     }
 
     /// <summary>Segna una cartella per un gioco solo, nella sua cartella dei dati.</summary>
@@ -79,7 +97,7 @@ internal sealed class IgnoredFolders
     {
         Load();
         global.RemoveAll(entry => string.Equals(entry.PortablePath, portablePath, StringComparison.OrdinalIgnoreCase));
-        Write(file, GlobalKey, global);
+        WriteGlobal();
     }
 
     /// <summary>Toglie una cartella da quelle di un gioco solo.</summary>
@@ -132,6 +150,58 @@ internal sealed class IgnoredFolders
     /// le cartelle ignorate del gioco, così non si perdono le voci vecchie.
     /// </summary>
     private static void ConvertOldFile(string gameDataFolder) => new GameSpots(gameDataFolder).Load();
+
+    /// <summary>Le voci di cartelle-ignorate.json con le loro date.</summary>
+    private List<IgnoredFolder> ReadGlobal()
+    {
+        var entries = new List<IgnoredFolder>();
+
+        foreach (IgnoredEntry entry in JsonFile.Read<IgnoredFile>(file)?.Folders ?? [])
+        {
+            if ((entry.Folder ?? "") == "")
+                continue;
+
+            DateTime added = DateTime.MinValue;
+
+            if (entry.Added != null)
+                DateTime.TryParse(entry.Added, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out added);
+
+            entries.Add(new IgnoredFolder(entry.Folder!, entry.Folder!, "", added));
+        }
+
+        return entries;
+    }
+
+    /// <summary>
+    /// Scrive cartelle-ignorate.json con le voci di tutti i giochi. Senza voci elimina il file.
+    /// Un errore si registra.
+    /// </summary>
+    private void WriteGlobal()
+    {
+        try
+        {
+            if (global.Count == 0)
+            {
+                if (File.Exists(file))
+                    File.Delete(file);
+
+                return;
+            }
+
+            JsonFile.Write(file, new IgnoredFile
+            {
+                Folders = global.Select(entry => new IgnoredEntry
+                {
+                    Folder = entry.PortablePath,
+                    Added = entry.Added.ToString("O", CultureInfo.InvariantCulture),
+                }).ToList(),
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Cartelle ignorate non salvate: " + file, ex);
+        }
+    }
 
     /// <summary>
     /// Legge le voci di una famiglia (Cartella.n o Ignorate.n) con le loro date.

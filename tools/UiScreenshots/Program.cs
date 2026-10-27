@@ -101,7 +101,7 @@ internal static class Program
         manager.DeleteProfile(SaveManager.ProfileFolderName(removed));
 
         var dialogs = new NoDialogs();
-        var settings = new AppSettings(Path.Combine(AppData.Root, "lss.ini"));
+        var settings = new AppSettings(AppSettings.FileIn(AppData.Root));
 
         var main = new MainWindow
         {
@@ -132,7 +132,7 @@ internal static class Program
             () => Task.FromResult(true), () => Task.FromResult(false)), focusSave: false), "07-history");
 
         Shot(new GameSettingsWindow(new GameSettingsViewModel(manager, dialogs)), "08-settings");
-        Shot(new LssSettingsWindow(new LssSettingsViewModel(new AppSettings(Path.Combine(root, "lss.ini")), dialogs)), "08b-lss-settings");
+        Shot(new LssSettingsWindow(new LssSettingsViewModel(new AppSettings(AppSettings.FileIn(root)), dialogs)), "08b-lss-settings");
         Shot(new FirstRunWindow(new FirstRunViewModel(manager, CloudState.Enabled)), "09-first-run");
 
         Shot(new AccountWindow(
@@ -341,10 +341,9 @@ internal static class Program
         const string clara = "b2c3d4e5";
 
         Directory.CreateDirectory(AppData.Root);
-        File.WriteAllText(Path.Combine(AppData.Root, "persone.ini"),
-            $"Ordine={andrea},{clara}\n" +
-            $"{andrea}.Nome=Andrea\n{andrea}.Colore=#C2410C\n{andrea}.Ruolo=admin\n" +
-            $"{clara}.Nome=Clara\n{clara}.Colore=#1D6FD0\n{clara}.Ruolo=utente\n");
+        File.WriteAllText(Path.Combine(AppData.Root, "persone.json"),
+            $"{{\"Persone\":[{{\"Id\":\"{andrea}\",\"Nome\":\"Andrea\",\"Colore\":\"#C2410C\",\"Ruolo\":\"admin\"}}," +
+            $"{{\"Id\":\"{clara}\",\"Nome\":\"Clara\",\"Colore\":\"#1D6FD0\",\"Ruolo\":\"utente\"}}]}}");
 
         var people = new People(AppData.Root);
         people.Load();

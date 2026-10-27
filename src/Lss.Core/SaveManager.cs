@@ -163,7 +163,7 @@ public sealed partial class SaveManager
         }
 
         string appData = AppData.Root;
-        var settings = new AppSettings(Path.Combine(appData, "lss.ini"));
+        var settings = new AppSettings(AppSettings.FileIn(appData));
         settings.Load();
 
         GameAccount? account = accounts[0];

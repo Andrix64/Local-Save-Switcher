@@ -172,17 +172,18 @@ internal static class LegacyMigration
     }
 
     /// <summary>
-    /// Trasforma account.txt (ultimo account usato) in lss.ini, se lss.ini non c'è.
-    /// account.txt viene eliminato solo quando lss.ini è stato scritto.
+    /// Trasforma account.txt (ultimo account usato) in lss.json, se le impostazioni non ci sono
+    /// (lss.json, o un lss.ini della 1.0 ancora da convertire). account.txt viene eliminato solo
+    /// quando lss.json è stato scritto.
     /// </summary>
     private static void MigrateAccountFile(string root)
     {
         string accountFile = Path.Combine(root, "account.txt");
-        string settingsFile = Path.Combine(root, "lss.ini");
+        string settingsFile = AppSettings.FileIn(root);
 
         try
         {
-            if (!File.Exists(accountFile) || File.Exists(settingsFile))
+            if (!File.Exists(accountFile) || File.Exists(settingsFile) || File.Exists(Path.Combine(root, "lss.ini")))
                 return;
 
             var settings = new AppSettings(settingsFile)

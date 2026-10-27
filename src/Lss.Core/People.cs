@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 namespace Lss;
 
@@ -8,8 +9,34 @@ namespace Lss;
 /// <param name="HasPin">true se la persona ha un PIN (vedi People.SetPin).</param>
 public sealed record Person(string Id, string Name, string Color, bool IsAdmin, bool HasPin = false);
 
+/// <summary>Una persona come è scritta in persone.json: nomi corti in italiano.</summary>
+internal sealed class PersonEntry
+{
+    public string Id { get; set; } = "";
+
+    [JsonPropertyName("Nome")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("Colore")]
+    public string Color { get; set; } = "";
+
+    /// <summary>"admin" o "utente".</summary>
+    [JsonPropertyName("Ruolo")]
+    public string Role { get; set; } = "utente";
+
+    /// <summary>"salt:hash" in base64, o vuoto se non ha un PIN.</summary>
+    public string Pin { get; set; } = "";
+}
+
+/// <summary>Come persone.json è scritto: le persone, nell'ordine scelto.</summary>
+internal sealed class PeopleFile
+{
+    [JsonPropertyName("Persone")]
+    public List<PersonEntry> People { get; set; } = [];
+}
+
 /// <summary>
-/// Le persone di LSS, in persone.ini. Non lancia mai eccezioni in lettura:
+/// Le persone di LSS, in persone.json. Non lancia mai eccezioni in lettura:
 /// un file rotto diventa una persona sola, quella del sistema.
 /// </summary>
 public sealed class People
@@ -41,7 +68,7 @@ public sealed class People
 
     public People(string dataRoot)
     {
-        path = Path.Combine(dataRoot, "persone.ini");
+        path = Path.Combine(dataRoot, "persone.json");
     }
 
     /// <summary>Tutte le persone, nell'ordine scelto dall'utente.</summary>
@@ -54,7 +81,7 @@ public sealed class People
         all.FirstOrDefault(person => person.Id == id);
 
     /// <summary>
-    /// Legge persone.ini. Se non c'è una persona, ne crea una col nome del
+    /// Legge persone.json. Se non c'è una persona, ne crea una col nome del
     /// sistema, amministratore. Se non c'è un amministratore, lo è la prima.
     /// </summary>
     public void Load()
@@ -62,28 +89,21 @@ public sealed class People
         all.Clear();
         pins.Clear();
 
-        Dictionary<string, string> values = IniFile.Read(path);
-        string[] order = values.TryGetValue("Ordine", out string? ordine)
-            ? ordine.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            : [];
-
-        foreach (string id in order)
+        foreach (PersonEntry entry in JsonFile.Read<PeopleFile>(path)?.People ?? [])
         {
-            if (!values.TryGetValue(id + ".Nome", out string? name) ||
-                !IsValidName(name, out string cleanName) ||
-                all.Any(person => person.Id == id))
+            string id = entry.Id ?? "";
+
+            if (id == "" || !IsValidName(entry.Name, out string cleanName) || all.Any(person => person.Id == id))
                 continue;
 
-            string color = values.TryGetValue(id + ".Colore", out string? savedColor) &&
-                           Palette.Contains(savedColor)
-                ? savedColor
+            string color = entry.Color != null && Palette.Contains(entry.Color)
+                ? entry.Color
                 : Palette[all.Count % Palette.Count];
 
-            bool isAdmin = values.TryGetValue(id + ".Ruolo", out string? role) &&
-                           role == "admin";
+            bool isAdmin = entry.Role == "admin";
 
-            if (values.TryGetValue(id + ".Pin", out string? pin) && IsStoredPin(pin))
-                pins[id] = pin;
+            if (entry.Pin != null && IsStoredPin(entry.Pin))
+                pins[id] = entry.Pin;
 
             all.Add(new Person(id, cleanName, color, isAdmin, pins.ContainsKey(id)));
         }
@@ -188,7 +208,7 @@ public sealed class People
     }
 
     /// <summary>
-    /// Toglie la persona da persone.ini. Le sue partite non si toccano qui:
+    /// Toglie la persona da persone.json. Le sue partite non si toccano qui:
     /// le sistema SaveManager (fase P, P5).
     /// </summary>
     public Result Remove(string id)
@@ -210,33 +230,32 @@ public sealed class People
     }
 
     /// <summary>
-    /// Scrive persone.ini. Non lancia eccezioni: l'esito è nel Result.
+    /// Scrive persone.json. Non lancia eccezioni: l'esito è nel Result.
     /// </summary>
     private Result Save()
     {
         try
         {
-            List<KeyValuePair<string, string>> values =
-            [
-                new("Ordine", string.Join(",", all.Select(person => person.Id))),
-            ];
+            var file = new PeopleFile();
 
             foreach (Person person in all)
             {
-                values.Add(new(person.Id + ".Nome", person.Name));
-                values.Add(new(person.Id + ".Colore", person.Color));
-                values.Add(new(person.Id + ".Ruolo", person.IsAdmin ? "admin" : "utente"));
-
-                if (pins.TryGetValue(person.Id, out string? pin))
-                    values.Add(new(person.Id + ".Pin", pin));
+                file.People.Add(new PersonEntry
+                {
+                    Id = person.Id,
+                    Name = person.Name,
+                    Color = person.Color,
+                    Role = person.IsAdmin ? "admin" : "utente",
+                    Pin = pins.GetValueOrDefault(person.Id, ""),
+                });
             }
 
-            IniFile.Write(path, values);
+            JsonFile.Write(path, file);
             return Result.Ok("");
         }
         catch (Exception ex)
         {
-            Log.Write("Salvataggio di persone.ini", ex);
+            Log.Write("Salvataggio di persone.json", ex);
             return Result.Fail(Strings.PlayersNotSaved);
         }
     }

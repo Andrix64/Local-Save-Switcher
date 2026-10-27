@@ -15,7 +15,7 @@ public sealed class SetPinViewModelTests : IDisposable
 
     private People People()
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Admin}\n{Admin}.Nome=Andrea\n{Admin}.Ruolo=admin\n");
 
         var people = new People(folder.Data);

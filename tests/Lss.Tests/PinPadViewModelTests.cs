@@ -19,7 +19,7 @@ public sealed class PinPadViewModelTests : IDisposable
     /// <summary>Persone: Andrea (admin con PIN 1234), Marco (admin senza PIN).</summary>
     private People People()
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Admin},{Plain}\n" +
             $"{Admin}.Nome=Andrea\n{Admin}.Ruolo=admin\n" +
             $"{Plain}.Nome=Marco\n{Plain}.Ruolo=admin\n");

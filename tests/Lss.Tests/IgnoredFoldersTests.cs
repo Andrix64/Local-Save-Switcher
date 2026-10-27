@@ -47,8 +47,8 @@ public sealed class IgnoredFoldersTests : IDisposable
         ignored.AddGlobal(portable);
 
         Assert.Equal("{WinAppDataLocal}/Discord", portable);
-        Assert.Contains("Cartella.0={WinAppDataLocal}/Discord",
-            File.ReadAllText(Path.Combine(folder.Data, "cartelle-ignorate.ini")));
+        Assert.Contains("\"Cartella\": \"{WinAppDataLocal}/Discord\"",
+            File.ReadAllText(Path.Combine(folder.Data, "cartelle-ignorate.json")));
         Assert.True(ignored.IsIgnored(Path.Combine(discordB, "cache.dat"), GameData("B"), Context(prefixB)));
     }
 
@@ -88,7 +88,7 @@ public sealed class IgnoredFoldersTests : IDisposable
 
         Assert.False(ignored.IsIgnored(dir, GameData("A"), Context()));
         Assert.Empty(ignored.Global);
-        Assert.False(File.Exists(Path.Combine(folder.Data, "cartelle-ignorate.ini")));
+        Assert.False(File.Exists(Path.Combine(folder.Data, "cartelle-ignorate.json")));
     }
 
     [Fact]

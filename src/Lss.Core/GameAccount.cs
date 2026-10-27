@@ -13,6 +13,6 @@ public sealed record GameAccount(string Provider, string Id, string Name, string
 {
     public string DisplayName => Name != "" ? Name : Loc.F(Strings.AccountFallbackName, Id);
 
-    /// <summary>Chiave salvata in lss.ini: provider/id.</summary>
+    /// <summary>Chiave salvata in lss.json: provider/id.</summary>
     public string Key => Provider + "/" + Id;
 }

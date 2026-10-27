@@ -12,7 +12,7 @@ public sealed class FavouritesTests : IDisposable
     private SaveManager ManagerWithTwoPlayers()
     {
         SaveManager manager = folder.CreateManager("A1");
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={TestFolder.Owner},{Second}\n" +
             $"{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n" +
             $"{Second}.Nome=Clara\n{Second}.Ruolo=utente\n");

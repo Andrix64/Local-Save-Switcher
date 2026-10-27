@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Lss;
 
 /// <summary>
@@ -6,8 +8,24 @@ namespace Lss;
 /// </summary>
 public sealed record ManualGame(string Name, string Exe, string Arguments, string Prefix);
 
+/// <summary>Come gioco.json è scritto: nomi corti in italiano.</summary>
+internal sealed class ManualGameFile
+{
+    [JsonPropertyName("Nome")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("Eseguibile")]
+    public string Exe { get; set; } = "";
+
+    [JsonPropertyName("Argomenti")]
+    public string Arguments { get; set; } = "";
+
+    [JsonPropertyName("Prefisso")]
+    public string Prefix { get; set; } = "";
+}
+
 /// <summary>
-/// I giochi aggiunti a mano, in &lt;dati LSS&gt;\manual\local\&lt;id&gt;\gioco.ini
+/// I giochi aggiunti a mano, in &lt;dati LSS&gt;\manual\local\&lt;id&gt;\gioco.json
 /// (una cartella per gioco, come quelle dei giochi dei launcher).
 /// </summary>
 internal static class ManualGames
@@ -30,17 +48,17 @@ internal static class ManualGames
     }
 
     /// <summary>
-    /// Scrive i dati di un gioco (gioco.ini), creando la cartella se manca.
+    /// Scrive i dati di un gioco (gioco.json), creando la cartella se manca.
     /// </summary>
     public static void Write(string dataRoot, string id, ManualGame game)
     {
-        IniFile.Write(Path.Combine(AccountFolder(dataRoot), id, "gioco.ini"),
-        [
-            new KeyValuePair<string, string>("Nome", game.Name),
-            new KeyValuePair<string, string>("Eseguibile", game.Exe),
-            new KeyValuePair<string, string>("Argomenti", game.Arguments),
-            new KeyValuePair<string, string>("Prefisso", game.Prefix),
-        ]);
+        JsonFile.Write(Path.Combine(AccountFolder(dataRoot), id, "gioco.json"), new ManualGameFile
+        {
+            Name = game.Name,
+            Exe = game.Exe,
+            Arguments = game.Arguments,
+            Prefix = game.Prefix,
+        });
     }
 
     /// <summary>
@@ -56,16 +74,14 @@ internal static class ManualGames
 
         foreach (string dir in Directory.GetDirectories(folder).OrderBy(dir => dir, StringComparer.Ordinal))
         {
-            Dictionary<string, string> values = IniFile.Read(Path.Combine(dir, "gioco.ini"));
-
-            if (!values.TryGetValue("Nome", out string? name) || name.Trim() == "")
+            if (JsonFile.Read<ManualGameFile>(Path.Combine(dir, "gioco.json")) is not { } file || (file.Name ?? "").Trim() == "")
                 continue;
 
             games.Add((Path.GetFileName(dir), new ManualGame(
-                name.Trim(),
-                values.GetValueOrDefault("Eseguibile", "").Trim(),
-                values.GetValueOrDefault("Argomenti", "").Trim(),
-                values.GetValueOrDefault("Prefisso", "").Trim())));
+                file.Name!.Trim(),
+                (file.Exe ?? "").Trim(),
+                (file.Arguments ?? "").Trim(),
+                (file.Prefix ?? "").Trim())));
         }
 
         return games;

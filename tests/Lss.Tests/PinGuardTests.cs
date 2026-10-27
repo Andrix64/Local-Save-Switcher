@@ -22,7 +22,7 @@ public sealed class PinGuardTests : IDisposable
     /// <summary>Andrea (admin) e Clara (utente), tutte e due con il PIN 1234.</summary>
     private People People()
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Andrea},{Clara}\n" +
             $"{Andrea}.Nome=Andrea\n{Andrea}.Ruolo=admin\n" +
             $"{Clara}.Nome=Clara\n{Clara}.Ruolo=utente\n");

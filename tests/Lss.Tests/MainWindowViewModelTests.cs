@@ -29,7 +29,7 @@ public sealed class MainWindowViewModelTests : IDisposable
         new(provider, id, name, "", "", "", GameInfo.SpotsOf(Path.Combine(folder.Root, provider, id), SaveSource.Userdata), support);
 
     private MainWindowViewModel Create(params LauncherGames[] launchers) =>
-        new(launchers, new AppSettings(Path.Combine(folder.Root, "lss.ini")), dialogs);
+        new(launchers, new AppSettings(Path.Combine(folder.Root, "lss.json")), dialogs);
 
     [Fact]
     public async Task ExportAllWritesOnlyTheGamesWithChosenFolders()

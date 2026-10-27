@@ -29,6 +29,19 @@ public sealed class TestFolder : IDisposable
         Directory.CreateDirectory(Root);
     }
 
+    /// <summary>
+    /// Le persone del test, scritte come persone.json. Il testo è nel formato "Chiave=Valore" (Ordine, id.Nome,
+    /// id.Ruolo...), comodo da scrivere: V1Compat lo converte come i dati della 1.0.
+    /// </summary>
+    public static void WritePeople(string dataFolder, string text)
+    {
+        // Le persone di prima si sostituiscono: con un persone.json già lì il testo non si convertirebbe.
+        Directory.CreateDirectory(dataFolder);
+        File.Delete(Path.Combine(dataFolder, "persone.json"));
+        Write(Path.Combine(dataFolder, "persone.ini"), text);
+        V1Compat.ConvertAppFiles(dataFolder);
+    }
+
     public static void Write(string path, string content)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -51,8 +64,7 @@ public sealed class TestFolder : IDisposable
     /// </summary>
     private People OnePlayer()
     {
-        Write(Path.Combine(Data, "persone.ini"),
-            $"Ordine={Owner}\n{Owner}.Nome=Test\n{Owner}.Ruolo=admin\n");
+        WritePeople(Data, $"Ordine={Owner}\n{Owner}.Nome=Test\n{Owner}.Ruolo=admin\n");
 
         var people = new People(Data);
         people.Load();
@@ -87,7 +99,7 @@ internal static class TestSetup
         Platform.Current = Fake;
         Log.FilePath = Path.Combine(Path.GetTempPath(), "csm_test_log.txt");
 
-        // I test non leggono né scrivono i dati veri di LSS (cartella.ini, lss.ini).
+        // I test non leggono né scrivono i dati veri di LSS (cartella.ini, lss.json).
         AppData.Root = Path.Combine(Path.GetTempPath(), "csm_test_data_" + Guid.NewGuid().ToString("N"));
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("it-IT");
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("it-IT");

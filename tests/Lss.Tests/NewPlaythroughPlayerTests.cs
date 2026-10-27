@@ -13,7 +13,7 @@ public sealed class NewPlaythroughPlayerTests : IDisposable
 
     private IReadOnlyList<Person> TwoPeople()
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Admin},{Second}\n" +
             $"{Admin}.Nome=Andrea\n{Admin}.Ruolo=admin\n" +
             $"{Second}.Nome=Clara\n{Second}.Ruolo=utente\n");

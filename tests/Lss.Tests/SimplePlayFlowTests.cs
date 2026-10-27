@@ -18,7 +18,7 @@ public sealed class SimplePlayFlowTests : IDisposable
         provider ??= new FakeProvider { Cloud = CloudState.Disabled };
         TestFolder.Write(folder.SaveFile, "A1");
         TestFolder.Write(folder.CacheFile, "cache");
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={TestFolder.Owner},{Second}\n" +
             $"{TestFolder.Owner}.Nome=Andrea\n{TestFolder.Owner}.Ruolo=admin\n" +
             $"{Second}.Nome=Clara\n{Second}.Ruolo=utente\n");

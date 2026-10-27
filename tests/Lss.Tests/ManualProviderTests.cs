@@ -1,7 +1,7 @@
 namespace Lss.Tests;
 
 /// <summary>
-/// I giochi aggiunti a mano: gioco.ini in una cartella per gioco, sotto la
+/// I giochi aggiunti a mano: gioco.json in una cartella per gioco, sotto la
 /// cartella dei dati di prova (TestFolder), mai quella vera di LSS.
 /// </summary>
 [Collection("AppData")]
@@ -23,12 +23,12 @@ public sealed class ManualProviderTests : IDisposable
     }
 
     [Fact]
-    public void AddWritesAGameIniAndReadsItBack()
+    public void AddWritesAGameFileAndReadsItBack()
     {
         string id = ManualGames.Add(AppData.Root, new ManualGame("Il mio gioco", @"C:\Giochi\gioco.exe", "-fullscreen", ""));
 
         Assert.Matches("^[0-9a-f]{8}$", id);
-        Assert.True(File.Exists(Path.Combine(ManualGames.AccountFolder(AppData.Root), id, "gioco.ini")));
+        Assert.True(File.Exists(Path.Combine(ManualGames.AccountFolder(AppData.Root), id, "gioco.json")));
 
         var read = ManualGames.ReadAll(AppData.Root).Single();
         Assert.Equal(id, read.Id);

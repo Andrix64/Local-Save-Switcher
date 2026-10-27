@@ -10,12 +10,17 @@ public sealed class PinTests : IDisposable
 
     public void Dispose() => folder.Dispose();
 
-    private string IniPath => Path.Combine(folder.Data, "persone.ini");
+    private string JsonPath => Path.Combine(folder.Data, "persone.json");
+
+    // Il PIN (salt:hash) di una persona, come sta in persone.json.
+    private string StoredPin(string id) =>
+        System.Text.Json.JsonDocument.Parse(File.ReadAllText(JsonPath)).RootElement.GetProperty("Persone")
+            .EnumerateArray().Single(entry => entry.GetProperty("Id").GetString() == id).GetProperty("Pin").GetString()!;
 
     /// <summary>Persone: due amministratori e un utente.</summary>
     private People Load()
     {
-        TestFolder.Write(IniPath,
+        TestFolder.WritePeople(folder.Data,
             $"Ordine={Admin},{OtherAdmin},{User}\n" +
             $"{Admin}.Nome=Andrea\n{Admin}.Ruolo=admin\n" +
             $"{OtherAdmin}.Nome=Marco\n{OtherAdmin}.Ruolo=admin\n" +
@@ -26,7 +31,7 @@ public sealed class PinTests : IDisposable
         return people;
     }
 
-    /// <summary>Rilegge persone.ini senza riscriverlo (a differenza di Load).</summary>
+    /// <summary>Rilegge persone.json senza riscriverlo (a differenza di Load).</summary>
     private People Reread()
     {
         var people = new People(folder.Data);
@@ -70,11 +75,7 @@ public sealed class PinTests : IDisposable
         people.SetPin(Admin, "1234");
         people.SetPin(OtherAdmin, "1234");
 
-        string text = File.ReadAllText(IniPath);
-        string first = text.Split('\n').Single(line => line.StartsWith(Admin + ".Pin="));
-        string second = text.Split('\n').Single(line => line.StartsWith(OtherAdmin + ".Pin="));
-
-        Assert.NotEqual(first.Split('=')[1], second.Split('=')[1]);
+        Assert.NotEqual(StoredPin(Admin), StoredPin(OtherAdmin));
     }
 
     [Fact]
@@ -84,8 +85,8 @@ public sealed class PinTests : IDisposable
 
         people.SetPin(Admin, "4821");
 
-        Assert.DoesNotContain("4821", File.ReadAllText(IniPath));
-        Assert.Contains(Admin + ".Pin=", File.ReadAllText(IniPath));
+        Assert.DoesNotContain("4821", File.ReadAllText(JsonPath));
+        Assert.Contains(":", StoredPin(Admin));
     }
 
     [Fact]

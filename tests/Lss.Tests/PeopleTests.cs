@@ -22,7 +22,7 @@ public sealed class PeopleTests : IDisposable
         Person person = Assert.Single(people.All);
         Assert.True(person.IsAdmin);
         Assert.False(string.IsNullOrWhiteSpace(person.Name));
-        Assert.True(File.Exists(Path.Combine(folder.Data, "persone.ini")));
+        Assert.True(File.Exists(Path.Combine(folder.Data, "persone.json")));
     }
 
     [Fact]
@@ -105,8 +105,8 @@ public sealed class PeopleTests : IDisposable
     [Fact]
     public void FileWithoutAdminMakesTheFirstPlayerAdmin()
     {
-        TestFolder.Write(
-            Path.Combine(folder.Data, "persone.ini"),
+        TestFolder.WritePeople(
+            folder.Data,
             "Ordine=aaaaaaaa,bbbbbbbb\n" +
             "aaaaaaaa.Nome=Andrea\n" +
             "aaaaaaaa.Ruolo=utente\n" +
@@ -162,12 +162,13 @@ public sealed class PeopleTests : IDisposable
     [Fact]
     public void BrokenFileBecomesTheFirstPlayerAgain()
     {
-        TestFolder.Write(Path.Combine(folder.Data, "persone.ini"), "questo non è un file di persone");
+        TestFolder.Write(Path.Combine(folder.Data, "persone.json"), "questo non è un file di persone");
 
         People people = Load();
 
         Person person = Assert.Single(people.All);
         Assert.True(person.IsAdmin);
+        Assert.True(File.Exists(Path.Combine(folder.Data, "persone.json.rotto")));
     }
 
     [Fact]
