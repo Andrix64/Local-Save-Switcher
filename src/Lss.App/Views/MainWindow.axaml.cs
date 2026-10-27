@@ -10,7 +10,20 @@ namespace Lss.App.Views;
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow() => InitializeComponent();
+    public MainWindow()
+    {
+        InitializeComponent();
+
+        // I titoli dei launcher stanno nella lista ma non si selezionano né ricevono il focus.
+        GamesList.ContainerPrepared += (_, e) =>
+        {
+            if (e.Container.DataContext is SidebarHeader)
+            {
+                e.Container.Focusable = false;
+                e.Container.IsHitTestVisible = false;
+            }
+        };
+    }
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
 

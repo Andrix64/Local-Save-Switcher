@@ -350,7 +350,6 @@ Usala solo se contiene solo i salvataggi di {1}.</value></data>
   <data name="SaveFolderLearned" xml:space="preserve"><value>Salvataggi: {0} (trovata da LSS)</value></data>
   <data name="SaveFolderMenu" xml:space="preserve"><value>Opzioni della cartella dei salvataggi</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>Questa partita è di {0}, non di {1}.</value></data>
-  <data name="GamesCaption" xml:space="preserve"><value>GIOCHI</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Altri giochi</value></data>
   <data name="SupportSavesElsewhere" xml:space="preserve"><value>I salvataggi non sono nella cartella userdata di Steam e LSS non sa dove sono: puoi scegliere tu la cartella.</value></data>
   <data name="SupportNoSaves" xml:space="preserve"><value>Ancora nessun salvataggio: avvia il gioco una volta.</value></data>

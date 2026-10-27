@@ -350,7 +350,6 @@ Use it only if it contains just the saves of {1}.</value></data>
   <data name="SaveFolderLearned" xml:space="preserve"><value>Saves: {0} (found by LSS)</value></data>
   <data name="SaveFolderMenu" xml:space="preserve"><value>Save folder options</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>This playthrough is from {0}, not from {1}.</value></data>
-  <data name="GamesCaption" xml:space="preserve"><value>GAMES</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Other games</value></data>
   <data name="SupportSavesElsewhere" xml:space="preserve"><value>The saves are not in Steam's userdata folder and LSS doesn't know where they are: you can choose the folder yourself.</value></data>
   <data name="SupportNoSaves" xml:space="preserve"><value>No saves yet: start the game once.</value></data>

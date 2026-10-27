@@ -37,8 +37,6 @@
     <Border DockPanel.Dock="Left" Width="240" Background="{StaticResource Header}" Padding="12,16"
             IsVisible="{Binding ShowSidebar}">
       <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Classes="caption" Text="{loc:Str GamesCaption}" Margin="4,0,0,10" />
-
         <Expander DockPanel.Dock="Bottom" IsVisible="{Binding HasOtherGames}" Margin="0,12,0,0"
                   IsExpanded="{Binding OtherGamesExpanded, Mode=OneTime}"
                   HorizontalAlignment="Stretch">
@@ -47,12 +45,23 @@
           </Expander.Header>
           <!-- Possono essere tanti (per esempio tutti i giochi Proton di uno Steam Deck): si scorrono. -->
           <ScrollViewer MaxHeight="420" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{Binding OtherGames}">
-              <ItemsControl.ItemTemplate>
+            <ItemsControl ItemsSource="{Binding OtherRows}">
+              <ItemsControl.DataTemplates>
+                <DataTemplate x:DataType="vm:SidebarHeader">
+                  <TextBlock Classes="sidebarHeader" Text="{Binding Text}" />
+                </DataTemplate>
                 <DataTemplate x:DataType="vm:GameItemViewModel">
                   <StackPanel Margin="0,4,0,8" Spacing="2">
-                    <TextBlock Classes="caption" Text="{Binding LauncherHeader}" IsVisible="{Binding HasLauncherHeader}" />
-                    <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <Image Source="{Binding Icon}" Width="26" Height="26" IsVisible="{Binding HasIcon}" />
+                      <Border Width="26" Height="26" CornerRadius="6" Background="{StaticResource SurfaceSelected}"
+                              IsVisible="{Binding !HasIcon}">
+                        <TextBlock Text="{Binding Initial}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontWeight="Bold" />
+                      </Border>
+                      <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                                 VerticalAlignment="Center" />
+                    </StackPanel>
                     <TextBlock Classes="small" Text="{Binding SupportText}" TextWrapping="Wrap" />
                     <Button Classes="secondary" Content="{loc:Str FindSaveFolder}" Command="{Binding FindFolderCommand}"
                             HorizontalAlignment="Stretch" Margin="0,4,0,0" />
@@ -60,30 +69,33 @@
                             HorizontalAlignment="Stretch" />
                   </StackPanel>
                 </DataTemplate>
-              </ItemsControl.ItemTemplate>
+              </ItemsControl.DataTemplates>
             </ItemsControl>
+
           </ScrollViewer>
         </Expander>
 
-        <ListBox ItemsSource="{Binding Games}" SelectedItem="{Binding SelectedGame}"
+        <ListBox x:Name="GamesList" ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}"
                  Background="Transparent" BorderThickness="0">
-          <ListBox.ItemTemplate>
+          <ListBox.DataTemplates>
+            <DataTemplate x:DataType="vm:SidebarHeader">
+              <TextBlock Classes="sidebarHeader" Text="{Binding Text}" />
+            </DataTemplate>
             <DataTemplate x:DataType="vm:GameItemViewModel">
-              <StackPanel Spacing="2">
-              <TextBlock Classes="caption" Text="{Binding LauncherHeader}" IsVisible="{Binding HasLauncherHeader}" Margin="0,6,0,0" />
-              <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
-                <Image Source="{Binding Icon}" Width="32" Height="32" IsVisible="{Binding HasIcon}" />
-                <Border Width="32" Height="32" CornerRadius="6" Background="{StaticResource SurfaceSelected}"
-                        IsVisible="{Binding !HasIcon}">
+              <StackPanel Orientation="Horizontal" Spacing="10" Height="40">
+                <Image Source="{Binding Icon}" Width="26" Height="26" IsVisible="{Binding HasIcon}" />
+                <Border Width="26" Height="26" CornerRadius="6" Background="{StaticResource SurfaceSelected}"
+                        IsVisible="{Binding !HasIcon}" VerticalAlignment="Center">
                   <TextBlock Text="{Binding Initial}" HorizontalAlignment="Center" VerticalAlignment="Center"
                              FontWeight="Bold" />
                 </Border>
-                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" />
-              </StackPanel>
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                           MaxWidth="170" />
               </StackPanel>
             </DataTemplate>
-          </ListBox.ItemTemplate>
+          </ListBox.DataTemplates>
         </ListBox>
+
       </DockPanel>
     </Border>
 

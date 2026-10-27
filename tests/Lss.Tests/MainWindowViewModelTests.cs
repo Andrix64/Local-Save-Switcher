@@ -135,4 +135,75 @@ public sealed class MainWindowViewModelTests : IDisposable
 
         Assert.Equal(new[] { "Alfa", "Beta" }, vm.OtherGames.Select(g => g.LauncherHeader));
     }
+
+    [Fact]
+    public void HeadersAreRowsOfTheirOwnBeforeTheirGames()
+    {
+        var alfa = new FakeProvider { Id = "a", DisplayName = "Alfa" };
+        var beta = new FakeProvider { Id = "b", DisplayName = "Beta" };
+        var anna = new GameAccount("a", "1", "Anna", folder.Root, null);
+        var bruno = new GameAccount("b", "2", "Bruno", folder.Root, null);
+
+        MainWindowViewModel vm = Create(
+            new LauncherGames(alfa, anna, [Game("a", "1", "Uno")]),
+            new LauncherGames(beta, bruno, [Game("b", "2", "Due"), Game("b", "3", "Tre")]));
+
+        Assert.Equal(["ALFA", "Uno", "BETA", "Due", "Tre"],
+            vm.Rows.Select(row => row is SidebarHeader header ? header.Text : ((GameItemViewModel)row).Name));
+    }
+
+    [Fact]
+    public void OneLauncherHasOnlyGameRows()
+    {
+        var provider = new FakeProvider { Id = "steam", DisplayName = "Alfa" };
+        var account = new GameAccount("steam", "111", "Anna", folder.Root, null);
+
+        MainWindowViewModel vm = Create(new LauncherGames(provider, account,
+            [Game("steam", "1", "Uno"), Game("steam", "2", "Due")]));
+
+        Assert.All(vm.Rows, row => Assert.IsType<GameItemViewModel>(row));
+        Assert.Equal(2, vm.Rows.Count);
+    }
+
+    [Fact]
+    public void OtherGamesRowsHaveHeadersToo()
+    {
+        var alfa = new FakeProvider { Id = "a", DisplayName = "Alfa" };
+        var beta = new FakeProvider { Id = "b", DisplayName = "Beta" };
+        var anna = new GameAccount("a", "1", "Anna", folder.Root, null);
+        var bruno = new GameAccount("b", "2", "Bruno", folder.Root, null);
+
+        MainWindowViewModel vm = Create(
+            new LauncherGames(alfa, anna, [Game("a", "1", "Uno", SupportState.SavesElsewhere)]),
+            new LauncherGames(beta, bruno, [Game("b", "2", "Due", SupportState.SavesElsewhere)]));
+
+        Assert.Equal(["ALFA", "Uno", "BETA", "Due"],
+            vm.OtherRows.Select(row => row is SidebarHeader header ? header.Text : ((GameItemViewModel)row).Name));
+    }
+
+    [Fact]
+    public void SelectingAHeaderLeavesTheSelectedGameAlone()
+    {
+        var alfa = new FakeProvider { Id = "a", DisplayName = "Alfa" };
+        var beta = new FakeProvider { Id = "b", DisplayName = "Beta" };
+        var anna = new GameAccount("a", "1", "Anna", folder.Root, null);
+        var bruno = new GameAccount("b", "2", "Bruno", folder.Root, null);
+
+        MainWindowViewModel vm = Create(
+            new LauncherGames(alfa, anna, [Game("a", "1", "Uno")]),
+            new LauncherGames(beta, bruno, [Game("b", "2", "Due")]));
+        GameItemViewModel before = vm.SelectedGame!;
+        var changed = new List<string?>();
+        vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        vm.SelectedRow = vm.Rows.OfType<SidebarHeader>().Last();
+
+        Assert.Same(before, vm.SelectedGame);
+        Assert.Same(before, vm.SelectedRow);
+        Assert.Contains(nameof(MainWindowViewModel.SelectedRow), changed);
+
+        vm.SelectedRow = vm.Rows.OfType<GameItemViewModel>().Last();
+
+        Assert.Equal("Due", vm.SelectedGame!.Name);
+    }
 }

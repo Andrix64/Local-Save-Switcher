@@ -78,6 +78,28 @@ public partial class MainWindowViewModel : ObservableObject
 
     public ObservableCollection<GameItemViewModel> OtherGames { get; } = [];
 
+    /// <summary>Le righe della colonna: il titolo di ogni launcher (SidebarHeader) prima dei suoi giochi.</summary>
+    public ObservableCollection<object> Rows { get; } = [];
+
+    /// <summary>Come Rows, per Altri giochi.</summary>
+    public ObservableCollection<object> OtherRows { get; } = [];
+
+    /// <summary>
+    /// La riga selezionata nella colonna: il gioco selezionato. Un titolo non si può selezionare:
+    /// si rimette il gioco di prima. Null (la lista che si ricostruisce) non cambia niente.
+    /// </summary>
+    public object? SelectedRow
+    {
+        get => SelectedGame;
+        set
+        {
+            if (value is GameItemViewModel game)
+                SelectedGame = game;
+            else if (value is SidebarHeader)
+                OnPropertyChanged(nameof(SelectedRow));
+        }
+    }
+
     public GameMonitor Monitor { get; }
 
     [ObservableProperty]
@@ -225,6 +247,8 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnSelectedGameChanged(GameItemViewModel? value)
     {
+        OnPropertyChanged(nameof(SelectedRow));
+
         if (value == null)
         {
             CurrentGame = null;
@@ -316,18 +340,26 @@ public partial class MainWindowViewModel : ObservableObject
                 if (game.Support == SupportState.Supported)
                 {
                     if (headers && firstSupported)
+                    {
                         item.LauncherHeader = launcher.Provider.DisplayName;
+                        Rows.Add(SidebarHeader.For(item.LauncherHeader));
+                    }
 
                     firstSupported = false;
                     Games.Add(item);
+                    Rows.Add(item);
                 }
                 else
                 {
                     if (headers && firstOther)
+                    {
                         item.LauncherHeader = launcher.Provider.DisplayName;
+                        OtherRows.Add(SidebarHeader.For(item.LauncherHeader));
+                    }
 
                     firstOther = false;
                     OtherGames.Add(item);
+                    OtherRows.Add(item);
                 }
             }
         }
@@ -349,10 +381,13 @@ public partial class MainWindowViewModel : ObservableObject
 
         Games.Clear();
         OtherGames.Clear();
+        Rows.Clear();
+        OtherRows.Clear();
         FillGames(launchers);
 
         ShowSidebar = Games.Count > 1 || OtherGames.Count > 0;
         SelectedGame = Games.FirstOrDefault(g => g.Info.Key == keepKey) ?? Games.FirstOrDefault();
+        OnPropertyChanged(nameof(SelectedRow));
     }
 
     /// <summary>

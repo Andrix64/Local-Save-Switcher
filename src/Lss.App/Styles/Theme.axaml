@@ -52,6 +52,14 @@
     <Setter Property="FontWeight" Value="Bold" />
     <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
   </Style>
+  <!-- Titolo di un launcher nella colonna dei giochi (R4): riga a sé, non selezionabile. -->
+  <Style Selector="TextBlock.sidebarHeader">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="LetterSpacing" Value="0.6" />
+    <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+    <Setter Property="Margin" Value="6,12,6,6" />
+  </Style>
   <Style Selector="TextBlock.small">
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
