@@ -221,7 +221,7 @@ per phase (the phase file names it).
 - [x] R8 — Two settings windows: the game's and LSS's (e9f72fb)
 - [x] R9 — JSON settings files: the format and the app-wide files (d479f5a)
 - [x] R10 — JSON for the per-game files (ea4adfa; 838 tests; Linux check not run)
-- [ ] R11 — A known spot suggested again as new (separators)
+- [x] R11 — A known spot suggested again as new (separators) (40bd8d5; 847 tests; no import test with foreign separators; Linux check not run)
 - [ ] R12 — Screenshots, docs, Linux check
 - [ ] R13 — 👤 Check on Windows and the Steam Deck (copy the data folder first)
 
