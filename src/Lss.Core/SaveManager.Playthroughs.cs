@@ -173,7 +173,8 @@ public sealed partial class SaveManager
 
     public Result SetNote(string profileName, string note)
     {
-        note = note.Trim().Replace("\r", "").Replace("\n", " ");
+        // Le note possono andare a capo (textarea): si toglie solo il ritorno carrello di Windows.
+        note = note.Trim().Replace("\r", "");
 
         try
         {

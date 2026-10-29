@@ -126,7 +126,7 @@ internal static class Program
 
         Shot(new TextPromptWindow(new TextPromptViewModel(Strings.NoteTitle,
             Loc.F(Strings.NoteCaption, first).ToUpperInvariant(), english ? "Polaris mission" : "Missione Polaris", Strings.NoteHint,
-            0, Strings.SaveButton)), "06-note");
+            0, Strings.SaveButton, multiline: true)), "06-note");
 
         Shot(new HistoryWindow(new HistoryViewModel(manager, dialogs,
             () => Task.FromResult(true), () => Task.FromResult(false)), focusSave: false), "07-history");

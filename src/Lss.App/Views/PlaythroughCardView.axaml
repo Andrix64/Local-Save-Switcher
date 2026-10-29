@@ -64,12 +64,23 @@
 
       <!-- La preferita è la stella gialla; le altre hanno il contorno e si cliccano per farle preferite. -->
       <Panel Grid.Column="1" VerticalAlignment="Center">
-        <Button Classes="star" Content="☆" Command="{Binding SetFavouriteCommand}"
+        <Button Classes="star" Command="{Binding SetFavouriteCommand}"
                 IsVisible="{Binding !IsFavourite}"
-                ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
-        <TextBlock Text="★" FontSize="18" Width="28" TextAlignment="Center" VerticalAlignment="Center"
-                   Foreground="{StaticResource Warning}" IsVisible="{Binding IsFavourite}"
-                   ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
+                ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}">
+          <Viewbox Width="20" Height="20">
+            <Canvas Width="24" Height="24">
+              <Path Data="M12 2 L15.1 8.3 L22 9.3 L17 14.1 L18.2 21 L12 17.8 L5.8 21 L7 14.1 L2 9.3 L8.9 8.3 Z"
+                    Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1.6" StrokeJoin="Round" />
+            </Canvas>
+          </Viewbox>
+        </Button>
+        <Viewbox Width="20" Height="20" IsVisible="{Binding IsFavourite}" HorizontalAlignment="Center"
+                 ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}">
+          <Canvas Width="24" Height="24">
+            <Path Data="M12 2 L15.1 8.3 L22 9.3 L17 14.1 L18.2 21 L12 17.8 L5.8 21 L7 14.1 L2 9.3 L8.9 8.3 Z"
+                  Fill="{StaticResource Warning}" Stroke="{StaticResource Warning}" StrokeThickness="1.5" StrokeJoin="Round" />
+          </Canvas>
+        </Viewbox>
       </Panel>
 
       <!-- Nome, dati e nota una sotto l'altra: così il testo si adatta alla larghezza e le icone restano intere. -->
@@ -83,7 +94,7 @@
 
       <!-- Azioni a icone (il nome è nel suggerimento): Gioca; nel gioco anche Salva un punto e Cronologia. Poi ⋯. -->
       <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-        <Button Classes="primary small" Command="{Binding PlayCommand}" Width="40" Padding="0"
+        <Button Classes="primary small" Command="{Binding PlayCommand}" Width="40" Height="34" Padding="0"
                 IsEnabled="{Binding CanPlay}" IsVisible="{Binding ShowPlay}"
                 ToolTip.Tip="{Binding PlayText}" AutomationProperties.Name="{Binding PlayText}">
           <Viewbox Width="16" Height="16">
@@ -92,7 +103,7 @@
             </Canvas>
           </Viewbox>
         </Button>
-        <Button Classes="iconbtn" Command="{Binding SavePointCommand}"
+        <Button Classes="iconbtn" Width="34" Height="34" Command="{Binding SavePointCommand}"
                 IsEnabled="{Binding CanPlay}" IsVisible="{Binding IsActive}"
                 ToolTip.Tip="{loc:Str SavePointButton}" AutomationProperties.Name="{loc:Str SavePointButton}">
           <Viewbox Width="18" Height="18">
@@ -103,7 +114,7 @@
             </Canvas>
           </Viewbox>
         </Button>
-        <Button Classes="iconbtn" Command="{Binding HistoryCommand}" IsVisible="{Binding IsActive}"
+        <Button Classes="iconbtn" Width="34" Height="34" Command="{Binding HistoryCommand}" IsVisible="{Binding IsActive}"
                 ToolTip.Tip="{loc:Str HistoryButton}" AutomationProperties.Name="{loc:Str HistoryButton}">
           <Viewbox Width="18" Height="18">
             <Canvas Width="24" Height="24">
@@ -112,7 +123,7 @@
             </Canvas>
           </Viewbox>
         </Button>
-        <Button Classes="more small" AutomationProperties.Name="{Binding MoreActionsName}">
+        <Button Classes="more small" Width="36" Height="34" VerticalAlignment="Center" AutomationProperties.Name="{Binding MoreActionsName}">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Ellipse />
             <Ellipse />

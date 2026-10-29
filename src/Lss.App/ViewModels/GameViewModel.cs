@@ -867,7 +867,8 @@ public partial class GameViewModel : ObservableObject
             Manager.GetInfo(profile).Note,
             Strings.NoteHint,
             0, // nessun limite di lunghezza per le note
-            Strings.SaveButton));
+            Strings.SaveButton,
+            multiline: true));
 
         string? note = await dialogs.ShowAsync<string>(window);
 
