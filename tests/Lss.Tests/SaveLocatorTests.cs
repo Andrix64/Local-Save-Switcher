@@ -52,6 +52,30 @@ public sealed class SaveLocatorTests : IDisposable
         SaveLocator.Locate(game, rules, [], Context(), [], LssData, Stored(chosen, chosenSource));
 
     [Fact]
+    public void ExcludedLauncherSpotIsNotFoundAgain()
+    {
+        string saves = Path.Combine(Steamuser, "AppData", "Local", "Game", "saves");
+        string settings = Path.Combine(Steamuser, "AppData", "Local", "Game");
+        Touch(Path.Combine(saves, "a.sav"));
+        Touch(Path.Combine(settings, "Graphics.xml"));
+        SaveRule[] rules = [Rule("WinAppDataLocal", "Game/saves"), Rule("WinAppDataLocal", "Game", "Graphics.xml", false)];
+
+        SaveLocation before = Run(Game(), rules);
+        SaveSpot extra = Assert.Single(before.Spots, spot => spot.Id != 1);
+
+        var stored = new GameSpots(Path.Combine(folder.Root, "gamedata"));
+        stored.Load();
+        stored.Exclude(SaveLocator.KeyOf(extra));
+        Assert.True(stored.Save());
+
+        var reloaded = new GameSpots(Path.Combine(folder.Root, "gamedata"));
+        reloaded.Load();
+        SaveLocation after = SaveLocator.Locate(Game(), rules, [], Context(), [], LssData, reloaded);
+
+        Assert.Single(after.Spots);
+    }
+
+    [Fact]
     public void OneFolderIsSupported()
     {
         string saves = Path.Combine(Steamuser, "AppData", "Local", "Game", "saves");

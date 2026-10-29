@@ -134,7 +134,7 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
-    /// Toglie un posto aggiunto a mano. Le copie nelle partite restano: se la cartella
+    /// Toglie un posto aggiunto a mano o trovato dalle regole del launcher (questo si ricorda in posti.json e non torna). Le copie nelle partite restano: se la cartella
     /// si aggiunge di nuovo, è un posto nuovo.
     /// </summary>
     public Result RemoveSpot(int id)
@@ -147,10 +147,14 @@ public sealed partial class SaveManager
         var stored = new GameSpots(dataFolder);
         stored.Load();
 
-        if (stored.Spots.All(spot => spot.Id != id))
-            return Result.Fail(Strings.SpotNotFound);
+        SaveSpot? fromLauncher = Game.Spots.FirstOrDefault(spot => spot.Id == id && spot.Source == SaveSource.Launcher);
 
-        stored.Remove(id);
+        if (fromLauncher is not null)
+            stored.Exclude(SaveLocator.KeyOf(fromLauncher));
+        else if (stored.Spots.All(spot => spot.Id != id))
+            return Result.Fail(Strings.SpotNotFound);
+        else
+            stored.Remove(id);
 
         if (!stored.Save())
             return Result.Fail(Loc.F(Strings.ErrorWithMessage, "posti.json non scritto"));

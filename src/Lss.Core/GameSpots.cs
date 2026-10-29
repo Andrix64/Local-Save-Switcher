@@ -56,13 +56,18 @@ internal sealed class SpotsFile
     [JsonPropertyName("CartelleExtra")]
     public List<string> ExtraRoots { get; set; } = [];
 
+    // Posti trovati dalle regole del launcher che l'utente ha tolto (chiave come in Launcher).
+    [JsonPropertyName("Escluse")]
+    public List<string> Excluded { get; set; } = [];
+
     [JsonPropertyName("Ignorate")]
     public List<IgnoredEntry> Ignored { get; set; } = [];
 
     /// <summary>true se non c'è niente da ricordare: il file si elimina.</summary>
     [JsonIgnore]
     public bool IsEmpty =>
-        Next == 0 && Spots.Count == 0 && Launchers.Count == 0 && ExtraRoots.Count == 0 && Ignored.Count == 0;
+        Next == 0 && Spots.Count == 0 && Launchers.Count == 0 && ExtraRoots.Count == 0 && Ignored.Count == 0 &&
+        Excluded.Count == 0;
 
     /// <summary>Il file (vuoto se manca o è rotto).</summary>
     public static SpotsFile Read(string path) => JsonFile.Read<SpotsFile>(path) ?? new SpotsFile();
@@ -104,6 +109,7 @@ internal sealed class GameSpots
     private readonly List<SaveSpot> spots = [];
     private readonly Dictionary<string, int> launcherIds = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> extraRoots = [];
+    private readonly HashSet<string> excluded = new(StringComparer.OrdinalIgnoreCase);
     // Il posto 1 è quello principale (in cima allo snapshot): gli altri id partono da 2.
     private int next = FirstExtraId;
 
@@ -124,12 +130,19 @@ internal sealed class GameSpots
     /// <summary>Cartelle extra da cercare per questo gioco (dopo Load).</summary>
     public IReadOnlyList<string> ExtraRoots => extraRoots;
 
+    /// <summary>Chiavi dei posti del launcher tolti dall'utente (dopo Load).</summary>
+    public IReadOnlySet<string> ExcludedKeys => excluded;
+
+    /// <summary>Ricorda che un posto trovato dalle regole del launcher non va usato. Si salva con Save.</summary>
+    public void Exclude(string key) => excluded.Add(key);
+
     /// <summary>Legge posti.json.</summary>
     public void Load()
     {
         spots.Clear();
         launcherIds.Clear();
         extraRoots.Clear();
+        excluded.Clear();
         next = FirstExtraId;
 
         SpotsFile data = SpotsFile.Read(file);
@@ -148,6 +161,9 @@ internal sealed class GameSpots
 
         foreach (LauncherSpotEntry entry in data.Launchers)
             launcherIds[entry.Key] = entry.Id;
+
+        foreach (string key in data.Excluded.Where(key => key != ""))
+            excluded.Add(key);
 
         foreach (string root in data.ExtraRoots.Where(root => root != ""))
             AddExtraRoot(root);
@@ -235,7 +251,7 @@ internal sealed class GameSpots
             SpotsFile data = SpotsFile.Read(file);
 
             // Il posto 1 può tornare senza danni; gli id dopo il 1 non si riusano mai.
-            data.Next = spots.Count > 0 || launcherIds.Count > 0 || extraRoots.Count > 0 || next > 2 ? next : 0;
+            data.Next = spots.Count > 0 || launcherIds.Count > 0 || extraRoots.Count > 0 || excluded.Count > 0 || next > 2 ? next : 0;
             data.Spots = spots.OrderBy(spot => spot.Id).Select(spot => new SpotEntry
             {
                 Id = spot.Id,
@@ -249,6 +265,7 @@ internal sealed class GameSpots
                 .Select(pair => new LauncherSpotEntry { Key = pair.Key, Id = pair.Value })
                 .ToList();
             data.ExtraRoots = extraRoots.ToList();
+            data.Excluded = excluded.OrderBy(key => key, StringComparer.OrdinalIgnoreCase).ToList();
 
             SpotsFile.Write(file, data);
             return true;

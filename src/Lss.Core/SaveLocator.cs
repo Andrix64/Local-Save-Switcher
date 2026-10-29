@@ -42,6 +42,7 @@ internal static class SaveLocator
         }
 
         (List<SaveSpot> found, bool tooWide) = FoundByRules(rules, overrides, context);
+        found.RemoveAll(spot => stored.ExcludedKeys.Contains(KeyOf(spot)));
         bool userdata = game.Source == SaveSource.Userdata && game.Support == SupportState.Supported
                         && game.SaveFolder != "";
 
@@ -200,7 +201,7 @@ internal static class SaveLocator
     /// <summary>
     /// Chiave con cui LauncherId ricorda l'id di un posto trovato dalle regole.
     /// </summary>
-    private static string KeyOf(SaveSpot spot) =>
+    internal static string KeyOf(SaveSpot spot) =>
         spot.PortablePath + "|" + spot.Pattern + "|" + (spot.Recursive ? "1" : "0");
 
     private static bool SameFolder(string first, string second) => PathText.Same(first, second);
