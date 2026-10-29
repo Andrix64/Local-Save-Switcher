@@ -20,7 +20,10 @@
             <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
                     CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
               <StackPanel Spacing="6">
-                <TextBlock Text="{Binding FolderText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <Button Classes="link" Command="{Binding OpenFolderCommand}" ToolTip.Tip="{Binding OpenFolderTip}"
+                        HorizontalAlignment="Left">
+                  <TextBlock Text="{Binding FolderText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </Button>
                 <TextBlock Classes="small" Text="{Binding ReasonsText}" IsVisible="{Binding HasReasons}" TextWrapping="Wrap" />
 
                 <WrapPanel>

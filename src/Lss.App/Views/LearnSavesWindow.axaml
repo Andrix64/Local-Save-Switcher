@@ -66,7 +66,10 @@
                                HorizontalAlignment="Stretch">
                     <StackPanel Spacing="2">
                       <TextBlock Classes="caption" Text="{Binding Badge}" IsVisible="{Binding HasBadge}" />
-                      <TextBlock Text="{Binding Folder}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                      <Button Classes="link" Command="{Binding OpenFolderCommand}" ToolTip.Tip="{Binding OpenFolderTip}"
+                              HorizontalAlignment="Left">
+                        <TextBlock Text="{Binding Folder}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                      </Button>
                     </StackPanel>
                   </CheckBox>
                   <TextBlock Classes="small" Text="{Binding ReasonsText}" TextWrapping="Wrap" />

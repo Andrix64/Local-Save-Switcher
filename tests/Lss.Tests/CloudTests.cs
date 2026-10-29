@@ -36,6 +36,15 @@ public sealed class CloudTests : IDisposable
     }
 
     [Fact]
+    public void GameWithoutCloudFilesMeansDisabled()
+    {
+        SaveManager manager = folder.CreateManager();
+        File.Delete(folder.CacheFile);
+
+        Assert.Equal(CloudState.Disabled, manager.GetCloudState());
+    }
+
+    [Fact]
     public void BrokenConfigMeansUnknown()
     {
         TestFolder.Write(SharedConfig, "\"apps\" { \"870780\" { \"cloudenabled\" ");

@@ -19,7 +19,7 @@ public sealed partial class LearnCandidate : ObservableObject
     private const int ShownFiles = 5;
 
     public LearnCandidate(SaveCandidate candidate, string gameName, bool recommended,
-        Action<LearnCandidate, bool> ignore)
+        Action<LearnCandidate, bool> ignore, Func<string, Task> openFolder)
     {
         Candidate = candidate;
         Folder = candidate.Folder;
@@ -37,6 +37,7 @@ public sealed partial class LearnCandidate : ObservableObject
 
         IgnoreForGameText = Loc.F(Strings.IgnoreForGame, gameName);
 
+        OpenFolderCommand = new AsyncRelayCommand(() => openFolder(Folder));
         ToggleIgnoreCommand = new RelayCommand(() => ChoosingIgnore = !ChoosingIgnore);
         IgnoreForGameCommand = new RelayCommand(() => ignore(this, false));
         IgnoreForAllCommand = new RelayCommand(() => ignore(this, true));
@@ -84,6 +85,11 @@ public sealed partial class LearnCandidate : ObservableObject
     /// <summary>Se la riga "Non è una cartella di salvataggi…" è aperta con i due pulsanti.</summary>
     [ObservableProperty]
     private bool choosingIgnore;
+
+    /// <summary>Apre la cartella proposta nel file manager.</summary>
+    public ICommand OpenFolderCommand { get; }
+
+    public string OpenFolderTip => Strings.OpenFolder;
 
     public ICommand ToggleIgnoreCommand { get; }
 

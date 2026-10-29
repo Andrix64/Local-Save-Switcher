@@ -380,6 +380,12 @@ public sealed partial class LearnSavesViewModel : ObservableObject
         ShowResult(result);
     }
 
+    private async Task OpenFolderAsync(string path)
+    {
+        if (!await dialogs.OpenFolderAsync(path))
+            await dialogs.InformAsync(Strings.TitleOperationFailed, Loc.F(Strings.CannotOpenFolder, path), InfoKind.Warning);
+    }
+
     private void ShowResult(LearnResult result)
     {
         Partial = result.Partial;
@@ -387,7 +393,7 @@ public sealed partial class LearnSavesViewModel : ObservableObject
 
         foreach (SaveCandidate candidate in result.Candidates)
         {
-            Candidates.Add(new LearnCandidate(candidate, game.Name, Candidates.Count == 0, Ignore));
+            Candidates.Add(new LearnCandidate(candidate, game.Name, Candidates.Count == 0, Ignore, OpenFolderAsync));
         }
 
         if (Candidates.Count > 0)

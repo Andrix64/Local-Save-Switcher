@@ -587,6 +587,7 @@ public sealed partial class SaveManager
             try
             {
                 Directory.CreateDirectory(Path.Combine(profile, "remote"));
+                saves.CreateEmptySnapshot(profile);
                 WriteOwner(profileName, ownerId);
                 return Result.Ok(Strings.EmptyProfileCreated);
             }

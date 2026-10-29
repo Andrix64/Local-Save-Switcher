@@ -1116,7 +1116,7 @@ public partial class GameViewModel : ObservableObject
             await OpenFolder(result.BackupPath!);
     }
 
-    private async Task OpenFolder(string path)
+    internal async Task OpenFolder(string path)
     {
         if (!await dialogs.OpenFolderAsync(path))
         {

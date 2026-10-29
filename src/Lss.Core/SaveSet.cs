@@ -49,6 +49,20 @@ internal sealed class SaveSet
     }
 
     /// <summary>
+    /// Crea uno snapshot vuoto: la cartella del posto 1 e quella di ogni posto extra
+    /// che c'è sul disco. Cambiando partita ogni posto torna vuoto; senza le cartelle
+    /// dei posti extra resterebbero i file della partita precedente.
+    /// </summary>
+    public void CreateEmptySnapshot(string snapshot)
+    {
+        foreach (SaveSpot spot in spots)
+        {
+            if (!IsMissingExtra(spot))
+                Directory.CreateDirectory(SnapshotFolder(snapshot, spot));
+        }
+    }
+
+    /// <summary>
     /// Rende ogni posto del gioco identico allo snapshot. Un posto extra assente
     /// nello snapshot non si tocca. Prima scrive il journal in journal; se un
     /// posto fallisce rimette a posto quelli già fatti dal backup, elimina il

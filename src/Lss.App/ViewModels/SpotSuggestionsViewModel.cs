@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lss.App.Services;
@@ -20,7 +21,7 @@ public partial class SpotSuggestionsViewModel : ObservableObject
         Title = Loc.F(Strings.SuggestionsTitle, game.Manager.Game.Name);
 
         Items = new ObservableCollection<SpotSuggestionItem>(suggestions.Select(suggestion => new SpotSuggestionItem(
-            suggestion, game.Manager.Game.Name, Add, Ignore, Later)));
+            suggestion, game.Manager.Game.Name, Add, Ignore, Later, game.OpenFolder)));
     }
 
     /// <summary>Esito della finestra: true se una proposta è stata gestita, false se si è chiusa senza fare nulla.</summary>
@@ -71,7 +72,7 @@ public sealed partial class SpotSuggestionItem : ObservableObject
     private readonly Action<SpotSuggestionItem> later;
 
     public SpotSuggestionItem(SpotSuggestion suggestion, string gameName, Func<SpotSuggestionItem, Task> add,
-        Action<SpotSuggestionItem, bool> ignore, Action<SpotSuggestionItem> later)
+        Action<SpotSuggestionItem, bool> ignore, Action<SpotSuggestionItem> later, Func<string, Task> openFolder)
     {
         Suggestion = suggestion;
         this.add = add;
@@ -89,6 +90,7 @@ public sealed partial class SpotSuggestionItem : ObservableObject
         IgnoreForGameCommand = new RelayCommand(() => this.ignore(this, false));
         IgnoreForAllCommand = new RelayCommand(() => this.ignore(this, true));
         LaterCommand = new RelayCommand(() => this.later(this));
+        OpenFolderCommand = new AsyncRelayCommand(() => openFolder(suggestion.Folder));
     }
 
     /// <summary>La proposta così come è salvata in proposte.json.</summary>
@@ -96,6 +98,11 @@ public sealed partial class SpotSuggestionItem : ObservableObject
 
     /// <summary>La cartella, o i file (maschera) dentro la cartella.</summary>
     public string FolderText { get; }
+
+    /// <summary>Apre la cartella proposta nel file manager.</summary>
+    public ICommand OpenFolderCommand { get; }
+
+    public string OpenFolderTip => Strings.OpenFolder;
 
     /// <summary>I motivi, uno per riga, con ✓ e ✗ (come nella procedura "Trova i salvataggi").</summary>
     public string ReasonsText { get; }

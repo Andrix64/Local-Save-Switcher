@@ -166,8 +166,9 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
     public bool IsLauncherRunning() => platform.IsSteamRunning();
 
     /// <summary>
-    /// Stato di Steam Cloud per il gioco, letto da
-    /// account\7\remote\sharedconfig.vdf. Senza impostazione vale Enabled.
+    /// Stato di Steam Cloud per il gioco. Disabled se è spento in
+    /// account\7\remote\sharedconfig.vdf, o se il gioco non usa Steam Cloud
+    /// (niente remotecache.vdf nella sua cartella e nessuna regola Auto-Cloud).
     /// </summary>
     public CloudState GetCloudState(GameAccount account, GameInfo game)
     {
@@ -175,12 +176,14 @@ public sealed class SteamProvider(IPlatform platform) : IGameProvider
         {
             string config = Path.Combine(account.Folder, "7", "remote", "sharedconfig.vdf");
 
-            if (!File.Exists(config))
-                return CloudState.Enabled;
+            if (File.Exists(config) &&
+                Vdf.Find(Vdf.Parse(File.ReadAllText(config)), "apps", game.Id, "cloudenabled") == "0")
+                return CloudState.Disabled;
 
-            string? value = Vdf.Find(Vdf.Parse(File.ReadAllText(config)), "apps", game.Id, "cloudenabled");
+            bool usesCloud = File.Exists(Path.Combine(account.Folder, game.Id, "remotecache.vdf")) ||
+                             SaveRules(account, game).Count > 0;
 
-            return value == "0" ? CloudState.Disabled : CloudState.Enabled;
+            return usesCloud ? CloudState.Enabled : CloudState.Disabled;
         }
         catch
         {

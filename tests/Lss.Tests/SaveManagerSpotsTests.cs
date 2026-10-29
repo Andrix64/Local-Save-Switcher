@@ -62,6 +62,21 @@ public sealed class SaveManagerSpotsTests : IDisposable
     }
 
     [Fact]
+    public void ActivatingAnEmptyProfileClearsEverySpot()
+    {
+        WriteGame("anna");
+        SaveManager manager = Manager();
+
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: false, TestFolder.Owner).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Bea").Success);
+
+        Assert.Empty(Directory.GetFiles(Game1, "*", SearchOption.AllDirectories));
+        Assert.Empty(Directory.GetFiles(Game2, "*", SearchOption.AllDirectories));
+        Assert.False(File.Exists(Path.Combine(Game3, "slot.sav")));
+        Assert.Equal("keep", File.ReadAllText(Path.Combine(Game3, "config.ini")));
+    }
+
+    [Fact]
     public void RestoringABackupMovesEverySpotBack()
     {
         WriteGame("before");
