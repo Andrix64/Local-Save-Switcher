@@ -631,6 +631,56 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
+    /// Crea un profilo copiando un'altra partita già esistente (non i salvataggi del gioco). Se la sorgente è
+    /// la partita in gioco, la copia parte dai salvataggi del gioco, che sono quelli aggiornati.
+    /// </summary>
+    public Result CreateProfileFrom(string name, string sourceProfile, string ownerId)
+    {
+        if (HasActiveProfile && string.Equals(sourceProfile, State.ActiveProfile, StringComparison.OrdinalIgnoreCase))
+            return CreateProfile(name, copyCurrentSaves: true, ownerId);
+
+        string operation = "Crea profilo " + ProfileFolderName(name) + " (copia di " + sourceProfile + ")";
+        Result result = CreateProfileFromCore(name, sourceProfile, ownerId);
+
+        if (result.Success)
+            RepairFavourites();
+
+        return Finish(operation, result);
+    }
+
+    private Result CreateProfileFromCore(string name, string sourceProfile, string ownerId)
+    {
+        if (!IsValidName(name))
+            return Result.Fail(Strings.InvalidName);
+
+        if (!OwnerIsKnown(ownerId))
+            return Result.Fail(Strings.PlayerNotFound);
+
+        string profileName = ProfileFolderName(name);
+        string profile = Path.Combine(ProfilesPath, profileName);
+        string source = Path.Combine(ProfilesPath, sourceProfile);
+
+        if (ProfileExists(profileName))
+            return Result.Fail(Strings.ProfileExists);
+
+        if (!Directory.Exists(source))
+            return Result.Fail(Strings.ProfileNotFound);
+
+        try
+        {
+            FileOps.CopyFolderVerified(source, profile);
+            WriteOwner(profileName, ownerId);
+            return Result.Ok(Strings.ProfileCreated);
+        }
+        catch (Exception ex)
+        {
+            // Un profilo copiato a metà comparirebbe nella lista e bloccherebbe il nome.
+            TryDeleteFolder(profile);
+            return Result.Fail(Loc.F(Strings.CopyFailed, ex.Message));
+        }
+    }
+
+    /// <summary>
     /// Rinomina un profilo e la cartella dei suoi savestate. Se è il profilo
     /// attivo, aggiorna anche lo stato.
     /// </summary>

@@ -121,7 +121,7 @@ internal static class Program
         Shot(MessageWindow.Inform(Strings.TitleOperationFailed, error,
             InfoKind.Warning, Strings.OpenBackup), "03-inform-error");
 
-        Shot(new NewPlaythroughWindow(new NewPlaythroughViewModel(_ => false, players: manager.Players?.All) { GameName = control.Name }), "04-new-playthrough");
+        Shot(new NewPlaythroughWindow(new NewPlaythroughViewModel(_ => false, players: manager.Players?.All) { GameName = control.Name, Sources = [new CopySource("Profilo_Storia", "Storia principale")] }), "04-new-playthrough");
         Shot(new NewPlaythroughWindow(new NewPlaythroughViewModel(_ => false, first)), "05-rename");
 
         Shot(new TextPromptWindow(new TextPromptViewModel(Strings.NoteTitle,

@@ -84,23 +84,6 @@ public sealed class GameViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Import_UsesPickedZip()
-    {
-        SaveManager manager = TwoPlaythroughs();
-        string zip = Path.Combine(folder.Root, "luigi.zip");
-        Assert.True(manager.ExportProfile("Profilo_Luigi", zip).Success);
-
-        dialogs.ZipToOpen = zip;
-        var vm = new GameViewModel(manager, dialogs);
-        vm.Refresh();
-
-        await vm.ImportAsync();
-
-        Assert.Contains("Open", dialogs.Calls);
-        Assert.Equal(3, vm.Playthroughs.Count);
-    }
-
-    [Fact]
     public async Task AnAddedSpotIsListedAndCanBeRemoved()
     {
         string extra = Path.Combine(folder.Root, "extra");

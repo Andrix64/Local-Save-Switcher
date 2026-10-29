@@ -98,7 +98,10 @@ DO NOT start the game. The backup is in:
   <data name="TitleOperationFailed" xml:space="preserve"><value>Operation failed</value></data>
   <data name="CannotOpenFolder" xml:space="preserve"><value>Can&apos;t open the folder: {0}</value></data>
   <data name="ProfileNameHint" xml:space="preserve"><value>Letters, digits, spaces, _ and - (up to 50 characters).</value></data>
-  <data name="CopyCurrentSaves" xml:space="preserve"><value>Copy of the game&apos;s current saves</value></data>
+  <data name="NewCopyOf" xml:space="preserve"><value>Copy of an existing playthrough</value></data>
+  <data name="NewImportFrom" xml:space="preserve"><value>Import from a file</value></data>
+  <data name="NewChooseFile" xml:space="preserve"><value>Choose file…</value></data>
+  <data name="NewNoFile" xml:space="preserve"><value>No file chosen</value></data>
   <data name="EmptyProfileOption" xml:space="preserve"><value>Empty: a new game from the beginning</value></data>
   <data name="ActivateNow" xml:space="preserve"><value>Play it right away</value></data>
   <data name="Create" xml:space="preserve"><value>Create</value></data>
@@ -254,7 +257,6 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="HistoryHeading" xml:space="preserve"><value>History of “{0}”</value></data>
   <data name="HistoryIntro" xml:space="preserve"><value>Pick a moment and go back to it. Before going back, the current situation is copied.</value></data>
   <data name="HistoryTitle" xml:space="preserve"><value>History</value></data>
-  <data name="ImportButton" xml:space="preserve"><value>Import...</value></data>
   <data name="ImportTitle" xml:space="preserve"><value>Import playthrough</value></data>
   <data name="Imported" xml:space="preserve"><value>Playthrough “{0}” imported.</value></data>
   <data name="InGameNow" xml:space="preserve"><value>IN THE GAME NOW</value></data>
@@ -514,7 +516,6 @@ LSS will look at what changed on the disk.</value></data>
   <data name="GiveToMenu" xml:space="preserve"><value>Give to…</value></data>
   <data name="GiveToPick" xml:space="preserve"><value>Who gets "{0}"?</value></data>
   <data name="NoOtherPlayer" xml:space="preserve"><value>There is no other player to give it to. Add a player first.</value></data>
-  <data name="ImportPlayerPick" xml:space="preserve"><value>Whose playthrough is it?</value></data>
   <data name="PlaythroughPlayer" xml:space="preserve"><value>Player</value></data>
   <data name="RemovePlayerText" xml:space="preserve"><value>What about the playthroughs of {0}?</value></data>
   <data name="PlayersButton" xml:space="preserve"><value>Players…</value></data>

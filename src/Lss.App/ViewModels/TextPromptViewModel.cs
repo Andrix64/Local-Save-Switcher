@@ -27,6 +27,8 @@ public partial class TextPromptViewModel : ObservableObject
 
     public string Hint { get; }
 
+    public bool HasHint => Hint != "";
+
     public int MaxLength { get; }
 
     public bool Multiline { get; }

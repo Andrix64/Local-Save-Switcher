@@ -100,7 +100,7 @@ public sealed partial class PlayersViewModel : ObservableObject
     /// <summary>"+ Aggiungi giocatore": chiede il nome e aggiunge. Annullando, non cambia nulla.</summary>
     public async Task<Result> AddAsync()
     {
-        string? name = await dialogs.PromptAsync(Strings.AddPlayer, Strings.PlayerNameCaption, Strings.PlayerNameCaption,
+        string? name = await dialogs.PromptAsync(Strings.AddPlayer, Strings.PlayerNameCaption, "",
             Strings.AddPlayer);
 
         return name == null ? Result.Ok("") : Add(name);
@@ -111,7 +111,7 @@ public sealed partial class PlayersViewModel : ObservableObject
     /// <summary>"Rinomina…" dal menu ⋯: chiede il nome nuovo partendo da quello attuale.</summary>
     public async Task<Result> RenameAsync(Person person)
     {
-        string? name = await dialogs.PromptAsync(Strings.RenameMenu, Strings.PlayerNameCaption, Strings.PlayerNameCaption,
+        string? name = await dialogs.PromptAsync(Strings.RenameMenu, Strings.PlayerNameCaption, "",
             Strings.RenameMenu.TrimEnd('.', '…'), person.Name);
 
         return name == null || name == person.Name ? Result.Ok("") : Rename(person, name);

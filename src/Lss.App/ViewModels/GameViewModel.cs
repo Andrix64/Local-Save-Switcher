@@ -614,40 +614,6 @@ public partial class GameViewModel : ObservableObject
         await ShowResult(result);
     }
 
-    [RelayCommand]
-    public async Task ImportAsync()
-    {
-        if (IsBusy)
-            return;
-
-        string? path = await dialogs.PickZipToOpenAsync(Strings.ImportTitle,
-            Loc.F(Strings.ZipFileType, Manager.Game.Name));
-
-        if (path == null)
-            return;
-
-        // Il proprietario si sceglie qui: con una sola persona è lei, senza domande.
-        Person? owner = await PickPlayerAsync(Strings.ImportPlayerPick);
-
-        if (owner == null)
-            return;
-
-        string imported = "";
-
-        Result result = await RunBusyAsync(Strings.BusyImporting, () =>
-        {
-            Result<string> import = Manager.ImportProfile(path, owner.Id);
-
-            if (!import.Success)
-                return Result.Fail(import.Message);
-
-            imported = import.Value!;
-            return Result.Ok(Loc.F(Strings.Imported, SaveManager.ProfileDisplayName(imported)));
-        });
-
-        await ShowResult(result);
-    }
-
     /// <summary>
     /// Elimina una partita: finisce tra le copie automatiche, da cui si può recuperare.
     /// </summary>
@@ -687,6 +653,9 @@ public partial class GameViewModel : ObservableObject
             defaultPlayerId: defaultOwner == "" ? Manager.DefaultOwnerId : defaultOwner)
         {
             GameName = Manager.Game.Name,
+            Sources = [.. Playthroughs.Select(card => new CopySource(card.ProfileName, card.Name))],
+            PickImportFile = () => dialogs.PickZipToOpenAsync(Strings.ImportTitle,
+                Loc.F(Strings.ZipFileType, Manager.Game.Name)),
         });
 
         NewPlaythroughResult? choice = await dialogs.ShowAsync<NewPlaythroughResult>(window);
@@ -696,13 +665,31 @@ public partial class GameViewModel : ObservableObject
 
         string owner = choice.PlayerId == "" ? Manager.DefaultOwnerId : choice.PlayerId;
 
-        Result result = await RunBusyAsync(Strings.BusyCreating,
-            () => Manager.CreateProfile(choice.Name, choice.CopyCurrentSaves, owner));
+        // Il nome della cartella della partita nuova: lo dà l'utente, o lo zip importato.
+        string created = SaveManager.ProfileFolderName(choice.Name);
+
+        Result result = choice.Content switch
+        {
+            NewContent.Import => await RunBusyAsync(Strings.BusyImporting, () =>
+            {
+                Result<string> import = Manager.ImportProfile(choice.ImportPath, owner);
+
+                if (!import.Success)
+                    return Result.Fail(import.Message);
+
+                created = import.Value!;
+                return Result.Ok(Loc.F(Strings.Imported, SaveManager.ProfileDisplayName(created)));
+            }),
+            NewContent.CopyOf => await RunBusyAsync(Strings.BusyCreating,
+                () => Manager.CreateProfileFrom(choice.Name, choice.SourceProfile, owner)),
+            _ => await RunBusyAsync(Strings.BusyCreating,
+                () => Manager.CreateProfile(choice.Name, copyCurrentSaves: false, owner)),
+        };
 
         await ShowResult(result);
 
         if (result.Success && choice.ActivateNow)
-            await PlayAsync(SaveManager.ProfileFolderName(choice.Name), Manager.State.LaunchGame);
+            await PlayAsync(created, Manager.State.LaunchGame);
     }
 
     /// <summary>

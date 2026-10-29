@@ -4,7 +4,7 @@
         xmlns:vm="using:Lss.App.ViewModels"
         x:Class="Lss.App.Views.AdminPickerWindow"
         x:DataType="vm:AdminPickerViewModel"
-        Title="Local Save Switcher"
+        Title="{Binding Title}"
         Width="460" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -70,7 +70,6 @@
     <!-- Chi sei: si scelgono gli amministratori -->
     <StackPanel Spacing="22" IsVisible="{Binding !PadOpen}">
       <StackPanel Spacing="8">
-        <TextBlock Text="{Binding Title}" FontSize="28" FontWeight="ExtraBold" />
         <TextBlock Text="{Binding OnlyAdminText}" FontSize="16" LineHeight="24" Foreground="{StaticResource TextSecondary}"
                    TextWrapping="Wrap" />
       </StackPanel>

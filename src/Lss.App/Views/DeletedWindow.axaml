@@ -3,7 +3,7 @@
         xmlns:vm="using:Lss.App.ViewModels"
         x:Class="Lss.App.Views.DeletedWindow"
         x:DataType="vm:DeletedViewModel"
-        Title="{Binding Title}"
+        Title="{Binding Heading}"
         Width="760" Height="470"
         MinWidth="560" MinHeight="360"
         WindowStartupLocation="CenterOwner"
@@ -61,7 +61,6 @@
     </StackPanel>
 
     <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,14">
-      <TextBlock Text="{Binding Heading}" FontSize="19" FontWeight="Bold" TextWrapping="Wrap" />
       <TextBlock Text="{Binding Intro}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
     </StackPanel>
 

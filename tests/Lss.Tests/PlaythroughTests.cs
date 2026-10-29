@@ -28,6 +28,18 @@ public sealed class PlaythroughTests : IDisposable
     }
 
     [Fact]
+    public void ANewPlaythroughCanBeACopyOfAnExistingOne()
+    {
+        SaveManager manager = TwoPlaythroughs();
+
+        Assert.True(manager.CreateProfileFrom("Copia", "Profilo_Luigi", TestFolder.Owner).Success);
+
+        Assert.Contains("Profilo_Copia", manager.GetProfiles());
+        Assert.False(manager.CreateProfileFrom("Copia", "Profilo_Luigi", TestFolder.Owner).Success);
+        Assert.False(manager.CreateProfileFrom("Altra", "Profilo_Inesistente", TestFolder.Owner).Success);
+    }
+
+    [Fact]
     public void NoteAndPlayTimeAreSavedAndFollowRename()
     {
         SaveManager manager = TwoPlaythroughs();

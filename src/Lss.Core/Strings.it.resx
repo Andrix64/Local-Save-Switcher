@@ -98,7 +98,10 @@ NON avviare il gioco. Il backup è in:
   <data name="TitleOperationFailed" xml:space="preserve"><value>Operazione non riuscita</value></data>
   <data name="CannotOpenFolder" xml:space="preserve"><value>Impossibile aprire la cartella: {0}</value></data>
   <data name="ProfileNameHint" xml:space="preserve"><value>Lettere, cifre, spazi, _ e - (massimo 50 caratteri).</value></data>
-  <data name="CopyCurrentSaves" xml:space="preserve"><value>Copia dei salvataggi attuali del gioco</value></data>
+  <data name="NewCopyOf" xml:space="preserve"><value>Copia di una partita esistente</value></data>
+  <data name="NewImportFrom" xml:space="preserve"><value>Importa da un file</value></data>
+  <data name="NewChooseFile" xml:space="preserve"><value>Scegli il file…</value></data>
+  <data name="NewNoFile" xml:space="preserve"><value>Nessun file scelto</value></data>
   <data name="EmptyProfileOption" xml:space="preserve"><value>Vuota: un nuovo gioco dall&apos;inizio</value></data>
   <data name="ActivateNow" xml:space="preserve"><value>Giocala subito</value></data>
   <data name="Create" xml:space="preserve"><value>Crea</value></data>
@@ -254,7 +257,6 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="HistoryHeading" xml:space="preserve"><value>Cronologia di «{0}»</value></data>
   <data name="HistoryIntro" xml:space="preserve"><value>Scegli un momento e torna lì. Prima di tornare indietro, la situazione attuale viene copiata.</value></data>
   <data name="HistoryTitle" xml:space="preserve"><value>Cronologia</value></data>
-  <data name="ImportButton" xml:space="preserve"><value>Importa...</value></data>
   <data name="ImportTitle" xml:space="preserve"><value>Importa partita</value></data>
   <data name="Imported" xml:space="preserve"><value>Partita «{0}» importata.</value></data>
   <data name="InGameNow" xml:space="preserve"><value>NEL GIOCO ADESSO</value></data>
@@ -514,7 +516,6 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="GiveToMenu" xml:space="preserve"><value>Dai a…</value></data>
   <data name="GiveToPick" xml:space="preserve"><value>A chi va "{0}"?</value></data>
   <data name="NoOtherPlayer" xml:space="preserve"><value>Non c'è un altro giocatore a cui darla. Aggiungine prima uno.</value></data>
-  <data name="ImportPlayerPick" xml:space="preserve"><value>Di chi è questa partita?</value></data>
   <data name="PlaythroughPlayer" xml:space="preserve"><value>Giocatore</value></data>
   <data name="RemovePlayerText" xml:space="preserve"><value>Cosa succede alle partite di {0}?</value></data>
   <data name="PlayersButton" xml:space="preserve"><value>Giocatori…</value></data>

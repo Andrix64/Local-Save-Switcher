@@ -4,7 +4,7 @@
         xmlns:vm="using:Lss.App.ViewModels"
         x:Class="Lss.App.Views.MyGamesWindow"
         x:DataType="vm:MyGamesViewModel"
-        Title="Local Save Switcher"
+        Title="{Binding Title}"
         Width="640" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -74,7 +74,6 @@
       </Panel>
       </Border>
       <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
-        <TextBlock Text="{Binding Title}" FontSize="26" FontWeight="ExtraBold" TextWrapping="Wrap" />
         <TextBlock Text="{Binding Hint}" FontSize="15" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
       </StackPanel>
     </Grid>

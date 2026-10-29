@@ -334,7 +334,7 @@ public sealed partial class SimpleViewModel : ObservableObject
         if (admin == null)
             return;
 
-        string? name = await dialogs.PromptAsync(Strings.AddPlayer, Strings.PlayerNameCaption, Strings.PlayerNameCaption,
+        string? name = await dialogs.PromptAsync(Strings.AddPlayer, Strings.PlayerNameCaption, "",
             Strings.AddPlayer);
 
         if (name != null)

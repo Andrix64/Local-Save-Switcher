@@ -5,7 +5,7 @@
         xmlns:core="using:Lss"
         x:Class="Lss.App.Views.NewPlaythroughWindow"
         x:DataType="vm:NewPlaythroughViewModel"
-        Title="{Binding Title}"
+        Title="{Binding Heading}"
         Width="520" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -54,9 +54,8 @@
 
   <StackPanel Margin="28,24" Spacing="16">
 
-    <TextBlock Text="{Binding Heading}" FontSize="19" FontWeight="Bold" TextWrapping="Wrap" />
 
-    <StackPanel Spacing="6">
+    <StackPanel Spacing="6" IsVisible="{Binding ShowName}">
       <TextBlock Classes="label" Text="{loc:Str CaptionProfileName}" />
       <TextBox Text="{Binding Name, Mode=TwoWay}" FontSize="14" />
       <TextBlock Classes="small" Text="{Binding HintText}" IsVisible="{Binding !HintIsError}"
@@ -89,13 +88,31 @@
       </ListBox>
     </StackPanel>
 
-    <!-- Solo per una partita nuova: da dove partono i salvataggi. -->
+    <!-- Solo per una partita nuova: da dove parte (di default vuota). -->
     <StackPanel IsVisible="{Binding !IsRename}" Spacing="8">
       <TextBlock Classes="label" Text="{loc:Str CaptionContent}" />
-      <RadioButton GroupName="Content" Content="{loc:Str CopyCurrentSaves}"
-                   IsChecked="{Binding CopyCurrentSaves, Mode=TwoWay}" />
       <RadioButton GroupName="Content" Content="{loc:Str EmptyProfileOption}"
                    IsChecked="{Binding EmptyProfile, Mode=TwoWay}" />
+
+      <RadioButton GroupName="Content" Content="{loc:Str NewCopyOf}" IsVisible="{Binding ShowCopyOption}"
+                   IsChecked="{Binding CopyOfOption, Mode=TwoWay}" />
+      <ComboBox IsVisible="{Binding CopyOfOption}" ItemsSource="{Binding Sources}"
+                SelectedItem="{Binding SelectedSource, Mode=TwoWay}" HorizontalAlignment="Stretch" Margin="28,0,0,0">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:CopySource">
+            <TextBlock Text="{Binding DisplayName}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <RadioButton GroupName="Content" Content="{loc:Str NewImportFrom}"
+                   IsChecked="{Binding ImportOption, Mode=TwoWay}" />
+      <StackPanel IsVisible="{Binding ImportOption}" Orientation="Horizontal" Spacing="12" Margin="28,0,0,0">
+        <Button Classes="secondary" Content="{loc:Str NewChooseFile}" Command="{Binding ChooseImportFileCommand}" />
+        <TextBlock Text="{Binding ImportFileText}" Classes="small" VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis" MaxWidth="280" />
+      </StackPanel>
+
       <CheckBox Content="{loc:Str ActivateNow}" IsChecked="{Binding ActivateNow, Mode=TwoWay}" Margin="0,6,0,0" />
     </StackPanel>
 

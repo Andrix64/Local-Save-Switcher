@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="using:Lss.App.Localization"
         x:Class="Lss.App.Views.ModeChoiceWindow"
-        Title="Local Save Switcher"
+        Title="{loc:Str ModeTitle}"
         Width="1000" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -61,7 +61,6 @@
 
     <StackPanel Margin="56,44,56,40" Spacing="32">
       <StackPanel Spacing="10">
-        <TextBlock Text="{loc:Str ModeTitle}" FontSize="30" FontWeight="ExtraBold" TextWrapping="Wrap" />
         <TextBlock Text="{loc:Str ModeHint}" FontSize="16" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
       </StackPanel>
 

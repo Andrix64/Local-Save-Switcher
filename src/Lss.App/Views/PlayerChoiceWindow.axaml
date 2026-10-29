@@ -3,7 +3,7 @@
         xmlns:vm="using:Lss.App.ViewModels"
         x:Class="Lss.App.Views.PlayerChoiceWindow"
         x:DataType="vm:PlayerChoiceViewModel"
-        Title="Local Save Switcher"
+        Title="{Binding Title}"
         Width="760" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -48,7 +48,6 @@
 
   <StackPanel Margin="44" Spacing="28">
     <StackPanel Spacing="8">
-      <TextBlock Text="{Binding Title}" FontSize="28" FontWeight="ExtraBold" LineHeight="34" TextWrapping="Wrap" />
       <TextBlock Text="{Binding Text}" FontSize="16" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap"
                  IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>

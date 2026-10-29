@@ -26,7 +26,7 @@
     </Panel>
     </Border>
 
-    <TextBlock Classes="small" Text="{Binding Hint}" Foreground="{StaticResource TextMuted}"
+    <TextBlock Classes="small" Text="{Binding Hint}" IsVisible="{Binding HasHint}" Foreground="{StaticResource TextMuted}"
                Margin="2,0,0,0" TextWrapping="Wrap" />
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,22,0,0">

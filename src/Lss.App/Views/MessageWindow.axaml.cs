@@ -28,8 +28,11 @@ public partial class MessageWindow : Window
 
         copyText = (heading != "" ? heading + Environment.NewLine + Environment.NewLine : "") + text;
 
-        HeadingText.Text = heading;
-        HeadingText.IsVisible = heading != "";
+        // Il titolo del messaggio sta nell'intestazione della finestra (il telaio dei popup).
+        if (heading != "")
+            Title = heading;
+
+        HeadingText.IsVisible = false;
         BodyText.Text = text;
         ShowKind(kind);
     }

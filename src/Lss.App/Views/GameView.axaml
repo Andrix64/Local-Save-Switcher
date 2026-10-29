@@ -180,8 +180,6 @@
                   HorizontalAlignment="Right" VerticalAlignment="Bottom" />
           </Panel>
         </Button>
-        <Button Classes="ghost" Content="{loc:Str ImportButton}"
-                Command="{Binding ImportCommand}" IsEnabled="{Binding !IsBusy}" />
         <Button Classes="primary" Content="{loc:Str NewPlaythroughButton}"
                 Command="{Binding NewCommand}" IsEnabled="{Binding !IsBusy}" />
       </StackPanel>

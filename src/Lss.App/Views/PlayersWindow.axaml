@@ -4,7 +4,7 @@
         xmlns:vm="using:Lss.App.ViewModels"
         x:Class="Lss.App.Views.PlayersWindow"
         x:DataType="vm:PlayersViewModel"
-        Title="Local Save Switcher"
+        Title="{loc:Str PlayersTitle}"
         Width="800" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -42,7 +42,6 @@
   <StackPanel Margin="28,24" Spacing="14">
 
     <Grid ColumnDefinitions="*,Auto">
-      <TextBlock Text="{loc:Str PlayersTitle}" FontSize="19" FontWeight="Bold" VerticalAlignment="Center" />
       <Button Grid.Column="1" Classes="primary" Click="Add_Click">
         <StackPanel Orientation="Horizontal" Spacing="4">
           <TextBlock Text="+" />
