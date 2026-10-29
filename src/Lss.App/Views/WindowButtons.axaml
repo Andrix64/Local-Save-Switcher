@@ -4,14 +4,14 @@
              x:Class="Lss.App.Views.WindowButtons"
              x:CompileBindings="False">
 
-  <!-- Chiudi, schermo intero, riduci: a sinistra dell'intestazione, che fa anche da maniglia per spostare la finestra.
+  <!-- Riduci, schermo intero, chiudi: a destra dell'intestazione, che fa anche da maniglia per spostare la finestra.
        Il DataContext (finestra principale o vista semplice) ha FullScreen. -->
   <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-    <Button Classes="iconbtn close" Click="Close_Click"
-            ToolTip.Tip="{loc:Str Close}" AutomationProperties.Name="{loc:Str Close}">
-      <Path Width="14" Height="14" Data="M5 5 L19 19 M19 5 L5 19" />
+    <Button Classes="iconbtn" Click="Minimize_Click"
+            ToolTip.Tip="{loc:Str WindowMinimize}" AutomationProperties.Name="{loc:Str WindowMinimize}">
+      <Border Width="14" Height="2" CornerRadius="1" Background="{Binding $parent[Button].Foreground}" />
     </Button>
-    <Button Classes="iconbtn" Command="{Binding FullScreen.ToggleCommand}"
+  <Button Classes="iconbtn" Command="{Binding FullScreen.ToggleCommand}"
             ToolTip.Tip="{Binding FullScreen.Tip}" AutomationProperties.Name="{Binding FullScreen.Tip}">
       <Panel>
         <Path IsVisible="{Binding FullScreen.IsWindowed}" Width="16" Height="16"
@@ -20,10 +20,10 @@
               Data="M9 4 V9 H4 M15 4 V9 H20 M20 15 H15 V20 M4 15 H9 V20" />
       </Panel>
     </Button>
-    <Button Classes="iconbtn" Click="Minimize_Click"
-            ToolTip.Tip="{loc:Str WindowMinimize}" AutomationProperties.Name="{loc:Str WindowMinimize}">
-      <Border Width="14" Height="2" CornerRadius="1" Background="{Binding $parent[Button].Foreground}" />
+    <Button Classes="iconbtn close" Click="Close_Click"
+            ToolTip.Tip="{loc:Str Close}" AutomationProperties.Name="{loc:Str Close}">
+      <Path Width="14" Height="14" Data="M5 5 L19 19 M19 5 L5 19" />
     </Button>
-  </StackPanel>
+    </StackPanel>
 
 </UserControl>

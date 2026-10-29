@@ -119,8 +119,6 @@ internal sealed class ExportSpotsData
 /// </summary>
 public sealed partial class SaveManager
 {
-    public const int MaxNoteLength = 100;
-
     // Formato delle date nei file .json.
     private const string InfoDateFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -176,9 +174,6 @@ public sealed partial class SaveManager
     public Result SetNote(string profileName, string note)
     {
         note = note.Trim().Replace("\r", "").Replace("\n", " ");
-
-        if (note.Length > MaxNoteLength)
-            return Result.Fail(Loc.F(Strings.NoteTooLong, MaxNoteLength));
 
         try
         {

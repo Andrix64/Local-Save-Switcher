@@ -7,7 +7,7 @@ namespace Lss.App.ViewModels;
 /// </summary>
 public partial class TextPromptViewModel : ObservableObject
 {
-    /// <param name="maxLength">Lunghezza massima del testo.</param>
+    /// <param name="maxLength">Lunghezza massima del testo; 0 = nessun limite.</param>
     public TextPromptViewModel(string title, string caption, string initial, string hint, int maxLength, string confirmText)
     {
         Title = title;

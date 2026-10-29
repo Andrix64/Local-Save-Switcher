@@ -48,11 +48,13 @@ public sealed class PlaythroughTests : IDisposable
     }
 
     [Fact]
-    public void NoteTooLongIsRefused()
+    public void ANoteHasNoLengthLimit()
     {
         SaveManager manager = TwoPlaythroughs();
+        string longNote = new('x', 1000);
 
-        Assert.False(manager.SetNote("Profilo_Mario", new string('x', SaveManager.MaxNoteLength + 1)).Success);
+        Assert.True(manager.SetNote("Profilo_Mario", longNote).Success);
+        Assert.Equal(longNote, manager.GetInfo("Profilo_Mario").Note);
     }
 
     [Fact]

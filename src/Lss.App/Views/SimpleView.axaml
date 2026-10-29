@@ -51,17 +51,16 @@
 
     <!-- Intestazione -->
     <Border Grid.Row="0" Classes="topbar" Background="{StaticResource Header}" Padding="16,0,24,0" PointerPressed="Header_PointerPressed">
-      <Grid ColumnDefinitions="Auto,*,Auto">
-        <views:WindowButtons Grid.Column="0" Margin="0,0,16,0" />
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto">
 
         <!-- Pagina "Chi gioca?": barretta rossa e LSS -->
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center" IsVisible="{Binding !OnGamesPage}">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center" IsVisible="{Binding !OnGamesPage}">
           <Border Width="4" Height="32" Background="{StaticResource Accent}" />
           <TextBlock Text="LSS" FontSize="26" FontWeight="ExtraBold" VerticalAlignment="Center" />
         </StackPanel>
 
         <!-- Pagina dei giochi: ‹ giocatore · Cambia giocatore -->
-        <Button Grid.Column="1" Classes="flat" Command="{Binding GoBackCommand}" IsVisible="{Binding OnGamesPage}"
+        <Button Grid.Column="0" Classes="flat" Command="{Binding GoBackCommand}" IsVisible="{Binding OnGamesPage}"
                 IsEnabled="{Binding !IsPlaying}" VerticalAlignment="Center"
                 AutomationProperties.Name="{loc:Str SimpleChangePlayer}">
           <Border Height="52" CornerRadius="26" Background="{StaticResource Surface}" Padding="8,0,18,0">
@@ -83,11 +82,14 @@
         </Button>
 
         <!-- Impostazioni (il passaggio ad Avanzata sta lì) -->
-        <Button Grid.Column="2" Classes="iconbtn" Width="44" Height="44" Command="{Binding OpenSettingsCommand}" IsVisible="{Binding ShowSettings}"
+        <Button Grid.Column="1" Classes="iconbtn" Width="44" Height="44" Margin="8,0,0,0" Command="{Binding OpenSettingsCommand}" IsVisible="{Binding ShowSettings}"
                 VerticalAlignment="Center"
                 ToolTip.Tip="{loc:Str SettingsButton}" AutomationProperties.Name="{loc:Str SettingsButton}">
           <Path Width="24" Height="24" Data="{StaticResource GearIcon}" />
         </Button>
+
+        <!-- Riduci, schermo intero, chiudi: a destra come da standard -->
+        <views:WindowButtons Grid.Column="3" />
       </Grid>
     </Border>
 

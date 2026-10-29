@@ -152,7 +152,6 @@ a:
 
 L&apos;app continua a usare la vecchia cartella. Non è andato perso nulla.</value></data>
   <data name="IgnoredProfileFolders" xml:space="preserve"><value>Cartelle ignorate in Profili (nome non valido: usa lettere, cifre, spazi, _ e -): {0}</value></data>
-  <data name="NoteTooLong" xml:space="preserve"><value>La nota può essere lunga al massimo {0} caratteri.</value></data>
   <data name="NoteSaved" xml:space="preserve"><value>Nota salvata.</value></data>
   <data name="DescActivate" xml:space="preserve"><value>Prima di passare a «{0}»</value></data>
   <data name="DescSave" xml:space="preserve"><value>Prima di salvare i progressi</value></data>

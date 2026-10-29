@@ -161,12 +161,13 @@
     </Border>
 
     <!-- Titolo dell'elenco e azioni -->
-    <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-      <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-        <StackPanel VerticalAlignment="Center" Spacing="2">
-          <TextBlock Text="{Binding Manager.Game.Name}" FontSize="28" FontWeight="ExtraBold" TextTrimming="CharacterEllipsis" />
-          <TextBlock Classes="caption" Text="{loc:Str YourPlaythroughs}" />
-        </StackPanel>
+    <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,0,0,10">
+      <!-- Il titolo si accorcia con "…" quando la finestra è stretta, senza finire sotto i pulsanti. -->
+      <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+        <TextBlock Text="{Binding Manager.Game.Name}" FontSize="28" FontWeight="ExtraBold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Classes="caption" Text="{loc:Str YourPlaythroughs}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
         <!-- Impostazioni del gioco: l'ingranaggio sopra un floppy -->
         <Button Classes="iconbtn" Command="{Binding GameSettingsCommand}" VerticalAlignment="Center"
                 ToolTip.Tip="{loc:Str GameSettingsButton}" AutomationProperties.Name="{loc:Str GameSettingsButton}">
@@ -179,8 +180,6 @@
                   HorizontalAlignment="Right" VerticalAlignment="Bottom" />
           </Panel>
         </Button>
-      </StackPanel>
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
         <Button Classes="ghost" Content="{loc:Str ImportButton}"
                 Command="{Binding ImportCommand}" IsEnabled="{Binding !IsBusy}" />
         <Button Classes="primary" Content="{loc:Str NewPlaythroughButton}"

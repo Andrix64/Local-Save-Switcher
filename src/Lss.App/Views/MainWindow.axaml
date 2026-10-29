@@ -8,7 +8,7 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Local Save Switcher"
         Width="860" Height="720"
-        MinWidth="640" MinHeight="560"
+        MinWidth="720" MinHeight="560"
         Classes="main free"
         WindowDecorations="None"
         TransparencyLevelHint="Transparent"
@@ -24,22 +24,22 @@
   <DockPanel IsVisible="{Binding !IsSimple}">
 
     <!-- Intestazione -->
-    <Border x:Name="HeaderBar" Classes="topbar" DockPanel.Dock="Top" Height="68" Background="{StaticResource Header}" Padding="12,0,16,0"
+    <Border x:Name="HeaderBar" Classes="topbar" DockPanel.Dock="Top" Height="68" Background="{StaticResource Header}" Padding="16,0,12,0"
             PointerPressed="Header_PointerPressed">
-      <Grid ColumnDefinitions="Auto,Auto,*,Auto">
-        <views:WindowButtons Grid.Column="0" Margin="0,0,16,0" />
-        <Border Grid.Column="1" Width="4" CornerRadius="2" Margin="0,16,14,16"
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+        <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="0,16,14,16"
                 Background="{StaticResource Accent}" />
-        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
           <TextBlock Classes="title" Text="LSS" />
           <TextBlock Classes="caption" Text="{Binding HeaderCaption}" />
         </StackPanel>
-        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <Button Classes="iconbtn" Command="{Binding OpenLssSettingsCommand}"
+        <!-- Impostazioni: subito dopo il nome dell'app -->
+        <Button Grid.Column="2" Classes="iconbtn" Margin="8,0,0,0" Command="{Binding OpenLssSettingsCommand}"
                   ToolTip.Tip="{loc:Str SettingsButton}" AutomationProperties.Name="{loc:Str SettingsButton}">
             <Path Width="22" Height="22" Data="{StaticResource GearIcon}" />
           </Button>
-        </StackPanel>
+        <!-- Riduci, schermo intero, chiudi: a destra come da standard -->
+        <views:WindowButtons Grid.Column="4" />
       </Grid>
     </Border>
 

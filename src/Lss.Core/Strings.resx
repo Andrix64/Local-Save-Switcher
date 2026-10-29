@@ -152,7 +152,6 @@ to:
 
 The app keeps using the old folder. Nothing has been lost.</value></data>
   <data name="IgnoredProfileFolders" xml:space="preserve"><value>Ignored folders in Profili (invalid name: use letters, digits, spaces, _ and -): {0}</value></data>
-  <data name="NoteTooLong" xml:space="preserve"><value>The note can be at most {0} characters long.</value></data>
   <data name="NoteSaved" xml:space="preserve"><value>Note saved.</value></data>
   <data name="DescActivate" xml:space="preserve"><value>Before switching to “{0}”</value></data>
   <data name="DescSave" xml:space="preserve"><value>Before saving progress</value></data>
