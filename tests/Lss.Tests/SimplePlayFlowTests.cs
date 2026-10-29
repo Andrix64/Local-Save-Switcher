@@ -160,4 +160,24 @@ public sealed class SimplePlayFlowTests : IDisposable
         Assert.Single(provider.Launched);
         Assert.False(manager.State.CloudAllowedInSimple);
     }
+    [Fact]
+    public async Task NothingSavedInTheGameIsExplainedWithoutBlamingTheAdmin()
+    {
+        var (manager, people, provider) = Setup();
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
+        Assert.True(manager.ActivateProfile("Profilo_Mario").Success);
+        var dialogs = new FakeDialogService();
+        var flow = new SimplePlayFlow(dialogs, people);
+        PlaySession session = (await flow.StartAsync(manager, Item(provider), people.Find(TestFolder.Owner)!, Ready))!;
+
+        // Il gioco non ha salvato niente: la cartella dei salvataggi è vuota alla chiusura.
+        Directory.Delete(Path.GetDirectoryName(folder.SaveFile)!, true);
+
+        Result done = await flow.FinishAsync(session);
+
+        Assert.False(done.Success);
+        Assert.Contains(Strings.SimpleNothingSaved, dialogs.LastInformText);
+        Assert.Contains(Strings.SimpleNothingSavedWarning, dialogs.LastInformText);
+        Assert.DoesNotContain(Strings.SimpleAskForHelp, dialogs.LastInformText);
+    }
 }

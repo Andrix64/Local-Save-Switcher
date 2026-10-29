@@ -567,6 +567,8 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SimpleDontKnow" xml:space="preserve"><value>I don't know: keep it aside and start a new game</value></data>
   <data name="SimpleWhoseSavesHint" xml:space="preserve"><value>LSS keeps it aside for that person. It only asks this once.</value></data>
   <data name="SimpleAskForHelp" xml:space="preserve"><value>Ask whoever set up LSS to look at it.</value></data>
+  <data name="SimpleNothingSaved" xml:space="preserve"><value>It looks like you did not save in the game, so there is nothing to keep.</value></data>
+  <data name="SimpleNothingSavedWarning" xml:space="preserve"><value>IF YOU DID SAVE, CALL AN ADMIN: YOUR PROGRESS IS NOT BEING SAVED.</value></data>
   <data name="PinCurrent" xml:space="preserve"><value>Current PIN</value></data>
   <data name="PinAgain" xml:space="preserve"><value>Repeat the new PIN</value></data>
   <data name="PinDigits" xml:space="preserve"><value>4 digits</value></data>

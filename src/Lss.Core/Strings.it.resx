@@ -567,6 +567,8 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="SimpleDontKnow" xml:space="preserve"><value>Non lo so: tienila da parte e inizia una partita nuova</value></data>
   <data name="SimpleWhoseSavesHint" xml:space="preserve"><value>LSS la tiene da parte per quella persona. Chiede solo questa volta.</value></data>
   <data name="SimpleAskForHelp" xml:space="preserve"><value>Chiedi a chi ha installato LSS di guardarla.</value></data>
+  <data name="SimpleNothingSaved" xml:space="preserve"><value>Sembra che tu non abbia salvato nel gioco, quindi non c'è niente da conservare.</value></data>
+  <data name="SimpleNothingSavedWarning" xml:space="preserve"><value>SE HAI SALVATO, CHIAMA UN AMMINISTRATORE: I TUOI PROGRESSI NON VENGONO SALVATI.</value></data>
   <data name="PinCurrent" xml:space="preserve"><value>PIN attuale</value></data>
   <data name="PinAgain" xml:space="preserve"><value>Ripeti il nuovo PIN</value></data>
   <data name="PinDigits" xml:space="preserve"><value>4 cifre</value></data>

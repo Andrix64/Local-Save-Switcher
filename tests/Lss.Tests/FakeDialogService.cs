@@ -16,6 +16,9 @@ public sealed class FakeDialogService : IDialogService
 
     public bool InformAnswer { get; set; }
 
+    /// <summary>Il testo dell'ultimo InformAsync.</summary>
+    public string LastInformText { get; private set; } = "";
+
     public string? ZipToSave { get; set; }
 
     public string? ZipToOpen { get; set; }
@@ -95,6 +98,7 @@ public sealed class FakeDialogService : IDialogService
     public Task<bool> InformAsync(string heading, string text, InfoKind kind, string? actionText = null)
     {
         Calls.Add("Inform: " + heading);
+        LastInformText = text;
         return Task.FromResult(InformAnswer);
     }
 

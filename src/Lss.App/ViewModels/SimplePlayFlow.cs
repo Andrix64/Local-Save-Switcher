@@ -75,6 +75,14 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func
 
         if (!saved.Success)
         {
+            // Cartella dei salvataggi vuota alla chiusura: di solito non si è salvato nel gioco, non è un guasto.
+            if (saved.Message == Strings.GameSavesEmptyWouldClear)
+            {
+                await dialogs.InformAsync(session.Item.Name,
+                    Strings.SimpleNothingSaved + "\n\n" + Strings.SimpleNothingSavedWarning, InfoKind.Warning);
+                return saved;
+            }
+
             await dialogs.InformAsync(session.Item.Name, saved.Message + "\n" + Strings.SimpleAskForHelp, InfoKind.Error);
             return saved;
         }
