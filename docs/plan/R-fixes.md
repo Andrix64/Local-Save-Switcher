@@ -26,7 +26,7 @@ What Andrix found trying phase P (2026-10-25), and the task for each:
 | 9 | Simple mode: games without a cover are empty tiles | R6 |
 | 10 | "Add a game": cancelling the file choice still asks the name | R2 |
 | 11 | Settings files are `.ini`: they should be JSON | R9, R10 |
-| 12 | Old saved paths have `\` instead of `/` | R11 |
+| 12 | On Windows, after every game LSS suggests as new a spot it already has: the stored path is written with different separators | R11 |
 | 13 | A full screen button in the simple mode (and back), never over the game | R7a |
 | — | **Everything that exists only for data of LSS 1.0 (or of builds before this phase) goes in one separate file**, so it can be deleted in one go when 1.0 is gone (Andrix is the only user) | R0, and R9–R11 put their migrations there |
 
@@ -504,18 +504,35 @@ Same rules as R9, for the files of each game's data folder:
 
 | Today | After | Class |
 |---|---|---|
-| `stato.ini` (own parser in `AppState`, not `IniFile`) | `stato.json` | `AppState` |
+| `stato.ini` (own parser in `AppState`, not `IniFile`) | `stato.json` | `AppState`; also `MainWindowViewModel` (checks that the file exists to open the game) |
 | `preferite.ini` | `preferite.json` | `SaveManager.Favourites.cs` |
 | `posti.ini` (and older `cartella.ini`) | `posti.json` | `GameSpots`, per-game part of `IgnoredFolders` |
 | `proposte.ini` | `proposte.json` | `SessionScan` |
-| the playthrough info files (`InfoFile(...)`: check name and folder) | `.json` | `SaveManager.Playthroughs.cs` |
-| `Backup/<copy>.ini` | `Backup/<copy>.json` | `WriteBackupInfo` / `WithBackupInfo` |
+| `Info/<playthrough>.ini` (`InfoFile(...)`) | `Info/<playthrough>.json` | `SaveManager.Playthroughs.cs` |
+| `Backup/<copy>.ini` (`BackupInfoFile(...)`) | `Backup/<copy>.json` | `WriteBackupInfo` / `WithBackupInfo` |
+
+The conversion reuses `V1Compat.ConvertIniFile<T>` of R9.
+
+**`posti.json`: one file, two sections.** Today `GameSpots` (the spots) and
+`IgnoredFolders` (keys `Ignorate.n`, `Aggiunta.n`) both write `posti.ini`.
+In JSON it stays one file with one type holding both sections (spots, and
+the game's ignored and added folders). Each class reads the whole file,
+changes only its section and writes the whole file back: with "unknown
+properties ignored", a class that wrote only its own type would erase the
+other's section. Test: saving a spot keeps the game's ignored folders, and
+ignoring a folder keeps the spots.
+
+**`cartella.ini`** is today converted lazily by `GameSpots`
+(`V1Compat.ConvertOldSpots`, called from the constructor). It moves into
+`ConvertGameFiles` (`cartella.ini` → `posti.json`) and the call in
+`GameSpots` is removed.
 
 **Not changed:**
 
 - `cambio.ini`, the `SaveSet` switch journal: written in the middle of a
   switch and read after a crash. Not a setting, not touched.
-- **Files inside export `.zip`s** (`posizioni.ini`, the zip's info file):
+- **Files inside export `.zip`s** (`posizioni.ini`, the zip's info file
+  `partita.ini`):
   new zips are written with JSON; zips made by 1.0 or by builds before R10
   must still import, and their reading is in `V1Compat`. Test both.
 - `.lss-config.json` (already JSON).
@@ -535,45 +552,67 @@ automatic copies with and without owner, a deleted playthrough, extra
 spots, ignored folders, a pending suggestion, a manual game. Run the whole
 start-up sequence (R9 point 5), then open each game with `SaveManager` and
 check that everything is there and equal. Then run it again: nothing
-changes. This test is the safety net of R9–R11: it stays until 1.0
+changes. Also: renaming a playthrough after the conversion keeps its info
+and its automatic copies (R1, now with `.json` info files). This test is the safety net of R9–R11: it stays until 1.0
 compatibility is removed (it is in `V1Compat` scope).
 
 Boundary test: remove the `// fino a R10` exceptions.
 
 Commit: `Settings in JSON: per-game files`
 
-## R11 — Old paths with `\` on Linux
+## R11 — A known spot suggested again as new (separators)
 
-**Problem.** On Linux (Steam Deck) some saved paths show `\` where `/`
-belongs: written by older builds or coming from rules or configurations
-made on Windows. New paths are right; old ones stay wrong.
+**Problem.** On Windows, after every game LSS suggests as a new spot a
+folder that already is one. The stored path, written by an older build,
+has different separators (other separator, mixed or doubled, final
+slash) from the path the search finds. Found on 2026-10-29:
+`SessionScan.Run` leaves out the known spots, the pending suggestions and
+the dismissed ones with `Same` (`SessionScan.cs`), a plain `string.Equals`
+(no case on Windows) that doesn't normalise separators. The search gives
+`Path.GetFullPath` paths, the stored `Folder` is as it was written: the
+strings differ and the folder looks new. "Ignore" can fail the same way.
+The same thing can happen on Linux with `\` in paths made on Windows.
 
 **Do.**
 
-1. **Find where first**: with a test, build data of an older build with
-   `\` in stored paths and see which of these keep it: game spots
-   (`GameSpots`), ignored folders, suggestions (`SessionScan`), what
-   `stato` stores about spots, manual games' exe and save folder,
-   imported `.lss-config.json`. Write the list in the Notes.
-2. Helper `PathText.Normalize(string path)` in `Lss.Core`: on Linux every
-   `\` becomes `/`; on Windows every `/` becomes `\`. Only for **folder and
-   file paths**. Spot patterns (`*.sav`, sub-paths) — read how
-   `Glob` / `SaveRule` / `ToLocal` use separators first, and normalise them
-   only if those places compare them with the system separator.
-3. Old data: in the R9/R10 conversion (`V1Compat`), so the JSON files are
+1. **Reproduce first**: a test with a spot stored as an older build wrote
+   it and a session that changes that same folder. Today it gives a
+   suggestion: the test fails. If Andrix gives a real `posti.ini` line
+   from Windows, use it in the test.
+2. **Find where else**: with a test, build data of an older build with
+   wrong separators in stored paths and see which of these keep it: game
+   spots (`GameSpots`), ignored folders, suggestions and dismissed
+   suggestions (`SessionScan`), what `stato` stores about spots, manual
+   games' exe and save folder, imported `.lss-config.json`. Write the list
+   in the Notes.
+3. Helper `PathText.Normalize(string path)` in `Lss.Core`: every `\` and
+   `/` becomes the system separator, doubled separators become one (not the
+   leading `\\` of a network path `\\server\share`), no final separator (except a drive root like `C:\` or `/`). Only for
+   **folder and file paths**. Spot patterns (`*.sav`, sub-paths) — read
+   how `Glob` / `SaveRule` / `ToLocal` use separators first, and normalise
+   them only if those places compare them with the system separator.
+4. **The fix is in the normal code, not in `V1Compat`**: comparing paths
+   robustly is right whatever the data. `SessionScan.Same` and every other
+   folder comparison found in point 2 normalise both sides before
+   comparing. This removes the symptom even on data nobody has seen.
+5. Suggestions already stored that are really a known spot: the next
+   `Run` finds them equal to a spot and removes them. Test it.
+6. Old data: in the R9/R10 conversion (`V1Compat`), so the JSON files are
    clean; logged with the file and the number of paths fixed. **Also** a
-   pass over the JSON files that already exist (a build between R10 and
-   R11 may have converted them with the `\` inside): `V1Compat` fixes them
-   at start-up, after the conversion; doing it again changes nothing.
-4. New data from elsewhere (an imported `.lss-config.json` made on
-   Windows): `Normalize` on import, in the normal code (that is not 1.0
-   compatibility).
+   pass over the JSON files that already exist (converted by R9/R10 with
+   the old separators inside): `V1Compat` fixes them at start-up, after
+   the conversion; doing it again changes nothing.
+7. New data from elsewhere (an imported `.lss-config.json` made on the
+   other system): `Normalize` on import, in the normal code (that is not
+   1.0 compatibility).
 
-**Tests.** `PathTextTests` (expectations by `OperatingSystem.IsLinux()`,
-like the existing Linux-only tests); a conversion test with `\` in every
-place of point 1; an import test of a config with `\` paths on Linux.
+**Tests.** `PathTextTests` (expectations by `OperatingSystem.IsWindows()`,
+like the existing platform-only tests); the reproduction of point 1; a
+suggestion already stored for a known spot goes away; a conversion test
+with wrong separators in every place of point 2; an import test of a
+config made on the other system.
 
-Commit: `Fix old saved paths with backslashes on Linux`
+Commit: `Known spots are not suggested again: compare paths with normalised separators`
 
 ## R12 — Screenshots, docs, Linux check
 
@@ -599,6 +638,9 @@ machine (Windows `%LOCALAPPDATA%\LSS`, Linux `~/.local/share/LSS`):
   screen, check it comes to the front and LSS comes back after).
 - Everything still there after the JSON conversion: players and PINs,
   favourites, playthroughs and history, save spots, ignored folders,
-  manual games; `.ini.precedente` files next to the new `.json`.
+  manual games; `.ini.precedente` files next to the new `.json`; no
+  `.rotto` file in the data folder and no conversion error in the log.
+- After a game whose spots were made by an older build, LSS doesn't
+  suggest them again as new (point 12).
 - **After R9/R10, don't open LSS 1.0 on the same data**: it no longer finds
   its `.ini` files and would start as on a new computer.
