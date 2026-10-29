@@ -9,7 +9,7 @@
         Title="Local Save Switcher"
         Width="860" Height="720"
         MinWidth="640" MinHeight="560"
-        WindowDecorations="BorderOnly"
+        WindowDecorations="None"
         WindowStartupLocation="CenterScreen">
 
   <Grid>
@@ -136,6 +136,23 @@
       </DataTemplate>
     </ContentControl.DataTemplates>
   </ContentControl>
+
+  <!-- Senza cornice di sistema i bordi sottili ridimensionano la finestra. -->
+  <Grid x:Name="ResizeGrips" IsVisible="{Binding FullScreen.IsWindowed}">
+    <Grid.Styles>
+      <Style Selector="Border.grip">
+        <Setter Property="Background" Value="Transparent" />
+      </Style>
+    </Grid.Styles>
+    <Border Classes="grip" Tag="North" Height="5" VerticalAlignment="Top" Margin="8,0" Cursor="SizeNorthSouth" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="South" Height="5" VerticalAlignment="Bottom" Margin="8,0" Cursor="SizeNorthSouth" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="West" Width="5" HorizontalAlignment="Left" Margin="0,8" Cursor="SizeWestEast" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="East" Width="5" HorizontalAlignment="Right" Margin="0,8" Cursor="SizeWestEast" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="NorthWest" Width="8" Height="8" HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="TopLeftCorner" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="NorthEast" Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="TopRightCorner" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="SouthWest" Width="8" Height="8" HorizontalAlignment="Left" VerticalAlignment="Bottom" Cursor="BottomLeftCorner" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="SouthEast" Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="BottomRightCorner" PointerPressed="Grip_PointerPressed" />
+  </Grid>
 
   </Grid>
 

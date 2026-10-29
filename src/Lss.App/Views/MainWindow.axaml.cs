@@ -27,6 +27,13 @@ public partial class MainWindow : Window
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
 
+    private void Grip_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        if (sender is Border { Tag: string edge } && Enum.TryParse(edge, out WindowEdge windowEdge)
+            && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            BeginResizeDrag(windowEdge, e);
+    }
+
     // Senza barra del titolo di sistema l'intestazione sposta la finestra.
     private void Header_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e) =>
         WindowDrag.Begin((Control)sender!, e);

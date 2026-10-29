@@ -83,7 +83,7 @@
         </Button>
 
         <!-- Impostazioni (il passaggio ad Avanzata sta lì) -->
-        <Button Grid.Column="2" Classes="iconbtn" Width="44" Height="44" Command="{Binding OpenSettingsCommand}"
+        <Button Grid.Column="2" Classes="iconbtn" Width="44" Height="44" Command="{Binding OpenSettingsCommand}" IsVisible="{Binding ShowSettings}"
                 VerticalAlignment="Center"
                 ToolTip.Tip="{loc:Str SettingsButton}" AutomationProperties.Name="{loc:Str SettingsButton}">
           <Path Width="24" Height="24" Data="{StaticResource GearIcon}" />

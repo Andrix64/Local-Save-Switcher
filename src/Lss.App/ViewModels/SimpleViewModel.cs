@@ -122,6 +122,9 @@ public sealed partial class SimpleViewModel : ObservableObject
 
     public string CurrentName => Current?.Name ?? "";
 
+    /// <summary>L'icona delle impostazioni compare solo dentro il profilo di un amministratore.</summary>
+    public bool ShowSettings => Current is { IsAdmin: true };
+
     /// <summary>Ricostruisce le persone e, se c'è, i giochi del giocatore attuale.</summary>
     public void Refresh()
     {
@@ -157,6 +160,7 @@ public sealed partial class SimpleViewModel : ObservableObject
 
         OnPropertyChanged(nameof(OnGamesPage));
         OnPropertyChanged(nameof(CurrentName));
+        OnPropertyChanged(nameof(ShowSettings));
         OnPropertyChanged(nameof(CurrentTile));
     }
 
