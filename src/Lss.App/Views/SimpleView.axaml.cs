@@ -15,6 +15,9 @@ public partial class SimpleView : UserControl
 
     private SimpleViewModel? ViewModel => DataContext as SimpleViewModel;
 
+    private void Header_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e) =>
+        Services.WindowDrag.Begin((Control)sender!, e);
+
     private void Player_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: PersonTile tile })

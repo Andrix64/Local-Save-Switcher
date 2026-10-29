@@ -27,6 +27,10 @@ public partial class MainWindow : Window
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
 
+    // Senza barra del titolo di sistema l'intestazione sposta la finestra.
+    private void Header_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e) =>
+        WindowDrag.Begin((Control)sender!, e);
+
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);

@@ -116,6 +116,7 @@ Which one do you want to use? Each account has its own playthroughs.</value></da
   <data name="CaptionLauncherAccount" xml:space="preserve"><value>{0} ACCOUNT</value></data>
   <data name="AccountNoSaves" xml:space="preserve"><value>no saves</value></data>
   <data name="AccountLastSaved" xml:space="preserve"><value>last saved {0}</value></data>
+  <data name="WindowMinimize" xml:space="preserve"><value>Minimize</value></data>
   <data name="Close" xml:space="preserve"><value>Close</value></data>
   <data name="CannotReadList" xml:space="preserve"><value>Can&apos;t read the list: {0}</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>

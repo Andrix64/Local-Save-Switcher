@@ -38,6 +38,9 @@
     <SolidColorBrush x:Key="DangerPressed">#8F1D17</SolidColorBrush>
     <SolidColorBrush x:Key="SecondaryHover">#38383D</SolidColorBrush>
     <SolidColorBrush x:Key="SecondaryPressed">#242428</SolidColorBrush>
+    <!-- Icone a tratto (griglia 24x24, stile Lucide), colorate dal Foreground del pulsante. -->
+    <StreamGeometry x:Key="GearIcon">M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z</StreamGeometry>
+    <StreamGeometry x:Key="FloppyIcon">M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7 M7 3v4a1 1 0 0 0 1 1h7</StreamGeometry>
   </Styles.Resources>
 
   <Style Selector="Window">
@@ -218,6 +221,31 @@
   <Style Selector="Border.infobar.error">
     <Setter Property="Background" Value="{StaticResource ErrorBack}" />
     <Setter Property="BorderBrush" Value="{StaticResource ErrorBorder}" />
+  </Style>
+
+  <!-- Pulsanti con la sola icona (impostazioni, tasti della finestra). -->
+  <Style Selector="Button.iconbtn">
+    <Setter Property="Width" Value="36" />
+    <Setter Property="Height" Value="36" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+  </Style>
+  <Style Selector="Button.iconbtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+    <Setter Property="Foreground" Value="{StaticResource Text}" />
+  </Style>
+  <Style Selector="Button.iconbtn.close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource Danger}" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.iconbtn Path">
+    <Setter Property="Stroke" Value="{Binding $parent[Button].Foreground}" />
+    <Setter Property="StrokeThickness" Value="1.8" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="StrokeJoin" Value="Round" />
+    <Setter Property="Stretch" Value="Uniform" />
   </Style>
 
   <!-- Finestre delle impostazioni: pannelli senza fronzoli, una riga per impostazione con l'interruttore a destra. -->

@@ -165,8 +165,18 @@
     <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
       <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
         <TextBlock Text="{loc:Str YourPlaythroughs}" FontSize="19" FontWeight="Bold" VerticalAlignment="Center" />
-        <Button Classes="link" Content="{loc:Str GameSettingsButton}" Command="{Binding GameSettingsCommand}"
-                VerticalAlignment="Center" />
+        <!-- Impostazioni del gioco: l'ingranaggio sopra un floppy -->
+        <Button Classes="iconbtn" Command="{Binding GameSettingsCommand}" VerticalAlignment="Center"
+                ToolTip.Tip="{loc:Str GameSettingsButton}" AutomationProperties.Name="{loc:Str GameSettingsButton}">
+          <Panel Width="24" Height="24">
+            <Path Data="{StaticResource FloppyIcon}" Width="22" Height="22" HorizontalAlignment="Left"
+                  VerticalAlignment="Top" />
+            <Ellipse Width="14" Height="14" Fill="{StaticResource Background}" HorizontalAlignment="Right"
+                     VerticalAlignment="Bottom" />
+            <Path Data="{StaticResource GearIcon}" Width="13" Height="13" StrokeThickness="2"
+                  HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+          </Panel>
+        </Button>
       </StackPanel>
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
         <Button Classes="secondary" Content="{loc:Str ImportButton}"

@@ -116,6 +116,7 @@ Quale vuoi usare? Ogni account ha le sue partite.</value></data>
   <data name="CaptionLauncherAccount" xml:space="preserve"><value>ACCOUNT {0}</value></data>
   <data name="AccountNoSaves" xml:space="preserve"><value>nessun salvataggio</value></data>
   <data name="AccountLastSaved" xml:space="preserve"><value>ultimo salvataggio {0}</value></data>
+  <data name="WindowMinimize" xml:space="preserve"><value>Riduci a icona</value></data>
   <data name="Close" xml:space="preserve"><value>Chiudi</value></data>
   <data name="CannotReadList" xml:space="preserve"><value>Impossibile leggere l&apos;elenco: {0}</value></data>
   <data name="Delete" xml:space="preserve"><value>Elimina</value></data>
