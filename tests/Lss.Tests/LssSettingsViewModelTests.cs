@@ -47,7 +47,7 @@ public sealed class LssSettingsViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task LookAfterPlayingIsOnByDefaultAndSavedInLssIni()
+    public void LookAfterPlayingIsOnByDefaultAndSavedAtOnceInLssIni()
     {
         string ini = Path.Combine(folder.Root, "lss.json");
         var settings = new AppSettings(ini);
@@ -55,7 +55,6 @@ public sealed class LssSettingsViewModelTests : IDisposable
         Assert.True(vm.LookAfterPlaying);
 
         vm.LookAfterPlaying = false;
-        Assert.True(await vm.TrySaveAsync());
 
         var read = new AppSettings(ini);
         read.Load();

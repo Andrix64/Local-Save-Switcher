@@ -81,5 +81,4 @@ public partial class PlayersWindow : Window
             await ViewModel.RemoveAsync(row.Person);
     }
 
-    private void Close_Click(object? sender, RoutedEventArgs e) => Close();
 }

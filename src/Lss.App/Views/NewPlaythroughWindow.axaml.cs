@@ -21,6 +21,4 @@ public partial class NewPlaythroughWindow : Window
     private void Create_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) =>
         Close(ViewModel.CreateResult());
 
-    private void Cancel_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) =>
-        Close(null);
 }

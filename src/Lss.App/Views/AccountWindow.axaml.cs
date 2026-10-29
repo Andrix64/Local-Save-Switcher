@@ -26,7 +26,6 @@ public partial class AccountWindow : Window
 
     private void List_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e) => Use();
 
-    private void Exit_Click(object? sender, RoutedEventArgs e) => Close();
 
     private void Use()
     {

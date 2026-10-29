@@ -49,8 +49,6 @@
     </ScrollViewer>
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
-      <Button Classes="secondary" Content="{Binding CloseText}" IsCancel="True" MinWidth="110"
-              Command="{Binding CloseCommand}" />
     </StackPanel>
 
   </StackPanel>

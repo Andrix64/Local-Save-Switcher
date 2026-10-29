@@ -100,7 +100,6 @@
     </StackPanel>
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,6,0,0">
-      <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" Click="Cancel_Click" />
       <Button Classes="primary" Content="{Binding CreateText}" IsDefault="True" IsEnabled="{Binding CanCreate}"
               Click="Create_Click" />
     </StackPanel>

@@ -890,7 +890,9 @@ public partial class GameViewModel : ObservableObject
         if (IsBusy)
             return false;
 
-        bool saved = await dialogs.ShowAsync<bool>(new GameSettingsWindow(new GameSettingsViewModel(Manager, dialogs)));
+        var settings = new GameSettingsViewModel(Manager, dialogs);
+        await dialogs.ShowAsync<bool>(new GameSettingsWindow(settings));
+        bool saved = settings.Saved;
 
         if (saved)
         {

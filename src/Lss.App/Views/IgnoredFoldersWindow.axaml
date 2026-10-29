@@ -37,11 +37,6 @@
       </ItemsControl>
     </ScrollViewer>
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-      <Button Classes="secondary" Content="{Binding CloseText}" IsCancel="True" IsDefault="True" MinWidth="110"
-              Click="Close_Click" />
-    </StackPanel>
-
   </StackPanel>
 
 </Window>

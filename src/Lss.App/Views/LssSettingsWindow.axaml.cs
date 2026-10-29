@@ -1,11 +1,10 @@
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Lss.App.ViewModels;
 
 namespace Lss.App.Views;
 
 /// <summary>
-/// Impostazioni di LSS. Il risultato è true se sono state salvate.
+/// Impostazioni di LSS: ogni modifica vale subito, la finestra si chiude con la X.
 /// </summary>
 public partial class LssSettingsWindow : Window
 {
@@ -15,24 +14,14 @@ public partial class LssSettingsWindow : Window
     {
         DataContext = viewModel;
 
-        // Cambiata la modalità la finestra ha fatto il suo lavoro: salva e si chiude.
+        // Cambiata la modalità la finestra ha fatto il suo lavoro: si chiude.
         if (viewModel.Mode is { } mode)
         {
-            mode.PropertyChanged += async (_, e) =>
+            mode.PropertyChanged += (_, e) =>
             {
-                if (e.PropertyName == nameof(ModeSwitchViewModel.IsSimple) && await viewModel.TrySaveAsync())
-                    Close(true);
+                if (e.PropertyName == nameof(ModeSwitchViewModel.IsSimple))
+                    Close();
             };
         }
     }
-
-    private LssSettingsViewModel ViewModel => (LssSettingsViewModel)DataContext!;
-
-    private async void Save_Click(object? sender, RoutedEventArgs e)
-    {
-        if (await ViewModel.TrySaveAsync())
-            Close(true);
-    }
-
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(false);
 }

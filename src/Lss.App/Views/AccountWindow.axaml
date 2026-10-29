@@ -14,8 +14,6 @@
 
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10"
                 Margin="0,16,0,0">
-      <Button Classes="secondary" Content="{Binding ExitText}" IsCancel="True" MinWidth="100"
-              Click="Exit_Click" />
       <Button Classes="primary" Content="{Binding UseText}" IsDefault="True" IsEnabled="{Binding CanUse}"
               MinWidth="170" Click="Use_Click" />
     </StackPanel>

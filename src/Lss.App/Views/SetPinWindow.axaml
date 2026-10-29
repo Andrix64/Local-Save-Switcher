@@ -67,7 +67,6 @@
                IsVisible="{Binding HasMessage}" />
 
     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-      <Button Classes="secondary" Content="{loc:Str Cancel}" IsCancel="True" Click="Cancel_Click" />
       <Button Classes="primary" Content="{loc:Str PinSave}" IsDefault="True" IsEnabled="{Binding CanSave}"
               Click="Save_Click" />
     </StackPanel>

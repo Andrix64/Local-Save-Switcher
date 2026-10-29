@@ -54,10 +54,6 @@ public partial class LssSettingsViewModel : ObservableObject
 
     public string CaptionData => Strings.CaptionData;
 
-    public string SaveText => Strings.SaveButton;
-
-    public string CancelText => Strings.Cancel;
-
     [ObservableProperty]
     private bool lookAfterPlaying;
 
@@ -65,13 +61,11 @@ public partial class LssSettingsViewModel : ObservableObject
 
     public string LookAfterPlayingHint => Strings.LookAfterPlayingHint;
 
-    /// <summary>Salva le impostazioni dell'app: valgono subito per tutti i giochi.</summary>
-    public Task<bool> TrySaveAsync()
+    /// <summary>Le impostazioni dell'app si salvano subito: valgono subito per tutti i giochi.</summary>
+    partial void OnLookAfterPlayingChanged(bool value)
     {
-        settings.LookAfterPlaying = LookAfterPlaying;
+        settings.LookAfterPlaying = value;
         settings.Save();
-
-        return Task.FromResult(true);
     }
 
     public string ExportAllText => Strings.ExportAllConfigs;

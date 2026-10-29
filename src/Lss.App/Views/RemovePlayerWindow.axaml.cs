@@ -17,5 +17,4 @@ public partial class RemovePlayerWindow : Window
 
     private void Remove_Click(object? sender, RoutedEventArgs e) => Close(((RemovePlayerViewModel)DataContext!).Choice);
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(null);
 }

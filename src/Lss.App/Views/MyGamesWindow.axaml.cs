@@ -34,5 +34,4 @@ public partial class MyGamesWindow : Window
         Close(ViewModel.Choice);
     }
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(null);
 }

@@ -127,7 +127,6 @@
     <TextBlock Text="{Binding Message}" IsVisible="{Binding HasMessage}"
                Foreground="{StaticResource Error}" TextWrapping="Wrap" />
 
-    <Button Classes="primary" Content="{loc:Str Close}" IsCancel="True" HorizontalAlignment="Right" Click="Close_Click" />
 
   </StackPanel>
 

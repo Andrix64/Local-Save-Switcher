@@ -26,5 +26,4 @@ public partial class SetPinWindow : Window
             Close(true);
     }
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(false);
 }

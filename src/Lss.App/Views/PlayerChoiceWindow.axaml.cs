@@ -25,5 +25,4 @@ public partial class PlayerChoiceWindow : Window
             Close(tile.Person);
     }
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(null);
 }

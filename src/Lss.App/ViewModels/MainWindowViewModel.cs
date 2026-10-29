@@ -506,68 +506,6 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Importa un file di configurazione dei salvataggi: per ogni gioco che c'è qui si
-    /// mostra cosa succede, e si scrive solo quello che l'utente conferma.
-    /// </summary>
-    [RelayCommand]
-    private async Task ImportConfigAsync()
-    {
-        string? path = await dialogs.PickConfigToOpenAsync(Strings.ImportConfigTitle);
-
-        if (path == null)
-            return;
-
-        Result<SaveConfigFile> read;
-
-        try
-        {
-            read = SaveConfig.Read(File.ReadAllText(path));
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            read = Result<SaveConfigFile>.Fail(Loc.F(Strings.ConfigInvalid, ex.Message));
-        }
-
-        if (!read.Success)
-        {
-            await dialogs.InformAsync(Strings.ImportConfigTitle, read.Message, InfoKind.Warning);
-            return;
-        }
-
-        SaveConfigFile file = read.Value!;
-        IReadOnlyList<ConfigGamePlan> plans = SaveConfigImport.Plan(file, Games.Select(item => item.Info).ToList(),
-            info => ContextOf(info), info => LauncherFoldersOf(info), AppData.Root);
-
-        var model = new ImportConfigViewModel(file, plans, info => ItemOf(info)!.Provider.DisplayName, ApplyConfigAsync);
-
-        if (await dialogs.ShowAsync<bool>(new ImportConfigWindow(model)) != true)
-            return;
-
-        await dialogs.InformAsync(Strings.ImportConfigTitle, Loc.F(Strings.ConfigImported, model.Applied), InfoKind.Info);
-        ReloadGames(SelectedGame?.Info.Key, SelectedGame?.Info.Key);
-    }
-
-    /// <summary>
-    /// Scrive i posti importabili di un gioco (vedi SaveConfigImport.ApplyAsync). Con partite
-    /// ogni posto chiede copia o vuoto; la scheda del gioco si ricrea alla prossima apertura.
-    /// </summary>
-    private async Task<int> ApplyConfigAsync(ConfigGamePlan plan)
-    {
-        GameItemViewModel item = ItemOf(plan.Game!)!;
-        string dataFolder = Path.Combine(AppData.Root, item.Account.Provider, item.Account.Id, plan.Game!.Id);
-        bool playthroughs = SaveFolderChoice.HasPlaythroughs(dataFolder);
-        GameViewModel game = GameFor(item);
-
-        int added = await SaveConfigImport.ApplyAsync(plan, dataFolder, playthroughs, game.AddSpotWithChoiceAsync);
-
-        // Il gioco cambia: la sua scheda, con i posti di prima, va ricreata.
-        if (added > 0 && !game.IsBusy)
-            gameModels.Remove(item.Info.Key);
-
-        return added;
-    }
-
-    /// <summary>
     /// Esporta in un solo file la configurazione di ogni gioco che ha almeno un posto
     /// scelto, imparato o importato (N9c). Il file si scrive solo se si sceglie dove.
     /// </summary>
@@ -606,18 +544,6 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     private GameItemViewModel? ItemOf(GameInfo info) => Games.FirstOrDefault(game => game.Info.Key == info.Key);
-
-    private SaveContext ContextOf(GameInfo info)
-    {
-        GameItemViewModel item = ItemOf(info)!;
-        return SaveLookup.ContextFor(item.Provider, item.Account, info, Platform.Current.GetKnownFolders());
-    }
-
-    private IReadOnlyList<string> LauncherFoldersOf(GameInfo info)
-    {
-        GameItemViewModel item = ItemOf(info)!;
-        return item.Provider.LauncherFolders(item.Account);
-    }
 
     /// <summary>"Impostazioni" di LSS (non di un gioco): cercare dopo aver giocato, giocatori, esportazione, dati.</summary>
     [RelayCommand]

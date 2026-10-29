@@ -77,14 +77,6 @@
 
     <Button Classes="link" Content="{Binding IgnoredFoldersText}" Command="{Binding OpenIgnoredFoldersCommand}"
             HorizontalAlignment="Left" Margin="4,16,0,0" />
-
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,20,0,0">
-      <Button Classes="secondary" Content="{Binding CancelText}" IsCancel="True" MinWidth="100"
-              Click="Cancel_Click" />
-      <Button Classes="primary" Content="{Binding SaveText}" IsDefault="True" MinWidth="100"
-              Click="Save_Click" />
-    </StackPanel>
-
   </StackPanel>
 
 </Window>

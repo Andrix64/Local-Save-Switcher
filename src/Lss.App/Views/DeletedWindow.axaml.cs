@@ -41,7 +41,6 @@ public partial class DeletedWindow : Window
         ViewModel.Stop();
     }
 
-    private void Close_Click(object? sender, RoutedEventArgs e) => Close();
 
     // I pulsanti della riga scelgono la partita, poi fanno come quelli in fondo.
     private async void Recover_Click(object? sender, RoutedEventArgs e)

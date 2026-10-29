@@ -63,7 +63,6 @@ public partial class AdminPickerWindow : Window
     }
 
     // Annulla dalla scelta: nessuno è scelto.
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close();
 
     // Le cifre della tastiera valgono come quelle dei pulsanti.
     private void Window_KeyDown(object? sender, KeyEventArgs e)

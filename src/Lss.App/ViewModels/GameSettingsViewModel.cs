@@ -29,6 +29,8 @@ public partial class GameSettingsViewModel : ObservableObject
 {
     private readonly SaveManager manager;
     private readonly IDialogService dialogs;
+    private bool ready;
+    private bool reverting;
 
     internal GameSettingsViewModel(SaveManager manager, IDialogService dialogs)
     {
@@ -43,6 +45,8 @@ public partial class GameSettingsViewModel : ObservableObject
 
         foreach (string file in manager.SharedFiles)
             SharedFiles.Add(new SharedFileItemViewModel(file, Remove));
+
+        ready = true;
     }
 
     /// <summary>"Impostazioni di {gioco}".</summary>
@@ -74,10 +78,6 @@ public partial class GameSettingsViewModel : ObservableObject
 
     public string CaptionCopies => Strings.CaptionCopies;
 
-    public string SaveText => Strings.SaveButton;
-
-    public string CancelText => Strings.Cancel;
-
     [ObservableProperty]
     private bool launchGame;
 
@@ -92,8 +92,43 @@ public partial class GameSettingsViewModel : ObservableObject
 
     public ObservableCollection<SharedFileItemViewModel> SharedFiles { get; } = [];
 
+    /// <summary>true se almeno una modifica è stata salvata: chi apre la finestra aggiorna le schede.</summary>
+    public bool Saved { get; private set; }
+
+    // Ogni modifica vale subito (nessun Salva): si scrive lo stato del gioco a ogni cambiamento.
+    partial void OnLaunchGameChanged(bool value) => ApplyNow();
+
+    partial void OnSaveOnExitChanged(bool value) => ApplyNow();
+
+    partial void OnShareOptionsChanged(bool value) => ApplyNow();
+
+    // Meno copie da tenere elimina quelle in più: se non si conferma, il numero torna com'era.
+    partial void OnKeepCopiesChanged(decimal oldValue, decimal newValue)
+    {
+        if (!ready || reverting)
+            return;
+
+        _ = ApplyKeepAsync(oldValue);
+    }
+
+    private async Task ApplyKeepAsync(decimal previous)
+    {
+        if (await TrySaveAsync())
+            return;
+
+        reverting = true;
+        KeepCopies = previous;
+        reverting = false;
+    }
+
+    private void ApplyNow()
+    {
+        if (ready && !reverting)
+            _ = TrySaveAsync();
+    }
+
     /// <summary>
-    /// Salva le impostazioni. Prima chiede conferma se si eliminano copie.
+    /// Salva le impostazioni (a ogni modifica). Prima chiede conferma se si eliminano copie.
     /// true se sono state salvate.
     /// </summary>
     public async Task<bool> TrySaveAsync()
@@ -116,6 +151,7 @@ public partial class GameSettingsViewModel : ObservableObject
             return false;
         }
 
+        Saved = true;
         return true;
     }
 
@@ -145,6 +181,7 @@ public partial class GameSettingsViewModel : ObservableObject
             return;
 
         SharedFiles.Add(new SharedFileItemViewModel(relative, Remove));
+        ApplyNow();
     }
 
     public string IgnoredFoldersText => Strings.IgnoredFoldersLink;
@@ -162,5 +199,9 @@ public partial class GameSettingsViewModel : ObservableObject
             new IgnoredFoldersViewModel(dataFolder, manager.Game.Name, IgnoredScope.Game)));
     }
 
-    private void Remove(SharedFileItemViewModel item) => SharedFiles.Remove(item);
+    private void Remove(SharedFileItemViewModel item)
+    {
+        SharedFiles.Remove(item);
+        ApplyNow();
+    }
 }

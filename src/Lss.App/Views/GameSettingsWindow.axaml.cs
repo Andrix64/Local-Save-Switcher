@@ -1,12 +1,10 @@
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Lss.App.ViewModels;
 
 namespace Lss.App.Views;
 
 /// <summary>
-/// Impostazioni di un gioco. Il risultato è true se sono state salvate.
+/// Impostazioni di un gioco: ogni modifica vale subito, la finestra si chiude con la X.
 /// </summary>
 public partial class GameSettingsWindow : Window
 {
@@ -16,14 +14,4 @@ public partial class GameSettingsWindow : Window
     {
         DataContext = viewModel;
     }
-
-    private GameSettingsViewModel ViewModel => (GameSettingsViewModel)DataContext!;
-
-    private async void Save_Click(object? sender, RoutedEventArgs e)
-    {
-        if (await ViewModel.TrySaveAsync())
-            Close(true);
-    }
-
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(false);
 }

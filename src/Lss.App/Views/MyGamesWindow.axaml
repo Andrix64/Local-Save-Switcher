@@ -77,11 +77,6 @@
         <TextBlock Text="{Binding Title}" FontSize="26" FontWeight="ExtraBold" TextWrapping="Wrap" />
         <TextBlock Text="{Binding Hint}" FontSize="15" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
       </StackPanel>
-      <Button Grid.Column="2" Classes="close" IsCancel="True" Click="Cancel_Click" VerticalAlignment="Center"
-              ToolTip.Tip="{loc:Str Close}" AutomationProperties.Name="{loc:Str Close}">
-        <Path Data="M6 6 L18 18 M18 6 L6 18" Stroke="{StaticResource Text}" StrokeThickness="2" StrokeLineCap="Round"
-              Width="20" Height="20" Stretch="Uniform" />
-      </Button>
     </Grid>
 
     <StackPanel Spacing="10">

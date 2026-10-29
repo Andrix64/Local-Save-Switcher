@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization">
 
   <!-- Colori del tema scuro con accento rosso (Theme.cs di WinForms, stessi nomi). -->
   <Styles.Resources>
@@ -298,4 +299,38 @@
     <Setter Property="BorderBrush" Value="{StaticResource AccentHover}" />
   </Style>
 
+
+  <!-- Telaio dei popup: niente cornice di sistema, angoli a 20px come la finestra principale, in alto il titolo
+       leggibile e la X per chiudere. Trascinamento ed Esc li gestisce PopupChrome (App.axaml.cs). -->
+  <Style Selector="Window:not(.main)">
+    <Setter Property="WindowDecorations" Value="None" />
+    <Setter Property="TransparencyLevelHint" Value="Transparent" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{StaticResource Background}" BorderBrush="{StaticResource Border}" BorderThickness="2"
+                CornerRadius="20" ClipToBounds="True">
+          <VisualLayerManager>
+            <DockPanel>
+              <Border x:Name="PART_PopupHeader" DockPanel.Dock="Top" Height="56" Background="{StaticResource Header}"
+                      Padding="24,0,12,0">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0" Text="{TemplateBinding Title}" FontSize="16" FontWeight="SemiBold"
+                             Foreground="{StaticResource Text}" VerticalAlignment="Center"
+                             TextTrimming="CharacterEllipsis" />
+                  <Button x:Name="PART_PopupClose" Grid.Column="1" Classes="iconbtn close" VerticalAlignment="Center"
+                          ToolTip.Tip="{loc:Str Close}" AutomationProperties.Name="{loc:Str Close}">
+                    <Path Width="14" Height="14" Data="M5 5 L19 19 M19 5 L5 19" />
+                  </Button>
+                </Grid>
+              </Border>
+              <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Padding="{TemplateBinding Padding}" />
+            </DockPanel>
+          </VisualLayerManager>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
 </Styles>

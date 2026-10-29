@@ -9,6 +9,7 @@
         Title="Local Save Switcher"
         Width="860" Height="720"
         MinWidth="640" MinHeight="560"
+        Classes="main"
         WindowDecorations="None"
         TransparencyLevelHint="Transparent"
         Background="Transparent"
@@ -35,7 +36,6 @@
         </StackPanel>
         <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
           <Button Classes="secondary" Content="{loc:Str AddGameButton}" Command="{Binding AddGameCommand}" />
-          <Button Classes="secondary" Content="{loc:Str ImportConfig}" Command="{Binding ImportConfigCommand}" />
           <Button Classes="iconbtn" Command="{Binding OpenLssSettingsCommand}"
                   ToolTip.Tip="{loc:Str SettingsButton}" AutomationProperties.Name="{loc:Str SettingsButton}">
             <Path Width="22" Height="22" Data="{StaticResource GearIcon}" />

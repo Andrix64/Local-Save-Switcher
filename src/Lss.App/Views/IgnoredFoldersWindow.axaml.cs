@@ -15,5 +15,4 @@ public partial class IgnoredFoldersWindow : Window
         DataContext = viewModel;
     }
 
-    private void Close_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => Close();
 }
