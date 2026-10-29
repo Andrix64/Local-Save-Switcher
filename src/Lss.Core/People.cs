@@ -202,6 +202,10 @@ public sealed class People
         if (!isAdmin && all[index].IsAdmin && Admins.Count == 1)
             return Result.Fail(Strings.LastAdmin);
 
+        // Un admin ha sempre il PIN: prima si imposta, poi si promuove.
+        if (isAdmin && !all[index].HasPin)
+            return Result.Fail(Strings.AdminNeedsPin);
+
         // Il PIN resta, anche diventando utente.
         all[index] = all[index] with { IsAdmin = isAdmin };
         return Save();
@@ -262,7 +266,7 @@ public sealed class People
 
     /// <summary>
     /// Imposta o cambia il PIN di una persona: 4 cifre, salvate con PBKDF2.
-    /// Il PIN non è obbligatorio: senza, la persona si sceglie da sola.
+    /// Per gli utenti il PIN non è obbligatorio (senza, la persona si sceglie da sola); per gli amministratori sì.
     /// </summary>
     public Result SetPin(string id, string pin)
     {
@@ -279,13 +283,16 @@ public sealed class People
         return Save();
     }
 
-    /// <summary>Toglie il PIN. Vale anche senza il PIN attuale (vedi P4a: si chiede al cambio).</summary>
+    /// <summary>Toglie il PIN a un utente. Vale anche senza il PIN attuale (vedi P4a: si chiede al cambio). Un amministratore deve averlo.</summary>
     public Result RemovePin(string id)
     {
         int index = IndexOf(id);
 
         if (index < 0)
             return Result.Fail(Strings.PlayerNotFound);
+
+        if (all[index].IsAdmin)
+            return Result.Fail(Strings.AdminNeedsPin);
 
         pins.Remove(id);
         all[index] = all[index] with { HasPin = false };

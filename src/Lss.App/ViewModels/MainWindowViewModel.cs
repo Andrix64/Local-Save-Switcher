@@ -624,7 +624,7 @@ public partial class MainWindowViewModel : ObservableObject
     public async Task OpenLssSettingsAsync()
     {
         await dialogs.ShowAsync<bool>(new LssSettingsWindow(
-            new LssSettingsViewModel(settings, dialogs, ExportAllConfigsAsync, OpenPlayersAsync, AccountText)));
+            new LssSettingsViewModel(settings, dialogs, ExportAllConfigsAsync, OpenPlayersAsync, AccountText, Mode)));
     }
 
     /// <summary>

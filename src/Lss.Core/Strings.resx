@@ -299,6 +299,8 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SettingSaveOnExitHint" xml:space="preserve"><value>As soon as you quit the game, the playthrough in use is updated, with an automatic copy. Only while the app is open.</value></data>
   <data name="SettingSharePreferences" xml:space="preserve"><value>Same game options for all playthroughs</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Controls, audio and subtitles stay the same when you switch playthrough, even in a new one.</value></data>
+  <data name="SettingMode" xml:space="preserve"><value>Mode</value></data>
+  <data name="SettingModeHint" xml:space="preserve"><value>Simple: whoever plays picks the game. Advanced: full control.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Settings</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
   <data name="GameSettingsTitle" xml:space="preserve"><value>Settings of {0}</value></data>
@@ -464,6 +466,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="PlayersNotSaved" xml:space="preserve"><value>The players could not be saved.</value></data>
   <data name="LastPlayer" xml:space="preserve"><value>There must be at least one player.</value></data>
   <data name="LastAdmin" xml:space="preserve"><value>There must be at least one admin.</value></data>
+  <data name="AdminNeedsPin" xml:space="preserve"><value>An admin must have a PIN.</value></data>
   <data name="PlayerDefaultName" xml:space="preserve"><value>Player 1</value></data>
   <data name="NotYourPlaythrough" xml:space="preserve"><value>This playthrough belongs to another player.</value></data>
   <data name="SimpleCloseGame" xml:space="preserve"><value>{0} is already open. Close it first.</value></data>

@@ -21,9 +21,11 @@ public partial class LssSettingsViewModel : ObservableObject
     /// <param name="exportAll">Esporta la configurazione di tutti i giochi (la finestra principale sa di tutti).</param>
     /// <param name="openPlayers">Apre la finestra Giocatori.</param>
     /// <param name="accountText">Gli account dei launcher, per le informazioni.</param>
+    /// <param name="mode">L'interruttore Semplice | Avanzata della finestra principale.</param>
     internal LssSettingsViewModel(AppSettings settings, IDialogService dialogs, Func<Task>? exportAll = null,
-        Func<Task>? openPlayers = null, string accountText = "")
+        Func<Task>? openPlayers = null, string accountText = "", ModeSwitchViewModel? mode = null)
     {
+        Mode = mode;
         this.settings = settings;
         this.dialogs = dialogs;
         this.exportAll = exportAll;
@@ -34,6 +36,15 @@ public partial class LssSettingsViewModel : ObservableObject
     }
 
     public string Title => Strings.SettingsTitle;
+
+    /// <summary>L'interruttore Semplice | Avanzata; null fuori dall'app (test, schermate).</summary>
+    public ModeSwitchViewModel? Mode { get; }
+
+    public bool HasMode => Mode != null;
+
+    public string ModeText => Strings.SettingMode;
+
+    public string ModeHint => Strings.SettingModeHint;
 
     public string DataFolderText => Loc.F(Strings.SettingDataFolder, AppData.Root);
 

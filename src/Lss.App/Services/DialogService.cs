@@ -24,11 +24,14 @@ public sealed class DialogService(Func<Window?> owner) : IDialogService
 
     public async Task<Person?> ChooseAdminAsync(People people, Person? current = null, bool unlocked = false)
     {
-        if (AdminPickerViewModel.WithoutWindow(people, current, unlocked) is Person admin)
-            return admin;
+        Person? admin = AdminPickerViewModel.WithoutWindow(people, current, unlocked) ?? await ShowAsync<Person>(
+            new AdminPickerWindow(new AdminPickerViewModel(people, AdminPickerViewModel.KnownAdmin(people, current))));
 
-        return await ShowAsync<Person>(new AdminPickerWindow(
-            new AdminPickerViewModel(people, AdminPickerViewModel.KnownAdmin(people, current))));
+        // Un admin senza PIN (persone.json di prima, o fatto a mano) deve metterlo ora.
+        if (admin is { HasPin: false } && !await SetPinAsync(people, admin))
+            return null;
+
+        return admin;
     }
 
     public async Task<bool> CheckPinAsync(People people, Person person)

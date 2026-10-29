@@ -299,6 +299,8 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SettingSaveOnExitHint" xml:space="preserve"><value>Appena esci dal gioco, la partita in uso viene aggiornata, con una copia automatica. Solo se l&apos;app è aperta.</value></data>
   <data name="SettingSharePreferences" xml:space="preserve"><value>Stesse opzioni del gioco per tutte le partite</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Comandi, audio e sottotitoli restano uguali quando cambi partita, anche in una partita nuova.</value></data>
+  <data name="SettingMode" xml:space="preserve"><value>Modalità</value></data>
+  <data name="SettingModeHint" xml:space="preserve"><value>Semplice: chi gioca sceglie il gioco. Avanzata: controllo completo.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Impostazioni</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Impostazioni</value></data>
   <data name="GameSettingsTitle" xml:space="preserve"><value>Impostazioni di {0}</value></data>
@@ -464,6 +466,7 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="PlayersNotSaved" xml:space="preserve"><value>Non è stato possibile salvare i giocatori.</value></data>
   <data name="LastPlayer" xml:space="preserve"><value>Deve restare almeno un giocatore.</value></data>
   <data name="LastAdmin" xml:space="preserve"><value>Deve restare almeno un amministratore.</value></data>
+  <data name="AdminNeedsPin" xml:space="preserve"><value>Un amministratore deve avere un PIN.</value></data>
   <data name="PlayerDefaultName" xml:space="preserve"><value>Giocatore 1</value></data>
   <data name="NotYourPlaythrough" xml:space="preserve"><value>Questa partita appartiene a un altro giocatore.</value></data>
   <data name="SimpleCloseGame" xml:space="preserve"><value>{0} è già aperto. Chiudilo prima.</value></data>

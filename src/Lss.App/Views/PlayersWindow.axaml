@@ -110,7 +110,7 @@
                         <MenuItem Header="{loc:Str MoveUp}" Tag="{Binding}" Click="Up_Click" />
                         <MenuItem Header="{loc:Str MoveDown}" Tag="{Binding}" Click="Down_Click" />
                         <MenuItem Header="{loc:Str PinRemoveMenu}" Tag="{Binding}" Click="RemovePin_Click"
-                                  IsVisible="{Binding Person.HasPin}" />
+                                  IsVisible="{Binding CanRemovePin}" />
                         <Separator />
                         <MenuItem Header="{loc:Str RemovePlayerMenu}" Tag="{Binding}" Click="Remove_Click" />
                       </MenuFlyout>

@@ -32,12 +32,12 @@ public partial class PlayersWindow : Window
             await ViewModel.RenameAsync(row.Person);
     }
 
-    private void Admin_Click(object? sender, RoutedEventArgs e)
+    private async void Admin_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is CheckBox { Tag: PlayerRow row } box)
         {
             // Il valore nuovo è quello della casella: se il modello dice no, la riga torna com'era.
-            ViewModel.SetAdmin(row.Person, box.IsChecked == true);
+            await ViewModel.SetAdminAsync(row.Person, box.IsChecked == true);
         }
     }
 

@@ -37,6 +37,9 @@ public sealed partial class PlayerRow : ObservableObject
     /// <summary>"Imposta PIN…" o "Cambia PIN…": per ogni persona.</summary>
     public string PinActionText => Person.HasPin ? Strings.PinChangeMenu : Strings.PinSetMenu;
 
+    /// <summary>Il PIN si può togliere solo a un utente: un amministratore deve averlo.</summary>
+    public bool CanRemovePin => Person.HasPin && !Person.IsAdmin;
+
     /// <summary>Il nome che l'utente sta scrivendo (si salva con Rinomina).</summary>
     [ObservableProperty]
     private string editName = "";
@@ -133,7 +136,14 @@ public sealed partial class PlayersViewModel : ObservableObject
         return SetColor(person, People.Palette[(index + 1) % People.Palette.Count]);
     }
 
-    public Result SetAdmin(Person person, bool isAdmin) => Done(people.SetAdmin(person.Id, isAdmin));
+    /// <summary>Rende admin o utente. Per diventare admin serve il PIN: si chiede subito, e senza non si cambia nulla.</summary>
+    public async Task<Result> SetAdminAsync(Person person, bool isAdmin)
+    {
+        if (isAdmin && !person.HasPin && !await dialogs.SetPinAsync(people, person))
+            return Done(Result.Fail(Strings.AdminNeedsPin));
+
+        return Done(people.SetAdmin(person.Id, isAdmin));
+    }
 
     /// <summary>Sposta una persona di un posto in su (-1) o in giù (+1).</summary>
     public Result Move(Person person, int step)

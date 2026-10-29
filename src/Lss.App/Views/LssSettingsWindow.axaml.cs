@@ -14,6 +14,16 @@ public partial class LssSettingsWindow : Window
     public LssSettingsWindow(LssSettingsViewModel viewModel) : this()
     {
         DataContext = viewModel;
+
+        // Cambiata la modalità la finestra ha fatto il suo lavoro: salva e si chiude.
+        if (viewModel.Mode is { } mode)
+        {
+            mode.PropertyChanged += async (_, e) =>
+            {
+                if (e.PropertyName == nameof(ModeSwitchViewModel.IsSimple) && await viewModel.TrySaveAsync())
+                    Close(true);
+            };
+        }
     }
 
     private LssSettingsViewModel ViewModel => (LssSettingsViewModel)DataContext!;
