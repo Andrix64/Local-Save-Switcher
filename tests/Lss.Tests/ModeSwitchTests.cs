@@ -117,6 +117,26 @@ public sealed class ModeSwitchTests : IDisposable
     }
 
     [Fact]
+    public async Task TheGameDidNotStartButtonEndsTheWaitWithoutSaving()
+    {
+        People people = People();
+        (MainWindowViewModel model, _) = Create(AppSettings.SimpleMode, people);
+        var session = new PlaySession(folder.CreateManager(), model.Games[0], people.Find(User)!, DateTime.Now, true, true);
+
+        Task finished = model.Simple!.BeginPlaying(session);
+        Assert.False(finished.IsCompleted);
+
+        model.Simple.GameNotStartedCommand.Execute(null);
+        await finished;
+
+        Assert.True(model.Simple.PlayCancelled);
+
+        model.Simple.EndPlaying();
+        _ = model.Simple.BeginPlaying(session);
+        Assert.False(model.Simple.PlayCancelled);
+    }
+
+    [Fact]
     public void TheSwitchIsOffWhileAGameIsPlayedFromTheSimpleMode()
     {
         People people = People();

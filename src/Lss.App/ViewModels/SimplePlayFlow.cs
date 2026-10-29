@@ -31,6 +31,10 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func
         if (!await CloudAllowedAsync(manager, item, player))
             return null;
 
+        // Steam aperto confonde il cambio dei file: si chiude prima (lo riavvia il gioco).
+        if (!await SteamGuard.EnsureClosedAsync(dialogs, manager))
+            return null;
+
         Result prepared = await prepare();
 
         if (!prepared.Success)

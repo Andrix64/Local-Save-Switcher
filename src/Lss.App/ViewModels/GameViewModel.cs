@@ -498,7 +498,7 @@ public partial class GameViewModel : ObservableObject
     /// <param name="offerUndo">false per il cambio fatto da "Annulla", che non si annulla.</param>
     public async Task PlayAsync(string profileName, bool launch, bool offerUndo = true)
     {
-        if (IsBusy || GameRunning || !await ConfirmCloudAsync(launch))
+        if (IsBusy || GameRunning || !await SteamGuard.EnsureClosedAsync(dialogs, Manager) || !await ConfirmCloudAsync(launch))
             return;
 
         string name = SaveManager.ProfileDisplayName(profileName);
@@ -947,7 +947,7 @@ public partial class GameViewModel : ObservableObject
             return;
 
         var history = new HistoryViewModel(Manager, dialogs,
-            () => ConfirmCloudAsync(launching: false),
+            async () => await SteamGuard.EnsureClosedAsync(dialogs, Manager) && await ConfirmCloudAsync(launching: false),
             GameSettingsAsync);
 
         await dialogs.ShowAsync<bool>(new HistoryWindow(history, focusSave));

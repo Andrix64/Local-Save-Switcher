@@ -266,6 +266,7 @@ public sealed partial class SimpleViewModel : ObservableObject
     public Task BeginPlaying(PlaySession session)
     {
         finishing = new TaskCompletionSource();
+        PlayCancelled = false;
         Playing = session;
         return finishing.Task;
     }
@@ -280,6 +281,19 @@ public sealed partial class SimpleViewModel : ObservableObject
 
     [RelayCommand]
     private void FinishPlaying() => finishing?.TrySetResult();
+
+    /// <summary>true se l'utente ha detto che il gioco non è partito: niente da salvare.</summary>
+    public bool PlayCancelled { get; private set; }
+
+    public string NotStartedText => Strings.SimpleNotStarted;
+
+    /// <summary>"Il gioco non è partito": LSS smette di aspettare, senza salvare né contare il tempo.</summary>
+    [RelayCommand]
+    private void GameNotStarted()
+    {
+        PlayCancelled = true;
+        finishing?.TrySetResult();
+    }
 
     /// <summary>"Le mie partite" su una copertina: si apre il menu (con il MainWindowViewModel).</summary>
     public Func<GameItemViewModel, Task>? MyGames { get; set; }

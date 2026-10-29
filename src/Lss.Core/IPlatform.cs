@@ -26,6 +26,14 @@ public interface IPlatform
 
     bool IsSteamRunning();
 
+    /// <summary>
+    /// Chiude Steam del tutto e aspetta che sia chiuso (al massimo mezzo minuto). true se non gira più.
+    /// </summary>
+    bool CloseSteam();
+
+    /// <summary>true se Steam è la schermata in uso (Gaming Mode del Steam Deck): non si può chiudere da qui.</summary>
+    bool IsSteamGamingMode { get; }
+
     /// <summary>Apre un indirizzo steam:// (Steam si apre da solo se è chiuso).</summary>
     void OpenSteamUri(string uri);
 

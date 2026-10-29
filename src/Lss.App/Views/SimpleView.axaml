@@ -318,6 +318,11 @@
                 <TextBlock Text="{Binding FinishText}" FontSize="18" FontWeight="Bold" />
               </Button>
             </StackPanel>
+            <!-- Il gioco non si è aperto: smette di aspettare, senza salvare -->
+            <Button Classes="secondary" Command="{Binding GameNotStartedCommand}" Height="44" Padding="22,0"
+                    HorizontalAlignment="Left" Margin="0,8,0,0">
+              <TextBlock Text="{Binding NotStartedText}" FontSize="15" FontWeight="SemiBold" />
+            </Button>
           </StackPanel>
         </Grid>
       </Border>

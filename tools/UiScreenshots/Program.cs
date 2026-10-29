@@ -452,6 +452,8 @@ internal sealed class FakePlatform : IPlatform
     public bool IsGameRunning(GameInfo game) => false;
     public DateTime? GameStartTime(GameInfo game) => null;
     public bool IsSteamRunning() => false;
+    public bool CloseSteam() => true;
+    public bool IsSteamGamingMode => false;
     public void OpenSteamUri(string uri) { }
     public void OpenUri(string uri) { }
     public IReadOnlyList<(int Id, DateTime? Start)> FindProcessesUnder(string folder) => [];

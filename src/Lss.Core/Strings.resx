@@ -569,6 +569,14 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SimpleAskForHelp" xml:space="preserve"><value>Ask whoever set up LSS to look at it.</value></data>
   <data name="SimpleNothingSaved" xml:space="preserve"><value>It looks like you did not save in the game, so there is nothing to keep.</value></data>
   <data name="SimpleNothingSavedWarning" xml:space="preserve"><value>IF YOU DID SAVE, CALL AN ADMIN: YOUR PROGRESS IS NOT BEING SAVED.</value></data>
+  <data name="SteamOpenHeading" xml:space="preserve"><value>Steam is open</value></data>
+  <data name="SteamOpenText" xml:space="preserve"><value>Steam keeps its own list of the saves in memory. If you change playthrough while it is open, {0} may not find the saves, or say it could not restore them. Close Steam first: LSS starts it again together with the game.</value></data>
+  <data name="SteamCloseAndContinue" xml:space="preserve"><value>Close Steam and continue</value></data>
+  <data name="SteamCloseFailed" xml:space="preserve"><value>LSS could not close Steam. Close it yourself (Steam menu, Exit) and try again.</value></data>
+  <data name="SteamDeckHeading" xml:space="preserve"><value>Steam is on screen</value></data>
+  <data name="SteamDeckText" xml:space="preserve"><value>You are in Gaming Mode, where Steam can't be closed. To change playthrough safely: go to Desktop Mode, exit Steam from its menu (Steam, Exit), open LSS there and change playthrough. Then play from Gaming Mode as usual.</value></data>
+  <data name="SimpleNotStarted" xml:space="preserve"><value>The game didn't start</value></data>
+  <data name="SimpleNotStartedDone" xml:space="preserve"><value>OK, nothing was saved.</value></data>
   <data name="PinCurrent" xml:space="preserve"><value>Current PIN</value></data>
   <data name="PinAgain" xml:space="preserve"><value>Repeat the new PIN</value></data>
   <data name="PinDigits" xml:space="preserve"><value>4 digits</value></data>

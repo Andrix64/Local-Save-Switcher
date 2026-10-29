@@ -187,6 +187,25 @@ public sealed class WindowsPlatform : IPlatform
         return IsProcessRunning("steam");
     }
 
+    public bool IsSteamGamingMode => false;
+
+    /// <summary>
+    /// "steam.exe -shutdown" chiude Steam e i suoi processi. Poi si aspetta che non ci sia più.
+    /// </summary>
+    public bool CloseSteam()
+    {
+        string? root = FindSteamRoots().FirstOrDefault();
+        string exe = root == null ? "" : Path.Combine(root, "steam.exe");
+
+        if (!File.Exists(exe) || !StartProgram(exe, "-shutdown", root!))
+            return !IsSteamRunning();
+
+        for (int i = 0; i < 60 && IsSteamRunning(); i++)
+            Thread.Sleep(500);
+
+        return !IsSteamRunning();
+    }
+
     /// <summary>
     /// true se c'è un processo con quel nome, anche di un altro utente:
     /// Process.GetProcessesByName non filtra per utente.

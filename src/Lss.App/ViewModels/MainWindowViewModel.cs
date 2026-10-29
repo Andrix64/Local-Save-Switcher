@@ -264,11 +264,17 @@ public partial class MainWindowViewModel : ObservableObject
             Task finished = simple.BeginPlaying(session);
             await simpleFlow.WaitForEndAsync(session, finished);
 
-            done = await simpleFlow.FinishAsync(session);
+            // "Il gioco non è partito": non c'è niente da salvare, né tempo da contare.
+            done = simple.PlayCancelled
+                ? Result.Ok(Strings.SimpleNotStartedDone)
+                : await simpleFlow.FinishAsync(session);
             simple.EndPlaying();
         });
 
         simple.Message = done.Message;
+
+        if (simple.PlayCancelled)
+            return;
 
         // Come nella modalità avanzata: dopo la partita si cercano altre cartelle dei salvataggi.
         GameFor(item).ScanAfterSession(session.Started);

@@ -95,6 +95,12 @@ right-click the game, choose **Properties**, and in **General** switch off
 *Keep games saves in the Steam Cloud*. While it's on, LSS shows a yellow bar at
 the top.
 
+**Steam must be closed while LSS changes the files.** Steam keeps its own list of the saves
+in memory (`remotecache.vdf`) and writes it back, so a game may not find its saves, or say it
+could not restore them, if you change playthrough with Steam open. LSS asks you to close
+Steam first (and starts it again with the game). On the Steam Deck in Gaming Mode Steam can't
+be closed: change playthrough from Desktop Mode, after exiting Steam.
+
 ## How to use it
 
 ### Playthroughs

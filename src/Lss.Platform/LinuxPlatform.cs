@@ -329,6 +329,31 @@ public sealed class LinuxPlatform : IPlatform
         IsProcessRunning("steam") || IsProcessRunning("steamwebhelper");
 
     /// <summary>
+    /// Gaming Mode del Steam Deck: Steam è la schermata e la sessione lo riavvia se si chiude.
+    /// </summary>
+    public bool IsSteamGamingMode =>
+        !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SteamGamepadUI"))
+        || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GAMESCOPE_WAYLAND_DISPLAY"));
+
+    /// <summary>
+    /// "steam -shutdown" chiude Steam. Poi si aspetta che non ci sia più. false anche se il comando
+    /// steam non c'è (Flatpak, Snap).
+    /// </summary>
+    public bool CloseSteam()
+    {
+        if (!IsSteamRunning())
+            return true;
+
+        if (!StartProgram("steam", "-shutdown", ""))
+            return false;
+
+        for (int i = 0; i < 60 && IsSteamRunning(); i++)
+            Thread.Sleep(500);
+
+        return !IsSteamRunning();
+    }
+
+    /// <summary>
     /// true se c'è un processo con quel nome, anche di un altro utente:
     /// Process.GetProcessesByName non filtra per utente.
     /// </summary>
