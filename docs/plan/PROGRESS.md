@@ -222,7 +222,7 @@ per phase (the phase file names it).
 - [x] R9 — JSON settings files: the format and the app-wide files (d479f5a)
 - [x] R10 — JSON for the per-game files (ea4adfa; 838 tests; Linux check not run)
 - [x] R11 — A known spot suggested again as new (separators) (40bd8d5; 847 tests; no import test with foreign separators; Linux check not run)
-- [ ] R12 — Screenshots, docs, Linux check
+- [x] R12 — Screenshots, docs, Linux check (Linux on lss-ci: 847 tests, four packages built, six installs OK; ⋯ menu not captured)
 - [ ] R13 — 👤 Check on Windows and the Steam Deck (copy the data folder first)
 
 ### Phase Q — Docs and release ([Q-release.md](Q-release.md))
@@ -235,6 +235,22 @@ per phase (the phase file names it).
 
 Write here anything that didn't match the plan, decisions taken with
 Andrix, and results of the 👤 checks. Newest first, with the date.
+
+- 2026-10-29 — R12 (Sonnet). Screenshots regenerated with `tools/UiScreenshots`
+  (English): sidebar (01), simple tiles (24), the switch in both headers (01,
+  24), both settings windows (08, 08b), full screen (24b, new), PIN pad on
+  "Who's playing?" (37, new), PIN pad of the admin (34). Fixed the tool: the
+  simple view had no `Mode` or `FullScreen` view model, so the switch showed
+  two empty circles. Not captured: the ⋯ menu (a popup, headless does not draw
+  it). I looked at each image but did not put them next to the HTML boards.
+  What differs from the boards **on purpose**: R6 the status badge is under the
+  launcher chip on the left (the board has it top right); R7 a Simple |
+  Advanced switch in both headers instead of the gear (the boards have the
+  gear); R7a the round full screen button left of the switch (not in the
+  boards); R8 two settings windows, the game's (08) and LSS's (08b), where the
+  board `Settings` has one. `docs/DEVELOPMENT.md` already lists the JSON files
+  and `V1Compat` (R10, R11); the README pictures in `docs/img` are not
+  regenerated (Q1).
 
 - 2026-10-27 — Fase R, R0 (Sonnet 5.5). Inventario di ciò che è compatibilità 1.0 e dove è andato:
   - `DataLayoutMigration` (intera) → `V1Compat.MoveBetaLayout` / `MoveAccount`; chiamata in `App.axaml.cs`.

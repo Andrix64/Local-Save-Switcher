@@ -359,6 +359,8 @@ internal static class Program
 
         var simple = new SimpleViewModel(people, dialogs, [controlItem, sekiroItem], _ => manager,
             _ => Task.CompletedTask, _ => Task.CompletedTask, () => Task.CompletedTask);
+        simple.Mode = new ModeSwitchViewModel(true, () => Task.CompletedTask, () => Task.CompletedTask, () => true);
+        simple.FullScreen = new FullScreenViewModel();
 
         Window Page(object content) => new()
         {
@@ -371,6 +373,11 @@ internal static class Program
 
         simple.SelectPlayer(andreaPerson);
         Shot(Page(new SimpleView { DataContext = simple }), "24-simple-games");
+
+        // Schermo intero: l'icona cambia, il resto è uguale.
+        simple.FullScreen.IsFullScreen = true;
+        Shot(Page(new SimpleView { DataContext = simple }), "24b-simple-fullscreen");
+        simple.FullScreen.IsFullScreen = false;
 
         Shot(new MyGamesWindow(new MyGamesViewModel(manager, andreaPerson) { Tile = simple.Games[0] }), "25-my-games");
 
@@ -399,6 +406,11 @@ internal static class Program
         picker.Pad!.Press("1");
         picker.Pad.Press("2");
         Shot(new AdminPickerWindow(picker), "34-admin-pin");
+
+        // "Chi gioca?": a chi ha un PIN lo si chiede prima di entrare.
+        var playerPin = new AdminPickerViewModel(people, people.Find(andreaPerson.Id)!);
+        playerPin.Pad!.Press("1");
+        Shot(new AdminPickerWindow(playerPin), "37-player-pin");
 
         Shot(new SetPinWindow(new SetPinViewModel(people, claraPerson) { NewPin = "1234", Again = "12" }), "35-set-pin");
 
