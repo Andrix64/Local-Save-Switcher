@@ -48,18 +48,6 @@ public sealed class SteamGuardTests : IDisposable
     }
 
     [Fact]
-    public async Task ContinuingAnywayLeavesSteamOpen()
-    {
-        platform.SteamRunning = true;
-        var dialogs = new FakeDialogService { ChooseAnswer = 1 };
-        int before = platform.CloseSteamCalls;
-
-        Assert.True(await Ensure(dialogs));
-        Assert.Equal(before, platform.CloseSteamCalls);
-        Assert.True(platform.SteamRunning);
-    }
-
-    [Fact]
     public async Task CancellingStopsTheChange()
     {
         platform.SteamRunning = true;
@@ -79,15 +67,14 @@ public sealed class SteamGuardTests : IDisposable
     }
 
     [Fact]
-    public async Task InGamingModeSteamIsNotClosedAndTheStepsAreShown()
+    public async Task InGamingModeSteamIsClosedToo()
     {
         platform.SteamRunning = true;
         platform.IsSteamGamingMode = true;
-        var dialogs = new FakeDialogService { ConfirmAnswer = true };
+        var dialogs = new FakeDialogService { ChooseAnswer = 0 };
         int before = platform.CloseSteamCalls;
 
         Assert.True(await Ensure(dialogs));
-        Assert.Equal(before, platform.CloseSteamCalls);
-        Assert.Contains("Confirm: " + Strings.SteamDeckHeading, dialogs.Calls);
+        Assert.Equal(before + 1, platform.CloseSteamCalls);
     }
 }

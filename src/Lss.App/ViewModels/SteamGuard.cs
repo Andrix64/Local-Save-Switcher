@@ -10,8 +10,8 @@ namespace Lss.App.ViewModels;
 internal static class SteamGuard
 {
     /// <summary>
-    /// true se si può cambiare i file: Steam è chiuso, l'utente l'ha fatto chiudere a LSS o ha scelto di
-    /// continuare comunque. false se annulla o Steam non si chiude. Non chiede nulla per i giochi di altri
+    /// true se si può cambiare i file: Steam è chiuso o l'utente l'ha fatto chiudere a LSS. false se annulla
+    /// o se Steam non si chiude. Non chiede nulla per i giochi di altri
     /// launcher o con Steam chiuso.
     /// </summary>
     public static async Task<bool> EnsureClosedAsync(IDialogService dialogs, SaveManager manager)
@@ -21,18 +21,14 @@ internal static class SteamGuard
 
         string game = manager.Game.Name;
 
-        // Nella Gaming Mode Steam è la schermata stessa: non si chiude da qui. Si spiega come fare.
-        if (Platform.Current.IsSteamGamingMode)
-        {
-            return await dialogs.ConfirmAsync(Strings.SteamDeckHeading, Strings.SteamDeckText,
-                Strings.ContinueAnyway, kind: InfoKind.Warning);
-        }
+        // Nella Gaming Mode Steam è la schermata stessa: si chiude lo stesso (steam -shutdown) e la sessione lo
+        // riavvia da sola. Il testo avverte che LSS può chiudersi insieme a Steam.
+        string text = Platform.Current.IsSteamGamingMode
+            ? Loc.F(Strings.SteamOpenText, game) + "\n\n" + Strings.SteamDeckText
+            : Loc.F(Strings.SteamOpenText, game);
 
-        int choice = await dialogs.ChooseAsync(Strings.SteamOpenHeading, Loc.F(Strings.SteamOpenText, game),
-            [Strings.SteamCloseAndContinue, Strings.ContinueAnyway]);
-
-        if (choice == 1)
-            return true;
+        int choice = await dialogs.ChooseAsync(Strings.SteamOpenHeading, text,
+            [Strings.SteamCloseAndContinue]);
 
         if (choice != 0)
             return false;

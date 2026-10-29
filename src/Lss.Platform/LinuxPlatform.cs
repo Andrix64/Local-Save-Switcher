@@ -347,10 +347,17 @@ public sealed class LinuxPlatform : IPlatform
         if (!StartProgram("steam", "-shutdown", ""))
             return false;
 
-        for (int i = 0; i < 60 && IsSteamRunning(); i++)
-            Thread.Sleep(500);
+        // Ogni decimo di secondo, fino a 30 secondi: in Gaming Mode la sessione riavvia Steam subito, e
+        // il momento in cui non c'è è breve.
+        for (int i = 0; i < 300; i++)
+        {
+            if (!IsSteamRunning())
+                return true;
 
-        return !IsSteamRunning();
+            Thread.Sleep(100);
+        }
+
+        return false;
     }
 
     /// <summary>
