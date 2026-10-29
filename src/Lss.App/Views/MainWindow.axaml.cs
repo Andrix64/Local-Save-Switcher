@@ -37,6 +37,7 @@ public partial class MainWindow : Window
             bool free = WindowState == WindowState.Normal;
             Frame.CornerRadius = new Avalonia.CornerRadius(free ? 20 : 0);
             Frame.BorderThickness = new Avalonia.Thickness(free ? 2 : 0);
+            Classes.Set("free", free);
         }
     }
 

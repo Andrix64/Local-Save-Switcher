@@ -9,7 +9,7 @@
         Title="Local Save Switcher"
         Width="860" Height="720"
         MinWidth="640" MinHeight="560"
-        Classes="main"
+        Classes="main free"
         WindowDecorations="None"
         TransparencyLevelHint="Transparent"
         Background="Transparent"
@@ -24,7 +24,7 @@
   <DockPanel IsVisible="{Binding !IsSimple}">
 
     <!-- Intestazione -->
-    <Border x:Name="HeaderBar" DockPanel.Dock="Top" Height="68" Background="{StaticResource Header}" Padding="12,0,16,0"
+    <Border x:Name="HeaderBar" Classes="topbar" DockPanel.Dock="Top" Height="68" Background="{StaticResource Header}" Padding="12,0,16,0"
             PointerPressed="Header_PointerPressed">
       <Grid ColumnDefinitions="Auto,Auto,*,Auto">
         <views:WindowButtons Grid.Column="0" Margin="0,0,16,0" />
@@ -44,7 +44,7 @@
     </Border>
 
     <!-- Colonna dei giochi (la lista si nasconde se c'è un solo gioco supportato; "Aggiungi un gioco" c'è sempre) -->
-    <Border DockPanel.Dock="Left" Width="240" Background="{StaticResource Header}" Padding="12,16">
+    <Border x:Name="Sidebar" Classes="sidebarpane" DockPanel.Dock="Left" Width="240" Background="{StaticResource Header}" Padding="12,16">
       <DockPanel>
         <!-- Aggiungi un gioco: sotto "Altri giochi" -->
         <Button DockPanel.Dock="Bottom" Classes="addgame" Command="{Binding AddGameCommand}" Margin="0,8,0,0"

@@ -50,7 +50,7 @@
   <Grid RowDefinitions="72,*" Background="{StaticResource Background}">
 
     <!-- Intestazione -->
-    <Border Grid.Row="0" Background="{StaticResource Header}" Padding="16,0,24,0" PointerPressed="Header_PointerPressed">
+    <Border Grid.Row="0" Classes="topbar" Background="{StaticResource Header}" Padding="16,0,24,0" PointerPressed="Header_PointerPressed">
       <Grid ColumnDefinitions="Auto,*,Auto">
         <views:WindowButtons Grid.Column="0" Margin="0,0,16,0" />
 

@@ -325,6 +325,15 @@
     <Setter Property="Foreground" Value="{StaticResource Text}" />
   </Style>
 
+  <!-- Il ritaglio del Border non segue gli angoli: le barre che toccano il bordo arrotondato (finestra libera,
+       classe "free" messa da MainWindow) hanno il loro raggio interno (20 meno il bordo di 2). -->
+  <Style Selector="Window.free Border.topbar">
+    <Setter Property="CornerRadius" Value="18,18,0,0" />
+  </Style>
+  <Style Selector="Window.free Border.sidebarpane">
+    <Setter Property="CornerRadius" Value="0,0,0,18" />
+  </Style>
+
   <!-- Telaio dei popup: niente cornice di sistema, angoli a 20px come la finestra principale, in alto il titolo
        leggibile e la X per chiudere. Trascinamento ed Esc li gestisce PopupChrome (App.axaml.cs). -->
   <Style Selector="Window:not(.main)">
@@ -337,7 +346,7 @@
                 CornerRadius="20" ClipToBounds="True">
           <VisualLayerManager>
             <DockPanel>
-              <Border x:Name="PART_PopupHeader" DockPanel.Dock="Top" Height="56" Background="{StaticResource Header}"
+              <Border x:Name="PART_PopupHeader" DockPanel.Dock="Top" Height="56" Background="{StaticResource Header}" CornerRadius="18,18,0,0"
                       Padding="24,0,12,0">
                 <Grid ColumnDefinitions="*,Auto">
                   <TextBlock Grid.Column="0" Text="{TemplateBinding Title}" FontSize="16" FontWeight="SemiBold"
