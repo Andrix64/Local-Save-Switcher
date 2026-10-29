@@ -300,6 +300,7 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SettingSaveOnExitHint" xml:space="preserve"><value>Appena esci dal gioco, la partita in uso viene aggiornata, con una copia automatica. Solo se l&apos;app è aperta.</value></data>
   <data name="SettingSharePreferences" xml:space="preserve"><value>Stesse opzioni del gioco per tutte le partite</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Comandi, audio e sottotitoli restano uguali quando cambi partita, anche in una partita nuova.</value></data>
+  <data name="CurrentPlaythrough" xml:space="preserve"><value>ATTUALE</value></data>
   <data name="SettingMode" xml:space="preserve"><value>Modalità</value></data>
   <data name="SettingModeHint" xml:space="preserve"><value>Semplice: chi gioca sceglie il gioco. Avanzata: controllo completo.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Impostazioni</value></data>

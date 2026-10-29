@@ -43,38 +43,54 @@
           Margin="0,0,0,8">
     <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
 
+      <!-- Il floppy inserito: la partita nel gioco adesso, con l'etichetta in alto a destra. -->
+      <Panel Grid.Column="0" Grid.RowSpan="2" Width="58" Height="48" VerticalAlignment="Center"
+             IsVisible="{Binding IsActive}" ToolTip.Tip="{loc:Str InGameNow}"
+             AutomationProperties.Name="{loc:Str InGameNow}">
+        <Border Width="44" Height="42" CornerRadius="10" Background="{StaticResource Header}"
+                HorizontalAlignment="Left" VerticalAlignment="Bottom">
+          <Path Data="{StaticResource FloppyIcon}" Width="24" Height="24" Stretch="Uniform"
+                Stroke="{StaticResource Accent}" StrokeThickness="1.8" StrokeLineCap="Round"
+                StrokeJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <Border CornerRadius="6" Background="{StaticResource Accent}" Padding="5,1" HorizontalAlignment="Right"
+                VerticalAlignment="Top">
+          <TextBlock Text="{loc:Str CurrentPlaythrough}" FontSize="9" FontWeight="Bold" Foreground="White" />
+        </Border>
+      </Panel>
+
       <!-- La preferita è la stella gialla; le altre hanno il contorno e si cliccano per farle preferite. -->
-      <Button Grid.Column="0" Classes="star" Content="☆" Command="{Binding SetFavouriteCommand}"
+      <Button Grid.Column="1" Classes="star" Content="☆" Command="{Binding SetFavouriteCommand}"
               IsVisible="{Binding !IsFavourite}"
               ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
-      <TextBlock Grid.Column="0" Text="★" FontSize="18" Width="28" TextAlignment="Center" VerticalAlignment="Center"
+      <TextBlock Grid.Column="1" Text="★" FontSize="18" Width="28" TextAlignment="Center" VerticalAlignment="Center"
                  Foreground="{StaticResource Warning}" IsVisible="{Binding IsFavourite}"
                  ToolTip.Tip="{Binding FavouriteTooltip}" AutomationProperties.Name="{Binding FavouriteTooltip}" />
 
-      <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
+      <TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
                  TextTrimming="CharacterEllipsis" MaxWidth="320" />
-
-      <!-- Il floppy inserito: la partita nel gioco adesso (la fessura del lettore e il floppy che vi entra). -->
-      <Panel Grid.Column="2" Width="26" Height="26" VerticalAlignment="Center" IsVisible="{Binding IsActive}"
-             ToolTip.Tip="{loc:Str InGameNow}" AutomationProperties.Name="{loc:Str InGameNow}">
-        <Border Height="3" Width="24" CornerRadius="2" Background="{StaticResource TextMuted}"
-                VerticalAlignment="Top" HorizontalAlignment="Center" />
-        <Path Data="{StaticResource FloppyIcon}" Width="20" Height="20" Stretch="Uniform" Margin="0,5,0,0"
-              Stroke="{StaticResource Accent}" Fill="{StaticResource AccentSoft}" StrokeThickness="1.8"
-              StrokeLineCap="Round" StrokeJoin="Round" VerticalAlignment="Bottom" HorizontalAlignment="Center" />
-      </Panel>
 
       <TextBlock Grid.Column="3" Text="{Binding Details}" FontSize="12" Foreground="{StaticResource TextMuted}"
                  VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Details}" />
 
-      <!-- Azioni: nel gioco Salva un punto e Cronologia; le altre Gioca questa. Poi ⋯. -->
+      <!-- Azioni a icone (il nome è nel suggerimento): Gioca; nel gioco anche Salva un punto e Cronologia. Poi ⋯. -->
       <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-        <Button Classes="primary small" Content="{Binding PlayText}" Command="{Binding PlayCommand}"
-                IsEnabled="{Binding CanPlay}" IsVisible="{Binding ShowPlay}" />
-        <Button Classes="ghost small" Content="{loc:Str SavePointButton}" Command="{Binding SavePointCommand}"
-                IsEnabled="{Binding CanPlay}" IsVisible="{Binding IsActive}" />
-        <Button Classes="ghost small" Content="{loc:Str HistoryButton}" Command="{Binding HistoryCommand}"
-                IsVisible="{Binding IsActive}" />
+        <Button Classes="primary small" Command="{Binding PlayCommand}" Width="40" Padding="0"
+                IsEnabled="{Binding CanPlay}" IsVisible="{Binding ShowPlay}"
+                ToolTip.Tip="{Binding PlayText}" AutomationProperties.Name="{Binding PlayText}">
+          <Path Data="M8 5 L19 12 L8 19 Z" Width="14" Height="14" Stretch="Uniform" Fill="White" Stroke="White"
+                StrokeThickness="1.5" StrokeJoin="Round" />
+        </Button>
+        <Button Classes="iconbtn" Command="{Binding SavePointCommand}"
+                IsEnabled="{Binding CanPlay}" IsVisible="{Binding IsActive}"
+                ToolTip.Tip="{loc:Str SavePointButton}" AutomationProperties.Name="{loc:Str SavePointButton}">
+          <Path Width="18" Height="18"
+                Data="M19 21 L12 16 L5 21 V5 A2 2 0 0 1 7 3 H17 A2 2 0 0 1 19 5 Z M12 7 V12 M9.5 9.5 H14.5" />
+        </Button>
+        <Button Classes="iconbtn" Command="{Binding HistoryCommand}" IsVisible="{Binding IsActive}"
+                ToolTip.Tip="{loc:Str HistoryButton}" AutomationProperties.Name="{loc:Str HistoryButton}">
+          <Path Width="18" Height="18" Data="M12 7 V12 L15 14 M21 12 A9 9 0 1 1 3 12 A9 9 0 0 1 21 12 Z" />
+        </Button>
         <Button Classes="more small" AutomationProperties.Name="{Binding MoreActionsName}">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Ellipse />
@@ -98,7 +114,7 @@
       </StackPanel>
 
       <!-- La nota, se c'è, sotto il nome (si scrive dal menu ⋯) -->
-      <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Classes="note" Text="{Binding Note}"
+      <TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3" Classes="note" Text="{Binding Note}"
                  TextWrapping="Wrap" FontSize="12" Margin="0,2,0,2" IsVisible="{Binding HasNote}" />
     </Grid>
   </Border>

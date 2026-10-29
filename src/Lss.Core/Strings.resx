@@ -300,6 +300,7 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SettingSaveOnExitHint" xml:space="preserve"><value>As soon as you quit the game, the playthrough in use is updated, with an automatic copy. Only while the app is open.</value></data>
   <data name="SettingSharePreferences" xml:space="preserve"><value>Same game options for all playthroughs</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Controls, audio and subtitles stay the same when you switch playthrough, even in a new one.</value></data>
+  <data name="CurrentPlaythrough" xml:space="preserve"><value>CURRENT</value></data>
   <data name="SettingMode" xml:space="preserve"><value>Mode</value></data>
   <data name="SettingModeHint" xml:space="preserve"><value>Simple: whoever plays picks the game. Advanced: full control.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Settings</value></data>
