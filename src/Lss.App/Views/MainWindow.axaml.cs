@@ -27,6 +27,19 @@ public partial class MainWindow : Window
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
 
+    // Stondata solo quando la finestra è libera: a schermo intero o ingrandita gli angoli sono quelli dello schermo.
+    protected override void OnPropertyChanged(Avalonia.AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == WindowStateProperty && Frame != null)
+        {
+            bool free = WindowState == WindowState.Normal;
+            Frame.CornerRadius = new Avalonia.CornerRadius(free ? 10 : 0);
+            Frame.BorderThickness = new Avalonia.Thickness(free ? 1 : 0);
+        }
+    }
+
     private void Grip_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
         if (sender is Border { Tag: string edge } && Enum.TryParse(edge, out WindowEdge windowEdge)

@@ -10,8 +10,13 @@
         Width="860" Height="720"
         MinWidth="640" MinHeight="560"
         WindowDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
         WindowStartupLocation="CenterScreen">
 
+  <!-- Angoli leggermente stondati (a schermo intero o ingrandita il codice li azzera). -->
+  <Border x:Name="Frame" CornerRadius="10" ClipToBounds="True" Background="{StaticResource Background}"
+          BorderBrush="{StaticResource Border}" BorderThickness="1">
   <Grid>
 
   <!-- La modalità avanzata: intestazione, colonna dei giochi, il gioco -->
@@ -155,5 +160,6 @@
   </Grid>
 
   </Grid>
+  </Border>
 
 </Window>
