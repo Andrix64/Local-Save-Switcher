@@ -35,8 +35,8 @@ public partial class MainWindow : Window
         if (change.Property == WindowStateProperty && Frame != null)
         {
             bool free = WindowState == WindowState.Normal;
-            Frame.CornerRadius = new Avalonia.CornerRadius(free ? 10 : 0);
-            Frame.BorderThickness = new Avalonia.Thickness(free ? 1 : 0);
+            Frame.CornerRadius = new Avalonia.CornerRadius(free ? 20 : 0);
+            Frame.BorderThickness = new Avalonia.Thickness(free ? 2 : 0);
         }
     }
 

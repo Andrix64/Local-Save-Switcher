@@ -15,8 +15,8 @@
         WindowStartupLocation="CenterScreen">
 
   <!-- Angoli leggermente stondati (a schermo intero o ingrandita il codice li azzera). -->
-  <Border x:Name="Frame" CornerRadius="10" ClipToBounds="True" Background="{StaticResource Background}"
-          BorderBrush="{StaticResource Border}" BorderThickness="1">
+  <Border x:Name="Frame" CornerRadius="20" ClipToBounds="True" Background="{StaticResource Background}"
+          BorderBrush="{StaticResource Border}" BorderThickness="2">
   <Grid>
 
   <!-- La modalità avanzata: intestazione, colonna dei giochi, il gioco -->
