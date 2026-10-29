@@ -93,22 +93,47 @@ public sealed class PinTests : IDisposable
     public void RemovePinRemovesIt()
     {
         People people = Load();
-        people.SetPin(Admin, "4821");
+        people.SetPin(User, "4821");
 
-        Assert.True(people.RemovePin(Admin).Success);
+        Assert.True(people.RemovePin(User).Success);
 
-        Assert.False(people.CheckPin(Admin, "4821"));
-        Assert.False(Reread().Find(Admin)!.HasPin);
+        Assert.False(people.CheckPin(User, "4821"));
+        Assert.False(Reread().Find(User)!.HasPin);
     }
 
     [Fact]
     public void AnotherAdminCanRemoveAPinWithoutKnowingIt()
     {
         People people = Load();
+        people.SetPin(User, "4821");
+
+        Assert.True(people.RemovePin(User).Success);
+        Assert.False(Reread().Find(User)!.HasPin);
+    }
+
+    [Fact]
+    public void AnAdminCannotLoseThePin()
+    {
+        People people = Load();
         people.SetPin(Admin, "4821");
 
-        Assert.True(people.RemovePin(Admin).Success);
-        Assert.False(Reread().Find(Admin)!.HasPin);
+        Assert.False(people.RemovePin(Admin).Success);
+
+        Assert.True(Reread().Find(Admin)!.HasPin);
+    }
+
+    [Fact]
+    public void AUserNeedsAPinToBecomeAnAdmin()
+    {
+        People people = Load();
+
+        Assert.False(people.SetAdmin(User, true).Success);
+        Assert.False(people.Find(User)!.IsAdmin);
+
+        people.SetPin(User, "4821");
+
+        Assert.True(people.SetAdmin(User, true).Success);
+        Assert.True(people.Find(User)!.IsAdmin);
     }
 
     [Fact]

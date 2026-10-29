@@ -97,6 +97,7 @@ public sealed class PeopleTests : IDisposable
         Assert.True(people.Find(admin)!.IsAdmin);
 
         // Con un secondo amministratore il primo si può declassare.
+        people.SetPin(user, "4821");
         Assert.True(people.SetAdmin(user, true).Success);
         Assert.True(people.SetAdmin(admin, false).Success);
         Assert.False(people.Find(admin)!.IsAdmin);

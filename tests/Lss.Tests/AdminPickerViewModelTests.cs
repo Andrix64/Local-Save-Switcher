@@ -88,6 +88,7 @@ public sealed class AdminPickerViewModelTests : IDisposable
     public void WithTwoAdminsAUserMustChoose()
     {
         People people = People();
+        people.SetPin(User, "4821");
         people.SetAdmin(User, true);
 
         Assert.Null(AdminPickerViewModel.KnownAdmin(people, null));

@@ -64,7 +64,9 @@ last used per provider). A player is **not** tied to a launcher account
 - There is always at least one player. The last player can't be removed.
 - There is always at least one **admin**. The last admin can't be removed
   or made a user. The first player (P1) is an admin.
-- An admin **may** set a 4-digit PIN (P4a); it is **never required**. Admin
+- An admin **must** have a 4-digit PIN (P4a, made mandatory later): a user needs
+  one to become an admin, an admin can't lose it, and an admin without one
+  (older data) is asked to set it the first time an admin is needed. Admin
   rights and the PIN are a guard against children and mistakes, not real
   security: anyone who can edit the data folder can remove a PIN.
 - Removing a player: their playthroughs are **given to another player**
@@ -290,7 +292,7 @@ Tests: setting round trip, existing `lss.ini` without the key →
 
 Commit: `Simple and advanced mode`
 
-## P4a — Optional PIN for admins
+## P4a — PIN for admins (optional at first, mandatory now)
 
 - `Person` gets `bool HasPin`. `persone.ini` stores
   `<id>.Pin=<salt base64>:<hash base64>`: PBKDF2-SHA256 with

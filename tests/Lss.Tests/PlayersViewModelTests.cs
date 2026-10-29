@@ -49,12 +49,12 @@ public sealed class PlayersViewModelTests : IDisposable
     }
 
     [Fact]
-    public void TheLastAdminCannotBeDemoted()
+    public async Task TheLastAdminCannotBeDemoted()
     {
         People people = People();
         PlayersViewModel model = Model(people, new FakeDialogService());
 
-        Assert.False(model.SetAdmin(people.Find(Admin)!, false).Success);
+        Assert.False((await model.SetAdminAsync(people.Find(Admin)!, false)).Success);
 
         Assert.True(people.Find(Admin)!.IsAdmin);
         Assert.Equal(Strings.LastAdmin, model.Message);
@@ -179,8 +179,9 @@ public sealed class PlayersViewModelTests : IDisposable
         Assert.True(people.Find(Admin)!.HasPin);
         Assert.Equal(Strings.PinChangeMenu, model.Rows[0].PinActionText);
 
-        Assert.True(model.RemovePin(people.Find(Admin)!).Success);
-        Assert.False(people.Find(Admin)!.HasPin);
+        Assert.False(model.Rows[0].CanRemovePin);
+        Assert.False(model.RemovePin(people.Find(Admin)!).Success);
+        Assert.True(people.Find(Admin)!.HasPin);
     }
 
     [Fact]
@@ -194,14 +195,28 @@ public sealed class PlayersViewModelTests : IDisposable
     }
 
     [Fact]
-    public void MakingAnAdminAUserKeepsTheirPin()
+    public async Task MakingAUserAnAdminAsksForAPinFirst()
     {
         People people = People();
-        people.SetAdmin(User, true);
+        var dialogs = new FakeDialogService { PinAnswer = "4821" };
+        PlayersViewModel model = Model(people, dialogs);
+
+        Assert.True((await model.SetAdminAsync(people.Find(User)!, true)).Success);
+
+        Assert.Contains("SetPin: Clara", dialogs.Calls);
+        Assert.True(people.Find(User)!.IsAdmin);
+        Assert.True(people.Find(User)!.HasPin);
+    }
+
+    [Fact]
+    public async Task MakingAnAdminAUserKeepsTheirPin()
+    {
+        People people = People();
         people.SetPin(User, "4821");
+        people.SetAdmin(User, true);
         PlayersViewModel model = Model(people, new FakeDialogService());
 
-        Assert.True(model.SetAdmin(people.Find(User)!, false).Success);
+        Assert.True((await model.SetAdminAsync(people.Find(User)!, false)).Success);
 
         Assert.True(people.Find(User)!.HasPin);
         Assert.True(people.CheckPin(User, "4821"));
