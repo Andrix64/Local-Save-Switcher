@@ -334,6 +334,29 @@
     <Setter Property="CornerRadius" Value="0,0,0,18" />
   </Style>
 
+  <!-- Riga che apre un'altra finestra: tutta cliccabile, con la freccia a destra. -->
+  <Style Selector="Button.navrow">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="16,14" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Button.navrow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SurfaceHover}" />
+  </Style>
+  <Style Selector="Path.chevron">
+    <Setter Property="Width" Value="12" />
+    <Setter Property="Height" Value="12" />
+    <Setter Property="Stretch" Value="Uniform" />
+    <Setter Property="Stroke" Value="{StaticResource TextMuted}" />
+    <Setter Property="StrokeThickness" Value="2" />
+    <Setter Property="StrokeLineCap" Value="Round" />
+    <Setter Property="StrokeJoin" Value="Round" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
   <!-- Telaio dei popup: niente cornice di sistema, angoli a 20px come la finestra principale, in alto il titolo
        leggibile e la X per chiudere. Trascinamento ed Esc li gestisce PopupChrome (App.axaml.cs). -->
   <Style Selector="Window:not(.main)">

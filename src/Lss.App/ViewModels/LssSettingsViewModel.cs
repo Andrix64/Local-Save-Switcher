@@ -6,29 +6,26 @@ using Lss.App.Views;
 namespace Lss.App.ViewModels;
 
 /// <summary>
-/// Impostazioni di LSS (R8): cercare altre cartelle dopo aver giocato, i giocatori, l'esportazione di
-/// tutte le configurazioni, le cartelle ignorate per tutti i giochi, la cartella dei dati e le
+/// Impostazioni di LSS (R8): cercare altre cartelle dopo aver giocato, i giocatori, le
+/// cartelle ignorate per tutti i giochi, la cartella dei dati e le
 /// informazioni. Le impostazioni di un gioco stanno in GameSettingsViewModel.
 /// </summary>
 public partial class LssSettingsViewModel : ObservableObject
 {
     private readonly IDialogService dialogs;
     private readonly AppSettings settings;
-    private readonly Func<Task>? exportAll;
     private readonly Func<Task>? openPlayers;
     private readonly string accountText;
 
-    /// <param name="exportAll">Esporta la configurazione di tutti i giochi (la finestra principale sa di tutti).</param>
     /// <param name="openPlayers">Apre la finestra Giocatori.</param>
     /// <param name="accountText">Gli account dei launcher, per le informazioni.</param>
     /// <param name="mode">L'interruttore Semplice | Avanzata della finestra principale.</param>
-    internal LssSettingsViewModel(AppSettings settings, IDialogService dialogs, Func<Task>? exportAll = null,
+    internal LssSettingsViewModel(AppSettings settings, IDialogService dialogs,
         Func<Task>? openPlayers = null, string accountText = "", ModeSwitchViewModel? mode = null)
     {
         Mode = mode;
         this.settings = settings;
         this.dialogs = dialogs;
-        this.exportAll = exportAll;
         this.openPlayers = openPlayers;
         this.accountText = accountText;
 
@@ -54,6 +51,10 @@ public partial class LssSettingsViewModel : ObservableObject
 
     public string CaptionData => Strings.CaptionData;
 
+    public string CaptionPlayers => Strings.CaptionPlayers;
+
+    public string CaptionFolders => Strings.CaptionFolders;
+
     [ObservableProperty]
     private bool lookAfterPlaying;
 
@@ -68,8 +69,6 @@ public partial class LssSettingsViewModel : ObservableObject
         settings.Save();
     }
 
-    public string ExportAllText => Strings.ExportAllConfigs;
-
     public string PlayersText => Strings.PlayersButton;
 
     /// <summary>"Giocatori…": la finestra delle persone di LSS.</summary>
@@ -78,14 +77,6 @@ public partial class LssSettingsViewModel : ObservableObject
     {
         if (openPlayers != null)
             await openPlayers();
-    }
-
-    /// <summary>Esporta in un file le configurazioni di tutti i giochi con cartelle scelte, imparate o importate.</summary>
-    [RelayCommand]
-    private async Task ExportAllAsync()
-    {
-        if (exportAll != null)
-            await exportAll();
     }
 
     public string IgnoredFoldersText => Strings.IgnoredFoldersAllLink;

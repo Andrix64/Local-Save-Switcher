@@ -505,52 +505,15 @@ public partial class MainWindowViewModel : ObservableObject
             ReloadGames(selected?.Info.Key, item.Info.Key);
     }
 
-    /// <summary>
-    /// Esporta in un solo file la configurazione di ogni gioco che ha almeno un posto
-    /// scelto, imparato o importato (N9c). Il file si scrive solo se si sceglie dove.
-    /// </summary>
-    public async Task ExportAllConfigsAsync()
-    {
-        var games = new List<SaveConfigGame>();
-
-        foreach (GameItemViewModel item in Games)
-        {
-            SaveManager manager = GameFor(item).Manager;
-
-            if (manager.Game.Spots.Any(spot => spot.Source is SaveSource.Chosen or SaveSource.Learned or SaveSource.Imported))
-                games.Add(manager.ConfigGame("").Game);
-        }
-
-        if (games.Count == 0)
-        {
-            await dialogs.InformAsync(Strings.ExportAllConfigs, Strings.ConfigExportNone, InfoKind.Info);
-            return;
-        }
-
-        string platform = OperatingSystem.IsLinux() ? "Linux" : "Windows";
-        string? path = await dialogs.PickConfigToSaveAsync(Strings.ExportAllConfigs, $"LSS - {platform}.lss-config.json");
-
-        if (path == null)
-            return;
-
-        try
-        {
-            File.WriteAllText(path, SaveConfig.Write(SaveConfig.CurrentFile(games)));
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            await dialogs.InformAsync(Strings.TitleOperationFailed, ex.Message, InfoKind.Warning);
-        }
-    }
 
     private GameItemViewModel? ItemOf(GameInfo info) => Games.FirstOrDefault(game => game.Info.Key == info.Key);
 
-    /// <summary>"Impostazioni" di LSS (non di un gioco): cercare dopo aver giocato, giocatori, esportazione, dati.</summary>
+    /// <summary>"Impostazioni" di LSS (non di un gioco): cercare dopo aver giocato, giocatori, cartelle ignorate, dati.</summary>
     [RelayCommand]
     public async Task OpenLssSettingsAsync()
     {
         await dialogs.ShowAsync<bool>(new LssSettingsWindow(
-            new LssSettingsViewModel(settings, dialogs, ExportAllConfigsAsync, OpenPlayersAsync, AccountText, Mode)));
+            new LssSettingsViewModel(settings, dialogs, OpenPlayersAsync, AccountText, Mode)));
     }
 
     /// <summary>

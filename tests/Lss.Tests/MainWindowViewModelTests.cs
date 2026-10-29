@@ -32,47 +32,6 @@ public sealed class MainWindowViewModelTests : IDisposable
         new(launchers, new AppSettings(Path.Combine(folder.Root, "lss.json")), dialogs);
 
     [Fact]
-    public async Task ExportAllWritesOnlyTheGamesWithChosenFolders()
-    {
-        var provider = new FakeProvider { Id = "steam", DisplayName = "Steam" };
-        var account = new GameAccount("steam", "111", "Anna", folder.Root, null);
-
-        // "Uno" ha una cartella imparata (posto 2); "Due" solo quella di default.
-        string saves = Path.Combine(folder.Root, "salvataggi");
-        TestFolder.Write(Path.Combine(saves, "a.sav"), "x");
-        var uno = new GameInfo("steam", "1", "Uno", "", "", "",
-            [.. GameInfo.SpotsOf(Path.Combine(folder.Root, "steam", "1"), SaveSource.Userdata),
-             new SaveSpot(2, saves, "*.sav", false, saves, SaveSource.Learned)],
-            SupportState.Supported);
-
-        MainWindowViewModel vm = Create(new LauncherGames(provider, account, [uno, Game("steam", "2", "Due")]));
-        string target = Path.Combine(folder.Root, "tutti.lss-config.json");
-        dialogs.ConfigToSave = target;
-
-        await vm.ExportAllConfigsAsync();
-
-        Result<SaveConfigFile> read = SaveConfig.Read(File.ReadAllText(target));
-        Assert.True(read.Success);
-        Assert.Equal("Uno", Assert.Single(read.Value!.Games).Name);
-    }
-
-    [Fact]
-    public async Task ExportAllWithNothingChosenWritesNothing()
-    {
-        var provider = new FakeProvider { Id = "steam", DisplayName = "Steam" };
-        var account = new GameAccount("steam", "111", "Anna", folder.Root, null);
-        string target = Path.Combine(folder.Root, "tutti.lss-config.json");
-        dialogs.ConfigToSave = target;
-
-        MainWindowViewModel vm = Create(new LauncherGames(provider, account, [Game("steam", "1", "Uno")]));
-
-        await vm.ExportAllConfigsAsync();
-
-        Assert.False(File.Exists(target));
-        Assert.Contains("Inform: " + Strings.ExportAllConfigs, dialogs.Calls);
-    }
-
-    [Fact]
     public void TheSameGameInTwoLaunchersIsShownOnce()
     {
         var steam = new FakeProvider { Id = "steam", DisplayName = "Steam" };

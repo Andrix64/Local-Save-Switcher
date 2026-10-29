@@ -16,21 +16,6 @@ public sealed class LssSettingsViewModelTests : IDisposable
     public void Dispose() => folder.Dispose();
 
     [Fact]
-    public async Task ExportAllRunsTheExporter()
-    {
-        bool exported = false;
-        var vm = new LssSettingsViewModel(new AppSettings(Path.Combine(folder.Root, "lss.json")), dialogs, () =>
-        {
-            exported = true;
-            return Task.CompletedTask;
-        });
-
-        await vm.ExportAllCommand.ExecuteAsync(null);
-
-        Assert.True(exported);
-    }
-
-    [Fact]
     public async Task PlayersOpensTheWindowOfPlayers()
     {
         bool opened = false;

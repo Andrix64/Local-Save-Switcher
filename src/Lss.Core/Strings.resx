@@ -300,6 +300,8 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SettingSharePreferences" xml:space="preserve"><value>Same game options for all playthroughs</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Controls, audio and subtitles stay the same when you switch playthrough, even in a new one.</value></data>
   <data name="CurrentPlaythrough" xml:space="preserve"><value>CURRENT</value></data>
+  <data name="CaptionPlayers" xml:space="preserve"><value>PLAYERS</value></data>
+  <data name="CaptionFolders" xml:space="preserve"><value>FOLDERS</value></data>
   <data name="SettingMode" xml:space="preserve"><value>Mode</value></data>
   <data name="SettingModeHint" xml:space="preserve"><value>Simple: whoever plays picks the game. Advanced: full control.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Settings</value></data>
@@ -413,7 +415,6 @@ LSS will look at what changed on the disk.</value></data>
   <data name="IgnoredFoldersLink" xml:space="preserve"><value>Folders that are not saves…</value></data>
   <data name="LearnFolderChanged" xml:space="preserve"><value>The playthroughs of {0} were made with another folder. Use the new folder anyway?</value></data>
   <data name="ExportConfig" xml:space="preserve"><value>Export save configuration…</value></data>
-  <data name="ExportAllConfigs" xml:space="preserve"><value>Export all save configurations…</value></data>
   <data name="ImportConfig" xml:space="preserve"><value>Import save configuration…</value></data>
   <data name="ConfigPreviewTitle" xml:space="preserve"><value>Save configuration of {0}</value></data>
   <data name="ConfigPreviewText" xml:space="preserve"><value>These folders will be in the file, written so they work on another computer. No user name and no saves are in it.</value></data>
@@ -421,7 +422,6 @@ LSS will look at what changed on the disk.</value></data>
   <data name="ConfigFromLauncher" xml:space="preserve"><value>{0} already knows these folders: this file is useful only where it doesn't.</value></data>
   <data name="ConfigNotes" xml:space="preserve"><value>Notes (optional)</value></data>
   <data name="ImportConfigTitle" xml:space="preserve"><value>Import save configuration</value></data>
-  <data name="ConfigExportNone" xml:space="preserve"><value>No game has save folders to export yet: choose or learn a save folder first.</value></data>
   <data name="LookAfterPlayingHint" xml:space="preserve"><value>After a session LSS looks at the files that changed and suggests folders that may be saves. It only suggests: nothing changes without your choice.</value></data>
   <data name="ImportConfigNow" xml:space="preserve"><value>Import</value></data>
   <data name="ConfigMadeOn" xml:space="preserve"><value>Made on {0}</value></data>
