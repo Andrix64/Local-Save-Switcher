@@ -353,6 +353,21 @@ public sealed class LinuxPlatform : IPlatform
     /// </summary>
     public void OpenUri(string uri)
     {
+        // Un indirizzo steam:// va al Steam che gira, anche in Gaming Mode sul Steam Deck dove xdg-open può non
+        // avere il programma registrato. Senza il comando steam (Flatpak, Snap) si torna a xdg-open.
+        if (uri.StartsWith("steam://", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo("steam", uri) { UseShellExecute = false })?.Dispose();
+                return;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // Il comando steam non c'è: sotto, xdg-open.
+            }
+        }
+
         Process.Start(new ProcessStartInfo("xdg-open", uri) { UseShellExecute = false })?.Dispose();
     }
 

@@ -71,6 +71,22 @@ where `<version>` is the version in the file name, for example `1.0.0`.
 The AppImage needs no installation. The `.tar.gz` installs into `~/.local`
 and doesn't need root.
 
+### Steam Deck: use LSS in Gaming Mode
+
+1. In **Desktop Mode**, download the AppImage, make it executable
+   (`chmod +x`) and run it once to check that it opens.
+2. Open Steam in Desktop Mode, choose **Games → Add a Non-Steam Game to My
+   Library → Browse…**, pick the AppImage and add it.
+3. Back in **Gaming Mode**, open LSS from the *Non-Steam* part of your library.
+   It fills the screen, and the games you start from it open in Gaming Mode
+   as usual.
+4. LSS in simple mode always starts full screen. To use it with the controller
+   as a mouse, open the controller settings of the LSS entry and pick the
+   *Web Browser* layout.
+
+Turn off Steam Cloud for each game you manage with LSS (see below): the Deck
+syncs it like any other Steam machine.
+
 ## Before you start: turn off Steam Cloud
 
 With Steam Cloud on, Steam may put back saves from another playthrough when
