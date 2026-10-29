@@ -160,8 +160,8 @@ public partial class App : Application
             DataContext = new MainWindowViewModel(launchers, settings, new DialogService(() => desktop.MainWindow), people),
         };
 
-        // Riparte a schermo intero se l'ultima volta la modalità semplice era così.
-        if (settings.FullScreen && settings.Mode == AppSettings.SimpleMode)
+        // La modalità semplice parte sempre a schermo intero (come una console); si esce con il pulsante o Esc.
+        if (settings.Mode == AppSettings.SimpleMode)
             window.WindowState = WindowState.FullScreen;
 
         window.Closed += (_, _) => desktop.Shutdown();
