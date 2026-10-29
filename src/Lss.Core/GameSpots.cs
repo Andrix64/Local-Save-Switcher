@@ -1,23 +1,99 @@
+using System.Text.Json.Serialization;
+
 namespace Lss;
 
+/// <summary>Un posto come è scritto in posti.json.</summary>
+internal sealed class SpotEntry
+{
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("Cartella")]
+    public string Folder { get; set; } = "";
+
+    // Percorso portabile; vuoto = lo stesso della cartella.
+    [JsonPropertyName("Portabile")]
+    public string Portable { get; set; } = "";
+
+    [JsonPropertyName("Maschera")]
+    public string Pattern { get; set; } = "";
+
+    [JsonPropertyName("Ricorsiva")]
+    public bool Recursive { get; set; } = true;
+
+    // "scelta", "imparata" o "importata".
+    [JsonPropertyName("Origine")]
+    public string Origin { get; set; } = "scelta";
+}
+
+/// <summary>L'id del posto di un launcher, con la sua chiave, come è scritto in posti.json.</summary>
+internal sealed class LauncherSpotEntry
+{
+    [JsonPropertyName("Chiave")]
+    public string Key { get; set; } = "";
+
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+}
+
 /// <summary>
-/// I posti di un gioco salvati in posti.ini nella cartella dati del gioco: le
+/// Come posti.json è scritto. Un solo file con due parti: i posti (GameSpots) e le cartelle
+/// ignorate del gioco (IgnoredFolders). Ogni classe legge tutto il file, cambia solo la sua parte
+/// e riscrive tutto: una che scrivesse solo la sua cancellerebbe l'altra.
+/// </summary>
+internal sealed class SpotsFile
+{
+    // 0 = non scritto.
+    [JsonPropertyName("Prossimo")]
+    public int Next { get; set; }
+
+    [JsonPropertyName("Posti")]
+    public List<SpotEntry> Spots { get; set; } = [];
+
+    [JsonPropertyName("Launcher")]
+    public List<LauncherSpotEntry> Launchers { get; set; } = [];
+
+    [JsonPropertyName("CartelleExtra")]
+    public List<string> ExtraRoots { get; set; } = [];
+
+    [JsonPropertyName("Ignorate")]
+    public List<IgnoredEntry> Ignored { get; set; } = [];
+
+    /// <summary>true se non c'è niente da ricordare: il file si elimina.</summary>
+    [JsonIgnore]
+    public bool IsEmpty =>
+        Next == 0 && Spots.Count == 0 && Launchers.Count == 0 && ExtraRoots.Count == 0 && Ignored.Count == 0;
+
+    /// <summary>Il file (vuoto se manca o è rotto).</summary>
+    public static SpotsFile Read(string path) => JsonFile.Read<SpotsFile>(path) ?? new SpotsFile();
+
+    /// <summary>Scrive il file; senza niente da ricordare lo elimina. Lancia un'eccezione in caso di errore.</summary>
+    public static void Write(string path, SpotsFile file)
+    {
+        if (file.IsEmpty)
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+
+            return;
+        }
+
+        JsonFile.Write(path, file);
+    }
+}
+
+/// <summary>
+/// I posti di un gioco salvati in posti.json nella cartella dati del gioco: le
 /// cartelle scelte o imparate (il posto 1 e gli altri, con il loro id), le
-/// cartelle extra da cercare, le cartelle ignorate per questo gioco (M3b) e
-/// gli id dei posti dei launcher. I posti dei launcher (userdata, regole) non
-/// si salvano: si ritrovano a ogni avvio, ma la riga Launcher.&lt;percorso&gt;
-/// fa tenere loro lo stesso id.
-/// Un cartella.ini della 1.0 si converte alla prima lettura (V1Compat).
-/// Le chiavi che non sono di questa classe (Ignorate.n, Aggiunta.n) restano com'erano.
+/// cartelle extra da cercare e gli id dei posti dei launcher. I posti dei launcher
+/// (userdata, regole) non si salvano: si ritrovano a ogni avvio, ma la voce
+/// Launcher fa tenere loro lo stesso id. Le cartelle ignorate per questo gioco
+/// (M3b) stanno nello stesso file ma sono di IgnoredFolders: qui restano com'erano.
 /// Non lancia eccezioni in lettura: un file illeggibile vale come vuoto.
 /// </summary>
 internal sealed class GameSpots
 {
-    private const string FileName = "posti.ini";
-    private const string NextKey = "Prossimo";
-    private const string SpotPrefix = "Posto.";
-    private const string LauncherPrefix = "Launcher.";
-    private const string ExtraKey = "CartelleExtra";
+    private const string FileName = "posti.json";
     private const string ScelteText = "scelta";
     private const string ImparateText = "imparata";
     private const string ImportateText = "importata";
@@ -36,10 +112,10 @@ internal sealed class GameSpots
         file = Path.Combine(gameDataFolder, FileName);
     }
 
-    /// <summary>Percorso di posti.ini.</summary>
+    /// <summary>Percorso di posti.json.</summary>
     internal string FilePath => file;
 
-    /// <summary>Cartella dati del gioco, dove stanno posti.ini e proposte.ini.</summary>
+    /// <summary>Cartella dati del gioco, dove stanno posti.json e proposte.json.</summary>
     public string GameDataFolder => Path.GetDirectoryName(file) ?? "";
 
     /// <summary>Posti scelti o imparati, in ordine di id (dopo Load).</summary>
@@ -48,9 +124,7 @@ internal sealed class GameSpots
     /// <summary>Cartelle extra da cercare per questo gioco (dopo Load).</summary>
     public IReadOnlyList<string> ExtraRoots => extraRoots;
 
-    /// <summary>
-    /// Legge posti.ini. Se non c'è ma c'è un cartella.ini della 1.0, lo converte.
-    /// </summary>
+    /// <summary>Legge posti.json.</summary>
     public void Load()
     {
         spots.Clear();
@@ -58,14 +132,25 @@ internal sealed class GameSpots
         extraRoots.Clear();
         next = FirstExtraId;
 
-        // V1Compat: cartella.ini della 1.0 diventa posti.ini
-        if (V1Compat.ConvertOldSpots(this))
-            return;
+        SpotsFile data = SpotsFile.Read(file);
 
-        Dictionary<string, string> values = IniFile.Read(file);
+        if (data.Next > 0)
+            next = data.Next;
 
-        foreach ((string key, string value) in values)
-            ReadValue(key, value);
+        foreach (SpotEntry entry in data.Spots)
+        {
+            if (entry.Folder == "")
+                continue;
+
+            string portable = entry.Portable == "" ? entry.Folder : entry.Portable;
+            spots.Add(new SaveSpot(entry.Id, entry.Folder, entry.Pattern, entry.Recursive, portable, OriginOf(entry.Origin)));
+        }
+
+        foreach (LauncherSpotEntry entry in data.Launchers)
+            launcherIds[entry.Key] = entry.Id;
+
+        foreach (string root in data.ExtraRoots.Where(root => root != ""))
+            AddExtraRoot(root);
 
         if (spots.Count > 0)
             next = Math.Max(next, spots.Max(spot => spot.Id) + 1);
@@ -75,13 +160,10 @@ internal sealed class GameSpots
     }
 
     /// <summary>
-    /// Aggiunge un posto con il prossimo id (mai riusato). Il percorso non
-    /// può contenere "|": il formato lo usa come separatore.
+    /// Aggiunge un posto con il prossimo id (mai riusato).
     /// </summary>
     public SaveSpot Add(string folder, string pattern, string portable, SaveSource source, bool recursive = true)
     {
-        CheckText(folder, portable, pattern);
-
         var spot = new SaveSpot(next++, folder, pattern, recursive, portable, source);
         spots.Add(spot);
 
@@ -98,7 +180,6 @@ internal sealed class GameSpots
         if (folder == "")
             return;
 
-        CheckText(folder, folder, "");
         spots.Add(new SaveSpot(1, folder, "", true, folder, source));
         next = Math.Max(next, 2);
     }
@@ -129,7 +210,7 @@ internal sealed class GameSpots
     /// <summary>
     /// Id del posto di un launcher, identificato dalla sua chiave (percorso portabile,
     /// maschera, ricorsione). La stessa chiave ha sempre lo stesso id, anche dopo un
-    /// riavvio: un id nuovo si scrive subito in posti.ini.
+    /// riavvio: un id nuovo si scrive subito in posti.json.
     /// </summary>
     public int LauncherId(string key)
     {
@@ -144,119 +225,44 @@ internal sealed class GameSpots
     }
 
     /// <summary>
-    /// Scrive posti.ini: le chiavi di questa classe e quelle di altre classi.
-    /// Senza nulla da ricordare elimina il file.
+    /// Scrive posti.json: i posti di questa classe, lasciando le cartelle ignorate come sono.
+    /// Senza nulla da ricordare elimina il file. Ritorna false se la scrittura fallisce.
     /// </summary>
     public bool Save()
     {
-        IEnumerable<KeyValuePair<string, string>> others = IniFile.Read(file)
-            .Where(pair => !IsOwned(pair.Key));
-        return Write(others.ToList());
-    }
-
-    /// <summary>Come Save, ma con le chiavi di altre classi date (per V1Compat).</summary>
-    internal bool Save(List<KeyValuePair<string, string>> others) => Write(others);
-
-    private void ReadValue(string key, string value)
-    {
-        if (key == NextKey && int.TryParse(value, out int nextId))
+        try
         {
-            next = nextId;
+            SpotsFile data = SpotsFile.Read(file);
+
+            // Il posto 1 può tornare senza danni; gli id dopo il 1 non si riusano mai.
+            data.Next = spots.Count > 0 || launcherIds.Count > 0 || extraRoots.Count > 0 || next > 2 ? next : 0;
+            data.Spots = spots.OrderBy(spot => spot.Id).Select(spot => new SpotEntry
+            {
+                Id = spot.Id,
+                Folder = spot.Folder,
+                Portable = spot.PortablePath,
+                Pattern = spot.Pattern,
+                Recursive = spot.Recursive,
+                Origin = TextOf(spot.Source),
+            }).ToList();
+            data.Launchers = launcherIds.OrderBy(pair => pair.Value)
+                .Select(pair => new LauncherSpotEntry { Key = pair.Key, Id = pair.Value })
+                .ToList();
+            data.ExtraRoots = extraRoots.ToList();
+
+            SpotsFile.Write(file, data);
+            return true;
         }
-        else if (key.StartsWith(SpotPrefix, StringComparison.OrdinalIgnoreCase)
-                 && int.TryParse(key[SpotPrefix.Length..], out int id))
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            if (ParseSpot(id, value) is { } spot)
-                spots.Add(spot);
+            Log.Write("posti.json non salvato: " + file, ex);
+            return false;
         }
-        else if (key.StartsWith(LauncherPrefix, StringComparison.OrdinalIgnoreCase)
-                 && int.TryParse(value, out int launcherId))
-        {
-            launcherIds[key[LauncherPrefix.Length..]] = launcherId;
-        }
-        else if (key == ExtraKey)
-        {
-            extraRoots.AddRange(value.Split(';', StringSplitOptions.RemoveEmptyEntries));
-        }
-    }
-
-    /// <summary>
-    /// Un posto da "cartella|percorso portabile|maschera|ricorsiva|origine".
-    /// null se la riga non è valida.
-    /// </summary>
-    private static SaveSpot? ParseSpot(int id, string value)
-    {
-        string[] parts = value.Split('|');
-
-        if (parts.Length != 5 || parts[0] == "")
-            return null;
-
-        string portable = parts[1] == "" ? parts[0] : parts[1];
-
-        return new SaveSpot(id, parts[0], parts[2], parts[3] == "1", portable, OriginOf(parts[4]));
     }
 
     internal static SaveSource OriginOf(string text) =>
         text == ImparateText ? SaveSource.Learned : text == ImportateText ? SaveSource.Imported : SaveSource.Chosen;
 
-    private static string TextOf(SaveSource source) =>
+    internal static string TextOf(SaveSource source) =>
         source == SaveSource.Learned ? ImparateText : source == SaveSource.Imported ? ImportateText : ScelteText;
-
-    private static void CheckText(string folder, string portable, string pattern)
-    {
-        if (folder.Contains('|') || portable.Contains('|') || pattern.Contains('|'))
-            throw new ArgumentException("Il percorso contiene '|': non si può salvare in posti.ini.");
-    }
-
-    private static bool IsOwned(string key) =>
-        key == NextKey
-        || key.StartsWith(SpotPrefix, StringComparison.OrdinalIgnoreCase)
-        || key.StartsWith(LauncherPrefix, StringComparison.OrdinalIgnoreCase)
-        || key == ExtraKey;
-
-    /// <summary>
-    /// Scrive posti.ini con le chiavi di questa classe e le altre date. Senza
-    /// niente da ricordare elimina il file. Ritorna false se la scrittura fallisce.
-    /// </summary>
-    private bool Write(List<KeyValuePair<string, string>> others)
-    {
-        try
-        {
-            var values = new List<KeyValuePair<string, string>>(others);
-
-            // Il posto 1 può tornare senza danni; gli id dopo il 1 non si riusano mai.
-            if (spots.Count > 0 || launcherIds.Count > 0 || extraRoots.Count > 0 || next > 2)
-                values.Add(new(NextKey, next.ToString(System.Globalization.CultureInfo.InvariantCulture)));
-
-            foreach (SaveSpot spot in spots.OrderBy(spot => spot.Id))
-            {
-                string value = string.Join("|", spot.Folder, spot.PortablePath, spot.Pattern,
-                    spot.Recursive ? "1" : "0", TextOf(spot.Source));
-
-                values.Add(new(SpotPrefix + spot.Id, value));
-            }
-
-            foreach ((string portable, int id) in launcherIds.OrderBy(pair => pair.Value))
-                values.Add(new(LauncherPrefix + portable, id.ToString(System.Globalization.CultureInfo.InvariantCulture)));
-
-            if (extraRoots.Count > 0)
-                values.Add(new(ExtraKey, string.Join(";", extraRoots)));
-
-            if (values.Count == 0)
-            {
-                if (File.Exists(file))
-                    File.Delete(file);
-
-                return true;
-            }
-
-            IniFile.Write(file, values);
-            return true;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            Log.Write("posti.ini non salvato: " + file, ex);
-            return false;
-        }
-    }
 }

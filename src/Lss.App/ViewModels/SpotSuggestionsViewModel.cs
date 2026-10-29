@@ -91,7 +91,7 @@ public sealed partial class SpotSuggestionItem : ObservableObject
         LaterCommand = new RelayCommand(() => this.later(this));
     }
 
-    /// <summary>La proposta così come è salvata in proposte.ini.</summary>
+    /// <summary>La proposta così come è salvata in proposte.json.</summary>
     public SpotSuggestion Suggestion { get; }
 
     /// <summary>La cartella, o i file (maschera) dentro la cartella.</summary>

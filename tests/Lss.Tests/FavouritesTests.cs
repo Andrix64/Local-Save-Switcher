@@ -23,8 +23,8 @@ public sealed class FavouritesTests : IDisposable
         return manager;
     }
 
-    /// <summary>Testo di preferite.ini, per confrontarlo prima e dopo un errore.</summary>
-    private string FavouritesFile() => File.ReadAllText(Path.Combine(folder.Data, "preferite.ini"));
+    /// <summary>Testo di preferite.json, per confrontarlo prima e dopo un errore.</summary>
+    private string FavouritesFile() => File.ReadAllText(Path.Combine(folder.Data, "preferite.json"));
 
     /// <summary>Segna una sessione di gioco che finisce a "end": decide quale partita è l'ultima giocata.</summary>
     private static void PlayUntil(SaveManager manager, string profile, DateTime end) =>
@@ -165,6 +165,7 @@ public sealed class FavouritesTests : IDisposable
 
         PlayUntil(manager, "Profilo_Mario", DateTime.Now);
 
-        Assert.Contains(TestFolder.Owner + ".Ultima=", FavouritesFile());
+        var data = JsonFile.Read<FavouritesFileData>(Path.Combine(folder.Data, "preferite.json"));
+        Assert.True(data!.LastPlayed.ContainsKey(TestFolder.Owner));
     }
 }

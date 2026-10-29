@@ -9,7 +9,7 @@ public sealed class StateAndAccountTests : IDisposable
     [Fact]
     public void AppState_RoundTripsAndLeavesNoTempFile()
     {
-        string path = Path.Combine(folder.Root, "stato.ini");
+        string path = Path.Combine(folder.Root, "stato.json");
         var state = new AppState(path)
         {
             ActiveProfile = "Profilo_Mario",
@@ -28,14 +28,14 @@ public sealed class StateAndAccountTests : IDisposable
         Assert.Equal("", loaded.LastSaved);
         Assert.Equal(5, loaded.BackupsToKeep);
         Assert.False(File.Exists(path + ".tmp"));
-        Assert.Contains("SalvatoIl=-", File.ReadAllLines(path));
+        Assert.Contains("\"SalvatoIl\": \"\"", File.ReadAllText(path));
     }
 
     [Fact]
     public void AppState_UsesDefaultsForMissingOrInvalidValues()
     {
-        string path = Path.Combine(folder.Root, "stato.ini");
-        File.WriteAllLines(path, new[] { "ProfiloAttivo=Profilo_Mario", "BackupDaConservare=abc" });
+        string path = Path.Combine(folder.Root, "stato.json");
+        File.WriteAllText(path, "{ \"ProfiloAttivo\": \"Profilo_Mario\", \"BackupDaConservare\": -1 }");
 
         var state = new AppState(path);
         state.Load();

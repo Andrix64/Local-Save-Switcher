@@ -85,7 +85,7 @@ public sealed partial class SaveManager
     // Journal del cambio di salvataggi, nella cartella dati del gioco.
     private readonly string switchJournal;
 
-    // Cartella dati del gioco (per un account): qui stanno posti.ini e cambio.ini.
+    // Cartella dati del gioco (per un account): qui stanno posti.json e cambio.ini.
     private readonly string dataFolder;
 
     /// <summary>
@@ -117,7 +117,7 @@ public sealed partial class SaveManager
         BackupPath = Path.Combine(basePath, "Backup");
         SavestatePath = Path.Combine(basePath, "Savestate");
         InfoPath = Path.Combine(basePath, "Info");
-        State = new AppState(Path.Combine(basePath, "stato.ini"));
+        State = new AppState(Path.Combine(basePath, "stato.json"));
 
         Directory.CreateDirectory(ProfilesPath);
         Directory.CreateDirectory(BackupPath);
@@ -414,8 +414,8 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
-    /// Data salvata in stato.ini mostrata nel formato della lingua di Windows.
-    /// In stato.ini è sempre gg/MM/aaaa; un valore illeggibile viene mostrato com'è.
+    /// Data salvata in stato.json mostrata nel formato della lingua di Windows.
+    /// In stato.json è sempre gg/MM/aaaa; un valore illeggibile viene mostrato com'è.
     /// </summary>
     public static string FormatStoredDate(string stored)
     {

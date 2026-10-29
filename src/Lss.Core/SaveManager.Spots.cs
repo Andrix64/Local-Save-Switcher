@@ -75,7 +75,7 @@ public sealed partial class SaveManager
             CopyNewSpotToPlaythroughs(added, others, made);
 
             if (!stored.Save())
-                throw new IOException("posti.ini non scritto");
+                throw new IOException("posti.json non scritto");
         }
         catch (Exception ex)
         {
@@ -153,7 +153,7 @@ public sealed partial class SaveManager
         stored.Remove(id);
 
         if (!stored.Save())
-            return Result.Fail(Loc.F(Strings.ErrorWithMessage, "posti.ini non scritto"));
+            return Result.Fail(Loc.F(Strings.ErrorWithMessage, "posti.json non scritto"));
 
         Game = Game with { Spots = Game.Spots.Where(spot => spot.Id != id).ToList() };
         saves = new SaveSet(Game.Spots);
@@ -191,7 +191,7 @@ public sealed partial class SaveManager
         return SaveConfig.FromGame(Game, context, notes);
     }
 
-    /// <summary>Cartella dati del gioco per questo account (posti.ini, cambio.ini, proposte.ini).</summary>
+    /// <summary>Cartella dati del gioco per questo account (posti.json, cambio.ini, proposte.json).</summary>
     public string DataFolder => dataFolder;
 
     /// <summary>

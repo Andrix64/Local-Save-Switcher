@@ -1,14 +1,14 @@
 namespace Lss.Tests;
 
 /// <summary>
-/// GameSpots: posti.ini nella cartella dati di un gioco.
+/// GameSpots: posti.json nella cartella dati di un gioco.
 /// </summary>
 public sealed class GameSpotsTests : IDisposable
 {
     private readonly TestFolder folder = new();
 
     private string Data => Path.Combine(folder.Root, "game-data");
-    private string Posti => Path.Combine(Data, "posti.ini");
+    private string Posti => Path.Combine(Data, "posti.json");
 
     public void Dispose() => folder.Dispose();
 
@@ -86,12 +86,17 @@ public sealed class GameSpotsTests : IDisposable
     }
 
     [Fact]
-    public void PathWithPipeIsRefused()
+    public void PathWithPipeIsKept()
     {
+        // In JSON "|" non è un separatore: il percorso si salva com'è (in posti.ini era rifiutato).
         var spots = new GameSpots(Data);
         spots.Load();
+        spots.Add("a|b", "", "a|b", SaveSource.Chosen);
+        Assert.True(spots.Save());
 
-        Assert.Throws<ArgumentException>(() => spots.Add("a|b", "", "a|b", SaveSource.Chosen));
+        var loaded = new GameSpots(Data);
+        loaded.Load();
+        Assert.Equal("a|b", Assert.Single(loaded.Spots).Folder);
     }
 
 
@@ -105,6 +110,6 @@ public sealed class GameSpotsTests : IDisposable
         spots.Remove(2);
         spots.Save();
 
-        Assert.Contains("Prossimo=4", File.ReadAllText(Posti));
+        Assert.Contains("\"Prossimo\": 4", File.ReadAllText(Posti));
     }
 }

@@ -64,6 +64,7 @@ public partial class App : Application
         // Cartelle degli account sotto steam\ (dalle beta): prima di leggere i dati.
         V1Compat.MoveBetaLayout(AppData.Root); // V1Compat: cartelle dati della 1.0 e delle beta
         V1Compat.ConvertAppFiles(AppData.Root); // V1Compat: impostazioni .ini della 1.0 in JSON
+        V1Compat.ConvertGameFiles(AppData.Root); // V1Compat: file .ini dei giochi della 1.0 in JSON
 
         Log.Write("Avvio versione " + Program.Version);
 

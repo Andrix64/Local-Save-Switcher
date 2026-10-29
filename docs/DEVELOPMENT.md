@@ -23,12 +23,12 @@ Technical notes for people working on the code. The user guide is in the
 | Game saves | `<Steam>\userdata\<AccountID>\<AppID>\` (Linux: `<Steam>/userdata/<AccountID>/<AppID>/`) |
 | App data | `%LOCALAPPDATA%\LSS\` (`AppData.Root`); on Linux `~/.local/share/LSS/` |
 | Playthroughs | `<data>\<AccountID>\<AppID>\Profili\Profilo_<name>\` |
-| Note and play time | `<data>\<AccountID>\<AppID>\Info\Profilo_<name>.ini` |
-| Automatic copies | `<data>\<AccountID>\<AppID>\Backup\<reason>_<date>\` plus `<reason>_<date>.ini` next to it |
+| Note and play time | `<data>\<AccountID>\<AppID>\Info\Profilo_<name>.json` |
+| Automatic copies | `<data>\<AccountID>\<AppID>\Backup\<reason>_<date>\` plus `<reason>_<date>.json` next to it |
 | Saved points | `<data>\<AccountID>\<AppID>\Savestate\Profilo_<name>\<date>_<point name>\` |
-| State | `<data>\<AccountID>\<AppID>\stato.ini` |
+| State | `<data>\<launcher>\<account>\<game>\stato.json` |
 | Log | `<data>\log.txt` (above 1 MB it becomes `log.old.txt`) |
-| Settings (last account and game) | `<data>\lss.ini`: `UltimoAccount=`, `UltimoGioco=` |
+| Settings (last account and game) | `<data>\lss.json`: `UltimoAccount`, `UltimoGioco` |
 | Steam Cloud setting | `<Steam>\userdata\<AccountID>\7\remote\sharedconfig.vdf` (read only) |
 
 Data lives in `%LOCALAPPDATA%` rather than Documents because Documents is often
@@ -119,8 +119,7 @@ by builds before phase R) is in **`src/Lss.Core/V1Compat.cs`**, with its tests i
 phase R10) **`V1UpgradeTests.cs`**. Every call to it from the rest of the code
 is marked with the comment `// V1Compat: <why>`. `V1CompatBoundaryTests` fails
 if the name of an old file (`lss.ini`, `persone.ini`...) shows up in `src/`
-outside `V1Compat.cs` and `LegacyMigration.cs` (the exceptions it lists are
-removed by R10).
+outside `V1Compat.cs` and `LegacyMigration.cs` (it has no exceptions left).
 
 What it does:
 
@@ -134,24 +133,30 @@ What it does:
   `lss`, `persone`, `cartelle-ignorate`, and the `gioco` of every manual game.
   The `.ini` is renamed `<name>.ini.precedente` (never deleted, never
   `.vecchio`); if the `.json` already exists it wins. `V1Compat.ConvertIniFile`
-  is the one engine for this (R10 uses it for the per-game files).
+  is the one engine for this.
+- **Game files.** `V1Compat.ConvertGameFiles` (called right after
+  `ConvertAppFiles`) walks `<data>\<launcher>\<account>\<game>\` and does the same
+  for `stato`, `preferite`, `posti` (also the `cartella.ini` of 1.0 when there is
+  no `posti.json`), `proposte`, `Info\<playthrough>` and `Backup\<copy>`. Nothing is
+  converted lazily. `cambio.ini` (the switch journal) is not converted.
 - **Playthroughs and copies.** `V1Compat.AssignFirstFavourites` gives a first
   favourite to the players of playthroughs made before players existed
-  (`ProprietariOk` in `stato.ini`). `V1Compat.BackupFromName` describes a copy
+  (`ProprietariOk` in the game state). `V1Compat.BackupFromName` describes a copy
   without info file from its folder name; `OldBackupReasonText` is the text of
   the oldest one; `BackupsWithoutOwner` feeds the "copies from before" section
   of the History window.
-- **Export zips.** `V1Compat.ZipProvider`: zips of format 1 and 2 have no
-  launcher and are Steam's.
-- **Spots.** `V1Compat.ConvertOldSpots` turns `cartella.ini` into `posti.ini`.
+- **Export zips.** `V1Compat.ReadExportedInfo` and `ReadExportedSpots` read the
+  `partita.ini` and `posizioni.ini` of zips made before R10 (formats 1-4; 1 and 2
+  have no launcher and are Steam's). New zips (format 5) hold `partita.json` and
+  `posizioni.json`.
 
 To remove it:
 
 1. Delete `src/Lss.Core/V1Compat.cs`, `tests/Lss.Tests/V1CompatTests.cs`,
    `V1CompatBoundaryTests.cs` and `V1UpgradeTests.cs`.
 2. `grep -rn V1Compat src tests`: delete or simplify each marked line
-   (`App.axaml.cs`, both calls: `MoveBetaLayout` and `ConvertAppFiles`;
-   `AppSettings.Refers`, `GameSpots.Load`, `SaveManager.WithBackupInfo`,
+   (`App.axaml.cs`, three calls: `MoveBetaLayout`, `ConvertAppFiles` and
+   `ConvertGameFiles`; `AppSettings.Refers`, `SaveManager.WithBackupInfo`,
    `SaveManager.BackupReasonText`, `SaveManager.AssignExistingPlaythroughs`,
    `ImportProfileCore`, `HistoryViewModel.Reload`). The "copies from before"
    section of the History window (`LegacyCopies`, `ShowLegacy`) goes with them.
@@ -169,7 +174,7 @@ copies and saved points.
 
 In the code and on disk the historical names remain: a *profile* is a
 playthrough, a *savestate* is a saved point, a *backup* is an automatic copy.
-Folder, file and key names on disk are Italian (`Profili`, `stato.ini`,
+Folder, file and key names on disk are Italian (`Profili`, `stato.json`,
 `ProfiloAttivo`...) and stay so whatever the app's language.
 
 Steam's `remotecache.vdf` file, at the top level of the game folder, is never
@@ -212,7 +217,7 @@ Linux reads the same files from the Steam folders above. Steam's `registry.vdf`
   goes through `<folder>.vecchio` and is deleted). If the folder is in use and
   can't be moved, it falls back to copying directly from the already verified
   copy. If anything fails, the backup is restored.
-- `stato.ini` is written to `stato.ini.tmp` and then replaced.
+- Every `.json` file is written to `<name>.json.tmp` and then replaced (`JsonFile`).
 - Recovery at startup from an interrupted operation (for example a power
   cut): before looking for accounts, for every game folder, and on opening,
   for `Profili` and `Savestate`. If the folder is missing but
@@ -257,7 +262,7 @@ Both are read again every 2 seconds while the app is open.
   process start time, if readable) and the playthrough; when it closes it adds
   the time with `AddPlayTime` and, with `SalvaAllaChiusura=1`, saves the
   progress (`SaveProgress(onGameExit: true)`). Only works while the app is open.
-- **Files kept the same** (`FileCondivisi` in `stato.ini`, `GameDefaults.SharedFiles`):
+- **Files kept the same** (`FileCondivisi` in `stato.json`, `GameDefaults.SharedFiles`):
   when activating a playthrough, each listed file is first copied into the
   playthrough; when going back to a point or a copy it's put back afterwards.
   **Same game options for all playthroughs** (`OpzioniCondivise=1`) does the same
@@ -277,20 +282,22 @@ Both are read again every 2 seconds while the app is open.
 
 ## Formats
 
-### `stato.ini`
+### `stato.json`
 
-```ini
-ProfiloAttivo=Profilo_Mario
-AttivatoIl=22/10/2026 18:30:00
-SalvatoIl=-
-BackupDaConservare=20
-AvviaGioco=1
-SalvaAllaChiusura=1
-OpzioniCondivise=0
-FileCondivisi=remote/preferences_data
+```json
+{
+  "ProfiloAttivo": "Profilo_Mario",
+  "AttivatoIl": "22/10/2026 18:30:00",
+  "SalvatoIl": "",
+  "BackupDaConservare": 20,
+  "AvviaGioco": true,
+  "SalvaAllaChiusura": true,
+  "OpzioniCondivise": false,
+  "FileCondivisi": ["remote/preferences_data"]
+}
 ```
 
-`-` means an empty value. `BackupDaConservare=0` keeps all copies. Dates are
+`"BackupDaConservare": 0` keeps all copies. Dates are
 always written as `dd/MM/yyyy HH:mm:ss` (invariant culture) and shown in the
 system language's format.
 
@@ -336,10 +343,11 @@ exit), `ripristino` (restore), `creazione` (creation), `eliminazione`
 
 ### Exported playthrough
 
-A zip with `partita.ini` (`Formato=2`, `AppId`, `Gioco`, `Nome`, `Nota`,
-`TempoDiGioco`, `UltimaSessione`), `salvataggi\` (the playthrough folder) and,
-if any, `punti\` (the saved points). `AppId` is the Steam number of the game
-and `Gioco` its name. Import rejects zips without `salvataggi\`, paths that
+A zip with `partita.json` (`Formato` 5, `Provider`, `AppId`, `Gioco`, `Nome`,
+`Info` with `Nota`, `TempoDiGioco`, `UltimaSessione` and `Giocatore`, and
+`NomeGiocatore`), `salvataggi\` (the playthrough folder), `posizioni.json` when
+the game has spots and, if any, `punti\` (the saved points). `AppId` is the
+number of the game in its launcher and `Gioco` its name. Import rejects zips without `salvataggi\`, paths that
 leave the folder, and playthroughs of another game (`ImportOtherGame`).
 Zip entries always use `/`, so the same zip imports on Windows and Linux.
 
@@ -385,7 +393,7 @@ language) and `Strings.it.resx` (Italian). The language follows the system
 | `Platform.cs` | The platform in use (`Platform.Current`). |
 | `IniFile.cs` | Safe reading and writing of `.ini` files. |
 | `FileOps.cs` | Copying, verifying and replacing folders. |
-| `AppState.cs` | Reading and writing `stato.ini`. |
+| `AppState.cs` | Reading and writing `stato.json`. |
 | `AppData.cs`, `AppSettings.cs` | App data folder and `lss.ini`. |
 | `GameDefaults.cs` | Files kept the same for known games. |
 | `CardText.cs` | Lines of text of a playthrough card. |
@@ -471,7 +479,7 @@ folder (`TestFolder`) and use `FakePlatform` for everything that would touch
 the registry, processes or Steam. They never touch the app's real data. They
 cover copying and swapping folders, playthroughs, saved points, automatic
 copies and their owner, note and play time, deleted playthroughs, export and
-import, shared files, first start, `stato.ini`, Steam Cloud, accounts,
+import, shared files, first start, `stato.json`, Steam Cloud, accounts,
 recovery from interrupted operations, game detection, Steam libraries and
 manifests, Linux paths and permissions, moving data from Documents, translated
 texts, card lines and the view models. Tests run in Italian whatever the system
@@ -547,30 +555,33 @@ backup the planned spots, deletes the journal and sets
 **Shared files** (E4, `SharedFiles`) are relative to spot 1 only. Extra spots
 have no shared files.
 
-**`posti.ini`** (`GameSpots`, in the game's data folder) keeps the spots that
+**`posti.json`** (`GameSpots`, in the game's data folder) keeps the spots that
 were chosen, learned or imported, with their ids, the extra roots, the folders
 ignored for this game and the ids of the launcher spots:
 
-```
-Prossimo=5
-Posto.1=C:\Users\x\AppData\Roaming\Foo|{WinAppDataRoaming}/Foo|*.sav|1|scelta
-Posto.3=D:\Giochi\Bar|{gameinstall}|*.sav;slot?.dat|0|importata
-Launcher.{WinAppDataRoaming}/Foo||1=2
-CartelleExtra=D:\Giochi
-Ignorate.0=C:\Users\x\AppData\Local\Foo
-Aggiunta.0=2026-10-25T10:00:00.0000000Z
+```json
+{
+  "Prossimo": 5,
+  "Posti": [
+    { "Id": 1, "Cartella": "C:\Users\x\AppData\Roaming\Foo", "Portabile": "{WinAppDataRoaming}/Foo",
+      "Maschera": "*.sav", "Ricorsiva": true, "Origine": "scelta" }
+  ],
+  "Launcher": [ { "Chiave": "{WinAppDataRoaming}/Foo||1", "Id": 2 } ],
+  "CartelleExtra": ["D:\Giochi"],
+  "Ignorate": [ { "Cartella": "C:\Users\x\AppData\Local\Foo", "Aggiunta": "2026-10-25T10:00:00.0000000Z" } ]
+}
 ```
 
-`Posto.<id>` is `cartella|percorso portabile|maschera|ricorsiva|origine`;
-origin is `scelta`, `imparata` or `importata`. Ids are never reused (`Prossimo`):
-id 1 is the main spot, the others start at 2. A path containing `|` is refused.
-The first read converts an old `cartella.ini` (L9) into spot 1 and deletes it.
+`Origine` is `scelta`, `imparata` or `importata`. Ids are never reused (`Prossimo`):
+id 1 is the main spot, the others start at 2. `GameSpots` and `IgnoredFolders`
+both write this file: each reads all of it, changes its part and writes all of it
+back. An old `cartella.ini` (L9) becomes spot 1 at start-up (`V1Compat.ConvertGameFiles`).
 The spots found by the launchers (userdata, the Steam rules) are not written:
-they are found at every start, and `Launcher.<key>` keeps their ids.
+they are found at every start, and the `Launcher` entries keep their ids.
 
-**`proposte.ini`** (`SessionScan`) keeps the folders that the look after a
-session suggested: `Proposta.<n>=cartella|maschera|punteggio|quando`. The
-reasons are not kept: they are computed again when shown.
+**`proposte.json`** (`SessionScan`) keeps the folders that the look after a
+session suggested (`Proposte`: folder, mask, score, when, and the reasons shown in the
+window) and the ones the user dismissed (`Scartate`).
 
 **Save configurations** (`SaveConfig`, `SaveConfigImport`) are
 `*.lss-config.json` files shared by hand. Spots are written as root plus
@@ -580,8 +591,9 @@ no Steam id. A file that comes from someone else is read as untrusted
 tokens and the patterns) and each folder passes `SaveLocator.CheckSpot` before
 anything is written.
 
-**Export format 4** (`partita.ini` `Formato=4`) adds `posizioni.ini` to the
-zip: `<id>=<portable path>|<pattern>|<recursive>` for each spot. Import matches
+**Export format 5** (`partita.json`, `"Formato": 5`) holds the game, the name and the
+playthrough info; `posizioni.json` lists the spots (`Id`, `Portabile`, `Maschera`,
+`Ricorsiva`). Zips of formats 1-4 (`.ini` files) still import through `V1Compat`. Import matches
 the zip's spot 1 to spot 1 here, and the others by portable path, pattern and
 recursive flag; the unmatched ones are listed, not imported.
 

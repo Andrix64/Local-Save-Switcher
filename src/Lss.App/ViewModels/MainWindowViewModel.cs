@@ -49,7 +49,7 @@ public partial class MainWindowViewModel : ObservableObject
         // I giochi già usati restano controllati anche quando non sono selezionati.
         foreach (GameItemViewModel item in Games)
         {
-            if (File.Exists(Path.Combine(AppData.Root, item.Account.Provider, item.Account.Id, item.Info.Id, "stato.ini")))
+            if (File.Exists(Path.Combine(AppData.Root, item.Account.Provider, item.Account.Id, item.Info.Id, "stato.json")))
                 GameFor(item);
         }
 

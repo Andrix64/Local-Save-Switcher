@@ -10,7 +10,7 @@ public sealed class CloudConsentTests : IDisposable
 
     public void Dispose() => folder.Dispose();
 
-    private string StateFile => Path.Combine(folder.Data, "stato.ini");
+    private string StateFile => Path.Combine(folder.Data, "stato.json");
 
     [Fact]
     public void TheConsentIsWrittenAndReadBack()
@@ -22,7 +22,7 @@ public sealed class CloudConsentTests : IDisposable
         var state = new AppState(StateFile);
         state.Load();
         Assert.True(state.CloudAllowedInSimple);
-        Assert.Contains("CloudConsentito=1", File.ReadAllText(StateFile));
+        Assert.Contains("\"CloudConsentito\": true", File.ReadAllText(StateFile));
 
         Assert.True(manager.SetCloudAllowedInSimple(false).Success);
 

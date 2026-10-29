@@ -14,7 +14,7 @@ public sealed record SaveLocation(IReadOnlyList<SaveSpot> Spots, SaveSource Sour
 /// Trova i posti dei salvataggi di un gioco. Il posto 1 è la cartella scelta o
 /// imparata (se c'è: vince, come prima), altrimenti quella di Steam in userdata,
 /// altrimenti la prima trovata dalle regole del launcher. Gli altri posti trovati
-/// dalle regole e quelli aggiunti a mano (posti.ini) vanno dopo.
+/// dalle regole e quelli aggiunti a mano (posti.json) vanno dopo.
 /// </summary>
 internal static class SaveLocator
 {
@@ -22,7 +22,7 @@ internal static class SaveLocator
     public const int MaxSpots = 8;
 
     /// <summary>
-    /// Posti del gioco. stored sono i posti salvati in posti.ini (scelti o imparati);
+    /// Posti del gioco. stored sono i posti salvati in posti.json (scelti o imparati);
     /// i posti trovati di un launcher ricevono un id da stored (LauncherId).
     /// </summary>
     public static SaveLocation Locate(GameInfo game, IReadOnlyList<SaveRule> rules,

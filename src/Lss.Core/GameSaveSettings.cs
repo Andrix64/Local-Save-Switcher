@@ -2,7 +2,7 @@ namespace Lss;
 
 /// <summary>
 /// Cartella dei salvataggi scelta a mano o trovata da LSS, e le cartelle extra
-/// da cercare: sono il posto 1 e le cartelle extra di posti.ini (GameSpots),
+/// da cercare: sono il posto 1 e le cartelle extra di posti.json (GameSpots),
 /// nella cartella dati del gioco. Non lancia eccezioni: un file illeggibile
 /// vale come nessuna scelta, e gli errori di scrittura si registrano.
 /// </summary>
@@ -22,7 +22,7 @@ internal sealed class GameSaveSettings
     public SaveSource Origin { get; set; } = SaveSource.Chosen;
 
     /// <summary>
-    /// Altre cartelle in cui cercare il gioco (CartelleExtra in posti.ini),
+    /// Altre cartelle in cui cercare il gioco (CartelleExtra in posti.json),
     /// come sono adesso nel file.
     /// </summary>
     public IReadOnlyList<string> ExtraFolders => ReadSpots(new GameSpots(gameDataFolder)).ExtraRoots;
@@ -54,7 +54,7 @@ internal sealed class GameSaveSettings
     }
 
     /// <summary>
-    /// Scrive il posto 1 in posti.ini. Con Folder "" lo toglie, ed elimina il file
+    /// Scrive il posto 1 in posti.json. Con Folder "" lo toglie, ed elimina il file
     /// se non ha altro. Le altre chiavi (cartelle ignorate, altri posti) restano com'erano.
     /// </summary>
     public void Save()
@@ -67,12 +67,12 @@ internal sealed class GameSaveSettings
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
         {
-            Log.Write("posti.ini non salvato: " + gameDataFolder, ex);
+            Log.Write("posti.json non salvato: " + gameDataFolder, ex);
         }
     }
 
     /// <summary>
-    /// Legge posti.ini (e converte cartella.ini se serve), restituendo lo stesso oggetto.
+    /// Legge posti.json, restituendo lo stesso oggetto.
     /// </summary>
     private static GameSpots ReadSpots(GameSpots spots)
     {

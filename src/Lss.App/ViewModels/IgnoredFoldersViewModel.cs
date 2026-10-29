@@ -29,7 +29,7 @@ public sealed partial class IgnoredFoldersViewModel : ObservableObject
     private readonly string gameName;
     private readonly IgnoredScope scope;
 
-    /// <param name="dataFolder">Cartella dei dati del gioco (dove sta posti.ini).</param>
+    /// <param name="dataFolder">Cartella dei dati del gioco (dove sta posti.json).</param>
     /// <param name="gameName">Nome del gioco, per l'ambito delle sue cartelle.</param>
     /// <param name="scope">Quali cartelle mostrare: di tutti i giochi, del gioco o tutte e due.</param>
     public IgnoredFoldersViewModel(string dataFolder, string gameName, IgnoredScope scope = IgnoredScope.Both)

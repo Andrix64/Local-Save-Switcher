@@ -3,7 +3,7 @@ namespace Lss.Tests;
 /// <summary>
 /// I nomi dei file della 1.0 non devono comparire fuori da V1Compat.cs e
 /// LegacyMigration.cs: così il codice nuovo non rimette in giro i vecchi formati.
-/// Le eccezioni di oggi sono elencate una per una e le toglie la fase R (R10).
+/// Non ci sono eccezioni (le ultime le ha tolte R10).
 /// </summary>
 public sealed class V1CompatBoundaryTests
 {
@@ -16,17 +16,8 @@ public sealed class V1CompatBoundaryTests
     // File che possono nominare i vecchi file: la compatibilità e Control Save Manager.
     private static readonly string[] AllowedFiles = ["V1Compat.cs", "LegacyMigration.cs"];
 
-    // Eccezioni di oggi: file -> nomi. Ogni riga dice quale task la toglie.
-    private static readonly Dictionary<string, string[]> Exceptions = new()
-    {
-        ["SaveManager.cs"] = ["stato.ini"], // fino a R10
-        ["IgnoredFolders.cs"] = ["posti.ini"], // fino a R10
-        ["MainWindowViewModel.cs"] = ["stato.ini"], // fino a R10
-        ["GameSpots.cs"] = ["posti.ini"], // fino a R10
-        ["SaveManager.Favourites.cs"] = ["preferite.ini"], // fino a R10
-        ["SessionScan.cs"] = ["proposte.ini"], // fino a R10
-        ["SaveManager.Playthroughs.cs"] = ["partita.ini", "posizioni.ini"], // fino a R10
-    };
+    // Eccezioni: file -> nomi. Dopo R10 non ce ne sono più; chi ne aggiunge una scrive qui perché.
+    private static readonly Dictionary<string, string[]> Exceptions = new();
 
     private static string RepositoryRoot()
     {

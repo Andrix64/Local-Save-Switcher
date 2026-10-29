@@ -30,14 +30,13 @@ public sealed class OldPlaythroughsTests : IDisposable
     /// </summary>
     private void StripOwner(string profile)
     {
-        IniFile.Write(Path.Combine(folder.Data, "Info", profile + ".ini"),
-            [new KeyValuePair<string, string>("Nota", "")]);
+        File.WriteAllText(Path.Combine(folder.Data, "Info", profile + ".json"), "{ \"Nota\": \"\" }");
     }
 
     /// <summary>Stato salvato su disco, riletto come farebbe il prossimo avvio.</summary>
     private bool OwnersAssignedOnDisk()
     {
-        var state = new AppState(Path.Combine(folder.Data, "stato.ini"));
+        var state = new AppState(Path.Combine(folder.Data, "stato.json"));
         state.Load();
         return state.OwnersAssigned;
     }
@@ -50,7 +49,7 @@ public sealed class OldPlaythroughsTests : IDisposable
         manager.CreateProfile("Luigi", false, TestFolder.Owner);
         StripOwner("Profilo_Mario");
         StripOwner("Profilo_Luigi");
-        File.Delete(Path.Combine(folder.Data, "preferite.ini"));
+        File.Delete(Path.Combine(folder.Data, "preferite.json"));
 
         manager.AssignExistingPlaythroughs();
 
@@ -119,7 +118,7 @@ public sealed class OldPlaythroughsTests : IDisposable
         Assert.True(manager.ActivateProfile("Profilo_Luigi").Success);
         StripOwner("Profilo_Mario");
         StripOwner("Profilo_Luigi");
-        File.Delete(Path.Combine(folder.Data, "preferite.ini"));
+        File.Delete(Path.Combine(folder.Data, "preferite.json"));
 
         manager.AssignExistingPlaythroughs();
 
@@ -149,10 +148,10 @@ public sealed class OldPlaythroughsTests : IDisposable
         Assert.True(manager.ExportProfile("Profilo_Mario", zip).Success);
 
         using ZipArchive archive = ZipFile.OpenRead(zip);
-        using var reader = new StreamReader(archive.GetEntry("partita.ini")!.Open());
+        using var reader = new StreamReader(archive.GetEntry("partita.json")!.Open());
         string info = reader.ReadToEnd();
 
-        Assert.Contains($"Giocatore={TestFolder.Owner}", info);
-        Assert.Contains("NomeGiocatore=Andrea", info);
+        Assert.Contains($"\"Giocatore\": \"{TestFolder.Owner}\"", info);
+        Assert.Contains("\"NomeGiocatore\": \"Andrea\"", info);
     }
 }

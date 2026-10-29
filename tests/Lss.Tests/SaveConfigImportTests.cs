@@ -204,12 +204,12 @@ public sealed class SaveConfigImportTests : IDisposable
         string data = Path.Combine(folder.Root, "gamedata");
 
         // Nessuna scrittura finché non si chiama ApplyAsync (l'annullo non lo chiama).
-        Assert.False(File.Exists(Path.Combine(data, "posti.ini")));
+        Assert.False(File.Exists(Path.Combine(data, "posti.json")));
 
         int added = await SaveConfigImport.ApplyAsync(plan, data, hasPlaythroughs: false, addWithPlaythroughs: null);
 
         Assert.Equal(2, added);
-        Assert.Contains("importata", File.ReadAllText(Path.Combine(data, "posti.ini")));
+        Assert.Contains("importata", File.ReadAllText(Path.Combine(data, "posti.json")));
         var stored = new GameSpots(data);
         stored.Load();
         Assert.All(stored.Spots, spot => Assert.Equal(SaveSource.Imported, spot.Source));

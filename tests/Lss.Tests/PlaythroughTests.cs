@@ -89,7 +89,7 @@ public sealed class PlaythroughTests : IDisposable
         manager.SetBackupsToKeep(1);
 
         Assert.Single(manager.GetBackups());
-        Assert.Single(Directory.GetFiles(manager.BackupPath, "*.ini"));
+        Assert.Single(Directory.GetFiles(manager.BackupPath, "*.json"));
     }
 
     [Fact]
@@ -154,20 +154,20 @@ public sealed class PlaythroughTests : IDisposable
     }
 
     [Fact]
-    public void Export_WritesFormat4WithGameAndProvider()
+    public void Export_WritesFormat5WithGameAndProvider()
     {
         SaveManager manager = TwoPlaythroughs();
-        string zip = Path.Combine(folder.Root, "formato4.zip");
+        string zip = Path.Combine(folder.Root, "formato5.zip");
 
         Assert.True(manager.ExportProfile("Profilo_Mario", zip).Success);
 
         using ZipArchive archive = ZipFile.OpenRead(zip);
-        string info = ReadEntry(archive, "partita.ini");
+        string info = ReadEntry(archive, "partita.json");
 
-        Assert.Contains("Formato=4", info);
-        Assert.Contains("Provider=steam", info);
-        Assert.Contains("AppId=870780", info);
-        Assert.Contains("Gioco=Control", info);
+        Assert.Contains("\"Formato\": 5", info);
+        Assert.Contains("\"Provider\": \"steam\"", info);
+        Assert.Contains("\"AppId\": \"870780\"", info);
+        Assert.Contains("\"Gioco\": \"Control\"", info);
     }
 
     [Fact]

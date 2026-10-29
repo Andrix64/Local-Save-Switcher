@@ -43,11 +43,11 @@ public sealed class RenameKeepsBackupsTests : IDisposable
     {
         SaveManager manager = ManagerWithTwoCopies();
         Snapshot copy = manager.GetBackupsOf("Profilo_Mario")[0];
-        File.Delete(copy.Path + ".ini");
+        File.Delete(copy.Path + ".json");
 
         Assert.True(manager.RenameProfile("Profilo_Mario", "Luigi").Success);
 
-        Assert.True(File.Exists(copy.Path + ".ini"));
+        Assert.True(File.Exists(copy.Path + ".json"));
         Assert.Contains(manager.GetBackupsOf("Profilo_Luigi"), b => b.Path == copy.Path);
     }
 
@@ -102,7 +102,7 @@ public sealed class RenameKeepsBackupsTests : IDisposable
         Snapshot blocked = manager.GetBackupsOf("Profilo_Mario")[0];
 
         // Una cartella al posto del file temporaneo: la scrittura dell'info fallisce.
-        Directory.CreateDirectory(blocked.Path + ".ini.tmp");
+        Directory.CreateDirectory(blocked.Path + ".json.tmp");
 
         Result result = manager.RenameProfile("Profilo_Mario", "Anna");
 

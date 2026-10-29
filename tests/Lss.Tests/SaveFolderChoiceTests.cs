@@ -27,7 +27,7 @@ public sealed class SaveFolderChoiceTests : IDisposable
 
     private string Home => Path.Combine(folder.Root, "home");
     private string Documents => Path.Combine(Home, "Documents");
-    private string SettingsFile => Path.Combine(folder.Data, "steam", "111", "123450", "posti.ini");
+    private string SettingsFile => Path.Combine(folder.Data, "steam", "111", "123450", "posti.json");
 
     private static GameInfo Game(SupportState support = SupportState.SavesElsewhere, string reason = "") =>
         new("steam", "123450", "Sandfall", "", "", "", [], support, "", "", SaveSource.None, reason);

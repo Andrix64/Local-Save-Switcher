@@ -31,15 +31,13 @@ internal sealed class IgnoredFile
 /// <summary>
 /// Cartelle che la ricerca non propone mai più: per tutti i giochi
 /// (cartelle-ignorate.json nella cartella dei dati)
-/// o per un gioco solo (posti.ini del gioco, chiavi Ignorate.n e Aggiunta.n).
+/// o per un gioco solo (posti.json del gioco, parte "Ignorate").
 /// Non lancia eccezioni: un file illeggibile vale come nessuna cartella.
 /// </summary>
 internal sealed class IgnoredFolders
 {
     private const string FileName = "cartelle-ignorate.json";
-    private const string GameFileName = "posti.ini";
-    private const string GameKey = "Ignorate";
-    private const string AddedKey = "Aggiunta";
+    private const string GameFileName = "posti.json";
 
     private readonly string file;
     private readonly List<IgnoredFolder> global = [];
@@ -62,8 +60,7 @@ internal sealed class IgnoredFolders
     /// <summary>Cartelle ignorate per un gioco solo, dalla sua cartella dei dati.</summary>
     public IReadOnlyList<IgnoredFolder> ForGame(string gameDataFolder)
     {
-        ConvertOldFile(gameDataFolder);
-        return Read(Path.Combine(gameDataFolder, GameFileName), gameDataFolder, GameKey);
+        return ReadGame(Path.Combine(gameDataFolder, GameFileName), gameDataFolder);
     }
 
     /// <summary>Segna una cartella per tutti i giochi, nel percorso portabile dato. Non ripete una voce già presente.</summary>
@@ -81,15 +78,14 @@ internal sealed class IgnoredFolders
     /// <summary>Segna una cartella per un gioco solo, nella sua cartella dei dati.</summary>
     public void AddForGame(string gameDataFolder, string folder)
     {
-        ConvertOldFile(gameDataFolder);
         string path = Path.Combine(gameDataFolder, GameFileName);
-        List<IgnoredFolder> entries = Read(path, gameDataFolder, GameKey).ToList();
+        List<IgnoredFolder> entries = ReadGame(path, gameDataFolder).ToList();
 
         if (entries.Any(entry => string.Equals(entry.Folder, folder, StringComparison.OrdinalIgnoreCase)))
             return;
 
         entries.Add(new IgnoredFolder(folder, folder, gameDataFolder, DateTime.Now));
-        Write(path, GameKey, entries);
+        WriteGame(path, entries);
     }
 
     /// <summary>Toglie una cartella da quelle per tutti i giochi, con il suo percorso portabile.</summary>
@@ -103,11 +99,10 @@ internal sealed class IgnoredFolders
     /// <summary>Toglie una cartella da quelle di un gioco solo.</summary>
     public void RemoveForGame(string gameDataFolder, string folder)
     {
-        ConvertOldFile(gameDataFolder);
         string path = Path.Combine(gameDataFolder, GameFileName);
-        List<IgnoredFolder> entries = Read(path, gameDataFolder, GameKey).ToList();
+        List<IgnoredFolder> entries = ReadGame(path, gameDataFolder).ToList();
         entries.RemoveAll(entry => string.Equals(entry.Folder, folder, StringComparison.OrdinalIgnoreCase));
-        Write(path, GameKey, entries);
+        WriteGame(path, entries);
     }
 
     /// <summary>
@@ -144,12 +139,6 @@ internal sealed class IgnoredFolders
             string.Equals(folder, ignored, comparison)
             || folder.StartsWith(ignored.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, comparison));
     }
-
-    /// <summary>
-    /// Converte cartella.ini in posti.ini (GameSpots) prima di leggere o scrivere
-    /// le cartelle ignorate del gioco, così non si perdono le voci vecchie.
-    /// </summary>
-    private static void ConvertOldFile(string gameDataFolder) => new GameSpots(gameDataFolder).Load();
 
     /// <summary>Le voci di cartelle-ignorate.json con le loro date.</summary>
     private List<IgnoredFolder> ReadGlobal()
@@ -204,61 +193,47 @@ internal sealed class IgnoredFolders
     }
 
     /// <summary>
-    /// Legge le voci di una famiglia (Cartella.n o Ignorate.n) con le loro date.
+    /// Le cartelle ignorate di un gioco, dalla parte "Ignorate" di posti.json, con le loro date.
     /// </summary>
-    private static List<IgnoredFolder> Read(string path, string gameKey, string key)
+    private static List<IgnoredFolder> ReadGame(string path, string gameKey)
     {
-        Dictionary<string, string> values = IniFile.Read(path);
         var entries = new List<IgnoredFolder>();
 
-        for (int n = 0; values.TryGetValue(key + "." + n, out string? value); n++)
+        foreach (IgnoredEntry entry in SpotsFile.Read(path).Ignored)
         {
+            if (entry.Folder == "")
+                continue;
+
             DateTime added = DateTime.MinValue;
+            DateTime.TryParse(entry.Added, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out added);
 
-            if (values.TryGetValue(AddedKey + "." + n, out string? date))
-                DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out added);
-
-            entries.Add(new IgnoredFolder(value, value, gameKey, added));
+            entries.Add(new IgnoredFolder(entry.Folder, entry.Folder, gameKey, added));
         }
 
         return entries;
     }
 
     /// <summary>
-    /// Scrive le voci di una famiglia; le altre chiavi del file restano. Senza voci
-    /// e senza altre chiavi elimina il file. Un errore si registra.
+    /// Scrive la parte "Ignorate" di posti.json; i posti restano. Senza cartelle e senza posti
+    /// elimina il file. Un errore si registra.
     /// </summary>
-    private static void Write(string path, string key, IReadOnlyList<IgnoredFolder> entries)
+    private static void WriteGame(string path, IReadOnlyList<IgnoredFolder> entries)
     {
         try
         {
-            List<KeyValuePair<string, string>> values = IniFile.Read(path)
-                .Where(pair => !IsOfFamily(pair.Key, key))
-                .ToList();
+            SpotsFile data = SpotsFile.Read(path);
 
-            for (int n = 0; n < entries.Count; n++)
+            data.Ignored = entries.Select(entry => new IgnoredEntry
             {
-                values.Add(new(key + "." + n, entries[n].PortablePath));
-                values.Add(new(AddedKey + "." + n, entries[n].Added.ToString("O", CultureInfo.InvariantCulture)));
-            }
+                Folder = entry.PortablePath,
+                Added = entry.Added.ToString("O", CultureInfo.InvariantCulture),
+            }).ToList();
 
-            if (values.Count == 0)
-            {
-                if (File.Exists(path))
-                    File.Delete(path);
-
-                return;
-            }
-
-            IniFile.Write(path, values);
+            SpotsFile.Write(path, data);
         }
         catch (Exception ex)
         {
             Log.Write("Cartelle ignorate non salvate: " + path, ex);
         }
     }
-
-    private static bool IsOfFamily(string name, string key) =>
-        name.StartsWith(key + ".", StringComparison.OrdinalIgnoreCase)
-        || name.StartsWith(AddedKey + ".", StringComparison.OrdinalIgnoreCase);
 }

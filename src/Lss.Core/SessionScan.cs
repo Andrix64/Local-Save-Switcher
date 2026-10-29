@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace Lss;
 
@@ -6,25 +7,76 @@ namespace Lss;
 /// <param name="Folder">Cartella (per i file sparsi nella cartella del gioco, la cartella del gioco).</param>
 /// <param name="Pattern">"" per una cartella intera, o le maschere dei file.</param>
 /// <param name="Score">Punteggio (per i file sparsi, la soglia minima).</param>
-/// <param name="Reasons">Perché: restano in proposte.ini insieme alla proposta, così la finestra li mostra.</param>
+/// <param name="Reasons">Perché: restano in proposte.json insieme alla proposta, così la finestra li mostra.</param>
 /// <param name="FoundUtc">Quando è stata trovata.</param>
 public sealed record SpotSuggestion(string Folder, string Pattern, int Score, IReadOnlyList<ScoreReason> Reasons,
     DateTime FoundUtc);
 
+/// <summary>Un motivo di una proposta, come è scritto in proposte.json.</summary>
+internal sealed class ReasonEntry
+{
+    [JsonPropertyName("Tipo")]
+    public string Kind { get; set; } = "";
+
+    [JsonPropertyName("Punti")]
+    public int Points { get; set; }
+
+    [JsonPropertyName("Dettaglio")]
+    public string Detail { get; set; } = "";
+}
+
+/// <summary>Una proposta in attesa, come è scritta in proposte.json.</summary>
+internal sealed class SuggestionEntry
+{
+    [JsonPropertyName("Cartella")]
+    public string Folder { get; set; } = "";
+
+    [JsonPropertyName("Maschera")]
+    public string Pattern { get; set; } = "";
+
+    [JsonPropertyName("Punteggio")]
+    public int Score { get; set; }
+
+    // Data in formato "O" (ISO 8601, UTC).
+    [JsonPropertyName("Trovata")]
+    public string Found { get; set; } = "";
+
+    [JsonPropertyName("Motivi")]
+    public List<ReasonEntry> Reasons { get; set; } = [];
+}
+
+/// <summary>Una proposta di file sparsi scartata, come è scritta in proposte.json.</summary>
+internal sealed class DismissedEntry
+{
+    [JsonPropertyName("Cartella")]
+    public string Folder { get; set; } = "";
+
+    [JsonPropertyName("Maschera")]
+    public string Pattern { get; set; } = "";
+}
+
+/// <summary>Come proposte.json è scritto: le proposte in attesa e quelle scartate.</summary>
+internal sealed class SuggestionsFile
+{
+    [JsonPropertyName("Proposte")]
+    public List<SuggestionEntry> Suggestions { get; set; } = [];
+
+    // Proposte di file sparsi scartate ("Non sono salvataggi"): cartella e maschera. Non tornano.
+    [JsonPropertyName("Scartate")]
+    public List<DismissedEntry> Dismissed { get; set; } = [];
+}
+
 /// <summary>
 /// Guarda, dopo una partita, le cartelle e i file cambiati sul disco e propone quelli
 /// che sembrano salvataggi e non sono ancora un posto del gioco (N10). Legge soltanto,
-/// e salva le proposte in proposte.ini finché non si accettano o non si ignorano.
+/// e salva le proposte in proposte.json finché non si accettano o non si ignorano.
 /// </summary>
 internal static class SessionScan
 {
     /// <summary>Più severo della ricerca della fase M: nessuno l'ha chiesto, meglio pochi falsi positivi.</summary>
     public const int MinScore = 9;
 
-    private const string FileName = "proposte.ini";
-    private const string Key = "Proposta.";
-    // Proposte di file sparsi scartate ("Non sono salvataggi"): cartella|maschera. Non tornano.
-    private const string DismissedKey = "Scartata.";
+    private const string FileName = "proposte.json";
     private const int LooseGroupMin = 3;
     private static readonly TimeSpan TimeLimit = TimeSpan.FromSeconds(90);
     private static readonly string[] SaveExtensions = [".sav", ".save", ".dat", ".sl2", ".slot"];
@@ -114,72 +166,41 @@ internal static class SessionScan
     /// <summary>Le proposte di file sparsi scartate, come cartella e maschera.</summary>
     public static IReadOnlyList<(string Folder, string Pattern)> Dismissed(string gameDataFolder)
     {
-        var result = new List<(string, string)>();
+        SuggestionsFile? file = JsonFile.Read<SuggestionsFile>(Path.Combine(gameDataFolder, FileName));
 
-        foreach ((string name, string value) in IniFile.Read(Path.Combine(gameDataFolder, FileName)))
-        {
-            if (!name.StartsWith(DismissedKey, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            string[] parts = value.Split('|');
-
-            if (parts.Length == 2)
-                result.Add((parts[0], parts[1]));
-        }
-
-        return result;
+        return file?.Dismissed
+            .Where(item => item.Folder != "")
+            .Select(item => (item.Folder, item.Pattern))
+            .ToList() ?? [];
     }
 
     /// <summary>
-    /// Le proposte salvate in proposte.ini, con i loro motivi. Una riga senza motivi
-    /// (com'era prima) resta valida.
+    /// Le proposte salvate in proposte.json, con i loro motivi. Una proposta senza
+    /// motivi resta valida.
     /// </summary>
     public static IReadOnlyList<SpotSuggestion> Pending(string gameDataFolder)
     {
         var result = new List<SpotSuggestion>();
+        SuggestionsFile? file = JsonFile.Read<SuggestionsFile>(Path.Combine(gameDataFolder, FileName));
 
-        foreach ((string name, string value) in IniFile.Read(Path.Combine(gameDataFolder, FileName)))
+        foreach (SuggestionEntry entry in file?.Suggestions ?? [])
         {
-            if (!name.StartsWith(Key, StringComparison.OrdinalIgnoreCase))
+            if (entry.Folder == "")
                 continue;
 
-            string[] parts = value.Split('|');
+            DateTime.TryParse(entry.Found, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime found);
 
-            if (parts.Length is < 4 or > 5 || !int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int score))
-                continue;
+            // I motivi con un tipo che non si conosce si saltano.
+            var reasons = entry.Reasons
+                .Where(reason => Enum.TryParse(reason.Kind, out ScoreReasonKind _))
+                .Select(reason => new ScoreReason(Enum.Parse<ScoreReasonKind>(reason.Kind), reason.Points, reason.Detail))
+                .ToList();
 
-            DateTime.TryParse(parts[3], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime found);
-            IReadOnlyList<ScoreReason> reasons = parts.Length == 5 ? ReadReasons(parts[4]) : [];
-            result.Add(new SpotSuggestion(parts[0], parts[1], score, reasons, found));
+            result.Add(new SpotSuggestion(entry.Folder, entry.Pattern, entry.Score, reasons, found));
         }
 
         return result;
     }
-
-    /// <summary>I motivi salvati, come "tipo:punti:dettaglio" separati da ";". Quelli non letti si saltano.</summary>
-    private static IReadOnlyList<ScoreReason> ReadReasons(string text)
-    {
-        var reasons = new List<ScoreReason>();
-
-        foreach (string item in text.Split(';', StringSplitOptions.RemoveEmptyEntries))
-        {
-            string[] fields = item.Split(':', 3);
-
-            if (fields.Length == 3
-                && Enum.TryParse(fields[0], out ScoreReasonKind kind)
-                && int.TryParse(fields[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int points))
-            {
-                reasons.Add(new ScoreReason(kind, points, fields[2]));
-            }
-        }
-
-        return reasons;
-    }
-
-    /// <summary>I motivi da salvare: "|" e ";" nel dettaglio diventano spazi, per non rompere la riga.</summary>
-    private static string WriteReasons(IReadOnlyList<ScoreReason> reasons) =>
-        string.Join(";", reasons.Select(reason => string.Join(":", reason.Kind.ToString(),
-            reason.Points.ToString(CultureInfo.InvariantCulture), reason.Detail.Replace('|', ' ').Replace(';', ' '))));
 
     private static void Store(string gameDataFolder, IReadOnlyList<SpotSuggestion> suggestions,
         IReadOnlyList<(string Folder, string Pattern)> dismissed)
@@ -196,20 +217,27 @@ internal static class SessionScan
                 return;
             }
 
-            var values = suggestions.Select((suggestion, index) => new KeyValuePair<string, string>(
-                Key + index.ToString(CultureInfo.InvariantCulture),
-                string.Join("|", suggestion.Folder, suggestion.Pattern,
-                    suggestion.Score.ToString(CultureInfo.InvariantCulture),
-                    suggestion.FoundUtc.ToString("O", CultureInfo.InvariantCulture),
-                    WriteReasons(suggestion.Reasons))))
-                .Concat(dismissed.Select((item, index) => new KeyValuePair<string, string>(
-                    DismissedKey + index.ToString(CultureInfo.InvariantCulture), item.Folder + "|" + item.Pattern)));
-
-            IniFile.Write(path, values);
+            JsonFile.Write(path, new SuggestionsFile
+            {
+                Suggestions = suggestions.Select(suggestion => new SuggestionEntry
+                {
+                    Folder = suggestion.Folder,
+                    Pattern = suggestion.Pattern,
+                    Score = suggestion.Score,
+                    Found = suggestion.FoundUtc.ToString("O", CultureInfo.InvariantCulture),
+                    Reasons = suggestion.Reasons.Select(reason => new ReasonEntry
+                    {
+                        Kind = reason.Kind.ToString(),
+                        Points = reason.Points,
+                        Detail = reason.Detail,
+                    }).ToList(),
+                }).ToList(),
+                Dismissed = dismissed.Select(item => new DismissedEntry { Folder = item.Folder, Pattern = item.Pattern }).ToList(),
+            });
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            Log.Write("proposte.ini non salvato: " + path, ex);
+            Log.Write("proposte.json non salvato: " + path, ex);
         }
     }
 

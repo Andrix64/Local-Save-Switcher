@@ -1,10 +1,11 @@
 using System.Globalization;
 using System.IO.Compression;
+using System.Text.Json.Serialization;
 
 namespace Lss;
 
 /// <summary>
-/// Operazione che ha creato un backup: scritta nel file .ini accanto al
+/// Operazione che ha creato un backup: scritta nel file .json accanto al
 /// backup e usata per descriverlo nella Cronologia.
 /// </summary>
 public static class BackupKind
@@ -31,6 +32,88 @@ public sealed record PlaythroughInfo(string Note, TimeSpan PlayTime, DateTime? L
 }
 
 /// <summary>
+/// Come sono scritti Info/&lt;partita&gt;.json e Backup/&lt;copia&gt;.json: nomi corti in italiano.
+/// Partita, Motivo e Dettaglio ci sono solo nel file di una copia (Backup).
+/// </summary>
+internal sealed class InfoFileData
+{
+    [JsonPropertyName("Partita")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Playthrough { get; set; }
+
+    [JsonPropertyName("Motivo")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; set; }
+
+    [JsonPropertyName("Dettaglio")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Detail { get; set; }
+
+    [JsonPropertyName("Nota")]
+    public string Note { get; set; } = "";
+
+    // Secondi.
+    [JsonPropertyName("TempoDiGioco")]
+    public long PlayTime { get; set; }
+
+    // Formato "yyyy-MM-dd HH:mm:ss"; vuoto se non c'è.
+    [JsonPropertyName("UltimaSessione")]
+    public string LastSession { get; set; } = "";
+
+    [JsonPropertyName("Giocatore")]
+    public string Owner { get; set; } = "";
+}
+
+/// <summary>Come partita.json, dentro lo zip di una partita esportata, è scritto.</summary>
+internal sealed class ExportInfoData
+{
+    [JsonPropertyName("Formato")]
+    public int Format { get; set; }
+
+    [JsonPropertyName("Provider")]
+    public string Provider { get; set; } = "";
+
+    [JsonPropertyName("AppId")]
+    public string AppId { get; set; } = "";
+
+    [JsonPropertyName("Gioco")]
+    public string Game { get; set; } = "";
+
+    [JsonPropertyName("Nome")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("Info")]
+    public InfoFileData Info { get; set; } = new();
+
+    // Il nome della persona sul PC di partenza: serve solo a leggere il file.
+    [JsonPropertyName("NomeGiocatore")]
+    public string OwnerName { get; set; } = "";
+}
+
+/// <summary>Un posto del gioco nello zip, come è scritto in posizioni.json.</summary>
+internal sealed class ExportSpotEntry
+{
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("Portabile")]
+    public string Portable { get; set; } = "";
+
+    [JsonPropertyName("Maschera")]
+    public string Pattern { get; set; } = "";
+
+    [JsonPropertyName("Ricorsiva")]
+    public bool Recursive { get; set; }
+}
+
+/// <summary>Come posizioni.json, dentro lo zip, è scritto.</summary>
+internal sealed class ExportSpotsData
+{
+    [JsonPropertyName("Posti")]
+    public List<ExportSpotEntry> Spots { get; set; } = [];
+}
+
+/// <summary>
 /// Partite: informazioni, proprietario dei backup, opzioni condivise,
 /// esportazione, importazione, recupero e avvio del gioco.
 /// </summary>
@@ -38,56 +121,57 @@ public sealed partial class SaveManager
 {
     public const int MaxNoteLength = 100;
 
-    // Formato delle date nei file .ini.
+    // Formato delle date nei file .json.
     private const string InfoDateFormat = "yyyy-MM-dd HH:mm:ss";
 
     // File dentro lo zip di una partita esportata.
-    private const string ExportInfoFile = "partita.ini";
+    private const string ExportInfoFile = "partita.json";
     private const string ExportSavesFolder = "salvataggi";
     private const string ExportSavestatesFolder = "punti";
 
-    // Posti del gioco nello zip (formato 4): id = percorso portabile|maschera|ricorsiva.
-    private const string ExportSpotsFile = "posizioni.ini";
+    // Formato dello zip: 5 = file JSON (partita.json, posizioni.json); 1-4 avevano file .ini (V1Compat).
+    private const int ExportFormat = 5;
+
+    // Posti del gioco nello zip.
+    private const string ExportSpotsFile = "posizioni.json";
 
     /// <summary>
-    /// Cartella con un file .ini per partita (nota, tempo di gioco). Sta fuori
+    /// Cartella con un file .json per partita (nota, tempo di gioco). Sta fuori
     /// dalla cartella della partita, che viene copiata così com'è nel gioco.
     /// </summary>
     public string InfoPath { get; }
 
     // INFORMAZIONI DELLA PARTITA
 
-    private string InfoFile(string profileName) => Path.Combine(InfoPath, profileName + ".ini");
+    private string InfoFile(string profileName) => Path.Combine(InfoPath, profileName + ".json");
 
     public PlaythroughInfo GetInfo(string profileName)
     {
-        return ParseInfo(IniFile.Read(InfoFile(profileName)));
+        return ParseInfo(ReadInfoData(InfoFile(profileName)));
     }
 
-    private static PlaythroughInfo ParseInfo(Dictionary<string, string> values)
+    // Il file (vuoto se manca o è rotto).
+    private static InfoFileData ReadInfoData(string path) => JsonFile.Read<InfoFileData>(path) ?? new InfoFileData();
+
+    private static PlaythroughInfo ParseInfo(InfoFileData data)
     {
-        string note = values.GetValueOrDefault("Nota", "");
+        TimeSpan playTime = data.PlayTime > 0 ? TimeSpan.FromSeconds(data.PlayTime) : TimeSpan.Zero;
 
-        TimeSpan playTime = long.TryParse(values.GetValueOrDefault("TempoDiGioco"), out long seconds) && seconds > 0
-            ? TimeSpan.FromSeconds(seconds)
-            : TimeSpan.Zero;
-
-        DateTime? last = DateTime.TryParseExact(values.GetValueOrDefault("UltimaSessione"), InfoDateFormat,
+        DateTime? last = DateTime.TryParseExact(data.LastSession, InfoDateFormat,
             CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date)
             ? date
             : null;
 
-        return new PlaythroughInfo(note, playTime, last, values.GetValueOrDefault("Giocatore", ""));
+        return new PlaythroughInfo(data.Note, playTime, last, data.Owner);
     }
 
-    private static IEnumerable<KeyValuePair<string, string>> FormatInfo(PlaythroughInfo info)
+    private static InfoFileData FormatInfo(PlaythroughInfo info) => new()
     {
-        yield return new("Nota", info.Note);
-        yield return new("TempoDiGioco", ((long)info.PlayTime.TotalSeconds).ToString(CultureInfo.InvariantCulture));
-        yield return new("UltimaSessione",
-            info.LastSession?.ToString(InfoDateFormat, CultureInfo.InvariantCulture) ?? "");
-        yield return new("Giocatore", info.Owner);
-    }
+        Note = info.Note,
+        PlayTime = (long)info.PlayTime.TotalSeconds,
+        LastSession = info.LastSession?.ToString(InfoDateFormat, CultureInfo.InvariantCulture) ?? "",
+        Owner = info.Owner,
+    };
 
     public Result SetNote(string profileName, string note)
     {
@@ -98,7 +182,7 @@ public sealed partial class SaveManager
 
         try
         {
-            IniFile.Write(InfoFile(profileName), FormatInfo(GetInfo(profileName) with { Note = note }));
+            JsonFile.Write(InfoFile(profileName), FormatInfo(GetInfo(profileName) with { Note = note }));
         }
         catch (Exception ex)
         {
@@ -121,7 +205,7 @@ public sealed partial class SaveManager
         {
             PlaythroughInfo info = GetInfo(profileName);
 
-            IniFile.Write(InfoFile(profileName), FormatInfo(info with
+            JsonFile.Write(InfoFile(profileName), FormatInfo(info with
             {
                 PlayTime = info.PlayTime + (end - start),
                 LastSession = end
@@ -176,15 +260,12 @@ public sealed partial class SaveManager
 
         try
         {
-            var values = new List<KeyValuePair<string, string>>
-            {
-                new("Partita", profileName),
-                new("Motivo", BackupKind.Delete),
-                new("Dettaglio", "")
-            };
-            values.AddRange(FormatInfo(info));
+            InfoFileData data = FormatInfo(info);
+            data.Playthrough = profileName;
+            data.Reason = BackupKind.Delete;
+            data.Detail = "";
 
-            IniFile.Write(BackupInfoFile(backup), values);
+            JsonFile.Write(BackupInfoFile(backup), data);
 
             if (File.Exists(InfoFile(profileName)))
                 File.Delete(InfoFile(profileName));
@@ -216,7 +297,7 @@ public sealed partial class SaveManager
     /// Scrive il proprietario nelle informazioni della partita, senza toccare il resto.
     /// </summary>
     private void WriteOwner(string profileName, string personId) =>
-        IniFile.Write(InfoFile(profileName), FormatInfo(GetInfo(profileName) with { Owner = personId }));
+        JsonFile.Write(InfoFile(profileName), FormatInfo(GetInfo(profileName) with { Owner = personId }));
 
     /// <summary>
     /// Dà la partita a una persona. Il proprietario dei salvataggi non cambia.
@@ -259,7 +340,7 @@ public sealed partial class SaveManager
 
     // BACKUP: PROPRIETARIO E DESCRIZIONE
 
-    private static string BackupInfoFile(string backup) => backup + ".ini";
+    private static string BackupInfoFile(string backup) => backup + ".json";
 
     /// <summary>
     /// Scrive accanto al backup a quale partita appartiene il contenuto e
@@ -270,11 +351,11 @@ public sealed partial class SaveManager
     {
         try
         {
-            IniFile.Write(BackupInfoFile(backup), new KeyValuePair<string, string>[]
+            JsonFile.Write(BackupInfoFile(backup), new InfoFileData
             {
-                new("Partita", owner),
-                new("Motivo", kind),
-                new("Dettaglio", detail)
+                Playthrough = owner,
+                Reason = kind,
+                Detail = detail,
             });
 
             return true;
@@ -294,29 +375,29 @@ public sealed partial class SaveManager
         }
         catch
         {
-            // Un .ini rimasto senza backup non dà fastidio.
+            // Un .json rimasto senza backup non dà fastidio.
         }
     }
 
     /// <summary>
-    /// Completa un backup con il proprietario e l'operazione: dal suo file .ini,
+    /// Completa un backup con il proprietario e l'operazione: dal suo file .json,
     /// o dal nome della cartella per i backup senza (V1Compat).
     /// </summary>
     private static Snapshot WithBackupInfo(Snapshot backup)
     {
-        Dictionary<string, string> values = IniFile.Read(BackupInfoFile(backup.Path));
+        InfoFileData data = ReadInfoData(BackupInfoFile(backup.Path));
 
-        if (values.TryGetValue("Motivo", out string? kind))
+        if (data.Reason != null)
         {
             return backup with
             {
-                Owner = values.GetValueOrDefault("Partita", ""),
-                Kind = kind,
-                Detail = values.GetValueOrDefault("Dettaglio", "")
+                Owner = data.Playthrough ?? "",
+                Kind = data.Reason,
+                Detail = data.Detail ?? ""
             };
         }
 
-        // V1Compat: backup senza file .ini, descritti dal nome della cartella
+        // V1Compat: backup senza file .json, descritti dal nome della cartella
         return V1Compat.BackupFromName(backup);
     }
 
@@ -390,7 +471,7 @@ public sealed partial class SaveManager
         string profileName = ProfileFolderName(name);
 
         // Il proprietario è quello scelto ora: quello di prima può non esistere più.
-        PlaythroughInfo info = ParseInfo(IniFile.Read(BackupInfoFile(deleted.Path))) with { Owner = ownerId };
+        PlaythroughInfo info = ParseInfo(ReadInfoData(BackupInfoFile(deleted.Path))) with { Owner = ownerId };
 
         try
         {
@@ -405,7 +486,7 @@ public sealed partial class SaveManager
 
         try
         {
-            IniFile.Write(InfoFile(profileName), FormatInfo(info));
+            JsonFile.Write(InfoFile(profileName), FormatInfo(info));
         }
         catch (Exception ex)
         {
@@ -446,13 +527,13 @@ public sealed partial class SaveManager
     /// Nota e tempo di gioco di una partita eliminata (dal suo file di backup).
     /// </summary>
     public PlaythroughInfo DeletedInfoOf(Snapshot deleted) =>
-        ParseInfo(IniFile.Read(BackupInfoFile(deleted.Path)));
+        ParseInfo(ReadInfoData(BackupInfoFile(deleted.Path)));
 
     /// <summary>
     /// Id della persona a cui apparteneva una partita eliminata, o "" se non si sa.
     /// </summary>
     public string DeletedOwnerOf(Snapshot deleted) =>
-        IniFile.Read(BackupInfoFile(deleted.Path)).GetValueOrDefault("Giocatore", "");
+        ReadInfoData(BackupInfoFile(deleted.Path)).Owner;
 
     /// <summary>
     /// Proprietario per recuperare una partita eliminata: la persona che la aveva, se esiste
@@ -693,28 +774,34 @@ public sealed partial class SaveManager
             if (Directory.Exists(savestates))
                 FileOps.CopyFolderVerified(savestates, Path.Combine(temp, ExportSavestatesFolder));
 
-            var values = new List<KeyValuePair<string, string>>
-            {
-                new("Formato", "4"),
-                new("Provider", Game.Provider),
-                new("AppId", Game.Id),
-                new("Gioco", Game.Name),
-                new("Nome", ProfileDisplayName(profileName))
-            };
             PlaythroughInfo exported = GetInfo(profileName);
-            values.AddRange(FormatInfo(exported));
 
-            // Giocatore è l'id della persona sul PC di partenza: al momento di importare si sceglie
+            // Info.Giocatore è l'id della persona sul PC di partenza: al momento di importare si sceglie
             // un'altra persona. NomeGiocatore serve solo a leggere il file.
-            values.Add(new("NomeGiocatore", Players?.Find(exported.Owner)?.Name ?? ""));
-            IniFile.Write(Path.Combine(temp, ExportInfoFile), values);
+            JsonFile.Write(Path.Combine(temp, ExportInfoFile), new ExportInfoData
+            {
+                Format = ExportFormat,
+                Provider = Game.Provider,
+                AppId = Game.Id,
+                Game = Game.Name,
+                Name = ProfileDisplayName(profileName),
+                Info = FormatInfo(exported),
+                OwnerName = Players?.Find(exported.Owner)?.Name ?? "",
+            });
 
-            // I posti del gioco, per abbinarli all'importazione (formato 4).
+            // I posti del gioco, per abbinarli all'importazione.
             if (Game.Spots.Count > 0)
             {
-                IniFile.Write(Path.Combine(temp, ExportSpotsFile), Game.Spots.Select(spot => new KeyValuePair<string, string>(
-                    spot.Id.ToString(CultureInfo.InvariantCulture),
-                    spot.PortablePath + "|" + spot.Pattern + "|" + (spot.Recursive ? "1" : "0"))));
+                JsonFile.Write(Path.Combine(temp, ExportSpotsFile), new ExportSpotsData
+                {
+                    Spots = Game.Spots.Select(spot => new ExportSpotEntry
+                    {
+                        Id = spot.Id,
+                        Portable = spot.PortablePath,
+                        Pattern = spot.Pattern,
+                        Recursive = spot.Recursive,
+                    }).ToList(),
+                });
             }
 
             if (File.Exists(tempZip))
@@ -780,26 +867,27 @@ public sealed partial class SaveManager
             if (!Directory.Exists(saves))
                 return Result<string>.Fail(Strings.ImportInvalid);
 
-            Dictionary<string, string> values = IniFile.Read(Path.Combine(temp, ExportInfoFile));
+            // V1Compat: gli zip fatti da 1.0 e dalle build prima della R10 hanno file .ini
+            ExportInfoData exportInfo = JsonFile.Read<ExportInfoData>(Path.Combine(temp, ExportInfoFile))
+                                        ?? V1Compat.ReadExportedInfo(temp);
 
-            (string appId, string gameName) = LegacyMigration.ExportedGame(values);
+            if (exportInfo.AppId != Game.Id || exportInfo.Provider != Game.Provider)
+                return Result<string>.Fail(Loc.F(Strings.ImportOtherGame, exportInfo.Game, Game.Name));
 
-            // V1Compat: gli zip di formato 1 e 2 non hanno il launcher
-            string provider = V1Compat.ZipProvider(values);
-
-            if (appId != Game.Id || provider != Game.Provider)
-                return Result<string>.Fail(Loc.F(Strings.ImportOtherGame, gameName, Game.Name));
-
-            string name = UniqueName(values.GetValueOrDefault("Nome", "").Trim());
+            string name = UniqueName(exportInfo.Name.Trim());
             string profileName = ProfileFolderName(name);
             string profile = Path.Combine(ProfilesPath, profileName);
             IReadOnlyList<string> skipped = [];
 
-            if (File.Exists(Path.Combine(temp, ExportSpotsFile)))
+            // V1Compat: posizioni.ini degli zip della 1.0
+            ExportSpotsData? zipSpots = JsonFile.Read<ExportSpotsData>(Path.Combine(temp, ExportSpotsFile))
+                                        ?? V1Compat.ReadExportedSpots(temp);
+
+            if (zipSpots != null)
             {
                 try
                 {
-                    skipped = ImportSpots(temp, saves, profile);
+                    skipped = ImportSpots(zipSpots, saves, profile);
                 }
                 catch
                 {
@@ -819,8 +907,8 @@ public sealed partial class SaveManager
                 FileOps.CopyFolderVerified(savestates, Path.Combine(SavestatePath, profileName));
 
             // Il proprietario è quello scelto qui, non il Giocatore dello zip.
-            PlaythroughInfo info = ParseInfo(values) with { Owner = ownerId };
-            IniFile.Write(InfoFile(profileName), FormatInfo(info));
+            PlaythroughInfo info = ParseInfo(exportInfo.Info) with { Owner = ownerId };
+            JsonFile.Write(InfoFile(profileName), FormatInfo(info));
 
             if (skipped.Count == 0)
                 return Result<string>.Ok(profileName);
@@ -850,26 +938,18 @@ public sealed partial class SaveManager
     /// primo posto l'importazione non si fa: un profilo senza cartella principale, cambiato
     /// nel gioco, svuoterebbe la cartella principale.
     /// </summary>
-    private List<string> ImportSpots(string temp, string saves, string profile)
+    private List<string> ImportSpots(ExportSpotsData zipSpots, string saves, string profile)
     {
-        Dictionary<string, string> zipSpots = IniFile.Read(Path.Combine(temp, ExportSpotsFile));
         string zipExtra = Path.Combine(saves, FileOps.ExtraSpotsFolder);
         var skipped = new List<string>();
         bool primaryCopied = false;
 
-        foreach ((string key, string value) in zipSpots)
+        foreach (ExportSpotEntry entry in zipSpots.Spots)
         {
-            if (!int.TryParse(key, NumberStyles.None, CultureInfo.InvariantCulture, out int zipId))
-                continue;
-
-            string[] parts = value.Split('|');
-
-            if (parts.Length != 3)
-                throw new InvalidDataException("posto non valido nello zip: " + key);
-
-            string portable = parts[0];
-            string pattern = parts[1];
-            bool recursive = parts[2] == "1";
+            int zipId = entry.Id;
+            string portable = entry.Portable;
+            string pattern = entry.Pattern;
+            bool recursive = entry.Recursive;
             string source = zipId == 1 ? saves : Path.Combine(zipExtra, zipId.ToString(CultureInfo.InvariantCulture));
 
             SaveSpot? mine = zipId == 1

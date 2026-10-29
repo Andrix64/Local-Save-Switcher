@@ -7,7 +7,7 @@ public sealed class GameSaveSettingsTests : IDisposable
     public void Dispose() => folder.Dispose();
 
     private string Data => Path.Combine(folder.Root, "dati", "steam", "111", "123450");
-    private string File => Path.Combine(Data, "posti.ini");
+    private string File => Path.Combine(Data, "posti.json");
 
     [Fact]
     public void RoundTripKeepsFolderAndOrigin()

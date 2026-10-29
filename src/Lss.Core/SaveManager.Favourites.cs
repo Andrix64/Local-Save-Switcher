@@ -1,18 +1,40 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace Lss;
 
+/// <summary>Come preferite.json è scritto: persona -> partita preferita, e persona -> data dell'ultima partita.</summary>
+internal sealed class FavouritesFileData
+{
+    [JsonPropertyName("Preferite")]
+    public Dictionary<string, string> Favourites { get; set; } = [];
+
+    [JsonPropertyName("Ultima")]
+    public Dictionary<string, string> LastPlayed { get; set; } = [];
+}
+
 /// <summary>
-/// Partita preferita di ogni persona per questo gioco (preferite.ini). È quella
+/// Partita preferita di ogni persona per questo gioco (preferite.json). È quella
 /// che la modalità semplice mette al suo posto, e la data dell'ultima partita
 /// giocata da ogni persona (Ultima) serve a ordinare le copertine.
 /// </summary>
 public sealed partial class SaveManager
 {
-    private const string FavouritesFile = "preferite.ini";
-    private const string LastPlayedSuffix = ".Ultima";
+    private const string FavouritesFile = "preferite.json";
 
     private string FavouritesPath => Path.Combine(dataFolder, FavouritesFile);
+
+    // Il file letto (vuoto se manca o è rotto), con i nomi delle persone senza distinguere maiuscole.
+    private FavouritesFileData ReadFavourites()
+    {
+        var file = JsonFile.Read<FavouritesFileData>(FavouritesPath);
+
+        return new FavouritesFileData
+        {
+            Favourites = new Dictionary<string, string>(file?.Favourites ?? [], StringComparer.OrdinalIgnoreCase),
+            LastPlayed = new Dictionary<string, string>(file?.LastPlayed ?? [], StringComparer.OrdinalIgnoreCase),
+        };
+    }
 
     /// <summary>
     /// Partita preferita di una persona per questo gioco, per nome di cartella,
@@ -20,7 +42,7 @@ public sealed partial class SaveManager
     /// </summary>
     public string? FavouriteOf(string personId)
     {
-        string profile = IniFile.Read(FavouritesPath).GetValueOrDefault(personId, "");
+        string profile = ReadFavourites().Favourites.GetValueOrDefault(personId, "");
 
         return profile != "" && ProfileExists(profile) ? profile : null;
     }
@@ -30,7 +52,7 @@ public sealed partial class SaveManager
     /// </summary>
     public DateTime? LastPlayedOf(string personId)
     {
-        string text = IniFile.Read(FavouritesPath).GetValueOrDefault(personId + LastPlayedSuffix, "");
+        string text = ReadFavourites().LastPlayed.GetValueOrDefault(personId, "");
 
         return DateTime.TryParseExact(text, InfoDateFormat, CultureInfo.InvariantCulture,
             DateTimeStyles.None, out DateTime last)
@@ -56,9 +78,9 @@ public sealed partial class SaveManager
 
         try
         {
-            Dictionary<string, string> values = IniFile.Read(FavouritesPath);
-            values[personId] = profileName;
-            IniFile.Write(FavouritesPath, values);
+            FavouritesFileData file = ReadFavourites();
+            file.Favourites[personId] = profileName;
+            JsonFile.Write(FavouritesPath, file);
         }
         catch (Exception ex)
         {
@@ -69,7 +91,7 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
-    /// Rimette preferite.ini a posto dopo un'operazione riuscita. Ogni persona con
+    /// Rimette preferite.json a posto dopo un'operazione riuscita. Ogni persona con
     /// partite ha una preferita: quella di prima se c'è ancora, altrimenti la
     /// partita giocata per ultima. Una partita rinominata resta la preferita.
     /// Senza partite, la persona non ha preferita. Non lancia eccezioni.
@@ -78,14 +100,14 @@ public sealed partial class SaveManager
     {
         try
         {
-            Dictionary<string, string> current = IniFile.Read(FavouritesPath);
+            FavouritesFileData current = ReadFavourites();
 
             if (renamedFrom != null && renamedTo != null)
             {
-                foreach (string key in current.Keys.ToList())
+                foreach (string key in current.Favourites.Keys.ToList())
                 {
-                    if (current[key] == renamedFrom)
-                        current[key] = renamedTo;
+                    if (current.Favourites[key] == renamedFrom)
+                        current.Favourites[key] = renamedTo;
                 }
             }
 
@@ -94,7 +116,7 @@ public sealed partial class SaveManager
                 .Where(item => item.Info.Owner != "")
                 .ToList();
 
-            var values = new Dictionary<string, string>();
+            var values = new FavouritesFileData();
 
             foreach (string personId in owned.Select(item => item.Info.Owner).Distinct())
             {
@@ -105,15 +127,15 @@ public sealed partial class SaveManager
                     .Select(item => item.Name)
                     .ToList();
 
-                string favourite = current.GetValueOrDefault(personId, "");
+                string favourite = current.Favourites.GetValueOrDefault(personId, "");
 
-                values[personId] = mine.Contains(favourite) ? favourite : mine[0];
+                values.Favourites[personId] = mine.Contains(favourite) ? favourite : mine[0];
 
-                if (current.TryGetValue(personId + LastPlayedSuffix, out string? last))
-                    values[personId + LastPlayedSuffix] = last;
+                if (current.LastPlayed.TryGetValue(personId, out string? last))
+                    values.LastPlayed[personId] = last;
             }
 
-            IniFile.Write(FavouritesPath, values);
+            JsonFile.Write(FavouritesPath, values);
         }
         catch (Exception ex)
         {
@@ -174,9 +196,9 @@ public sealed partial class SaveManager
             if (owner == "")
                 return;
 
-            Dictionary<string, string> values = IniFile.Read(FavouritesPath);
-            values[owner + LastPlayedSuffix] = when.ToString(InfoDateFormat, CultureInfo.InvariantCulture);
-            IniFile.Write(FavouritesPath, values);
+            FavouritesFileData file = ReadFavourites();
+            file.LastPlayed[owner] = when.ToString(InfoDateFormat, CultureInfo.InvariantCulture);
+            JsonFile.Write(FavouritesPath, file);
         }
         catch (Exception ex)
         {

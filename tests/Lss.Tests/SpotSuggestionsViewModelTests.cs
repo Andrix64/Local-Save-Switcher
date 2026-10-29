@@ -28,14 +28,21 @@ public sealed class SpotSuggestionsViewModelTests : IDisposable
 
     private string Extra => Path.Combine(folder.Root, "extra");
 
-    /// <summary>Una proposta in proposte.ini, con un motivo come quelli che la ricerca salva.</summary>
+    /// <summary>Una proposta in proposte.json, con un motivo come quelli che la ricerca salva.</summary>
     private void SuggestExtra()
     {
         TestFolder.Write(Path.Combine(Extra, "a.sav"), "x");
-        IniFile.Write(Path.Combine(folder.Data, "proposte.ini"),
-        [
-            new("Proposta.0", string.Join("|", Extra, "", "9", DateTime.UtcNow.ToString("O"), "GameName:6:Hollow")),
-        ]);
+        JsonFile.Write(Path.Combine(folder.Data, "proposte.json"), new SuggestionsFile
+        {
+            Suggestions =
+            [
+                new SuggestionEntry
+                {
+                    Folder = Extra, Score = 9, Found = DateTime.UtcNow.ToString("O"),
+                    Reasons = [new ReasonEntry { Kind = "GameName", Points = 6, Detail = "Hollow" }],
+                },
+            ],
+        });
     }
 
     private GameViewModel Game() => new(folder.CreateManager("L"), dialogs);
@@ -45,10 +52,10 @@ public sealed class SpotSuggestionsViewModelTests : IDisposable
     public void LooseFilesCanOnlyBeDismissedForThisGame()
     {
         TestFolder.Write(Path.Combine(Extra, "a.sav"), "x");
-        IniFile.Write(Path.Combine(folder.Data, "proposte.ini"),
-        [
-            new("Proposta.0", string.Join("|", Extra, "*.sav", "9", DateTime.UtcNow.ToString("O"), "")),
-        ]);
+        JsonFile.Write(Path.Combine(folder.Data, "proposte.json"), new SuggestionsFile
+        {
+            Suggestions = [new SuggestionEntry { Folder = Extra, Pattern = "*.sav", Score = 9, Found = DateTime.UtcNow.ToString("O") }],
+        });
         GameViewModel game = Game();
         var vm = new SpotSuggestionsViewModel(game, SessionScan.Pending(folder.Data));
 

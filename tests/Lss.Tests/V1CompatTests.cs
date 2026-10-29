@@ -82,8 +82,8 @@ public sealed class V1CompatTests : IDisposable
 
     // Posti: cartella.ini della 1.0
 
-    private string SpotsData => Path.Combine(folder.Root, "game-data");
-    private string Posti => Path.Combine(SpotsData, "posti.ini");
+    private string DataRoot => Path.Combine(folder.Root, "data");
+    private string SpotsData => Path.Combine(DataRoot, "steam", "111", "123450");
     private string Cartella => Path.Combine(SpotsData, "cartella.ini");
 
     [Fact]
@@ -103,6 +103,8 @@ public sealed class V1CompatTests : IDisposable
             "Aggiunta.0=" + when,
         ]);
 
+        V1Compat.ConvertGameFiles(DataRoot);
+
         var spots = new GameSpots(SpotsData);
         spots.Load();
 
@@ -112,12 +114,15 @@ public sealed class V1CompatTests : IDisposable
         Assert.Equal(SaveSource.Learned, primary.Source);
         Assert.Equal([extra], spots.ExtraRoots);
         Assert.False(File.Exists(Cartella));
-
-        string text = File.ReadAllText(Posti);
-        Assert.Contains("Ignorate.0=" + ignored, text);
-        Assert.Contains("Aggiunta.0=" + when, text);
+        Assert.True(File.Exists(Cartella + ".precedente"));
 
         Assert.Equal(ignored, Assert.Single(new IgnoredFolders(folder.Root).ForGame(SpotsData)).Folder);
+
+        // Una seconda volta non cambia niente.
+        V1Compat.ConvertGameFiles(DataRoot);
+        var again = new GameSpots(SpotsData);
+        again.Load();
+        Assert.Single(again.Spots);
     }
 
     // Impostazioni e zip
@@ -135,8 +140,12 @@ public sealed class V1CompatTests : IDisposable
     [Fact]
     public void ZipWithoutProviderIsSteam()
     {
-        Assert.Equal("steam", V1Compat.ZipProvider(new Dictionary<string, string> { ["Formato"] = "2" }));
-        Assert.Equal("epic", V1Compat.ZipProvider(new Dictionary<string, string> { ["Provider"] = "epic" }));
+        using var folder = new TestFolder();
+        TestFolder.Write(Path.Combine(folder.Root, "partita.ini"), "Formato=2\nAppId=123450\n");
+        Assert.Equal("steam", V1Compat.ReadExportedInfo(folder.Root).Provider);
+
+        TestFolder.Write(Path.Combine(folder.Root, "partita.ini"), "Provider=epic\n");
+        Assert.Equal("epic", V1Compat.ReadExportedInfo(folder.Root).Provider);
     }
 
     // Copie

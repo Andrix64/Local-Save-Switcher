@@ -28,7 +28,7 @@ public sealed class GameSettingsViewModelTests : IDisposable
 
         Assert.True(await vm.TrySaveAsync());
 
-        var read = new AppState(Path.Combine(folder.Data, "stato.ini"));
+        var read = new AppState(Path.Combine(folder.Data, "stato.json"));
         read.Load();
         Assert.False(read.LaunchGame);
         Assert.False(read.SaveOnGameExit);
