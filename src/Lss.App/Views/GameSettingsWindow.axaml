@@ -75,8 +75,16 @@
       </Grid>
     </Border>
 
-    <Button Classes="link" Content="{Binding IgnoredFoldersText}" Command="{Binding OpenIgnoredFoldersCommand}"
-            HorizontalAlignment="Left" Margin="4,16,0,0" />
+    <!-- Cartelle che non sono salvataggi (di questo gioco) -->
+    <TextBlock Classes="sectionLabel" Text="{Binding CaptionFolders}" />
+    <Border Classes="panel" Padding="0">
+      <Button Classes="navrow" Command="{Binding OpenIgnoredFoldersCommand}">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="settingTitle" Text="{Binding IgnoredFoldersText}" VerticalAlignment="Center" />
+          <Path Grid.Column="1" Classes="chevron" Data="M9 6 L15 12 L9 18" />
+        </Grid>
+      </Button>
+    </Border>
   </StackPanel>
 
 </Window>

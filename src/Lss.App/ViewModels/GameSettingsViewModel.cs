@@ -78,6 +78,8 @@ public partial class GameSettingsViewModel : ObservableObject
 
     public string CaptionCopies => Strings.CaptionCopies;
 
+    public string CaptionFolders => Strings.CaptionFolders;
+
     [ObservableProperty]
     private bool launchGame;
 
