@@ -222,4 +222,56 @@ public sealed class V1UpgradeTests : IDisposable
         Assert.True(File.Exists(Path.Combine(GameData, "stato.json")));
         Assert.True(File.Exists(Path.Combine(GameData, "proposte.json")));
     }
+
+    // R11: percorsi con altri separatori, doppi o con uno finale (build vecchie) in ogni posto che li tiene.
+    private static string Odd(string path) =>
+        path.Replace(Path.DirectorySeparatorChar, Path.DirectorySeparatorChar == '/' ? '\\' : '/') + "/";
+
+    [Fact]
+    public void StoredPathsWithOtherSeparatorsAreFixedOnce()
+    {
+        JsonFile.Write(Path.Combine(GameData, "posti.json"), new SpotsFile
+        {
+            Next = 3,
+            Spots = [new SpotEntry { Id = 1, Folder = Odd(Extra), Portable = "{Documents}/Extra", Origin = "scelta" }],
+            ExtraRoots = [Odd(Extra)],
+            Ignored = [new IgnoredEntry { Folder = Odd(Ignored), Added = When }],
+        });
+        JsonFile.Write(Path.Combine(GameData, "proposte.json"), new SuggestionsFile
+        {
+            Suggestions = [new SuggestionEntry { Folder = Odd(Loose), Score = 9, Found = When }],
+            Dismissed = [new DismissedEntry { Folder = Odd(Loose), Pattern = "*.sav" }],
+        });
+
+        V1Compat.ConvertGameFiles(Root);
+
+        var spots = new GameSpots(GameData);
+        spots.Load();
+        Assert.Equal(Extra, Assert.Single(spots.Spots).Folder);
+        Assert.Equal("{Documents}/Extra", spots.Spots[0].PortablePath);
+        Assert.Equal([Extra], spots.ExtraRoots);
+        Assert.Equal(Ignored, Assert.Single(new IgnoredFolders(Root).ForGame(GameData)).Folder);
+        Assert.Equal(Loose, Assert.Single(SessionScan.Pending(GameData)).Folder);
+        Assert.Equal(Loose, Assert.Single(SessionScan.Dismissed(GameData)).Folder);
+
+        string before = File.ReadAllText(Path.Combine(GameData, "posti.json"))
+                        + File.ReadAllText(Path.Combine(GameData, "proposte.json"));
+        V1Compat.ConvertGameFiles(Root);
+        Assert.Equal(before, File.ReadAllText(Path.Combine(GameData, "posti.json"))
+                             + File.ReadAllText(Path.Combine(GameData, "proposte.json")));
+    }
+
+    [Fact]
+    public void AFolderIgnoredWithOtherSeparatorsIsStillIgnored()
+    {
+        new IgnoredFolders(Root).AddForGame(GameData, Odd(Ignored));
+
+        Assert.True(new IgnoredFolders(Root).IsIgnored(Ignored, GameData, Context()));
+
+        new IgnoredFolders(Root).RemoveForGame(GameData, Ignored);
+        Assert.Empty(new IgnoredFolders(Root).ForGame(GameData));
+    }
+
+    private SaveContext Context() => new(
+        new KnownFolders(folder.Root, "", "", "", "", "", "", "", "", "", "andrix"), "", false, "", "123", IgnoreCase: false);
 }

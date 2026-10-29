@@ -203,15 +203,15 @@ internal static class SaveLocator
     private static string KeyOf(SaveSpot spot) =>
         spot.PortablePath + "|" + spot.Pattern + "|" + (spot.Recursive ? "1" : "0");
 
-    private static bool SameFolder(string first, string second) =>
-        string.Equals(first, second, FolderComparison());
+    private static bool SameFolder(string first, string second) => PathText.Same(first, second);
 
     /// <summary>
     /// true se folder è uguale a root o sta dentro root.
     /// </summary>
     private static bool SameOrInside(string folder, string root)
     {
-        string trimmed = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string trimmed = PathText.Normalize(root).TrimEnd(Path.DirectorySeparatorChar);
+        folder = PathText.Normalize(folder);
 
         return string.Equals(folder, trimmed, FolderComparison())
                || folder.StartsWith(trimmed + Path.DirectorySeparatorChar, FolderComparison());

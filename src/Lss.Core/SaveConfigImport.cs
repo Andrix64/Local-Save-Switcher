@@ -148,6 +148,9 @@ public static class SaveConfigImport
         if (string.IsNullOrEmpty(folder))
             return new ConfigSpotPlan(spot, "", ConfigSpotState.NotForThisSystem, "");
 
+        // Una configurazione fatta sull'altro sistema: i separatori si portano a quelli di qui.
+        folder = PathText.Normalize(folder);
+
         if (spot.Pattern == "" && !Directory.Exists(folder))
             return new ConfigSpotPlan(spot, folder, ConfigSpotState.NotYet, "");
 
@@ -166,6 +169,5 @@ public static class SaveConfigImport
     private static string Portable(SaveConfigSpot spot) =>
         "{" + spot.Root + "}" + (spot.Path == "" ? "" : "/" + spot.Path);
 
-    private static bool SameFolder(string first, string second) =>
-        string.Equals(first, second, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+    private static bool SameFolder(string first, string second) => PathText.Same(first, second);
 }

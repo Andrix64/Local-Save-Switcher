@@ -148,4 +148,53 @@ public sealed class SessionScanTests : IDisposable
         Assert.Equal(found.Reasons.Select(reason => (reason.Kind, reason.Points, reason.Detail)),
             saved.Reasons.Select(reason => (reason.Kind, reason.Points, reason.Detail)));
     }
+
+    // R11: lo stesso percorso scritto con altri separatori e uno finale (come una build vecchia).
+    private static string Other(string path) =>
+        path.Replace(Path.DirectorySeparatorChar, Path.DirectorySeparatorChar == '/' ? '\\' : '/') + "/";
+
+    private string Changed()
+    {
+        string dir = Path.Combine(Documents, "Hollow Knight");
+        TestFolder.Write(Path.Combine(dir, "slot1.sav"), "x");
+        TestFolder.Write(Path.Combine(dir, "slot2.sav"), "y");
+        return dir;
+    }
+
+    [Fact]
+    public void AKnownSpotWithOtherSeparatorsIsNotSuggestedAgain()
+    {
+        DateTime start = DateTime.UtcNow.AddMinutes(-1);
+        string dir = Changed();
+        var spots = Spots();
+        spots.Add(Other(dir), "", Other(dir), SaveSource.Chosen);
+
+        Assert.Empty(Run(spots, start));
+    }
+
+    [Fact]
+    public void ADismissedSuggestionWithOtherSeparatorsIsNotSuggestedAgain()
+    {
+        DateTime start = DateTime.UtcNow.AddMinutes(-1);
+        string dir = Changed();
+        SessionScan.Dismiss(folder.Data, Other(dir), "");
+
+        Assert.Empty(Run(Spots(), start));
+    }
+
+    [Fact]
+    public void AStoredSuggestionForAKnownSpotGoesAway()
+    {
+        DateTime start = DateTime.UtcNow.AddMinutes(-1);
+        string dir = Changed();
+        JsonFile.Write(Path.Combine(folder.Data, "proposte.json"), new SuggestionsFile
+        {
+            Suggestions = [new SuggestionEntry { Folder = Other(dir), Score = 9, Found = DateTime.UtcNow.ToString("O") }],
+        });
+        var spots = Spots();
+        spots.Add(dir, "", dir, SaveSource.Chosen);
+
+        Assert.Empty(Run(spots, start));
+        Assert.Empty(SessionScan.Pending(folder.Data));
+    }
 }

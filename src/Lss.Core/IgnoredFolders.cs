@@ -81,7 +81,7 @@ internal sealed class IgnoredFolders
         string path = Path.Combine(gameDataFolder, GameFileName);
         List<IgnoredFolder> entries = ReadGame(path, gameDataFolder).ToList();
 
-        if (entries.Any(entry => string.Equals(entry.Folder, folder, StringComparison.OrdinalIgnoreCase)))
+        if (entries.Any(entry => PathText.Same(entry.Folder, folder)))
             return;
 
         entries.Add(new IgnoredFolder(folder, folder, gameDataFolder, DateTime.Now));
@@ -101,7 +101,7 @@ internal sealed class IgnoredFolders
     {
         string path = Path.Combine(gameDataFolder, GameFileName);
         List<IgnoredFolder> entries = ReadGame(path, gameDataFolder).ToList();
-        entries.RemoveAll(entry => string.Equals(entry.Folder, folder, StringComparison.OrdinalIgnoreCase));
+        entries.RemoveAll(entry => PathText.Same(entry.Folder, folder));
         WriteGame(path, entries);
     }
 
@@ -135,9 +135,11 @@ internal sealed class IgnoredFolders
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
 
-        return Folders(gameDataFolder, context).Any(ignored =>
-            string.Equals(folder, ignored, comparison)
-            || folder.StartsWith(ignored.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, comparison));
+        string wanted = PathText.Normalize(folder);
+
+        return Folders(gameDataFolder, context).Select(PathText.Normalize).Any(ignored =>
+            string.Equals(wanted, ignored, comparison)
+            || wanted.StartsWith(ignored.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, comparison));
     }
 
     /// <summary>Le voci di cartelle-ignorate.json con le loro date.</summary>

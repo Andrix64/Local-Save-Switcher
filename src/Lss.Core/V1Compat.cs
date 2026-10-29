@@ -349,6 +349,8 @@ internal static class V1Compat
         ConvertIniFile(Path.Combine(game, "cartella.ini"), Path.Combine(game, "posti.json"), SpotsFromOldFolderIni);
         ConvertIniFile(Path.Combine(game, "proposte.ini"), Path.Combine(game, "proposte.json"), SuggestionsFromIni);
 
+        FixStoredPaths(game);
+
         foreach (string folder in new[] { Path.Combine(game, "Info"), Path.Combine(game, "Backup") })
         {
             if (!Directory.Exists(folder))
@@ -356,6 +358,68 @@ internal static class V1Compat
 
             foreach (string ini in Directory.GetFiles(folder, "*.ini"))
                 ConvertIniFile(ini, Path.ChangeExtension(ini, ".json"), InfoFromIni);
+        }
+    }
+
+    // Percorsi di cartelle scritti da build vecchie con altri separatori, doppi o con uno finale (R11):
+    // si portano alla forma del sistema in posti.json e proposte.json, anche se erano già JSON. Gira a ogni
+    // avvio e riscrive un file solo se qualcosa cambia.
+    private static void FixStoredPaths(string game)
+    {
+        string spotsPath = Path.Combine(game, "posti.json");
+        string suggestionsPath = Path.Combine(game, "proposte.json");
+        int fixedCount = 0;
+
+        string Fix(string path)
+        {
+            string normal = PathText.Normalize(path);
+
+            if (normal != path)
+                fixedCount++;
+
+            return normal;
+        }
+
+        try
+        {
+            if (File.Exists(spotsPath))
+            {
+                SpotsFile spots = SpotsFile.Read(spotsPath);
+                int before = fixedCount;
+
+                foreach (SpotEntry spot in spots.Spots)
+                    spot.Folder = Fix(spot.Folder);
+
+                spots.ExtraRoots = spots.ExtraRoots.Select(Fix).ToList();
+
+                foreach (IgnoredEntry ignored in spots.Ignored)
+                    ignored.Folder = Fix(ignored.Folder);
+
+                if (fixedCount != before)
+                    JsonFile.Write(spotsPath, spots);
+            }
+
+            if (File.Exists(suggestionsPath))
+            {
+                SuggestionsFile suggestions = JsonFile.Read<SuggestionsFile>(suggestionsPath) ?? new SuggestionsFile();
+                int before = fixedCount;
+
+                foreach (SuggestionEntry suggestion in suggestions.Suggestions)
+                    suggestion.Folder = Fix(suggestion.Folder);
+
+                foreach (DismissedEntry dismissed in suggestions.Dismissed)
+                    dismissed.Folder = Fix(dismissed.Folder);
+
+                if (fixedCount != before)
+                    JsonFile.Write(suggestionsPath, suggestions);
+            }
+
+            if (fixedCount > 0)
+                Log.Write($"Percorsi con separatori diversi corretti: {fixedCount} in {game}");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Write("Percorsi non corretti in " + game, ex);
         }
     }
 

@@ -117,6 +117,9 @@ internal static class SessionScan
         var pending = Pending(dataFolder).ToList();
         IReadOnlyList<(string Folder, string Pattern)> dismissed = Dismissed(dataFolder);
 
+        // Una proposta già salvata che intanto è diventata un posto non serve più.
+        pending.RemoveAll(other => other.Pattern == "" && known.Any(folder => Same(folder, other.Folder)));
+
         foreach (SpotSuggestion suggestion in fresh)
         {
             bool already = pending.Any(other => Same(other.Folder, suggestion.Folder) && other.Pattern == suggestion.Pattern);
@@ -273,6 +276,6 @@ internal static class SessionScan
         }
     }
 
-    private static bool Same(string first, string second) =>
-        string.Equals(first, second, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+    // Percorsi scritti con separatori diversi (R11) sono la stessa cartella.
+    private static bool Same(string first, string second) => PathText.Same(first, second);
 }
