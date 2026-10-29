@@ -39,8 +39,8 @@
   <Border Classes="card" Classes.active="{Binding IsActive}"
           IsEnabled="{Binding Enabled}"
           AutomationProperties.Name="{Binding AccessibleName}"
-          Padding="10,8,14,8" CornerRadius="8"
-          Margin="0,0,0,6">
+          Padding="12,12,14,12"
+          Margin="0,0,0,8">
     <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
 
       <!-- La preferita è la stella gialla; le altre hanno il contorno e si cliccano per farle preferite. -->
@@ -54,10 +54,15 @@
       <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
                  TextTrimming="CharacterEllipsis" MaxWidth="320" />
 
-      <Border Grid.Column="2" CornerRadius="4" Background="{StaticResource Accent}" Padding="7,2"
-              VerticalAlignment="Center" IsVisible="{Binding IsActive}">
-        <TextBlock Text="{loc:Str InGameNow}" FontSize="11" FontWeight="Bold" Foreground="White" />
-      </Border>
+      <!-- Il floppy inserito: la partita nel gioco adesso (la fessura del lettore e il floppy che vi entra). -->
+      <Panel Grid.Column="2" Width="26" Height="26" VerticalAlignment="Center" IsVisible="{Binding IsActive}"
+             ToolTip.Tip="{loc:Str InGameNow}" AutomationProperties.Name="{loc:Str InGameNow}">
+        <Border Height="3" Width="24" CornerRadius="2" Background="{StaticResource TextMuted}"
+                VerticalAlignment="Top" HorizontalAlignment="Center" />
+        <Path Data="{StaticResource FloppyIcon}" Width="20" Height="20" Stretch="Uniform" Margin="0,5,0,0"
+              Stroke="{StaticResource Accent}" Fill="{StaticResource AccentSoft}" StrokeThickness="1.8"
+              StrokeLineCap="Round" StrokeJoin="Round" VerticalAlignment="Bottom" HorizontalAlignment="Center" />
+      </Panel>
 
       <TextBlock Grid.Column="3" Text="{Binding Details}" FontSize="12" Foreground="{StaticResource TextMuted}"
                  VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Details}" />
@@ -66,9 +71,9 @@
       <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
         <Button Classes="primary small" Content="{Binding PlayText}" Command="{Binding PlayCommand}"
                 IsEnabled="{Binding CanPlay}" IsVisible="{Binding ShowPlay}" />
-        <Button Classes="secondary small" Content="{loc:Str SavePointButton}" Command="{Binding SavePointCommand}"
+        <Button Classes="ghost small" Content="{loc:Str SavePointButton}" Command="{Binding SavePointCommand}"
                 IsEnabled="{Binding CanPlay}" IsVisible="{Binding IsActive}" />
-        <Button Classes="secondary small" Content="{loc:Str HistoryButton}" Command="{Binding HistoryCommand}"
+        <Button Classes="ghost small" Content="{loc:Str HistoryButton}" Command="{Binding HistoryCommand}"
                 IsVisible="{Binding IsActive}" />
         <Button Classes="more small" AutomationProperties.Name="{Binding MoreActionsName}">
           <StackPanel Orientation="Horizontal" Spacing="3">

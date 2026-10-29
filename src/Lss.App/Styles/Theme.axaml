@@ -180,9 +180,9 @@
   <!-- Schede delle partite. -->
   <Style Selector="Border.card">
     <Setter Property="Background" Value="{StaticResource Surface}" />
-    <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="CornerRadius" Value="14" />
     <Setter Property="Padding" Value="18,14,14,14" />
   </Style>
   <Style Selector="Border.card.active">
@@ -299,6 +299,31 @@
     <Setter Property="BorderBrush" Value="{StaticResource AccentHover}" />
   </Style>
 
+
+  <!-- "Aggiungi un gioco" nella colonna dei giochi: tratteggiato, discreto. -->
+  <Style Selector="Button.addgame">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="14,10" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+  </Style>
+  <Style Selector="Button.addgame:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource Surface}" />
+    <Setter Property="Foreground" Value="{StaticResource Text}" />
+  </Style>
+  <!-- Pulsanti "fantasma": solo testo, il fondo compare al passaggio del mouse. -->
+  <Style Selector="Button.ghost">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+  <Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+    <Setter Property="Foreground" Value="{StaticResource Text}" />
+  </Style>
 
   <!-- Telaio dei popup: niente cornice di sistema, angoli a 20px come la finestra principale, in alto il titolo
        leggibile e la X per chiudere. Trascinamento ed Esc li gestisce PopupChrome (App.axaml.cs). -->

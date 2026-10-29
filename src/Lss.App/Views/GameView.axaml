@@ -83,8 +83,7 @@
     </Border>
 
     <!-- Dove sono i salvataggi del gioco, e da dove li ha trovati LSS: un riquadro che parte chiuso -->
-    <Border Grid.Row="3" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
-            CornerRadius="8" Padding="14,6" Margin="0,0,0,14">
+    <Border Grid.Row="3" Background="Transparent" Padding="0,2" Margin="0,0,0,12">
       <StackPanel Spacing="6">
         <Grid ColumnDefinitions="*,Auto">
           <Button Classes="folderToggle" Command="{Binding ToggleSaveFoldersCommand}" HorizontalAlignment="Left">
@@ -164,7 +163,10 @@
     <!-- Titolo dell'elenco e azioni -->
     <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
       <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-        <TextBlock Text="{loc:Str YourPlaythroughs}" FontSize="19" FontWeight="Bold" VerticalAlignment="Center" />
+        <StackPanel VerticalAlignment="Center" Spacing="2">
+          <TextBlock Text="{Binding Manager.Game.Name}" FontSize="28" FontWeight="ExtraBold" TextTrimming="CharacterEllipsis" />
+          <TextBlock Classes="caption" Text="{loc:Str YourPlaythroughs}" />
+        </StackPanel>
         <!-- Impostazioni del gioco: l'ingranaggio sopra un floppy -->
         <Button Classes="iconbtn" Command="{Binding GameSettingsCommand}" VerticalAlignment="Center"
                 ToolTip.Tip="{loc:Str GameSettingsButton}" AutomationProperties.Name="{loc:Str GameSettingsButton}">
@@ -179,7 +181,7 @@
         </Button>
       </StackPanel>
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-        <Button Classes="secondary" Content="{loc:Str ImportButton}"
+        <Button Classes="ghost" Content="{loc:Str ImportButton}"
                 Command="{Binding ImportCommand}" IsEnabled="{Binding !IsBusy}" />
         <Button Classes="primary" Content="{loc:Str NewPlaythroughButton}"
                 Command="{Binding NewCommand}" IsEnabled="{Binding !IsBusy}" />
