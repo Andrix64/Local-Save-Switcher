@@ -94,6 +94,10 @@ DO NOT start the game. The backup is in:
   <data name="GameRunning" xml:space="preserve"><value>{0} is running: close it to switch or save.</value></data>
   <data name="SwitchSaveFailed" xml:space="preserve"><value>Nothing changed: we couldn&apos;t save the progress of “{0}”.
 {1}</value></data>
+  <data name="SwitchEmptyHeading" xml:space="preserve"><value>Switch without saving?</value></data>
+  <data name="SwitchEmptyText" xml:space="preserve"><value>The game&apos;s main save folder is empty, so the progress of “{0}” can&apos;t be saved.
+“{0}” stays as it was saved last, and the game&apos;s current files go to an automatic copy.</value></data>
+  <data name="SwitchEmptyVerb" xml:space="preserve"><value>Switch anyway</value></data>
   <data name="TitleSeriousError" xml:space="preserve"><value>Serious error</value></data>
   <data name="TitleOperationFailed" xml:space="preserve"><value>Operation failed</value></data>
   <data name="CannotOpenFolder" xml:space="preserve"><value>Can&apos;t open the folder: {0}</value></data>

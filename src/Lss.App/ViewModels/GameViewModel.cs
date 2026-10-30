@@ -506,20 +506,36 @@ public partial class GameViewModel : ObservableObject
         bool hadPrevious = Manager.HasActiveProfile && previous != profileName;
         string previousName = SaveManager.ProfileDisplayName(previous);
 
+        bool saved = false;
+
+        Result save = await RunBusyAsync(Loc.F(Strings.BusyLoading, name), () =>
+        {
+            if (!Manager.HasUnsavedProgress())
+                return Result.Ok("");
+
+            Result progress = Manager.SaveProgress();
+            saved = progress.Success;
+
+            return progress;
+        });
+
+        if (!save.Success)
+        {
+            // Cartella principale vuota ma la partita aveva salvataggi: lo decide l'utente, non si perde niente.
+            if (save.Message == Strings.GameSavesEmptyWouldClear)
+            {
+                if (!await dialogs.ConfirmAsync(Strings.SwitchEmptyHeading, Loc.F(Strings.SwitchEmptyText, previousName), Strings.SwitchEmptyVerb))
+                    return;
+            }
+            else
+            {
+                await ShowError(save with { Message = Loc.F(Strings.SwitchSaveFailed, previousName, save.Message) });
+                return;
+            }
+        }
+
         Result result = await RunBusyAsync(Loc.F(Strings.BusyLoading, name), () =>
         {
-            bool saved = false;
-
-            if (Manager.HasUnsavedProgress())
-            {
-                Result save = Manager.SaveProgress();
-
-                if (!save.Success)
-                    return save with { Message = Loc.F(Strings.SwitchSaveFailed, previousName, save.Message) };
-
-                saved = true;
-            }
-
             Result activation = Manager.ActivateProfile(profileName);
 
             if (!activation.Success)

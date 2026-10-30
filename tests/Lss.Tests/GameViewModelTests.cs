@@ -177,4 +177,50 @@ public sealed class GameViewModelTests : IDisposable
         Assert.Equal(TimeSpan.FromMinutes(10), manager.GetInfo("Profilo_Mario").PlayTime);
         Assert.Single(manager.GetBackupsOf("Profilo_Mario"), b => b.Kind == BackupKind.SaveOnExit);
     }
+
+    // Gioco con due posti: Anna ha salvataggi nel primo, il gioco ha il primo vuoto e il secondo cambiato.
+    private (SaveManager Manager, GameViewModel Vm) EmptyMainFolderCase()
+    {
+        string second = Path.Combine(folder.Root, "second");
+        var game = new GameInfo("steam", "123450", "Test", "", "", "",
+            [
+                new SaveSpot(1, folder.Game, "", true, folder.Game, SaveSource.Chosen),
+                new SaveSpot(2, second, "", true, second, SaveSource.Chosen),
+            ],
+            SupportState.Supported);
+        TestFolder.Write(Path.Combine(folder.Game, "slot.sav"), "anna");
+        TestFolder.Write(Path.Combine(second, "settings.ini"), "anna");
+        var manager = new SaveManager(folder.Game, folder.Data, "", game);
+        manager.AdoptGameSaves("Anna", TestFolder.Owner);
+        manager.CreateProfile("Bea", false, TestFolder.Owner);
+        File.Delete(Path.Combine(folder.Game, "slot.sav"));
+        TestFolder.Write(Path.Combine(second, "settings.ini"), "changed");
+        TestSetup.Fake.SteamRunning = false;
+
+        return (manager, new GameViewModel(manager, dialogs));
+    }
+
+    [Fact]
+    public async Task Switch_EmptyMainFolder_AsksAndSwitchesOnYes()
+    {
+        var (manager, vm) = EmptyMainFolderCase();
+        dialogs.ConfirmAnswer = true;
+
+        await vm.PlayAsync("Profilo_Bea", launch: false);
+
+        Assert.Contains("Confirm: " + Strings.SwitchEmptyHeading, dialogs.Calls);
+        Assert.Equal("Profilo_Bea", manager.State.ActiveProfile);
+    }
+
+    [Fact]
+    public async Task Switch_EmptyMainFolder_AsksAndChangesNothingOnNo()
+    {
+        var (manager, vm) = EmptyMainFolderCase();
+        dialogs.ConfirmAnswer = false;
+
+        await vm.PlayAsync("Profilo_Bea", launch: false);
+
+        Assert.Contains("Confirm: " + Strings.SwitchEmptyHeading, dialogs.Calls);
+        Assert.Equal("Profilo_Anna", manager.State.ActiveProfile);
+    }
 }

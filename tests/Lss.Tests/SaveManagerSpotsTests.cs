@@ -187,6 +187,37 @@ public sealed class SaveManagerSpotsTests : IDisposable
         Assert.Equal("first", File.ReadAllText(Path.Combine(ProfileFolder("Anna"), "slot.sav")));
     }
 
+    // Partita nuova e vuota: il gioco ha scritto solo le impostazioni (posto 2). Non si perde niente: si salva.
+    [Fact]
+    public void SavingIsAllowedWhenThePlaythroughHasNoMainFilesEither()
+    {
+        WriteGame("anna");
+        SaveManager manager = Manager();
+        Assert.True(manager.AdoptGameSaves("Anna", TestFolder.Owner).Success);
+        Assert.True(manager.CreateProfile("Bea", copyCurrentSaves: false, TestFolder.Owner).Success);
+        Assert.True(manager.ActivateProfile("Profilo_Bea").Success);
+
+        TestFolder.Write(Path.Combine(Game2, "settings.ini"), "bea");
+
+        Assert.True(manager.HasUnsavedProgress());
+        Result saved = manager.SaveProgress();
+
+        Assert.True(saved.Success, saved.Message);
+        Assert.Equal("bea", File.ReadAllText(Path.Combine(ProfileFolder("Bea"), ".lss-posizioni", "2", "settings.ini")));
+    }
+
+    [Fact]
+    public void SavingIsStillRefusedWhenThePlaythroughHasMainFilesAndTheGameHasNone()
+    {
+        WriteGame("first");
+        SaveManager manager = Manager();
+        Assert.True(manager.AdoptGameSaves("Anna", TestFolder.Owner).Success);
+
+        File.Delete(Path.Combine(Game1, "slot.sav"));
+
+        Assert.Equal(Strings.GameSavesEmptyWouldClear, manager.SaveProgress().Message);
+    }
+
     [Fact]
     public void AFullRoundKeepsEverySpot()
     {

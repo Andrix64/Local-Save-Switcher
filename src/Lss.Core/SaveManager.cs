@@ -975,14 +975,16 @@ public sealed partial class SaveManager
         if (IsGameRunning())
             return Result.Fail(Loc.F(Strings.CloseGameFirst, Game.Name));
 
+        string profile = Path.Combine(ProfilesPath, State.ActiveProfile);
+
         // Come nella 1.0: con la cartella principale vuota non si salva, anche se un
         // altro posto ha file (per esempio solo le impostazioni), per non svuotare la partita.
-        if (!allowEmptySaves && (GameSavesAreEmpty() || saves.PrimaryIsEmpty()))
+        // Se anche la partita ha il posto 1 vuoto non si perde niente: si salva.
+        if (!allowEmptySaves && (GameSavesAreEmpty() || saves.PrimaryIsEmpty()) && !saves.SnapshotPrimaryIsEmpty(profile))
         {
             return Result.Fail(Strings.GameSavesEmptyWouldClear);
         }
 
-        string profile = Path.Combine(ProfilesPath, State.ActiveProfile);
         // Il nome dice di quale profilo è il backup.
         string backup = NewBackupPath(SaveBackupPrefix + State.ActiveProfile);
 

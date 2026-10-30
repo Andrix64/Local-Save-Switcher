@@ -168,6 +168,27 @@ internal sealed class SaveSet
             : FileOps.MatchedFiles(primary.Folder, primary.Pattern, primary.Recursive).Count == 0;
     }
 
+    /// <summary>
+    /// true se il posto 1 dello snapshot non ha file di salvataggio (uno snapshot
+    /// senza il posto 1 conta come vuoto).
+    /// </summary>
+    public bool SnapshotPrimaryIsEmpty(string snapshot)
+    {
+        SaveSpot? primary = spots.FirstOrDefault(spot => spot.Id == 1);
+
+        if (primary is null)
+            return true;
+
+        string folder = SnapshotFolder(snapshot, primary);
+
+        if (!Directory.Exists(folder))
+            return true;
+
+        return primary.IsWholeFolder
+            ? FileOps.HasNoSaveFiles(folder)
+            : FileOps.MatchedFiles(folder, primary.Pattern, primary.Recursive).Count == 0;
+    }
+
     /// <summary>true se nessun posto del gioco ha file di salvataggio.</summary>
     public bool GameIsEmpty()
     {

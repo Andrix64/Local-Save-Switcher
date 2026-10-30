@@ -94,6 +94,10 @@ NON avviare il gioco. Il backup è in:
   <data name="GameRunning" xml:space="preserve"><value>{0} è in esecuzione: chiudilo per cambiare o salvare.</value></data>
   <data name="SwitchSaveFailed" xml:space="preserve"><value>Non è cambiato nulla: non siamo riusciti a salvare i progressi di «{0}».
 {1}</value></data>
+  <data name="SwitchEmptyHeading" xml:space="preserve"><value>Cambiare senza salvare?</value></data>
+  <data name="SwitchEmptyText" xml:space="preserve"><value>La cartella principale dei salvataggi del gioco è vuota, quindi i progressi di «{0}» non si possono salvare.
+«{0}» resta com&apos;era stata salvata l&apos;ultima volta e i file attuali del gioco vanno in una copia automatica.</value></data>
+  <data name="SwitchEmptyVerb" xml:space="preserve"><value>Cambia lo stesso</value></data>
   <data name="TitleSeriousError" xml:space="preserve"><value>Errore grave</value></data>
   <data name="TitleOperationFailed" xml:space="preserve"><value>Operazione non riuscita</value></data>
   <data name="CannotOpenFolder" xml:space="preserve"><value>Impossibile aprire la cartella: {0}</value></data>
