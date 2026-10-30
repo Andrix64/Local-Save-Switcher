@@ -52,7 +52,7 @@ public sealed class NewPlaythroughViewModelTests
         vm.Name = "  Peach  ";
 
         Assert.True(vm.CanCreate);
-        Assert.Equal(new NewPlaythroughResult("Peach", true, true), vm.CreateResult());
+        Assert.Equal(new NewPlaythroughResult("Peach", NewContent.Empty, true), vm.CreateResult());
     }
 
     [Fact]
@@ -76,12 +76,42 @@ public sealed class NewPlaythroughViewModelTests
     }
 
     [Fact]
-    public void EmptyProfile_IsTheOppositeOfCopy()
+    public void ANewPlaythroughStartsEmptyByDefault()
     {
         NewPlaythroughViewModel vm = New();
 
-        vm.EmptyProfile = true;
+        Assert.True(vm.EmptyProfile);
+        Assert.Equal(NewContent.Empty, vm.Content);
+    }
 
-        Assert.False(vm.CopyCurrentSaves);
+    [Fact]
+    public void CopyingNeedsAnExistingPlaythroughAndAName()
+    {
+        var vm = new NewPlaythroughViewModel(_ => false)
+        {
+            Sources = [new CopySource("Profilo_Luigi", "Luigi")],
+        };
+        vm.Name = "Peach";
+
+        vm.CopyOfOption = true;
+
+        Assert.Equal("Profilo_Luigi", vm.SelectedSource?.ProfileName);
+        Assert.True(vm.CanCreate);
+        Assert.Equal(new NewPlaythroughResult("Peach", NewContent.CopyOf, true, "", "Profilo_Luigi"), vm.CreateResult());
+    }
+
+    [Fact]
+    public void ImportingNeedsOnlyTheFile()
+    {
+        NewPlaythroughViewModel vm = New();
+
+        vm.ImportOption = true;
+        Assert.False(vm.CanCreate);
+
+        vm.ImportPath = "/salvataggi/luigi.zip";
+
+        Assert.True(vm.CanCreate);
+        Assert.False(vm.ShowName);
+        Assert.Equal("/salvataggi/luigi.zip", vm.CreateResult().ImportPath);
     }
 }

@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Lss.App.ViewModels"
+        xmlns:views="using:Lss.App.Views"
+        x:Class="Lss.App.Views.LssSettingsWindow"
+        x:DataType="vm:LssSettingsViewModel"
+        Title="{Binding Title}"
+        Width="520" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="24,16,24,20">
+
+    <!-- Modalità e ricerca dopo ogni partita -->
+    <Border Classes="panel" Margin="0,4,0,0">
+      <StackPanel>
+        <Grid Classes="row" ColumnDefinitions="*,Auto" IsVisible="{Binding HasMode}">
+          <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <TextBlock Classes="settingTitle" Text="{Binding ModeText}" />
+            <TextBlock Classes="settingHint" Text="{Binding ModeHint}" />
+          </StackPanel>
+          <views:ModeSwitch Grid.Column="1" DataContext="{Binding Mode}" Margin="16,0,0,0" />
+        </Grid>
+        <Border Classes="divider" IsVisible="{Binding HasMode}" />
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <TextBlock Classes="settingTitle" Text="{Binding LookAfterPlayingText}" />
+            <TextBlock Classes="settingHint" Text="{Binding LookAfterPlayingHint}" />
+          </StackPanel>
+          <ToggleSwitch Grid.Column="1" IsChecked="{Binding LookAfterPlaying, Mode=TwoWay}" />
+        </Grid>
+      </StackPanel>
+    </Border>
+
+    <!-- Giocatori -->
+    <TextBlock Classes="sectionLabel" Text="{Binding CaptionPlayers}" />
+    <Border Classes="panel" Padding="0">
+      <Button Classes="navrow" Command="{Binding OpenPlayersCommand}">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="settingTitle" Text="{Binding PlayersText}" VerticalAlignment="Center" />
+          <Path Grid.Column="1" Classes="chevron" Data="M9 6 L15 12 L9 18" />
+        </Grid>
+      </Button>
+    </Border>
+
+    <!-- Cartelle che non sono salvataggi -->
+    <TextBlock Classes="sectionLabel" Text="{Binding CaptionFolders}" />
+    <Border Classes="panel" Padding="0">
+      <Button Classes="navrow" Command="{Binding OpenIgnoredFoldersCommand}">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="settingTitle" Text="{Binding IgnoredFoldersText}" VerticalAlignment="Center" />
+          <Path Grid.Column="1" Classes="chevron" Data="M9 6 L15 12 L9 18" />
+        </Grid>
+      </Button>
+    </Border>
+
+    <!-- Cartella dei dati -->
+    <TextBlock Classes="sectionLabel" Text="{Binding CaptionData}" />
+    <Border Classes="panel">
+      <Grid Classes="row" ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0" Text="{Binding DataFolderText}" Classes="small" TextWrapping="Wrap"
+                   VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="secondary" Content="{Binding OpenFolderText}"
+                Command="{Binding OpenFolderCommand}" Margin="16,0,0,0" />
+      </Grid>
+    </Border>
+
+    <TextBlock Classes="settingHint" Text="{Binding AboutText}" Margin="4,12,0,0" />
+  </StackPanel>
+
+</Window>

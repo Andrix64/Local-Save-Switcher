@@ -10,7 +10,7 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <!-- Dati del prodotto: compaiono nelle proprietà dell'exe. Version è l'unica da cambiare a ogni rilascio. -->
-    <Version>1.0.0</Version>
+    <Version>2.0.0</Version>
     <Product>Local Save Switcher</Product>
     <AssemblyTitle>Local Save Switcher</AssemblyTitle>
     <Description>Più partite per i tuoi giochi PC.</Description>

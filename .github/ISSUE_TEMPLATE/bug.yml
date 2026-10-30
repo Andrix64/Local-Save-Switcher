@@ -40,7 +40,7 @@ body:
     id: lss-version
     attributes:
       label: LSS version
-      description: Shown in the window header, for example "v1.0.0".
+      description: Shown in the window header, for example "v2.0.0".
     validations:
       required: true
   - type: textarea

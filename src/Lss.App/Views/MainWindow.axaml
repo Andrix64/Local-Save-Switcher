@@ -3,35 +3,57 @@
         xmlns:loc="using:Lss.App.Localization"
         xmlns:vm="using:Lss.App.ViewModels"
         xmlns:views="using:Lss.App.Views"
+        xmlns:ctl="using:Lss.App.Controls"
         x:Class="Lss.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Local Save Switcher"
         Width="860" Height="720"
-        MinWidth="640" MinHeight="560"
+        MinWidth="720" MinHeight="560"
+        Classes="main free"
+        WindowDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
         WindowStartupLocation="CenterScreen">
 
-  <DockPanel>
+  <!-- Angoli leggermente stondati (a schermo intero o ingrandita il codice li azzera). -->
+  <Border x:Name="Frame" CornerRadius="20" ClipToBounds="True" Background="{StaticResource Background}"
+          BorderBrush="{StaticResource Border}" BorderThickness="2">
+  <Grid>
+
+  <!-- La modalità avanzata: intestazione, colonna dei giochi, il gioco -->
+  <DockPanel IsVisible="{Binding !IsSimple}">
 
     <!-- Intestazione -->
-    <Border DockPanel.Dock="Top" Height="68" Background="{StaticResource Header}" Padding="16,0">
-      <Grid ColumnDefinitions="Auto,*,Auto">
+    <Border x:Name="HeaderBar" Classes="topbar" DockPanel.Dock="Top" Height="68" Background="{StaticResource Header}" Padding="16,0,12,0"
+            PointerPressed="Header_PointerPressed">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
         <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="0,16,14,16"
                 Background="{StaticResource Accent}" />
         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
           <TextBlock Classes="title" Text="LSS" />
           <TextBlock Classes="caption" Text="{Binding HeaderCaption}" />
         </StackPanel>
-        <Button Grid.Column="2" Classes="secondary" Content="{loc:Str SettingsButton}"
-                Command="{Binding CurrentGame.SettingsCommand}" VerticalAlignment="Center" />
+        <!-- Impostazioni: subito dopo il nome dell'app -->
+        <Button Grid.Column="2" Classes="iconbtn" Margin="8,0,0,0" Command="{Binding OpenLssSettingsCommand}"
+                  ToolTip.Tip="{loc:Str SettingsButton}" AutomationProperties.Name="{loc:Str SettingsButton}">
+            <Path Width="22" Height="22" Data="{StaticResource GearIcon}" />
+          </Button>
+        <!-- Riduci, schermo intero, chiudi: a destra come da standard -->
+        <views:WindowButtons Grid.Column="4" />
       </Grid>
     </Border>
 
-    <!-- Colonna dei giochi (nascosta se c'è un solo gioco supportato) -->
-    <Border DockPanel.Dock="Left" Width="240" Background="{StaticResource Header}" Padding="12,16"
-            IsVisible="{Binding ShowSidebar}">
+    <!-- Colonna dei giochi (la lista si nasconde se c'è un solo gioco supportato; "Aggiungi un gioco" c'è sempre) -->
+    <Border x:Name="Sidebar" Classes="sidebarpane" DockPanel.Dock="Left" Width="240" Background="{StaticResource Header}" Padding="12,16">
       <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Classes="caption" Text="{loc:Str GamesCaption}" Margin="4,0,0,10" />
-
+        <!-- Aggiungi un gioco: sotto "Altri giochi" -->
+        <Button DockPanel.Dock="Bottom" Classes="addgame" Command="{Binding AddGameCommand}" Margin="0,8,0,0"
+                HorizontalAlignment="Stretch">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="+" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+            <TextBlock Text="{loc:Str AddGameButton}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
         <Expander DockPanel.Dock="Bottom" IsVisible="{Binding HasOtherGames}" Margin="0,12,0,0"
                   IsExpanded="{Binding OtherGamesExpanded, Mode=OneTime}"
                   HorizontalAlignment="Stretch">
@@ -40,35 +62,64 @@
           </Expander.Header>
           <!-- Possono essere tanti (per esempio tutti i giochi Proton di uno Steam Deck): si scorrono. -->
           <ScrollViewer MaxHeight="420" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{Binding OtherGames}">
-              <ItemsControl.ItemTemplate>
+            <ItemsControl ItemsSource="{Binding OtherRows}">
+              <ItemsControl.DataTemplates>
+                <DataTemplate x:DataType="vm:SidebarHeader">
+                  <TextBlock Classes="sidebarHeader" Text="{Binding Text}" />
+                </DataTemplate>
                 <DataTemplate x:DataType="vm:GameItemViewModel">
                   <StackPanel Margin="0,4,0,8" Spacing="2">
-                    <TextBlock Text="{Binding Name}" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <Image Source="{Binding Icon}" Width="26" Height="26" IsVisible="{Binding HasIcon}" />
+                      <Border Width="26" Height="26" CornerRadius="6" Background="{StaticResource SurfaceSelected}"
+                              IsVisible="{Binding !HasIcon}">
+                        <TextBlock Text="{Binding Initial}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   FontWeight="Bold" />
+                      </Border>
+                      <ctl:MarqueeText Text="{Binding Name}" Foreground="{StaticResource TextMuted}" FontSize="13"
+                                       Width="160" VerticalAlignment="Center" />
+                    </StackPanel>
                     <TextBlock Classes="small" Text="{Binding SupportText}" TextWrapping="Wrap" />
+                    <Button Classes="secondary" Content="{loc:Str FindSaveFolder}" Command="{Binding FindFolderCommand}"
+                            HorizontalAlignment="Stretch" Margin="0,4,0,0" />
+                    <Button Classes="secondary" Content="{loc:Str ChooseSaveFolder}" Command="{Binding ChooseFolderCommand}"
+                            HorizontalAlignment="Stretch" />
                   </StackPanel>
                 </DataTemplate>
-              </ItemsControl.ItemTemplate>
+              </ItemsControl.DataTemplates>
             </ItemsControl>
+
           </ScrollViewer>
         </Expander>
 
-        <ListBox ItemsSource="{Binding Games}" SelectedItem="{Binding SelectedGame}"
+        <ListBox x:Name="GamesList" ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}" IsVisible="{Binding ShowSidebar}"
                  Background="Transparent" BorderThickness="0">
-          <ListBox.ItemTemplate>
+          <ListBox.DataTemplates>
+            <DataTemplate x:DataType="vm:SidebarHeader">
+              <TextBlock Classes="sidebarHeader" Text="{Binding Text}" />
+            </DataTemplate>
             <DataTemplate x:DataType="vm:GameItemViewModel">
-              <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
-                <Image Source="{Binding Icon}" Width="32" Height="32" IsVisible="{Binding HasIcon}" />
-                <Border Width="32" Height="32" CornerRadius="6" Background="{StaticResource SurfaceSelected}"
-                        IsVisible="{Binding !HasIcon}">
+              <StackPanel Orientation="Horizontal" Spacing="10" Height="40">
+                <Image Source="{Binding Icon}" Width="26" Height="26" IsVisible="{Binding HasIcon}" />
+                <Border Width="26" Height="26" CornerRadius="6" Background="{StaticResource SurfaceSelected}"
+                        IsVisible="{Binding !HasIcon}" VerticalAlignment="Center">
                   <TextBlock Text="{Binding Initial}" HorizontalAlignment="Center" VerticalAlignment="Center"
                              FontWeight="Bold" />
                 </Border>
-                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <ctl:MarqueeText Text="{Binding Name}" Foreground="{StaticResource Text}" FontSize="13"
+                                 Width="150" VerticalAlignment="Center">
+                  <ctl:MarqueeText.IsActive>
+                    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                      <Binding Path="$parent[ListBoxItem].IsSelected" />
+                      <Binding Path="$parent[ListBoxItem].IsPointerOver" />
+                    </MultiBinding>
+                  </ctl:MarqueeText.IsActive>
+                </ctl:MarqueeText>
               </StackPanel>
             </DataTemplate>
-          </ListBox.ItemTemplate>
+          </ListBox.DataTemplates>
         </ListBox>
+
       </DockPanel>
     </Border>
 
@@ -87,5 +138,34 @@
     </Grid>
 
   </DockPanel>
+
+  <!-- La modalità semplice: al posto di tutto il resto -->
+  <ContentControl Content="{Binding Simple}" IsVisible="{Binding IsSimple}">
+    <ContentControl.DataTemplates>
+      <DataTemplate x:DataType="vm:SimpleViewModel">
+        <views:SimpleView />
+      </DataTemplate>
+    </ContentControl.DataTemplates>
+  </ContentControl>
+
+  <!-- Senza cornice di sistema i bordi sottili ridimensionano la finestra. -->
+  <Grid x:Name="ResizeGrips" IsVisible="{Binding FullScreen.IsWindowed}">
+    <Grid.Styles>
+      <Style Selector="Border.grip">
+        <Setter Property="Background" Value="Transparent" />
+      </Style>
+    </Grid.Styles>
+    <Border Classes="grip" Tag="North" Height="5" VerticalAlignment="Top" Margin="8,0" Cursor="SizeNorthSouth" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="South" Height="5" VerticalAlignment="Bottom" Margin="8,0" Cursor="SizeNorthSouth" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="West" Width="5" HorizontalAlignment="Left" Margin="0,8" Cursor="SizeWestEast" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="East" Width="5" HorizontalAlignment="Right" Margin="0,8" Cursor="SizeWestEast" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="NorthWest" Width="8" Height="8" HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="TopLeftCorner" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="NorthEast" Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Top" Cursor="TopRightCorner" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="SouthWest" Width="8" Height="8" HorizontalAlignment="Left" VerticalAlignment="Bottom" Cursor="BottomLeftCorner" PointerPressed="Grip_PointerPressed" />
+    <Border Classes="grip" Tag="SouthEast" Width="8" Height="8" HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="BottomRightCorner" PointerPressed="Grip_PointerPressed" />
+  </Grid>
+
+  </Grid>
+  </Border>
 
 </Window>

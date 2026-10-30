@@ -10,9 +10,10 @@
   </developer>
   <description>
     <p>Keep several playthroughs of the same PC game: pick the one you want,
-    LSS loads its saves and starts the game. Today it works with Steam games
-    that keep their saves in Steam's userdata folder; other launchers are
-    planned.</p>
+    LSS loads its saves and starts the game. It works with Steam, Epic Games,
+    GOG and Heroic games, and with any game you add by hand; it finds where
+    each game keeps its saves. A simple mode with one tile per game is made
+    for families and the Steam Deck.</p>
     <p>Steam is a trademark of Valve Corporation. LSS is not affiliated with
     or endorsed by Valve.</p>
   </description>
@@ -21,6 +22,7 @@
   <url type="bugtracker">https://github.com/Andrix64/Local-Save-Switcher/issues</url>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="2.0.0" date="2026-10-30" />
     <release version="1.0.0" date="2026-10-25" />
   </releases>
 </component>

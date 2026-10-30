@@ -29,9 +29,40 @@ what to write, how to check it and what to commit.
 | `N-several-folders.md` | Phase N — games with saves in several folders or loose files; a look after every session for folders not detected yet. |
 | `O-launchers.md` | Phase O — Epic, GOG, Heroic, non-Steam shortcuts, any game added by hand. |
 | `P-simple-mode.md` | Phase P — players and favourites; simple mode (pick who's playing, click a game) and advanced mode grouped by player. |
+| `R-fixes.md` | Phase R — fixes after the first try of 2.0 (done by Sonnet 5.5, **before** Q). |
 | `Q-release.md` | Phase Q — docs and release of 2.0, and what comes later. |
 
 Phases A (rename) and B (Avalonia test, `spike/`) are already done.
+
+## Starting a session (any Claude account)
+
+Everything needed is in the repository: this folder (`docs/plan/`), the
+design boards (`docs/design/`, see its README) and `docs/DEVELOPMENT.md`.
+Nothing depends on a previous conversation.
+
+- **Where.** The repository is `H:\Projects\Control Savegame Switcher` on
+  Andrix's PC (GitHub: `Andrix64/Local-Save-Switcher`). Work on the branch
+  `v2`. On Andrix's PC it may be checked out in a git worktree: run
+  `git worktree list` and work in the folder that shows `[v2]` (git refuses
+  to check out `v2` in a second folder while that one exists). On another
+  PC: clone, `git checkout v2`; check that `git log -1` matches the last
+  commit in `PROGRESS.md`, and stop and ask Andrix if it doesn't (the
+  GitHub copy can be older: Andrix pushes it, agents never do).
+- **Check first.** `git status` clean, `git log -1` matches the last commit
+  named in `PROGRESS.md`, then build and test (rule 3) before changing
+  anything. If the tests already fail, stop and write it in the Notes.
+- **Prompt to start a phase R session** (paste it as the first message):
+
+  > Work in the LSS repository, branch `v2` (the folder `git worktree
+  > list` shows with `[v2]`). Read `docs/plan/README.md` first, then
+  > `docs/plan/PROGRESS.md` and `docs/plan/R-fixes.md`. Do the first task of
+  > phase R that is not ticked, exactly as written, following every rule of
+  > the README: build and tests green, commit on `v2` with the trailer of
+  > phase R, tick it in `PROGRESS.md`, never push. If something doesn't
+  > match the plan, stop and write it in the Notes of `PROGRESS.md`. When
+  > the task is committed, stop and tell me what you did.
+
+  One task per session keeps each session small; Andrix starts the next one.
 
 ## How to work (rules for the agent)
 
@@ -42,6 +73,10 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
    merged into `main` and closed. For new work, create a branch from
    `main` named after it (for example `beta-2` or `fix-history-scroll`)
    unless the session brief names one. Never commit on `main`.
+   **The 2.0 plan (phases K–Q) is done on the branch `v2`**, created from
+   `main` after 1.0.0: every task of K–Q is committed on `v2` (the branch
+   names in the phase files are not used). `v2` goes into `main` only when
+   Andrix decides 2.0 ships.
    **Never push**, never create tags, never create releases: Andrix does
    that.
 3. **Before every commit** run, from the repository root:
@@ -64,6 +99,9 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
    Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
    ```
 
+   Phase R is done by Claude Sonnet 5.5: its tasks use
+   `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
+
 5. **Then tick the task** in `PROGRESS.md` (`- [ ]` → `- [x]`) and add the
    short commit hash, in a separate commit `Progress: <task id>`, or in the
    same commit if you prefer: be consistent.
@@ -77,11 +115,14 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 8. **Never touch the real Steam folder or the real app data.** Tests work
    only in temporary folders (see `TestFolder`). Don't run the app against
    real saves unless a 👤 task says so.
-   **Linux checks:** if the brief of your session gives you an SSH host
-   for Linux checks, run `bash scripts/linux-check.sh <host>` after every
-   task that touches Linux code, packaging or tests (`--tests-only` when
-   packaging didn't change). It only uses temporary containers on that
-   machine; never run anything else there.
+   **Linux checks:** run `bash scripts/linux-check.sh lss-ci@192.168.1.3`
+   after every task that touches Linux code, packaging or tests (add
+   `--tests-only` **after** the host when packaging didn't change). That
+   host is a machine on Andrix's network: SSH with the key already set up
+   on Andrix's PC, Docker only, no root. Use it **only** through that
+   script (temporary containers); never run anything else there. If it
+   can't be reached (another PC, the machine is off), write it in the task's
+   note in `PROGRESS.md` and go on: Andrix runs the check later.
 9. **Keep the existing style.** Read the file before editing it and write
    code like the code around it.
 
@@ -97,6 +138,8 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
 - **Names on disk stay Italian**: `Profili`, `Info`, `Backup`, `Savestate`,
   `stato.ini`, `Profilo_<name>`, `Prima_di_...`, `.nuovo`, `.vecchio`,
   `.rinomina`, `partita.ini`, `salvataggi`, `punti`. Don't rename them.
+  Exception, phase R (R9–R10): the settings files become JSON with the same
+  Italian base name (`stato.ini` → `stato.json`...); `cambio.ini` stays.
 - **Documentation for GitHub (README, docs/, CHANGELOG, workflow comments)
   in English.**
 - `Nullable` enabled, file-scoped namespaces (`namespace Lss;`), one public
@@ -114,6 +157,13 @@ Phases A (rename) and B (Avalonia test, `spike/`) are already done.
   deleted later with the checklist in `docs/DEVELOPMENT.md`
   ("Compatibility with Control Save Manager"). If a task needs more of it,
   add it there and add a line to that checklist.
+- **Compatibility with LSS 1.0 only in `V1Compat`** (from task R0). Code
+  that exists only to read, convert or tolerate data written by LSS 1.0.x
+  or by builds before phase R goes in `src/Lss.Core/V1Compat.cs` (tests in
+  `V1CompatTests.cs`); every call to it is marked `// V1Compat: <why>`.
+  `V1CompatBoundaryTests` fails if an old file name appears elsewhere.
+  Removal checklist in `docs/DEVELOPMENT.md` ("Compatibility with LSS
+  1.0").
 - No new NuGet packages except those named in a task, with the exact
   version given.
 
@@ -157,6 +207,7 @@ Order of the phases, each needs the ones before:
 | N | Several save folders per game, scan after every session | changes how a playthrough is stored: before the launchers and the simple mode build on it |
 | O | Epic, GOG, Heroic, any game | they rely on L, M and N for their saves |
 | P | Players, favourites, simple mode | needs games of every launcher with known saves |
+| R | Fixes after the first try (1.0 compatibility in one file, PIN for everyone, settings split, JSON files, sidebar...) | found by Andrix trying P; runs before Q |
 | Q | Docs and 2.0 release | |
 
 The Steam Deck works after L (games with Steam Auto-Cloud rules) and M
@@ -180,7 +231,7 @@ are listed under *Other games*). This plan is **2.0**. Phase K starts from
 | Versions | `1.0.0-beta.N` for tests, then `1.0.0`. |
 | Supported games | Until phase L: games with files in `userdata/<AccountID>/<AppID>/` other than `remotecache.vdf` at the top level; others are shown as not supported. From phase L: any game whose save folder passes `SaveFolderSafety` (found in `userdata`, from the launcher's rules, learned from the disk or chosen by hand). From phase N: up to 8 save spots per game (folders or loose files), switched together. |
 | Save locations | Only from the launchers' own data on the PC (Steam `appinfo.vdf` Auto-Cloud rules, Epic `CloudSaveFolder`, Heroic `gogSaves`), then the search on the disk. **No Ludusavi manifest or other third-party list** (decision of 2026-10-24). No network access from the app. |
-| Players and modes | Every playthrough has a player (owner); one favourite per player and game. Players are users or admins (at least one admin; optional 4-digit PIN for admins). Simple mode (player → game cover, always the favourite, "My games" menu to switch) and advanced mode (today's app, playthroughs grouped by player), phase P. Existing users start in advanced; their playthroughs go to a first player named after the OS user. |
+| Players and modes | Every playthrough has a player (owner); one favourite per player and game. Players are users or admins (at least one admin; optional 4-digit PIN for every player, from R3). Simple mode (player → game cover, always the favourite, "My games" menu to switch) and advanced mode (today's app, playthroughs grouped by player), phase P. Existing users start in advanced; their playthroughs go to a first player named after the OS user. |
 | Systems | Windows 10/11 x64; Linux x64 (Ubuntu 22.04+, Debian 12+, Fedora 40+, openSUSE, Arch and derivatives, SteamOS desktop mode). |
 | UI | Avalonia **12.1.4**, CommunityToolkit.Mvvm **8.4.2**, MVVM, compiled bindings. |
 | Data folder | `Environment.SpecialFolder.LocalApplicationData` + `LSS` (Windows `%LOCALAPPDATA%\LSS`, Linux `~/.local/share/LSS`). Until phase F it stays `ControlSaveManager`. |

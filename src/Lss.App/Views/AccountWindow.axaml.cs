@@ -13,20 +13,19 @@ public partial class AccountWindow : Window
 {
     public AccountWindow() => InitializeComponent();
 
-    public AccountWindow(IReadOnlyList<SteamAccount> accounts, string? lastId) : this()
+    public AccountWindow(IReadOnlyList<GameAccount> accounts, string? lastId, string launcher = "") : this()
     {
-        DataContext = new AccountViewModel(accounts, lastId);
+        DataContext = new AccountViewModel(accounts, lastId, launcher);
     }
 
     private AccountViewModel ViewModel => (AccountViewModel)DataContext!;
 
-    public SteamAccount? Chosen { get; private set; }
+    public GameAccount? Chosen { get; private set; }
 
     private void Use_Click(object? sender, RoutedEventArgs e) => Use();
 
     private void List_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e) => Use();
 
-    private void Exit_Click(object? sender, RoutedEventArgs e) => Close();
 
     private void Use()
     {

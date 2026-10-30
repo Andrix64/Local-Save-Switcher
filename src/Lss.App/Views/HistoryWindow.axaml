@@ -4,7 +4,7 @@
         xmlns:vm="using:Lss.App.ViewModels"
         x:Class="Lss.App.Views.HistoryWindow"
         x:DataType="vm:HistoryViewModel"
-        Title="{Binding Title}"
+        Title="{Binding Heading}"
         Width="680" SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
@@ -31,7 +31,6 @@
 
   <StackPanel Margin="24,20,24,16">
 
-    <TextBlock Classes="heading" Text="{Binding Heading}" Margin="0,0,0,4" />
     <TextBlock Text="{Binding Intro}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap"
                MaxWidth="620" Margin="0,0,0,16" HorizontalAlignment="Left" />
 
@@ -137,8 +136,6 @@
       <TextBlock Grid.Column="1" Text="{Binding Status}" Classes="small" TextWrapping="Wrap"
                  Classes.ok="{Binding StatusIsSuccess}" Classes.bad="{Binding StatusIsError}"
                  Margin="10,0,10,0" VerticalAlignment="Center" />
-      <Button Grid.Column="2" Classes="secondary" Content="{Binding CloseText}" IsCancel="True"
-              MinWidth="100" Click="Close_Click" />
     </Grid>
 
   </StackPanel>

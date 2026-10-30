@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Gioco con il cloud attivo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; align-items: center; justify-content: center; gap: 40px">
+  <div role="dialog" aria-labelledby="blocked-title" style="width: 560px; box-sizing: border-box; padding: 36px; border-radius: 20px; background: #19191B; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; gap: 18px; align-items: center">
+      <div style="width: 56px; height: 84px; flex: none; border-radius: 8px; background: #2B3A3A"></div>
+      <h1 id="blocked-title" style="margin: 0; font-size: 26px; font-weight: 800; line-height: 1.2">Alan Wake 2 ha bisogno di un admin</h1>
+    </div>
+    <p style="margin: 0; font-size: 18px; line-height: 1.5; color: #D6D6DA">Alan Wake 2 tiene una copia dei salvataggi online, e potrebbe riportare la partita di un altro. Chiedi a un admin (Andrea o Mamma) di spegnere i salvataggi nel cloud o di consentire questo gioco.</p>
+    <div style="display: flex; gap: 12px; justify-content: flex-end">
+      <button style="height: 52px; padding: 0 22px; border-radius: 12px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 17px; font-weight: 600">Indietro</button>
+      <button style="height: 52px; padding: 0 22px; border-radius: 12px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700">C'è un admin</button>
+    </div>  </div>
+  <div role="dialog" aria-labelledby="admin-title" style="width: 520px; box-sizing: border-box; padding: 36px; border-radius: 20px; background: #19191B; border: 1px solid #5C4515; display: flex; flex-direction: column; gap: 20px">
+    <h2 id="admin-title" style="margin: 0; font-size: 24px; font-weight: 800">Salvataggi nel cloud attivi</h2>
+    <p style="margin: 0; font-size: 17px; line-height: 1.5; color: #D6D6DA">Per Alan Wake 2 i salvataggi nel cloud sono attivi: il launcher potrebbe riportare i salvataggi di un altro giocatore. Spegnerli è più sicuro.</p>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <button style="height: 52px; border-radius: 12px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700">Consenti questo gioco</button>
+      <button style="height: 52px; border-radius: 12px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 17px; font-weight: 600">Gioca solo questa volta</button>
+      <button style="height: 44px; border-radius: 12px; border: 0; background: transparent; color: #A8A8AE; font-family: inherit; font-size: 16px; font-weight: 600">Annulla</button>
+    </div>  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@ namespace Lss.App.ViewModels;
 /// <summary>Un account nella lista: nome e ultimo salvataggio.</summary>
 public sealed class AccountItemViewModel
 {
-    public AccountItemViewModel(SteamAccount account)
+    public AccountItemViewModel(GameAccount account)
     {
         Account = account;
         Name = account.DisplayName;
@@ -18,7 +18,7 @@ public sealed class AccountItemViewModel
         Details = $"ID {account.Id}  ·  {saved}";
     }
 
-    public SteamAccount Account { get; }
+    public GameAccount Account { get; }
 
     public string Name { get; }
 
@@ -31,18 +31,23 @@ public sealed class AccountItemViewModel
 /// </summary>
 public partial class AccountViewModel : ObservableObject
 {
-    public AccountViewModel(IReadOnlyList<SteamAccount> accounts, string? lastId)
+    /// <param name="launcher">Nome del launcher degli account, nei testi.</param>
+    private readonly string launcher;
+
+    public AccountViewModel(IReadOnlyList<GameAccount> accounts, string? lastId, string launcher = "")
     {
-        foreach (SteamAccount account in accounts)
+        this.launcher = launcher;
+
+        foreach (GameAccount account in accounts)
             Accounts.Add(new AccountItemViewModel(account));
 
         // Preseleziona l'ultimo account usato, altrimenti il primo.
-        SelectedAccount = Accounts.FirstOrDefault(a => a.Account.Id == lastId) ?? Accounts.FirstOrDefault();
+        SelectedAccount = Accounts.FirstOrDefault(a => AppSettings.Refers(lastId ?? "", a.Account.Provider, a.Account.Id)) ?? Accounts.FirstOrDefault();
     }
 
-    public string Intro => Strings.AccountIntroAny;
+    public string Intro => Loc.F(Strings.AccountIntroAny, launcher);
 
-    public string CaptionText => Strings.CaptionSteamAccount;
+    public string CaptionText => Loc.F(Strings.CaptionLauncherAccount, launcher.ToUpperInvariant());
 
     public string UseText => Strings.UseThisAccount;
 
@@ -54,7 +59,7 @@ public partial class AccountViewModel : ObservableObject
     private AccountItemViewModel? selectedAccount;
 
     /// <summary>L'account scelto, o null se l'utente esce.</summary>
-    public SteamAccount? Chosen { get; private set; }
+    public GameAccount? Chosen { get; private set; }
 
     public bool CanUse => SelectedAccount != null;
 

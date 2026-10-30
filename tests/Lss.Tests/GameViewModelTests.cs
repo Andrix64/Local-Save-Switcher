@@ -22,11 +22,26 @@ public sealed class GameViewModelTests : IDisposable
     private SaveManager TwoPlaythroughs()
     {
         SaveManager manager = folder.CreateManager("L");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         TestFolder.Write(folder.SaveFile, "M");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         return manager;
+    }
+
+    // Outer Wilds sul Deck: il primo posto è *.owprofile nella cartella, e la riga lo deve dire.
+    [Fact]
+    public void SaveFolderLineShowsThePatternOfTheFirstSpot()
+    {
+        TestFolder.Write(Path.Combine(folder.Game, "a.owprofile"), "x");
+        var game = new GameInfo("steam", "753640", "Outer Wilds", "", "", "",
+            [new SaveSpot(1, folder.Game, "*.owprofile", false, folder.Game, SaveSource.Launcher)],
+            SupportState.Supported, Source: SaveSource.Launcher);
+
+        var vm = new GameViewModel(new SaveManager(folder.Game, folder.Data, "", game), dialogs);
+
+        Assert.Contains("*.owprofile", vm.SaveFolderText);
+        Assert.Contains(folder.Game, vm.SaveFolderText);
     }
 
     [Fact]
@@ -69,19 +84,65 @@ public sealed class GameViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task Import_UsesPickedZip()
+    public async Task AnAddedSpotIsListedAndCanBeRemoved()
+    {
+        string extra = Path.Combine(folder.Root, "extra");
+        TestFolder.Write(Path.Combine(extra, "a.sav"), "x");
+
+        var stored = new GameSpots(folder.Data);
+        stored.Load();
+        stored.Add(extra, "*.sav", extra, SaveSource.Chosen, recursive: false);
+        stored.Save();
+
+        var game = new GameInfo("steam", "123450", "Test", "", "", "",
+            [
+                new SaveSpot(1, folder.Game, "", true, folder.Game, SaveSource.Chosen),
+                new SaveSpot(2, extra, "*.sav", false, extra, SaveSource.Chosen),
+            ],
+            SupportState.Supported);
+        var vm = new GameViewModel(new SaveManager(folder.Game, folder.Data, "", game), dialogs);
+
+        SpotLine line = Assert.Single(vm.SpotLines);
+        Assert.True(line.Removable);
+        Assert.Contains("*.sav", line.Text);
+
+        dialogs.ConfirmAnswer = true;
+        await line.RemoveCommand!.ExecuteAsync(null);
+
+        Assert.Empty(vm.SpotLines);
+        var after = new GameSpots(folder.Data);
+        after.Load();
+        Assert.DoesNotContain(after.Spots, spot => spot.Id == 2);
+    }
+
+    [Fact]
+    public async Task AnImportedSpotInAGameWithPlaythroughsAsksCopyOrEmpty()
     {
         SaveManager manager = TwoPlaythroughs();
-        string zip = Path.Combine(folder.Root, "luigi.zip");
-        Assert.True(manager.ExportProfile("Profilo_Luigi", zip).Success);
-
-        dialogs.ZipToOpen = zip;
+        string extra = Path.Combine(folder.Root, "extra");
+        TestFolder.Write(Path.Combine(extra, "a.sav"), "x");
         var vm = new GameViewModel(manager, dialogs);
-        vm.Refresh();
+        dialogs.ConfirmAnswer = true;
 
-        await vm.ImportAsync();
+        bool added = await vm.AddSpotWithChoiceAsync(new SaveSpot(0, extra, "", true, manager.PortableFolder(extra), SaveSource.Imported));
 
-        Assert.Contains("Open", dialogs.Calls);
-        Assert.Equal(3, vm.Playthroughs.Count);
+        Assert.True(added);
+        Assert.Contains("Confirm: " + Strings.AddSpot, dialogs.Calls);
+        Assert.Contains(vm.Manager.Game.Spots, spot => spot.Folder == extra && spot.Source == SaveSource.Imported);
+    }
+
+    [Fact]
+    public async Task AnImportedSpotRefusedInTheChoiceIsNotAdded()
+    {
+        SaveManager manager = TwoPlaythroughs();
+        string extra = Path.Combine(folder.Root, "extra");
+        TestFolder.Write(Path.Combine(extra, "a.sav"), "x");
+        var vm = new GameViewModel(manager, dialogs);
+        dialogs.ConfirmAnswer = false;
+
+        bool added = await vm.AddSpotWithChoiceAsync(new SaveSpot(0, extra, "", true, manager.PortableFolder(extra), SaveSource.Imported));
+
+        Assert.False(added);
+        Assert.DoesNotContain(vm.Manager.Game.Spots, spot => spot.Folder == extra);
     }
 }

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Cartelle che non sono salvataggi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center">
+  <div role="dialog" aria-labelledby="ig-title" style="width: 720px; box-sizing: border-box; padding: 24px 28px; border-radius: 12px; background: #0F0F10; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 14px">
+    <h1 id="ig-title" style="margin: 0; font-size: 19px; font-weight: 700">Cartelle che non sono salvataggi</h1>
+    <p style="margin: 0; color: #A8A8AE; line-height: 1.5">LSS non propone più queste cartelle. Se una ti serve di nuovo, toglila dall'elenco.</p>
+    <div style="display: flex; flex-direction: column; border-radius: 8px; border: 1px solid #2E2E33; overflow: hidden">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid {{r.line}}">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #D6D6DA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.path}}</span>
+            <span style="font-size: 12px; color: #96969C">{{r.scope}} · {{r.date}}</span>
+          </div>
+          <button style="height: 30px; padding: 0 12px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600; flex: none">Proponila di nuovo</button>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; justify-content: flex-end">
+      <button style="height: 34px; padding: 0 18px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 700">Chiudi</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const r = (path, scope, date, first) => ({ path, scope, date, line: first ? 'transparent' : '#2E2E33' });
+    return {
+      rows: [
+        r('{WinAppDataLocal}/dxvk', 'tutti i giochi', '25/10/2026', true),
+        r('{WinAppDataLocal}/Discord/Cache', 'tutti i giochi', '25/10/2026', false),
+        r('C:\\Users\\andrea\\Documents\\My Games\\Hollow Knight\\Screenshots', 'solo Hollow Knight', '24/10/2026', false),
+        r('C:\\Users\\andrea\\AppData\\Local\\Mobius Digital\\Logs', 'solo Outer Wilds', '24/10/2026', false)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

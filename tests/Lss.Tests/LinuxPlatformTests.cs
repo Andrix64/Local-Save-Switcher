@@ -150,6 +150,104 @@ public sealed class LinuxPlatformTests : IDisposable
     }
 
     /// <summary>registry.vdf con il gioco 105600 e un RunningAppID dato.</summary>
+    [Fact]
+    public void CmdlineMatchesLinuxPath()
+    {
+        byte[] cmdline = Encoding.UTF8.GetBytes("wine\0/home/a/Games/Control/Control.exe\0-nointro\0");
+
+        Assert.True(LinuxPlatform.CmdlineMatches(cmdline, "/home/a/Games/Control"));
+    }
+
+    [Fact]
+    public void CmdlineMatchesWineWindowsPath()
+    {
+        byte[] cmdline = Encoding.UTF8.GetBytes("wine\0Z:\\home\\a\\Games\\Control\\Control.exe\0");
+
+        Assert.True(LinuxPlatform.CmdlineMatches(cmdline, "/home/a/Games/Control"));
+    }
+
+    [Fact]
+    public void CmdlineDoesNotMatchAnotherFolder()
+    {
+        // "Control" non deve trovare "Control Ultimate": manca il "/" dopo il nome.
+        byte[] cmdline = Encoding.UTF8.GetBytes("wine\0Z:\\home\\a\\Games\\Control Ultimate\\Control.exe\0");
+
+        Assert.False(LinuxPlatform.CmdlineMatches(cmdline, "/home/a/Games/Control"));
+        Assert.False(LinuxPlatform.CmdlineMatches(cmdline, ""));
+    }
+
+    [Fact]
+    public void FindProcessesUnderEmptyFolderFindsNothing()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        Assert.Empty(new LinuxPlatform().FindProcessesUnder(folder.Root));
+        Assert.Empty(new LinuxPlatform().FindProcessesUnder(""));
+    }
+
+    [Fact]
+    public void RegistryIsNullOnLinux()
+    {
+        if (!OperatingSystem.IsLinux()) return;
+
+        var platform = new LinuxPlatform();
+
+        Assert.Null(platform.ReadRegistryString(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "SteamPath"));
+        Assert.Empty(platform.RegistrySubKeys(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve"));
+    }
+
+    [Fact]
+    public void KnownFoldersDefaultXdgWithoutVariables()
+    {
+        string home = Path.Combine(folder.Root, "home");
+
+        KnownFolders folders = LinuxPlatform.KnownFoldersFor(home, null, null, "andrix");
+
+        Assert.Equal(home, folders.Home);
+        Assert.Equal(Path.Combine(home, ".local", "share"), folders.XdgData);
+        Assert.Equal(Path.Combine(home, ".config"), folders.XdgConfig);
+        Assert.Equal("andrix", folders.UserName);
+        Assert.Equal("", folders.Documents);
+        Assert.Equal("", folders.AppData);
+    }
+
+    [Fact]
+    public void KnownFoldersUseAbsoluteXdgVariables()
+    {
+        string home = Path.Combine(folder.Root, "home");
+        string data = Path.Combine(folder.Root, "dati");
+        string config = Path.Combine(folder.Root, "config");
+
+        KnownFolders folders = LinuxPlatform.KnownFoldersFor(home, data, config, "andrix");
+
+        Assert.Equal(data, folders.XdgData);
+        Assert.Equal(config, folders.XdgConfig);
+    }
+
+    [Fact]
+    public void KnownFoldersIgnoreRelativeAndEmptyXdgVariables()
+    {
+        string home = Path.Combine(folder.Root, "home");
+
+        KnownFolders folders = LinuxPlatform.KnownFoldersFor(home, "dati/lss", "", "andrix");
+
+        Assert.Equal(Path.Combine(home, ".local", "share"), folders.XdgData);
+        Assert.Equal(Path.Combine(home, ".config"), folders.XdgConfig);
+    }
+
+    [Fact]
+    public void DocumentsOnlyWhenTheFolderExists()
+    {
+        string home = Path.Combine(folder.Root, "home");
+        Directory.CreateDirectory(home);
+
+        Assert.Equal("", LinuxPlatform.KnownFoldersFor(home, null, null, "andrix").Documents);
+
+        Directory.CreateDirectory(Path.Combine(home, "Documents"));
+
+        Assert.Equal(Path.Combine(home, "Documents"), LinuxPlatform.KnownFoldersFor(home, null, null, "andrix").Documents);
+    }
+
     private static string Registry(string runningAppId, string running) => $$"""
         "Registry"
         {

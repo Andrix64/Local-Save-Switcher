@@ -237,4 +237,47 @@ public sealed class SteamLibraryTests : IDisposable
 
         Assert.Empty(SteamLibrary.FindGames(SteamRoot, account));
     }
+
+    [Fact]
+    public void FindGames_InstalledGameWithoutUserdataIsListedAsNoSaves()
+    {
+        string account = Path.Combine(SteamRoot, "userdata", "111");
+        Directory.CreateDirectory(account);
+        TestFolder.Write(Path.Combine(SteamRoot, "steamapps", "appmanifest_1085660.acf"), Manifest("1085660", "Destiny 2", "Destiny 2"));
+
+        var games = SteamLibrary.FindGames(SteamRoot, account);
+
+        GameInfo game = Assert.Single(games);
+        Assert.Equal("Destiny 2", game.Name);
+        Assert.Equal(SupportState.NoSaves, game.Support);
+        Assert.Equal(SaveSource.None, game.Source);
+        Assert.Equal("", game.SaveFolder);
+        Assert.True(game.IsInstalled);
+    }
+
+    [Fact]
+    public void FindGames_GameWithUserdataAndManifestIsListedOnce()
+    {
+        string account = Path.Combine(SteamRoot, "userdata", "111");
+        TestFolder.Write(Path.Combine(SteamRoot, "steamapps", "appmanifest_105600.acf"), Manifest("105600", "Terraria", "Terraria"));
+        TestFolder.Write(Path.Combine(account, "105600", "remote", "a.sav"), "x");
+
+        var games = SteamLibrary.FindGames(SteamRoot, account);
+
+        GameInfo game = Assert.Single(games);
+        Assert.Equal(SupportState.Supported, game.Support);
+        Assert.Equal(SaveSource.Userdata, game.Source);
+        Assert.Equal(Path.Combine(account, "105600"), game.SaveFolder);
+    }
+
+    [Fact]
+    public void FindGames_SkipsInstalledProtonAndRuntimesWithoutUserdata()
+    {
+        string account = Path.Combine(SteamRoot, "userdata", "111");
+        Directory.CreateDirectory(account);
+        TestFolder.Write(Path.Combine(SteamRoot, "steamapps", "appmanifest_1493710.acf"), Manifest("1493710", "Proton 9.0", "Proton 9.0"));
+        TestFolder.Write(Path.Combine(SteamRoot, "steamapps", "appmanifest_1628350.acf"), Manifest("1628350", "Steam Linux Runtime 3.0 (sniper)", "x"));
+
+        Assert.Empty(SteamLibrary.FindGames(SteamRoot, account));
+    }
 }

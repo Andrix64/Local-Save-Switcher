@@ -46,6 +46,14 @@ public partial class PlaythroughViewModel : ObservableObject
 
     public string MoreActionsName => Loc.F(Strings.MoreActionsFor, Name);
 
+    /// <summary>Id della persona a cui appartiene la partita.</summary>
+    public string Owner => Data.Info.Owner;
+
+    /// <summary>true se è la partita preferita della sua persona per questo gioco (la ★).</summary>
+    public bool IsFavourite => game.Manager.FavouriteOf(Owner) == ProfileName;
+
+    public string FavouriteTooltip => Strings.FavouriteTooltip;
+
     /// <summary>Chiamato dal GameViewModel quando cambia busy o gioco aperto.</summary>
     public void NotifyStateChanged()
     {
@@ -78,4 +86,10 @@ public partial class PlaythroughViewModel : ObservableObject
 
     [RelayCommand]
     private Task DeleteAsync() => game.DeleteAsync(ProfileName);
+
+    [RelayCommand]
+    private Task SetFavouriteAsync() => game.SetFavouriteAsync(this);
+
+    [RelayCommand]
+    private Task GiveToMenuAsync() => game.GiveToMenuAsync(ProfileName);
 }

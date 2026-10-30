@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>I giochi di Andrea</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #0F0F10; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column; position: relative">
+  <header style="height: 72px; box-sizing: border-box; padding: 0 24px; background: #0A0A0B; display: flex; align-items: center; justify-content: space-between">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 14px; color: #F2F2F2; height: 52px; padding: 0 16px 0 8px; border-radius: 26px; background: #19191B">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+      <div style="width: 38px; height: 38px; border-radius: 19px; background: #C2410C; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #FFFFFF">A</div>
+      <span style="font-size: 18px; font-weight: 600">Andrea</span>
+      <span style="font-size: 14px; color: #96969C">· Cambia giocatore</span>
+    </a>
+    <button aria-label="Impostazioni" style="width: 48px; height: 48px; border-radius: 12px; border: 0; background: transparent; color: #96969C; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>
+    </button>
+  </header>
+  <main style="flex: 1; box-sizing: border-box; padding: 36px 56px 0; display: flex; flex-direction: column; gap: 28px">
+    <h1 style="margin: 0; font-size: 32px; font-weight: 800">A cosa giochi oggi?</h1>
+    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 28px">
+      <sc-for list="{{games}}" as="g" hint-placeholder-count="6">
+        <div style="position: relative">
+        <a href="{{g.href}}" style="display: flex; flex-direction: column; gap: 10px; color: #F2F2F2; opacity: {{g.opacity}}">
+          <div style="position: relative; height: 252px; border-radius: 14px; background: {{g.color}}; display: flex; align-items: flex-end; box-sizing: border-box; padding: 16px; overflow: hidden; outline: {{g.outline}}">
+            <div style="font-size: 22px; font-weight: 800; line-height: 1.15; color: #FFFFFF">{{g.name}}</div>
+            <div style="position: absolute; top: 10px; left: 10px; padding: 4px 8px; border-radius: 6px; background: rgba(10,10,11,0.75); font-size: 11px; font-weight: 600; color: #D6D6DA; letter-spacing: 0.3px">{{g.store}}</div>
+            <sc-if value="{{g.badge}}" hint-placeholder-val="{{false}}">
+              <div style="position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 6px; background: {{g.badgeBack}}; font-size: 11px; font-weight: 700; color: {{g.badgeText}}">{{g.badge}}</div>
+            </sc-if>
+          </div>
+          <div style="font-size: 16px; font-weight: 600">{{g.name}}</div>
+          <div style="font-size: 13px; color: #96969C; margin-top: -6px">{{g.sub}}</div>
+        </a>
+        <sc-if value="{{g.menu}}" hint-placeholder-val="{{true}}">
+          <a href="MyGames.dc.html" aria-label="Le mie partite di {{g.name}}" title="Le mie partite" style="position: absolute; top: 198px; right: 10px; width: 44px; height: 44px; border-radius: 22px; background: rgba(10,10,11,0.82); color: #F2F2F2; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700">···</a>
+        </sc-if>
+        </div>
+      </sc-for>
+      <button style="display: flex; flex-direction: column; gap: 10px; background: transparent; border: 0; padding: 0; text-align: left; font-family: inherit; color: #A8A8AE; cursor: pointer">
+        <div style="height: 248px; width: 100%; box-sizing: border-box; border-radius: 14px; border: 2px dashed #3A3A40; display: flex; align-items: center; justify-content: center">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </div>
+        <div style="font-size: 16px; font-weight: 600">Aggiungi un gioco</div>
+        <div style="font-size: 13px; color: #96969C; margin-top: -6px">Qualsiasi gioco del PC</div>
+      </button>
+    </div>
+  </main>
+  <div role="status" style="position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 12px; background: #18261F; border: 1px solid #2E5C44; font-size: 16px">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CC38A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>
+    <span>Celeste salvato per Andrea</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ready = { opacity: 1, outline: 'none', badge: '', badgeBack: '', badgeText: '', menu: true };
+    return {
+      games: [
+        { ...ready, name: 'Hades', store: 'STEAM', sub: 'Giocato ieri', color: '#7A1E2B', href: 'Playing.dc.html' },
+        { ...ready, name: 'Celeste', store: 'STEAM', sub: 'Giocato oggi', color: '#3B3F8F', href: 'Playing.dc.html' },
+        { ...ready, name: 'Alan Wake 2', store: 'EPIC', sub: 'Cloud attivo: serve un admin', color: '#2B3A3A', href: 'AdminPin.dc.html', opacity: 0.75, badge: 'CHIEDI A UN ADMIN', badgeBack: '#1B2230', badgeText: '#7FB0F0' },
+        { ...ready, name: 'The Witcher 3', store: 'GOG', sub: 'Mai giocato da Andrea', color: '#5A4A22', href: 'WhoseSaves.dc.html' },
+        { name: 'Control', store: 'STEAM', sub: 'Clara sta giocando', color: '#4A4A50', href: '#', opacity: 0.55, outline: 'none', badge: 'IN GIOCO', badgeBack: '#E0261B', badgeText: '#FFFFFF' },
+        { name: 'Minecraft', store: 'AGGIUNTO A MANO', sub: 'Da preparare una volta', color: '#2F5D2F', href: '#', opacity: 0.6, outline: '2px dashed #5A5A60', badge: 'DA PREPARARE', badgeBack: '#2A2110', badgeText: '#F5B83D' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

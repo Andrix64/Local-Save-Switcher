@@ -7,7 +7,9 @@
 #   3. installa ogni pacchetto in una distribuzione pulita e avvia "lss --version".
 #
 # Uso (da Git Bash su Windows o da Linux):
-#   bash scripts/linux-check.sh utente@host [--tests-only]
+#   bash scripts/linux-check.sh utente@host [--tests-only | --only FORMATI]
+#   --only FORMATI  salta test e prove di installazione e crea solo quei pacchetti
+#                   (targz, deb, rpm, appimage; vedi scripts/release.sh)
 #
 # Sulla macchina usa solo ~/lss-ci (sorgenti), ~/lss-out (pacchetti),
 # ~/.lss-nuget e il volume Docker lss-nuget-root (cache di NuGet). L'utente
@@ -15,13 +17,17 @@
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-    echo "Uso: bash scripts/linux-check.sh utente@host [--tests-only]" >&2
+    echo "Uso: bash scripts/linux-check.sh utente@host [--tests-only | --only FORMATI]" >&2
     exit 2
 fi
 
 target="$1"
 tests_only=0
-[ "${2:-}" = "--tests-only" ] && tests_only=1
+only=""
+case "${2:-}" in
+    --tests-only) tests_only=1 ;;
+    --only) only="${3:?--only richiede un elenco di formati}" ;;
+esac
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
@@ -39,14 +45,26 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 echo "== Copia di $(git rev-parse --short HEAD) su $target"
-git archive --format=tar HEAD | ssh_run 'rm -rf ~/lss-ci && mkdir -p ~/lss-ci ~/.lss-nuget && tar -x -C ~/lss-ci'
+# Se una prova precedente è stata interrotta, in ~/lss-ci restano file di root: allora
+# si pulisce con lo stesso container (solo ~/lss-ci), senza bisogno di root sulla macchina.
+ssh_run "rm -rf ~/lss-ci 2>/dev/null || docker run --rm -v ~:/home-lss $sdk_image rm -rf /home-lss/lss-ci"
+git archive --format=tar HEAD | ssh_run 'mkdir -p ~/lss-ci ~/.lss-nuget && tar -x -C ~/lss-ci'
 
+if [ -z "$only" ]; then
 echo "== Test"
-ssh_run "docker run --rm --user \"\$(id -u):\$(id -g)\" \
+# Root dentro il container per installare libfontconfig1 (la dipendenza del
+# pacchetto, che SkiaSharp usa anche nei test delle icone); poi i file in ~/lss-ci
+# tornano al proprietario giusto.
+ssh_run "docker run --rm -e OWNER=\"\$(id -u):\$(id -g)\" \
     -e HOME=/tmp -e DOTNET_CLI_HOME=/tmp -e NUGET_PACKAGES=/nuget \
     -e DOTNET_CLI_TELEMETRY_OPTOUT=1 -e DOTNET_NOLOGO=1 \
-    -v ~/lss-ci:/src -v ~/.lss-nuget:/nuget -w /src $sdk_image \
-    dotnet test tests/Lss.Tests -c Release"
+    -v ~/lss-ci:/src -v ~/.lss-nuget:/nuget -w /src $sdk_image bash -c '
+set -e
+trap \"chown -R \$OWNER /src\" EXIT
+apt-get update -qq >/dev/null && apt-get install -y -qq libfontconfig1 >/dev/null
+dotnet test tests/Lss.Tests -c Release
+'"
+fi
 
 [ "$tests_only" -eq 1 ] && exit 0
 
@@ -67,9 +85,14 @@ curl -fsSL -o /tmp/\$deb \$base/\$deb
 curl -fsSL -o /tmp/checksums.txt \$base/checksums.txt
 (cd /tmp && grep \" \$deb\$\" checksums.txt | sha256sum -c -)
 dpkg -i /tmp/\$deb >/dev/null
-bash scripts/release.sh --skip-tests --allow-dirty
-cp dist/*.tar.gz dist/*.deb dist/*.rpm dist/*.AppImage dist/*.sha256 /out/
+bash scripts/release.sh --skip-tests --allow-dirty ${only:+--only $only}
+find dist -maxdepth 1 -type f -exec cp -t /out {} +
 '"
+
+if [ -n "$only" ]; then
+    echo "== Pacchetti ($only) in $target:~/lss-out (prove di installazione saltate)"
+    exit 0
+fi
 
 echo "== Installazione nelle distribuzioni"
 ssh_run 'cd ~/lss-out

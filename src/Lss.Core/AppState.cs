@@ -1,12 +1,47 @@
+using System.Text.Json.Serialization;
+
 namespace Lss;
 
+/// <summary>Come stato.json è scritto: nomi corti in italiano, come le chiavi del vecchio stato.ini.</summary>
+internal sealed class AppStateFile
+{
+    [JsonPropertyName("ProfiloAttivo")]
+    public string ActiveProfile { get; set; } = "";
+
+    [JsonPropertyName("AttivatoIl")]
+    public string ActiveSince { get; set; } = "";
+
+    [JsonPropertyName("SalvatoIl")]
+    public string LastSaved { get; set; } = "";
+
+    [JsonPropertyName("BackupDaConservare")]
+    public int BackupsToKeep { get; set; } = AppState.DefaultBackupsToKeep;
+
+    [JsonPropertyName("AvviaGioco")]
+    public bool LaunchGame { get; set; } = true;
+
+    [JsonPropertyName("SalvaAllaChiusura")]
+    public bool SaveOnGameExit { get; set; } = true;
+
+    [JsonPropertyName("OpzioniCondivise")]
+    public bool SharePreferences { get; set; }
+
+    // null = mai impostato: valgono i file di GameDefaults.
+    [JsonPropertyName("FileCondivisi")]
+    public List<string>? SharedFiles { get; set; }
+
+    [JsonPropertyName("ProprietariOk")]
+    public bool OwnersAssigned { get; set; }
+
+    [JsonPropertyName("CloudConsentito")]
+    public bool CloudAllowedInSimple { get; set; }
+}
+
 /// <summary>
-/// Stato dell'applicazione, salvato in stato.ini.
+/// Stato dell'applicazione, salvato in stato.json.
 /// </summary>
 public sealed class AppState
 {
-    private const string EmptyValue = "-";
-
     private readonly string path;
 
     public string ActiveProfile { get; set; } = "";
@@ -36,10 +71,21 @@ public sealed class AppState
     public bool SharePreferences { get; set; }
 
     /// <summary>
-    /// File da tenere uguali in tutte le partite (FileCondivisi in stato.ini),
+    /// File da tenere uguali in tutte le partite (FileCondivisi in stato.json),
     /// o null se non è mai stato impostato: allora valgono quelli di GameDefaults.
     /// </summary>
     public IReadOnlyList<string>? SharedFiles { get; set; }
+
+    /// <summary>
+    /// Le partite fatte prima delle persone hanno un proprietario (ProprietariOk in stato.json).
+    /// </summary>
+    public bool OwnersAssigned { get; set; }
+
+    /// <summary>
+    /// Il gioco con le copie online attive può andare in modalità semplice (CloudConsentito).
+    /// Lo decide un amministratore; senza, la modalità semplice non lo fa partire.
+    /// </summary>
+    public bool CloudAllowedInSimple { get; set; }
 
     public AppState(string path)
     {
@@ -48,97 +94,42 @@ public sealed class AppState
 
     public void Load()
     {
-        ActiveProfile = "";
-        ActiveSince = "";
-        LastSaved = "";
-        BackupsToKeep = DefaultBackupsToKeep;
-        LaunchGame = true;
-        SaveOnGameExit = true;
-        SharePreferences = false;
-        SharedFiles = null;
+        var file = JsonFile.Read<AppStateFile>(path) ?? new AppStateFile();
 
-        if (!File.Exists(path))
-            return;
-
-        foreach (string line in File.ReadAllLines(path))
-        {
-            string[] parts = line.Split('=', 2);
-
-            if (parts.Length != 2)
-                continue;
-
-            string value = parts[1] == EmptyValue ? "" : parts[1];
-
-            switch (parts[0])
-            {
-                case "ProfiloAttivo":
-                    ActiveProfile = value;
-                    break;
-
-                case "AttivatoIl":
-                    ActiveSince = value;
-                    break;
-
-                case "SalvatoIl":
-                    LastSaved = value;
-                    break;
-
-                case "BackupDaConservare":
-                    if (int.TryParse(value, out int keep) && keep >= 0)
-                        BackupsToKeep = keep;
-                    break;
-
-                case "AvviaGioco":
-                    LaunchGame = value != "0";
-                    break;
-
-                case "SalvaAllaChiusura":
-                    SaveOnGameExit = value != "0";
-                    break;
-
-                case "OpzioniCondivise":
-                    SharePreferences = value == "1";
-                    break;
-
-                case "FileCondivisi":
-                    SharedFiles = value.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                    break;
-            }
-        }
+        ActiveProfile = file.ActiveProfile;
+        ActiveSince = file.ActiveSince;
+        LastSaved = file.LastSaved;
+        BackupsToKeep = file.BackupsToKeep >= 0 ? file.BackupsToKeep : DefaultBackupsToKeep;
+        LaunchGame = file.LaunchGame;
+        SaveOnGameExit = file.SaveOnGameExit;
+        SharePreferences = file.SharePreferences;
+        SharedFiles = file.SharedFiles?
+            .Select(name => name.Trim())
+            .Where(name => name != "")
+            .ToList();
+        OwnersAssigned = file.OwnersAssigned;
+        CloudAllowedInSimple = file.CloudAllowedInSimple;
     }
 
     /// <summary>
     /// Scrive lo stato su disco. Lancia un'eccezione in caso di errore.
-    /// Scrive prima un file temporaneo e poi sostituisce stato.ini, così
+    /// JsonFile scrive prima un file temporaneo e poi sostituisce stato.json, così
     /// un'interruzione non lo lascia vuoto o a metà.
     /// </summary>
     public void Save()
     {
-        string temp = path + ".tmp";
-
-        using (FileStream stream = new(temp, FileMode.Create, FileAccess.Write))
-        using (StreamWriter writer = new(stream))
+        JsonFile.Write(path, new AppStateFile
         {
-            writer.WriteLine("ProfiloAttivo=" + Format(ActiveProfile));
-            writer.WriteLine("AttivatoIl=" + Format(ActiveSince));
-            writer.WriteLine("SalvatoIl=" + Format(LastSaved));
-            writer.WriteLine("BackupDaConservare=" + BackupsToKeep);
-            writer.WriteLine("AvviaGioco=" + (LaunchGame ? "1" : "0"));
-            writer.WriteLine("SalvaAllaChiusura=" + (SaveOnGameExit ? "1" : "0"));
-            writer.WriteLine("OpzioniCondivise=" + (SharePreferences ? "1" : "0"));
-
-            if (SharedFiles != null)
-                writer.WriteLine("FileCondivisi=" + Format(string.Join("|", SharedFiles)));
-
-            writer.Flush();
-            stream.Flush(flushToDisk: true);
-        }
-
-        File.Move(temp, path, overwrite: true);
-    }
-
-    private static string Format(string value)
-    {
-        return value == "" ? EmptyValue : value;
+            ActiveProfile = ActiveProfile,
+            ActiveSince = ActiveSince,
+            LastSaved = LastSaved,
+            BackupsToKeep = BackupsToKeep,
+            LaunchGame = LaunchGame,
+            SaveOnGameExit = SaveOnGameExit,
+            SharePreferences = SharePreferences,
+            SharedFiles = SharedFiles?.ToList(),
+            OwnersAssigned = OwnersAssigned,
+            CloudAllowedInSimple = CloudAllowedInSimple,
+        });
     }
 }

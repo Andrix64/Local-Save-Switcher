@@ -4,26 +4,26 @@ public sealed class SaveManagerTests : IDisposable
 {
     private readonly TestFolder folder = new();
 
-    private static SteamAccount Account => new("111", "Mario", "", null);
+    private static GameAccount Account => new("steam", "111", "Mario", "", null);
 
     public void Dispose() => folder.Dispose();
 
     [Fact]
     public void Open_UsesAccountAndGameFolder()
     {
-        var game = new GameInfo("123450", "Test", "", "", folder.Game, SupportState.Supported);
+        var game = new GameInfo("steam", "123450", "Test", "", "", "", GameInfo.SpotsOf(folder.Game, SaveSource.Userdata), SupportState.Supported);
 
         Result<SaveManager> result = SaveManager.Open(folder.Data, Account, game);
 
         Assert.True(result.Success);
-        Assert.Equal(Path.Combine(folder.Data, "111", "123450", "Profili"), result.Value!.ProfilesPath);
-        Assert.Equal(game.AppId, result.Value.Game.AppId);
+        Assert.Equal(Path.Combine(folder.Data, "steam", "111", "123450", "Profili"), result.Value!.ProfilesPath);
+        Assert.Equal(game.Id, result.Value.Game.Id);
     }
 
     [Fact]
     public void Open_RefusesUnsupportedGame()
     {
-        var game = new GameInfo("123450", "Test", "", "", folder.Game, SupportState.SavesElsewhere);
+        var game = new GameInfo("steam", "123450", "Test", "", "", "", GameInfo.SpotsOf(folder.Game, SaveSource.Userdata), SupportState.SavesElsewhere);
 
         Result<SaveManager> result = SaveManager.Open(folder.Data, Account, game);
 

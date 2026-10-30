@@ -1,0 +1,124 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.MyGamesWindow"
+        x:DataType="vm:MyGamesViewModel"
+        Title="{Binding Title}"
+        Width="640" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{StaticResource Surface}"
+        WindowStartupLocation="CenterOwner">
+
+  <!-- Come il design (canvas "Le mie partite"). -->
+  <Window.Styles>
+    <Style Selector="Button.row">
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="MinHeight" Value="68" />
+      <Setter Property="Padding" Value="18,12" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.row:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource SurfaceHover}" />
+    </Style>
+    <Style Selector="Button.row.favourite">
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="Button.row.favourite:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="Button.newRow">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.newRow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.newRow:pointerover Rectangle">
+      <Setter Property="Stroke" Value="{StaticResource TextSecondary}" />
+    </Style>
+    <Style Selector="Button.close">
+      <Setter Property="Width" Value="44" />
+      <Setter Property="Height" Value="44" />
+      <Setter Property="CornerRadius" Value="22" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+  </Window.Styles>
+
+  <StackPanel Margin="36" Spacing="22">
+
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+      <Border Width="48" Height="72" CornerRadius="8" ClipToBounds="True"
+              Background="{Binding Tile.TileBrush, FallbackValue={StaticResource SurfaceSelected}}">
+      <Panel>
+        <Image Source="{Binding Tile.Cover}" Stretch="UniformToFill" />
+        <!-- Senza copertina: l'icona del gioco, o la sua iniziale -->
+        <Panel IsVisible="{Binding !Tile.HasCover}">
+          <Image Source="{Binding Tile.Item.Icon}" IsVisible="{Binding Tile.Item.HasIcon}" Width="28" Height="28" />
+          <TextBlock Text="{Binding Tile.Item.Initial}" IsVisible="{Binding !Tile.Item.HasIcon}" FontSize="22" FontWeight="ExtraBold"
+                     Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Panel>
+      </Panel>
+      </Border>
+      <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center">
+        <TextBlock Text="{Binding Hint}" FontSize="15" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+      </StackPanel>
+    </Grid>
+
+    <StackPanel Spacing="10">
+      <ItemsControl ItemsSource="{Binding Rows}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Spacing="10" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:MyGameRow">
+            <Button Classes="row" Classes.favourite="{Binding IsFavourite}" Tag="{Binding}" Click="Row_Click">
+              <Grid ColumnDefinitions="28,*,Auto" ColumnSpacing="16">
+                <TextBlock Text="★" FontSize="24" Foreground="{StaticResource Warning}" VerticalAlignment="Center"
+                           IsVisible="{Binding IsFavourite}" />
+                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding LastText}" FontSize="14" Foreground="{StaticResource TextMuted}"
+                             IsVisible="{Binding LastText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+                <Border Grid.Column="2" CornerRadius="6" Background="#2A2110" Padding="10,4" VerticalAlignment="Center"
+                        IsVisible="{Binding IsFavourite}">
+                  <TextBlock Text="{loc:Str SimpleFavourite}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource Warning}" />
+                </Border>
+              </Grid>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <!-- Inizia una partita nuova -->
+      <Button Classes="newRow" Click="New_Click">
+        <Grid MinHeight="64">
+          <Rectangle RadiusX="14" RadiusY="14" Stroke="#3A3A40" StrokeThickness="2" StrokeDashArray="3,2" />
+          <StackPanel Orientation="Horizontal" Spacing="16" Margin="20,12" VerticalAlignment="Center">
+            <Path Data="M12 5 V19 M5 12 H19" Stroke="{StaticResource Text}" StrokeThickness="2" StrokeLineCap="Round"
+                  Width="24" Height="24" Stretch="Uniform" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding NewText}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+          </StackPanel>
+        </Grid>
+      </Button>
+    </StackPanel>
+
+  </StackPanel>
+
+</Window>

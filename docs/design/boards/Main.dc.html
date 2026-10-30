@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Chi gioca?</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #0F0F10; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="height: 72px; box-sizing: border-box; padding: 0 32px; background: #0A0A0B; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 14px">
+      <div style="width: 4px; height: 32px; background: {{accent}}"></div>
+      <div style="font-size: 26px; font-weight: 800; letter-spacing: 0.5px">LSS</div>
+    </div>
+    <button aria-label="Impostazioni" style="width: 48px; height: 48px; border-radius: 12px; border: 0; background: transparent; color: #96969C; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+    </button>
+  </header>
+  <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px">
+    <h1 style="margin: 0; font-size: 44px; font-weight: 800">Chi gioca?</h1>
+    <div style="display: flex; gap: 48px; align-items: flex-start">
+      <a href="Games.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 16px; color: #F2F2F2">
+        <div style="position: relative; width: 140px; height: 140px; border-radius: 70px; background: #C2410C; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: 700; color: #FFFFFF">A
+          <div title="Admin" aria-label="Admin" style="position: absolute; right: 2px; bottom: 2px; width: 40px; height: 40px; border-radius: 20px; background: #0F0F10; border: 3px solid #0F0F10; display: flex; align-items: center; justify-content: center; color: #F5B83D">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"></path></svg>
+          </div>
+        </div>
+        <div style="font-size: 22px; font-weight: 600">Andrea</div>
+      </a>
+      <a href="Games.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 16px; color: #F2F2F2">
+        <div style="width: 140px; height: 140px; border-radius: 70px; background: #1D6FD0; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: 700; color: #FFFFFF">C</div>
+        <div style="font-size: 22px; font-weight: 600">Clara</div>
+      </a>
+      <a href="Games.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 16px; color: #F2F2F2">
+        <div style="width: 140px; height: 140px; border-radius: 70px; background: #2F7D3B; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: 700; color: #FFFFFF">L</div>
+        <div style="font-size: 22px; font-weight: 600">Luca</div>
+      </a>
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 16px; background: transparent; border: 0; padding: 0; color: #A8A8AE; font-family: inherit; cursor: pointer">
+        <div style="width: 136px; height: 136px; border-radius: 70px; border: 2px dashed #5A5A60; display: flex; align-items: center; justify-content: center">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </div>
+        <div style="font-size: 22px; font-weight: 600">Aggiungi giocatore</div>
+      </button>
+    </div>
+    <p style="margin: 0; font-size: 17px; color: #96969C">Tocca il tuo nome per vedere i tuoi giochi.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#E0261B"},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#E0261B' };
+  }
+}
+</script>
+</body>
+</html>

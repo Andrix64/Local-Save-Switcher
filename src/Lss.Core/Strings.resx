@@ -31,6 +31,8 @@ Start the game at least once.</value></data>
 Its saved points were not moved: {0}
 They are still in:
 {1}</value></data>
+  <data name="BackupsNotMoved" xml:space="preserve"><value>
+Some automatic copies (history) were not moved to the new name: {0}</value></data>
   <data name="RenamedStateNotSaved" xml:space="preserve"><value>Playthrough renamed, but the state was not saved: {0}</value></data>
   <data name="ProfileRenamed" xml:space="preserve"><value>Playthrough renamed.</value></data>
   <data name="CannotDeleteActive" xml:space="preserve"><value>The playthrough in the game can&apos;t be deleted.
@@ -96,7 +98,10 @@ DO NOT start the game. The backup is in:
   <data name="TitleOperationFailed" xml:space="preserve"><value>Operation failed</value></data>
   <data name="CannotOpenFolder" xml:space="preserve"><value>Can&apos;t open the folder: {0}</value></data>
   <data name="ProfileNameHint" xml:space="preserve"><value>Letters, digits, spaces, _ and - (up to 50 characters).</value></data>
-  <data name="CopyCurrentSaves" xml:space="preserve"><value>Copy of the game&apos;s current saves</value></data>
+  <data name="NewCopyOf" xml:space="preserve"><value>Copy of an existing playthrough</value></data>
+  <data name="NewImportFrom" xml:space="preserve"><value>Import from a file</value></data>
+  <data name="NewChooseFile" xml:space="preserve"><value>Choose file…</value></data>
+  <data name="NewNoFile" xml:space="preserve"><value>No file chosen</value></data>
   <data name="EmptyProfileOption" xml:space="preserve"><value>Empty: a new game from the beginning</value></data>
   <data name="ActivateNow" xml:space="preserve"><value>Play it right away</value></data>
   <data name="Create" xml:space="preserve"><value>Create</value></data>
@@ -111,9 +116,10 @@ DO NOT start the game. The backup is in:
   <data name="Exit" xml:space="preserve"><value>Exit</value></data>
   <data name="AccountIntro" xml:space="preserve"><value>This PC has more than one Steam account with {0}.
 Which one do you want to use? Each account has its own playthroughs.</value></data>
-  <data name="CaptionSteamAccount" xml:space="preserve"><value>STEAM ACCOUNT</value></data>
+  <data name="CaptionLauncherAccount" xml:space="preserve"><value>{0} ACCOUNT</value></data>
   <data name="AccountNoSaves" xml:space="preserve"><value>no saves</value></data>
   <data name="AccountLastSaved" xml:space="preserve"><value>last saved {0}</value></data>
+  <data name="WindowMinimize" xml:space="preserve"><value>Minimize</value></data>
   <data name="Close" xml:space="preserve"><value>Close</value></data>
   <data name="CannotReadList" xml:space="preserve"><value>Can&apos;t read the list: {0}</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>
@@ -149,7 +155,6 @@ to:
 
 The app keeps using the old folder. Nothing has been lost.</value></data>
   <data name="IgnoredProfileFolders" xml:space="preserve"><value>Ignored folders in Profili (invalid name: use letters, digits, spaces, _ and -): {0}</value></data>
-  <data name="NoteTooLong" xml:space="preserve"><value>The note can be at most {0} characters long.</value></data>
   <data name="NoteSaved" xml:space="preserve"><value>Note saved.</value></data>
   <data name="DescActivate" xml:space="preserve"><value>Before switching to “{0}”</value></data>
   <data name="DescSave" xml:space="preserve"><value>Before saving progress</value></data>
@@ -252,7 +257,6 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="HistoryHeading" xml:space="preserve"><value>History of “{0}”</value></data>
   <data name="HistoryIntro" xml:space="preserve"><value>Pick a moment and go back to it. Before going back, the current situation is copied.</value></data>
   <data name="HistoryTitle" xml:space="preserve"><value>History</value></data>
-  <data name="ImportButton" xml:space="preserve"><value>Import...</value></data>
   <data name="ImportTitle" xml:space="preserve"><value>Import playthrough</value></data>
   <data name="Imported" xml:space="preserve"><value>Playthrough “{0}” imported.</value></data>
   <data name="InGameNow" xml:space="preserve"><value>IN THE GAME NOW</value></data>
@@ -287,7 +291,7 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SavedOnExit" xml:space="preserve"><value>Progress of “{0}” saved when the game closed.</value></data>
   <data name="SavedToday" xml:space="preserve"><value>saved today at {0}</value></data>
   <data name="SavedYesterday" xml:space="preserve"><value>saved yesterday at {0}</value></data>
-  <data name="SettingAbout" xml:space="preserve"><value>Steam account: {0}  ·  Version {1}  ·  MIT license</value></data>
+  <data name="SettingAbout" xml:space="preserve"><value>Account: {0}  ·  Version {1}  ·  MIT license</value></data>
   <data name="SettingDataFolder" xml:space="preserve"><value>Playthroughs and copies are in {0}</value></data>
   <data name="SettingKeepCopies" xml:space="preserve"><value>Automatic copies to keep</value></data>
   <data name="SettingKeepCopiesHint" xml:space="preserve"><value>0 = all</value></data>
@@ -297,8 +301,17 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="SettingSaveOnExitHint" xml:space="preserve"><value>As soon as you quit the game, the playthrough in use is updated, with an automatic copy. Only while the app is open.</value></data>
   <data name="SettingSharePreferences" xml:space="preserve"><value>Same game options for all playthroughs</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Controls, audio and subtitles stay the same when you switch playthrough, even in a new one.</value></data>
+  <data name="CurrentPlaythrough" xml:space="preserve"><value>CURRENT</value></data>
+  <data name="CaptionPlayers" xml:space="preserve"><value>PLAYERS</value></data>
+  <data name="CaptionFolders" xml:space="preserve"><value>FOLDERS</value></data>
+  <data name="SettingMode" xml:space="preserve"><value>Mode</value></data>
+  <data name="SettingModeHint" xml:space="preserve"><value>Simple: whoever plays picks the game. Advanced: full control.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Settings</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Settings</value></data>
+  <data name="GameSettingsTitle" xml:space="preserve"><value>Settings of {0}</value></data>
+  <data name="GameSettingsButton" xml:space="preserve"><value>Game settings</value></data>
+  <data name="GameSettingsMenu" xml:space="preserve"><value>Game settings…</value></data>
+  <data name="IgnoredFoldersAllLink" xml:space="preserve"><value>Folders that are not saves, for all games…</value></data>
   <data name="StartAnyway" xml:space="preserve"><value>Start anyway</value></data>
   <data name="StartingWith" xml:space="preserve"><value>Starting {0} with “{1}”...</value></data>
   <data name="Undo" xml:space="preserve"><value>Undo</value></data>
@@ -306,18 +319,290 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="ZipFileType" xml:space="preserve"><value>{0} playthrough</value></data>
   <data name="UnknownGameName" xml:space="preserve"><value>App {0}</value></data>
   <data name="GameNotSupported" xml:space="preserve"><value>{0} doesn't keep its saves in Steam's userdata folder: LSS can't manage it.</value></data>
+  <data name="SaveFolderNoLongerSafe" xml:space="preserve"><value>The save folder of {0} can no longer be used safely: {1}</value></data>
+  <data name="SafetyMissing" xml:space="preserve"><value>the folder doesn't exist.</value></data>
+  <data name="SafetyEmpty" xml:space="preserve"><value>the folder is empty.</value></data>
+  <data name="SafetyProtected" xml:space="preserve"><value>it is a system, launcher or game folder, not a save folder.</value></data>
+  <data name="SafetyTooBig" xml:space="preserve"><value>the folder is too big for a save folder (over 2 GB or 20,000 files).</value></data>
+  <data name="SafetyInsideLss" xml:space="preserve"><value>the folder is inside LSS's own data.</value></data>
+  <data name="SafetyUnreadable" xml:space="preserve"><value>the folder can't be read.</value></data>
+  <data name="SafetyBadPattern" xml:space="preserve"><value>the file pattern is too broad or names program or game files.</value></data>
+  <data name="ReasonBeforeAddingSpot" xml:space="preserve"><value>Before adding a save folder</value></data>
+  <data name="SpotAdded" xml:space="preserve"><value>Save folder added.</value></data>
+  <data name="SpotRemoved" xml:space="preserve"><value>Save folder removed. The copies in the playthroughs are kept.</value></data>
+  <data name="SpotNotFound" xml:space="preserve"><value>LSS did not add this save folder.</value></data>
+  <data name="SpotBadName" xml:space="preserve"><value>LSS can't use a folder whose path contains "|".</value></data>
+  <data name="ImportSpotsSkipped" xml:space="preserve"><value>Some saves were not imported, because this game doesn't use these folders here: {0}</value></data>
+  <data name="SaveFoldersCaption" xml:space="preserve"><value>Save folders</value></data>
+  <data name="SpotFiles" xml:space="preserve"><value>{0} (only {1})</value></data>
+  <data name="AddSpot" xml:space="preserve"><value>Add another folder…</value></data>
+  <data name="AddSpotText" xml:space="preserve"><value>LSS will also switch this folder:&#10;{0}&#10;Its files now belong to the playthrough "{1}". What about the other playthroughs?</value></data>
+  <data name="AddSpotCopy" xml:space="preserve"><value>Give them a copy of these files</value></data>
+  <data name="AddSpotEmpty" xml:space="preserve"><value>Start it empty for them</value></data>
+  <data name="RemoveSpot" xml:space="preserve"><value>Remove from the save folders</value></data>
+  <data name="RemoveSpotText" xml:space="preserve"><value>LSS will stop switching this folder. Its files stay where they are, and the copies in the playthroughs are kept.</value></data>
+  <data name="LearnUseFolders" xml:space="preserve"><value>Use these folders</value></data>
+  <data name="SwitchInterruptedTitle" xml:space="preserve"><value>Save switch interrupted</value></data>
+  <data name="SwitchInterruptedRestored" xml:space="preserve"><value>The last switch of {0} was interrupted (maybe the computer turned off). LSS put back the saves as they were before it.</value></data>
+  <data name="SupportNotFound" xml:space="preserve"><value>No save folder yet: start the game once and save.</value></data>
+  <data name="SupportUnsure" xml:space="preserve"><value>This game saves in too many places for LSS. You can choose its folders yourself.</value></data>
+  <data name="SupportUnsafe" xml:space="preserve"><value>The save folder found can't be used safely: {0}</value></data>
+  <data name="FindSaveFolder" xml:space="preserve"><value>Find the save folder…</value></data>
+  <data name="ChooseSaveFolder" xml:space="preserve"><value>Choose the folder myself…</value></data>
+  <data name="ChooseSaveFolderTitle" xml:space="preserve"><value>Save folder of {0}</value></data>
+  <data name="UseThisFolderText" xml:space="preserve"><value>When you switch playthrough, LSS replaces everything in this folder with the playthrough's files:
+{0}
+Use it only if it contains just the saves of {1}.</value></data>
+  <data name="UseThisFolder" xml:space="preserve"><value>Use this folder</value></data>
+  <data name="UseAutomaticFolder" xml:space="preserve"><value>Use the automatic folder</value></data>
+  <data name="SaveFolderFromSteam" xml:space="preserve"><value>Saves: {0} (Steam)</value></data>
+  <data name="SaveFolderFromLauncher" xml:space="preserve"><value>Saves: {0} (from {1})</value></data>
+  <data name="SaveFolderChosen" xml:space="preserve"><value>Saves: {0} (chosen by you)</value></data>
+  <data name="SaveFolderLearned" xml:space="preserve"><value>Saves: {0} (found by LSS)</value></data>
+  <data name="SaveFolderMenu" xml:space="preserve"><value>Save folder options</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>This playthrough is from {0}, not from {1}.</value></data>
-  <data name="GamesCaption" xml:space="preserve"><value>GAMES</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Other games</value></data>
-  <data name="SupportSavesElsewhere" xml:space="preserve"><value>Saves are outside Steam's userdata folder: not supported yet.</value></data>
+  <data name="SupportSavesElsewhere" xml:space="preserve"><value>The saves are not in Steam's userdata folder and LSS doesn't know where they are: you can choose the folder yourself.</value></data>
   <data name="SupportNoSaves" xml:space="preserve"><value>No saves yet: start the game once.</value></data>
-  <data name="NoSupportedGames" xml:space="preserve"><value>None of this account's games keeps its saves in Steam's userdata folder, so LSS can't manage them yet. Many games, especially those that run through Proton, save in other folders: you find them under Other games, with the reason.</value></data>
+  <data name="NoSupportedGames" xml:space="preserve"><value>LSS found no save folder it can use yet. Under Other games you see why for each game, and LSS can help you find the folder.</value></data>
   <data name="OnlyUserdataNotice" xml:space="preserve"><value>LSS copies only the files in Steam's userdata folder for {0}. If the game also saves elsewhere, those files don't change between playthroughs.</value></data>
   <data name="NoAccountWithGames" xml:space="preserve"><value>No Steam account on this PC has games with saves in the userdata folder.</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>LOCAL SAVE SWITCHER</value></data>
-  <data name="AccountIntroAny" xml:space="preserve"><value>More than one Steam account on this PC has game saves. Choose the one to manage.</value></data>
+  <data name="AccountIntroAny" xml:space="preserve"><value>More than one {0} account on this PC has game saves. Choose the one to manage.</value></data>
   <data name="SharedFilesCaption" xml:space="preserve"><value>FILES KEPT THE SAME</value></data>
   <data name="AddSharedFile" xml:space="preserve"><value>Add file...</value></data>
   <data name="RemoveSharedFile" xml:space="preserve"><value>Remove</value></data>
   <data name="SharedFileOutside" xml:space="preserve"><value>Choose a file inside the game's save folder.</value></data>
+  <data name="LearnTitle" xml:space="preserve"><value>Find the saves of {0}</value></data>
+  <data name="LearnIntroText" xml:space="preserve"><value>LSS doesn't know yet where {0} keeps its saves. Let's find out together:
+1. Start the game.
+2. Save in the game (or play until it saves by itself).
+3. Quit the game.
+LSS will look at what changed on the disk.</value></data>
+  <data name="LearnStart" xml:space="preserve"><value>Start the game</value></data>
+  <data name="LearnStartedByHand" xml:space="preserve"><value>I've started the game</value></data>
+  <data name="LearnStartByHandText" xml:space="preserve"><value>Start {0} yourself now, then press the button.</value></data>
+  <data name="LearnCloseFirst" xml:space="preserve"><value>{0} is open. Quit the game first, then start again from here.</value></data>
+  <data name="LearnPlayingText" xml:space="preserve"><value>Play, save, then quit {0}.</value></data>
+  <data name="LearnPressWhenDone" xml:space="preserve"><value>When you have quit the game, press the button.</value></data>
+  <data name="LearnQuitDone" xml:space="preserve"><value>I've quit the game</value></data>
+  <data name="LearnLooking" xml:space="preserve"><value>Looking for changed files… {0}</value></data>
+  <data name="LearnFilesChanged" xml:space="preserve"><value>{0} files changed</value></data>
+  <data name="LearnUseFolder" xml:space="preserve"><value>Use this folder</value></data>
+  <data name="LearnTryAgain" xml:space="preserve"><value>Try again</value></data>
+  <data name="LearnLookElsewhere" xml:space="preserve"><value>Look in another folder…</value></data>
+  <data name="LearnNothingFound" xml:space="preserve"><value>LSS didn't see any file that looks like a save. Did you save before quitting? You can try again, or choose the folder yourself.</value></data>
+  <data name="LearnPartial" xml:space="preserve"><value>The search took too long and stopped early: the list may be incomplete.</value></data>
+  <data name="LearnRecommended" xml:space="preserve"><value>Recommended</value></data>
+  <data name="LearnUnlikely" xml:space="preserve"><value>Unlikely</value></data>
+  <data name="ReasonGameName" xml:space="preserve"><value>The name contains "{0}"</value></data>
+  <data name="ReasonGameOwned" xml:space="preserve"><value>It belongs to the game (its folder or its Proton/Wine folder)</value></data>
+  <data name="ReasonSaveLikeFile" xml:space="preserve"><value>Files that look like saves ({0})</value></data>
+  <data name="ReasonChangedFiles" xml:space="preserve"><value>{0} files changed while you were playing</value></data>
+  <data name="ReasonSaveLikePath" xml:space="preserve"><value>It has a usual save folder name ("{0}")</value></data>
+  <data name="ReasonOnlySettings" xml:space="preserve"><value>Only settings files changed</value></data>
+  <data name="ReasonOtherProgram" xml:space="preserve"><value>It seems to belong to another program</value></data>
+  <data name="NotSaveFolder" xml:space="preserve"><value>Not a save folder…</value></data>
+  <data name="NotSaveFolderText" xml:space="preserve"><value>LSS won't propose this folder again:
+{0}</value></data>
+  <data name="IgnoreForGame" xml:space="preserve"><value>Only for {0}</value></data>
+  <data name="IgnoreForAll" xml:space="preserve"><value>For every game</value></data>
+  <data name="IgnoredToast" xml:space="preserve"><value>LSS won't propose this folder again.</value></data>
+  <data name="IgnoreUndo" xml:space="preserve"><value>Undo</value></data>
+  <data name="IgnoreCurrentFolder" xml:space="preserve"><value>This is a save folder of {0}: remove it from its save folders first.</value></data>
+  <data name="IgnoredFoldersTitle" xml:space="preserve"><value>Folders that are not saves</value></data>
+  <data name="IgnoredFoldersEmpty" xml:space="preserve"><value>No folders: everything LSS finds can be proposed.</value></data>
+  <data name="IgnoredScopeAll" xml:space="preserve"><value>every game</value></data>
+  <data name="IgnoredRemove" xml:space="preserve"><value>Propose it again</value></data>
+  <data name="IgnoredFoldersLink" xml:space="preserve"><value>Folders that are not saves…</value></data>
+  <data name="LearnFolderChanged" xml:space="preserve"><value>The playthroughs of {0} were made with another folder. Use the new folder anyway?</value></data>
+  <data name="ExportConfig" xml:space="preserve"><value>Export save configuration…</value></data>
+  <data name="ImportConfig" xml:space="preserve"><value>Import save configuration…</value></data>
+  <data name="ConfigPreviewTitle" xml:space="preserve"><value>Save configuration of {0}</value></data>
+  <data name="ConfigPreviewText" xml:space="preserve"><value>These folders will be in the file, written so they work on another computer. No user name and no saves are in it.</value></data>
+  <data name="ConfigSpotSkipped" xml:space="preserve"><value>Not exported (not in a standard folder): {0}</value></data>
+  <data name="ConfigFromLauncher" xml:space="preserve"><value>{0} already knows these folders: this file is useful only where it doesn't.</value></data>
+  <data name="ConfigNotes" xml:space="preserve"><value>Notes (optional)</value></data>
+  <data name="ImportConfigTitle" xml:space="preserve"><value>Import save configuration</value></data>
+  <data name="LookAfterPlayingHint" xml:space="preserve"><value>After a session LSS looks at the files that changed and suggests folders that may be saves. It only suggests: nothing changes without your choice.</value></data>
+  <data name="ImportConfigNow" xml:space="preserve"><value>Import</value></data>
+  <data name="ConfigMadeOn" xml:space="preserve"><value>Made on {0}</value></data>
+  <data name="ConfigWindowsInPrefix" xml:space="preserve"><value>Made on Windows: here the folders are inside the game's Proton/Wine folder.</value></data>
+  <data name="ConfigFound" xml:space="preserve"><value>found</value></data>
+  <data name="ConfigNotYet" xml:space="preserve"><value>not here yet: it will be used once the game creates it</value></data>
+  <data name="ConfigRefused" xml:space="preserve"><value>refused: {0}</value></data>
+  <data name="ConfigNotForThisSystem" xml:space="preserve"><value>not for this system</value></data>
+  <data name="ConfigNoGame" xml:space="preserve"><value>{0} is not on this computer.</value></data>
+  <data name="ConfigInvalid" xml:space="preserve"><value>This file is not a valid save configuration: {0}</value></data>
+  <data name="ConfigTooNew" xml:space="preserve"><value>This file was made by a newer LSS. Update LSS to import it.</value></data>
+  <data name="ConfigImported" xml:space="preserve"><value>Save folders imported for {0} game(s).</value></data>
+  <data name="SaveFolderImported" xml:space="preserve"><value>Saves: {0} (imported)</value></data>
+  <data name="LookAfterPlaying" xml:space="preserve"><value>Look for other save folders after playing</value></data>
+  <data name="SuggestionsFound" xml:space="preserve"><value>LSS found files of {0} that may be saves, in a folder it doesn't switch yet.</value></data>
+  <data name="SuggestionsLook" xml:space="preserve"><value>Look</value></data>
+  <data name="SuggestionsPending" xml:space="preserve"><value>{0} possible save folders to check</value></data>
+  <data name="SuggestionsTitle" xml:space="preserve"><value>Possible save folders of {0}</value></data>
+  <data name="SuggestionAdd" xml:space="preserve"><value>Add to the save folders</value></data>
+  <data name="SuggestionNotSaves" xml:space="preserve"><value>Not saves…</value></data>
+  <data name="SuggestionLater" xml:space="preserve"><value>Later</value></data>
+  <data name="SaveFolderFoundForOther" xml:space="preserve"><value>LSS found where {0} saves.</value></data>
+  <data name="EpicItemMissing" xml:space="preserve"><value>Epic Games Launcher doesn&apos;t list this game any more.</value></data>
+  <data name="LaunchFailedVia" xml:space="preserve"><value>We couldn&apos;t start {0} through {1}: {2}</value></data>
+  <data name="CloudOnGeneric" xml:space="preserve"><value>{0} keeps a copy of the saves online (cloud saves). It may bring back the saves of another playthrough: turn it off for this game in {1}.</value></data>
+  <data name="CloudBarTitleGeneric" xml:space="preserve"><value>Cloud saves are on for {0}</value></data>
+  <data name="CloudConfirmHeadingGeneric" xml:space="preserve"><value>Cloud saves might mix up your playthroughs</value></data>
+  <data name="CloudBarGeneric" xml:space="preserve"><value>{0} keeps a copy of the saves online. Turn it off for this game in {1}.</value></data>
+  <data name="GogExeMissing" xml:space="preserve"><value>GOG doesn&apos;t say which program starts this game.</value></data>
+  <data name="ProgramNotStarted" xml:space="preserve"><value>The program didn&apos;t start.</value></data>
+  <data name="StartFromHeroic" xml:space="preserve"><value>Start the game from Heroic: LSS can&apos;t start it from here yet.</value></data>
+  <data name="ManualProviderName" xml:space="preserve"><value>This computer</value></data>
+  <data name="ManualCannotStart" xml:space="preserve"><value>LSS can&apos;t start this game from here: the program is not set, or it is a Windows program on Linux.</value></data>
+  <data name="AddGameButton" xml:space="preserve"><value>Add a game…</value></data>
+  <data name="AddGamePickProgram" xml:space="preserve"><value>Choose the program that starts the game</value></data>
+  <data name="AddGameTitle" xml:space="preserve"><value>Add a game</value></data>
+  <data name="AddGameCaption" xml:space="preserve"><value>NAME OF THE GAME</value></data>
+  <data name="AddGameHint" xml:space="preserve"><value>As it will be shown in LSS.</value></data>
+  <data name="AddGameConfirm" xml:space="preserve"><value>Add</value></data>
+  <data name="PlayerNameTaken" xml:space="preserve"><value>There is already a player with this name.</value></data>
+  <data name="PlayerNotFound" xml:space="preserve"><value>Player not found.</value></data>
+  <data name="PlayerColorInvalid" xml:space="preserve"><value>Choose one of the colours.</value></data>
+  <data name="PlayersNotSaved" xml:space="preserve"><value>The players could not be saved.</value></data>
+  <data name="LastPlayer" xml:space="preserve"><value>There must be at least one player.</value></data>
+  <data name="LastAdmin" xml:space="preserve"><value>There must be at least one admin.</value></data>
+  <data name="AdminNeedsPin" xml:space="preserve"><value>An admin must have a PIN.</value></data>
+  <data name="PlayerDefaultName" xml:space="preserve"><value>Player 1</value></data>
+  <data name="NotYourPlaythrough" xml:space="preserve"><value>This playthrough belongs to another player.</value></data>
+  <data name="SimpleCloseGame" xml:space="preserve"><value>{0} is already open. Close it first.</value></data>
+  <data name="SavesBeforeLss" xml:space="preserve"><value>Before LSS</value></data>
+  <data name="ModeTitle" xml:space="preserve"><value>How do you want to use LSS?</value></data>
+  <data name="ModeHint" xml:space="preserve"><value>You can change it at any time in Settings.</value></data>
+  <data name="ModeSimpleTitle" xml:space="preserve"><value>Simple</value></data>
+  <data name="ModeSimpleText" xml:space="preserve"><value>Choose who's playing and click a game. Everyone finds their own playthroughs. Fits everyone, kids too.</value></data>
+  <data name="ModeSimplePoint1" xml:space="preserve"><value>One player, one click, play</value></data>
+  <data name="ModeSimplePoint2" xml:space="preserve"><value>Saves by itself when you close the game</value></data>
+  <data name="ModeSimplePoint3" xml:space="preserve"><value>No button that deletes</value></data>
+  <data name="ModeAdvancedPoint1" xml:space="preserve"><value>Several playthroughs per game, with notes</value></data>
+  <data name="ModeAdvancedPoint2" xml:space="preserve"><value>Save points and automatic copies</value></data>
+  <data name="ModeAdvancedPoint3" xml:space="preserve"><value>Export and import between computers</value></data>
+  <data name="ModeContinue" xml:space="preserve"><value>Continue with {0}</value></data>
+  <data name="ModeAdvancedTitle" xml:space="preserve"><value>Advanced</value></data>
+  <data name="ModeAdvancedText" xml:space="preserve"><value>All playthroughs, saved points, history, save folders and every option.</value></data>
+  <data name="AdminPickerTitle" xml:space="preserve"><value>Who are you?</value></data>
+  <data name="AdminOnlyText" xml:space="preserve"><value>Only an admin can do this.</value></data>
+  <data name="AdminPickerCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="PinTitle" xml:space="preserve"><value>PIN of {0}</value></data>
+  <data name="PinPrompt" xml:space="preserve"><value>Enter the PIN</value></data>
+  <data name="AdminWithPin" xml:space="preserve"><value>with PIN</value></data>
+  <data name="AdminWithoutPin" xml:space="preserve"><value>no PIN</value></data>
+  <data name="PinWrong" xml:space="preserve"><value>Wrong PIN</value></data>
+  <data name="PinWait" xml:space="preserve"><value>Too many tries. Wait {0} seconds.</value></data>
+  <data name="PinFormat" xml:space="preserve"><value>The PIN is 4 digits.</value></data>
+  <data name="SetPin" xml:space="preserve"><value>Set PIN…</value></data>
+  <data name="ChangePin" xml:space="preserve"><value>Change PIN…</value></data>
+  <data name="RemovePin" xml:space="preserve"><value>Remove PIN</value></data>
+  <data name="PinNew" xml:space="preserve"><value>New PIN</value></data>
+  <data name="PinRepeat" xml:space="preserve"><value>Repeat the new PIN</value></data>
+  <data name="PinMismatch" xml:space="preserve"><value>The two PINs are different.</value></data>
+  <data name="PinOptional" xml:space="preserve"><value>Optional. With a PIN, only you can use your admin rights.</value></data>
+  <data name="GiveToBusy" xml:space="preserve"><value>Changing the player...</value></data>
+  <data name="SaveFoldersCount" xml:space="preserve"><value>Save folders ({0})</value></data>
+  <data name="PlaythroughCountOne" xml:space="preserve"><value>1 playthrough</value></data>
+  <data name="PlaythroughCount" xml:space="preserve"><value>{0} playthroughs</value></data>
+  <data name="FavouriteTooltip" xml:space="preserve"><value>Favourite: the one used in simple mode</value></data>
+  <data name="CloudAllowSimple" xml:space="preserve"><value>Allow in simple mode anyway</value></data>
+  <data name="CloudAllowedSimple" xml:space="preserve"><value>Allowed in simple mode even with cloud saves on.</value></data>
+  <data name="CloudAllowUndo" xml:space="preserve"><value>Undo</value></data>
+  <data name="CancelChoice" xml:space="preserve"><value>Cancel</value></data>
+  <data name="GiveToMenu" xml:space="preserve"><value>Give to…</value></data>
+  <data name="GiveToPick" xml:space="preserve"><value>Who gets "{0}"?</value></data>
+  <data name="NoOtherPlayer" xml:space="preserve"><value>There is no other player to give it to. Add a player first.</value></data>
+  <data name="PlaythroughPlayer" xml:space="preserve"><value>Player</value></data>
+  <data name="RemovePlayerText" xml:space="preserve"><value>What about the playthroughs of {0}?</value></data>
+  <data name="PlayersButton" xml:space="preserve"><value>Players…</value></data>
+  <data name="PlayersTitle" xml:space="preserve"><value>Players</value></data>
+  <data name="AddPlayer" xml:space="preserve"><value>Add player</value></data>
+  <data name="RemovePlayer" xml:space="preserve"><value>Remove</value></data>
+  <data name="PlayerAdmin" xml:space="preserve"><value>Admin</value></data>
+  <data name="PlayerAdminTooltip" xml:space="preserve"><value>Admins can open the advanced mode, add players and games, and allow games with cloud saves.</value></data>
+  <data name="DeletedIntro" xml:space="preserve"><value>Deleted playthroughs stay here until you recover them or delete them for good.</value></data>
+  <data name="PurgeButton" xml:space="preserve"><value>Delete for good…</value></data>
+  <data name="PurgeAllButton" xml:space="preserve"><value>Delete all for good…</value></data>
+  <data name="PurgeTitle" xml:space="preserve"><value>Delete for good?</value></data>
+  <data name="PurgeText" xml:space="preserve"><value>"{0}" will be deleted for good. This can't be undone.</value></data>
+  <data name="PurgeAllText" xml:space="preserve"><value>{0} deleted playthroughs will be deleted for good. This can't be undone.</value></data>
+  <data name="PurgeVerb" xml:space="preserve"><value>Delete for good</value></data>
+  <data name="Purged" xml:space="preserve"><value>Playthrough deleted for good.</value></data>
+  <data name="DeletedPlayTime" xml:space="preserve"><value>play time {0}</value></data>
+  <data name="PlayerNameCaption" xml:space="preserve"><value>Player's name</value></data>
+  <data name="SimpleLastPlay" xml:space="preserve"><value>Last played {0}</value></data>
+  <data name="SimpleNeedsSetup" xml:space="preserve"><value>To set up</value></data>
+  <data name="SimpleNeedsSetupOnce" xml:space="preserve"><value>Needs setting up once</value></data>
+  <data name="SimpleCloudLabel" xml:space="preserve"><value>Ask an admin</value></data>
+  <data name="FullScreenOn" xml:space="preserve"><value>Full screen</value></data>
+  <data name="FullScreenOff" xml:space="preserve"><value>Leave full screen</value></data>
+  <data name="SwitchToSimple" xml:space="preserve"><value>Simple mode</value></data>
+  <data name="SwitchToAdvanced" xml:space="preserve"><value>Advanced mode</value></data>
+  <data name="SimpleWhoIsPlaying" xml:space="preserve"><value>Who's playing?</value></data>
+  <data name="SimpleTapName" xml:space="preserve"><value>Tap your name to see your games.</value></data>
+  <data name="SimpleWhatToPlay" xml:space="preserve"><value>What do you play today?</value></data>
+  <data name="SimpleAddGameAny" xml:space="preserve"><value>Any game on this computer</value></data>
+  <data name="SimpleHaveFunTitle" xml:space="preserve"><value>Have fun, {0}!</value></data>
+  <data name="SimpleHaveFunBody" xml:space="preserve"><value>When you close {0}, LSS saves your game by itself. You don't have to do anything.</value></data>
+  <data name="SimpleGameOpen" xml:space="preserve"><value>{0} is open</value></data>
+  <data name="SimpleCantDetect" xml:space="preserve"><value>LSS can't see when you close this game: when you have finished, press here.</value></data>
+  <data name="SimpleChangePlayer" xml:space="preserve"><value>Change player</value></data>
+  <data name="SimpleAddPlayer" xml:space="preserve"><value>Add player</value></data>
+  <data name="SimpleAddGame" xml:space="preserve"><value>Add a game</value></data>
+  <data name="SimplePlaying" xml:space="preserve"><value>Playing</value></data>
+  <data name="SimpleMyGames" xml:space="preserve"><value>My games</value></data>
+  <data name="SimpleMyGamesTitle" xml:space="preserve"><value>Your games of {0}</value></data>
+  <data name="SimpleMyGamesHint" xml:space="preserve"><value>{0} · tap a game to play it</value></data>
+  <data name="SimpleFavourite" xml:space="preserve"><value>The one you play</value></data>
+  <data name="SimpleNewGame" xml:space="preserve"><value>Start a new game</value></data>
+  <data name="SimpleHaveFun" xml:space="preserve"><value>Have fun, {0}! When you close {1}, LSS saves your game.</value></data>
+  <data name="SimpleStartYourself" xml:space="preserve"><value>Now start {0} as usual. When you have finished, come back here.</value></data>
+  <data name="SimpleFinished" xml:space="preserve"><value>I've finished playing</value></data>
+  <data name="SimpleSaved" xml:space="preserve"><value>{0} saved for {1}</value></data>
+  <data name="SimpleCloudBlocked" xml:space="preserve"><value>{0} keeps a copy of the saves online, and it may bring back someone else's game. Ask an admin ({1}) to turn the cloud saves off or to allow this game.</value></data>
+  <data name="SimpleAdminHere" xml:space="preserve"><value>An admin is here</value></data>
+  <data name="SimpleCloudAdminText" xml:space="preserve"><value>Cloud saves are on for {0}: the launcher may bring back the saves of another player. Turning them off is safer.</value></data>
+  <data name="SimpleCloudAllow" xml:space="preserve"><value>Allow this game</value></data>
+  <data name="SimpleCloudOnce" xml:space="preserve"><value>Play only this time</value></data>
+  <data name="SimpleWhoseSaves" xml:space="preserve"><value>There is already a saved game of {0} on this computer. Whose is it?</value></data>
+  <data name="SimpleDontKnow" xml:space="preserve"><value>I don't know: keep it aside and start a new game</value></data>
+  <data name="SimpleWhoseSavesHint" xml:space="preserve"><value>LSS keeps it aside for that person. It only asks this once.</value></data>
+  <data name="SimpleAskForHelp" xml:space="preserve"><value>Ask whoever set up LSS to look at it.</value></data>
+  <data name="SimpleNothingSaved" xml:space="preserve"><value>It looks like you did not save in the game, so there is nothing to keep.</value></data>
+  <data name="SimpleNothingSavedWarning" xml:space="preserve"><value>IF YOU DID SAVE, CALL AN ADMIN: YOUR PROGRESS IS NOT BEING SAVED.</value></data>
+  <data name="SteamOpenHeading" xml:space="preserve"><value>Steam is open</value></data>
+  <data name="SteamOpenText" xml:space="preserve"><value>Steam keeps its own list of the saves in memory. If you change playthrough while it is open, {0} may not find the saves, or say it could not restore them. Close Steam first: LSS starts it again together with the game.</value></data>
+  <data name="SteamCloseAndContinue" xml:space="preserve"><value>Close Steam and continue</value></data>
+  <data name="SteamCloseFailed" xml:space="preserve"><value>LSS could not close Steam. Close it yourself (Steam menu, Exit) and try again.</value></data>
+  <data name="SteamDeckText" xml:space="preserve"><value>You are in Gaming Mode: Steam shuts down and starts again by itself. LSS may close together with Steam; if it does, open it again from your library and choose the playthrough once more.</value></data>
+  <data name="SimpleNotStarted" xml:space="preserve"><value>The game didn't start</value></data>
+  <data name="SimpleNotStartedDone" xml:space="preserve"><value>OK, nothing was saved.</value></data>
+  <data name="PinCurrent" xml:space="preserve"><value>Current PIN</value></data>
+  <data name="PinAgain" xml:space="preserve"><value>Repeat the new PIN</value></data>
+  <data name="PinDigits" xml:space="preserve"><value>4 digits</value></data>
+  <data name="PinSave" xml:space="preserve"><value>Save the PIN</value></data>
+  <data name="PinSetHint" xml:space="preserve"><value>Optional. With a PIN, only you can play under your name; if you are an admin, also with the admin rights. If you forget it, an admin can remove it.</value></data>
+  <data name="PinSetMenu" xml:space="preserve"><value>Set PIN…</value></data>
+  <data name="PinChangeMenu" xml:space="preserve"><value>Change PIN…</value></data>
+  <data name="PinRemoveMenu" xml:space="preserve"><value>Remove PIN</value></data>
+  <data name="PlayerUser" xml:space="preserve"><value>User</value></data>
+  <data name="PlayersHint" xml:space="preserve"><value>Admins can open the advanced mode, add players and games and allow games with cloud saves. The PIN is optional.</value></data>
+  <data name="PlayersColName" xml:space="preserve"><value>NAME</value></data>
+  <data name="PlayersColAdmin" xml:space="preserve"><value>ADMIN</value></data>
+  <data name="PlayersColPin" xml:space="preserve"><value>PIN</value></data>
+  <data name="PlayersColColour" xml:space="preserve"><value>COLOUR</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>Move up</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>Move down</value></data>
+  <data name="RemovePlayerMenu" xml:space="preserve"><value>Remove…</value></data>
+  <data name="SimpleCloudBlockedHeading" xml:space="preserve"><value>{0} needs an admin</value></data>
+  <data name="SimpleCloudAdminHeading" xml:space="preserve"><value>Online saves are on</value></data>
+  <data name="RemovePlayerTitle" xml:space="preserve"><value>Remove {0}?</value></data>
+  <data name="RemovePlayerGiveTo" xml:space="preserve"><value>Give them to:</value></data>
+  <data name="RemovePlayerDelete" xml:space="preserve"><value>Delete them (they can be recovered from the deleted playthroughs)</value></data>
+  <data name="RemovePlayerVerb" xml:space="preserve"><value>Remove {0}</value></data>
+  <data name="NewProfileTitleFor" xml:space="preserve"><value>New playthrough of {0}</value></data>
 </root>

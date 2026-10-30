@@ -1,0 +1,56 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.SpotSuggestionsWindow"
+        x:DataType="vm:SpotSuggestionsViewModel"
+        Title="{Binding Title}"
+        Width="560" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="22,20" Spacing="12">
+
+    <!-- Una riga per proposta: la cartella, i motivi e le decisioni -->
+    <ScrollViewer MaxHeight="460" HorizontalScrollBarVisibility="Disabled">
+      <ItemsControl ItemsSource="{Binding Items}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:SpotSuggestionItem">
+            <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
+                    CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
+              <StackPanel Spacing="6">
+                <Button Classes="link" Command="{Binding OpenFolderCommand}" ToolTip.Tip="{Binding OpenFolderTip}"
+                        HorizontalAlignment="Left">
+                  <TextBlock Text="{Binding FolderText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                </Button>
+                <TextBlock Classes="small" Text="{Binding ReasonsText}" IsVisible="{Binding HasReasons}" TextWrapping="Wrap" />
+
+                <WrapPanel>
+                  <Button Classes="primary" Content="{Binding AddText}" Command="{Binding AddCommand}"
+                          Margin="0,0,8,6" />
+                  <Button Classes="secondary" Content="{Binding LaterText}" Command="{Binding LaterCommand}"
+                          Margin="0,0,8,6" />
+                  <Button Classes="link" Content="{Binding NotSaveText}" Command="{Binding ToggleIgnoreCommand}"
+                          Margin="0,0,8,6" />
+                </WrapPanel>
+
+                <!-- Solo per questo gioco o per tutti: come nella procedura "Trova i salvataggi" -->
+                <StackPanel IsVisible="{Binding ChoosingIgnore}" Orientation="Horizontal" Spacing="8">
+                  <Button Classes="secondary" Content="{Binding IgnoreForGameText}" Command="{Binding IgnoreForGameCommand}" />
+                  <Button Classes="secondary" Content="{Binding IgnoreForAllText}" Command="{Binding IgnoreForAllCommand}"
+                          IsVisible="{Binding CanIgnoreForAll}" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+    </StackPanel>
+
+  </StackPanel>
+
+</Window>

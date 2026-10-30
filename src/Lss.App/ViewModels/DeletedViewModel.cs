@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -6,21 +7,43 @@ using Lss.App.Services;
 
 namespace Lss.App.ViewModels;
 
-/// <summary>Una partita eliminata nell'elenco, con la data dell'eliminazione.</summary>
+/// <summary>
+/// Una partita eliminata nell'elenco: nome, persona a cui apparteneva (pallino e
+/// nome, "—" se non esiste più), data dell'eliminazione e tempo di gioco.
+/// </summary>
 public sealed class DeletedItemViewModel
 {
-    public DeletedItemViewModel(Snapshot snapshot)
+    public DeletedItemViewModel(Snapshot snapshot, Person? owner, PlaythroughInfo info)
     {
         Snapshot = snapshot;
         Name = SaveManager.ProfileDisplayName(snapshot.Owner);
-        Details = Loc.F(Strings.DeletedOn, snapshot.Date.ToString("g"));
+        OwnerText = owner?.Name ?? "—";
+        OwnerInitial = owner != null && owner.Name.Length > 0 ? char.ToUpperInvariant(owner.Name[0]).ToString() : "";
+        OwnerBrush = owner == null ? null : new SolidColorBrush(Color.Parse(owner.Color));
+        Details = Loc.F(Strings.DeletedOn, snapshot.Date.ToString("g")) + "  ·  " +
+                  Loc.F(Strings.DeletedPlayTime, info.PlayTime.ToString(@"h\:mm"));
     }
 
     public Snapshot Snapshot { get; }
 
     public string Name { get; }
 
+    public string OwnerText { get; }
+
+    public string OwnerInitial { get; }
+
+    /// <summary>Colore della persona, o null se non esiste più.</summary>
+    public IBrush? OwnerBrush { get; }
+
     public string Details { get; }
+
+    /// <summary>"Andrea · eliminata il … · tempo di gioco …", sotto il nome.</summary>
+    public string Line => OwnerText + "  ·  " + Details;
+
+    /// <summary>La persona non c'è più: il pallino è grigio con "?".</summary>
+    public IBrush CircleBrush => OwnerBrush ?? new SolidColorBrush(Color.Parse("#4A4A50"));
+
+    public string CircleInitial => OwnerInitial == "" ? "?" : OwnerInitial;
 }
 
 /// <summary>
@@ -49,6 +72,9 @@ public partial class DeletedViewModel : ObservableObject
     public bool Changed { get; private set; }
 
     public string Title => Strings.DeletedTitle;
+
+    /// <summary>"Partite eliminate · Control", in cima alla finestra.</summary>
+    public string Heading => Strings.DeletedTitle + " · " + manager.Game.Name;
 
     public string EmptyText => Strings.NoDeleted;
 
@@ -94,6 +120,60 @@ public partial class DeletedViewModel : ObservableObject
 
     public bool CanUse => !Busy && Selected != null;
 
+    public string Intro => Strings.DeletedIntro;
+
+    public string PurgeText => Strings.PurgeButton;
+
+    public string PurgeAllText => Strings.PurgeAllButton;
+
+    /// <summary>"Elimina tutte per sempre…" si vede da due partite eliminate in su.</summary>
+    [ObservableProperty]
+    private bool showPurgeAll;
+
+    /// <summary>Elimina per sempre la partita selezionata, dopo conferma.</summary>
+    [RelayCommand]
+    private async Task PurgeAsync()
+    {
+        if (Selected is not DeletedItemViewModel item)
+            return;
+
+        bool confirmed = await dialogs.ConfirmAsync(Strings.PurgeTitle,
+            Loc.F(Strings.PurgeText, item.Name), Strings.PurgeVerb, destructive: true);
+
+        if (!confirmed)
+            return;
+
+        await RunAsync(Strings.BusyDeleting, () => manager.PurgeDeletedProfile(item.Snapshot));
+    }
+
+    /// <summary>Elimina per sempre tutte le partite eliminate, dopo conferma. Si ferma al primo errore.</summary>
+    [RelayCommand]
+    private async Task PurgeAllAsync()
+    {
+        int count = Items.Count;
+
+        bool confirmed = await dialogs.ConfirmAsync(Strings.PurgeTitle,
+            Loc.F(Strings.PurgeAllText, count), Strings.PurgeVerb, destructive: true);
+
+        if (!confirmed)
+            return;
+
+        List<Snapshot> all = Items.Select(item => item.Snapshot).ToList();
+
+        await RunAsync(Strings.BusyDeleting, () =>
+        {
+            foreach (Snapshot deleted in all)
+            {
+                Result purged = manager.PurgeDeletedProfile(deleted);
+
+                if (!purged.Success)
+                    return purged;
+            }
+
+            return Result.Ok(Strings.Purged);
+        });
+    }
+
     partial void OnSelectedChanged(DeletedItemViewModel? value) => OnPropertyChanged(nameof(CanUse));
 
     partial void OnBusyChanged(bool value) => OnPropertyChanged(nameof(CanUse));
@@ -114,7 +194,7 @@ public partial class DeletedViewModel : ObservableObject
         if (Selected is not DeletedItemViewModel item)
             return;
 
-        await RunAsync(Strings.BusyRecovering, () => manager.RecoverDeletedProfile(item.Snapshot));
+        await RunAsync(Strings.BusyRecovering, () => manager.RecoverDeletedProfile(item.Snapshot, manager.RecoveryOwnerOf(item.Snapshot)));
     }
 
     [RelayCommand]
@@ -147,7 +227,11 @@ public partial class DeletedViewModel : ObservableObject
         try
         {
             foreach (Snapshot deleted in manager.GetDeletedProfiles())
-                Items.Add(new DeletedItemViewModel(deleted));
+            {
+                // Se la persona non esiste più, la riga dice "—".
+                Person? owner = manager.Players?.Find(manager.DeletedOwnerOf(deleted));
+                Items.Add(new DeletedItemViewModel(deleted, owner, manager.DeletedInfoOf(deleted)));
+            }
         }
         catch (Exception ex)
         {
@@ -158,6 +242,7 @@ public partial class DeletedViewModel : ObservableObject
         Caption = count == 0 ? Strings.CaptionDeleted : $"{Strings.CaptionDeleted}  ·  {count}";
         ShowEmpty = count == 0;
         ListVisible = count > 0;
+        ShowPurgeAll = count >= 2;
     }
 
     private async Task<Result> RunAsync(string message, Func<Result> action)

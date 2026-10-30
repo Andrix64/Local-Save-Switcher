@@ -12,7 +12,7 @@ public sealed class SnapshotTests : IDisposable
     private SaveManager ManagerWithActiveProfile()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         return manager;
     }
@@ -86,7 +86,7 @@ public sealed class SnapshotTests : IDisposable
     {
         SaveManager manager = ManagerWithActiveProfile();
         manager.CreateSavestate("Boss");
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Luigi");
 
         Assert.Empty(manager.GetSavestates());

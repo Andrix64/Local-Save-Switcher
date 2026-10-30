@@ -13,19 +13,29 @@ internal static class FileOps
     // come gli altri.
     private const string SteamCacheFile = "remotecache.vdf";
 
+    // Cartella al primo livello di uno snapshot con i posti extra del gioco
+    // (.lss-posizioni/<id>): non è mai parte della partita, va solo tenuta.
+    public const string ExtraSpotsFolder = ".lss-posizioni";
+
     // Cartelle accanto alla destinazione durante ReplaceFolder.
     public const string TempSuffix = ".nuovo";
     public const string OldSuffix = ".vecchio";
 
+    /// <summary>
+    /// Copia tutta la cartella, posti extra compresi (da uno snapshot a un altro).
+    /// </summary>
     public static void CopyFolder(string source, string destination)
     {
         if (!Directory.Exists(source))
             throw new DirectoryNotFoundException("Cartella non trovata: " + source);
 
-        CopyFolder(source, destination, topLevel: true);
+        CopyFolder(source, destination, topLevel: true, carryExtraSpots: true);
     }
 
-    private static void CopyFolder(string source, string destination, bool topLevel)
+    /// <param name="carryExtraSpots">
+    /// false: i posti extra di source non si copiano (la copia va nel gioco).
+    /// </param>
+    private static void CopyFolder(string source, string destination, bool topLevel, bool carryExtraSpots)
     {
         Directory.CreateDirectory(destination);
 
@@ -40,21 +50,32 @@ internal static class FileOps
         }
 
         foreach (string dir in Directory.GetDirectories(source))
-            CopyFolder(dir, Path.Combine(destination, Path.GetFileName(dir)), topLevel: false);
+        {
+            string name = Path.GetFileName(dir);
+
+            if (!carryExtraSpots && IsExtraSpots(name, topLevel))
+                continue;
+
+            CopyFolder(dir, Path.Combine(destination, name), topLevel: false, carryExtraSpots);
+        }
     }
 
     /// <summary>
     /// Rende destination identica a source, cancellando ciò che manca in source.
+    /// I posti extra di destination non si toccano.
     /// </summary>
     public static void MirrorFolder(string source, string destination)
     {
         if (!Directory.Exists(source))
             throw new DirectoryNotFoundException("Cartella non trovata: " + source);
 
-        MirrorFolder(source, destination, topLevel: true);
+        MirrorFolder(source, destination, topLevel: true, carryExtraSpots: false);
     }
 
-    private static void MirrorFolder(string source, string destination, bool topLevel)
+    /// <param name="carryExtraSpots">
+    /// false: i posti extra non si copiano né si cancellano (sono di destination).
+    /// </param>
+    private static void MirrorFolder(string source, string destination, bool topLevel, bool carryExtraSpots)
     {
         Directory.CreateDirectory(destination);
 
@@ -70,10 +91,15 @@ internal static class FileOps
                 File.Delete(file);
         }
 
-        // Elimina le cartelle non presenti nella sorgente.
+        // Elimina le cartelle non presenti nella sorgente (i posti extra no).
         foreach (string dir in Directory.GetDirectories(destination))
         {
-            if (!Directory.Exists(Path.Combine(source, Path.GetFileName(dir))))
+            string name = Path.GetFileName(dir);
+
+            if (!carryExtraSpots && IsExtraSpots(name, topLevel))
+                continue;
+
+            if (!Directory.Exists(Path.Combine(source, name)))
                 Directory.Delete(dir, true);
         }
 
@@ -90,7 +116,27 @@ internal static class FileOps
 
         // Sincronizza le sottocartelle.
         foreach (string dir in Directory.GetDirectories(source))
-            MirrorFolder(dir, Path.Combine(destination, Path.GetFileName(dir)), topLevel: false);
+        {
+            string name = Path.GetFileName(dir);
+
+            if (!carryExtraSpots && IsExtraSpots(name, topLevel))
+                continue;
+
+            MirrorFolder(dir, Path.Combine(destination, name), topLevel: false, carryExtraSpots);
+        }
+    }
+
+    /// <summary>
+    /// Copia source in destination senza i posti extra che source ha in .lss-posizioni,
+    /// e controlla la copia. Serve per portare un posto da uno zip o da un altro snapshot.
+    /// </summary>
+    public static void CopyWithoutExtraSpotsVerified(string source, string destination)
+    {
+        if (!Directory.Exists(source))
+            throw new DirectoryNotFoundException("Cartella non trovata: " + source);
+
+        CopyFolder(source, destination, topLevel: true, carryExtraSpots: false);
+        Verify(source, destination);
     }
 
     /// <summary>
@@ -99,7 +145,7 @@ internal static class FileOps
     public static void CopyFolderVerified(string source, string destination)
     {
         CopyFolder(source, destination);
-        Verify(source, destination);
+        Verify(source, destination, carryExtraSpots: true);
     }
 
     /// <summary>
@@ -108,7 +154,12 @@ internal static class FileOps
     /// cartelle. Se qualcosa va storto prima dello scambio, destination resta
     /// com'era. Il file di Steam Cloud di destination viene conservato.
     /// </summary>
-    public static void ReplaceFolder(string source, string destination)
+    /// <param name="carryExtraSpots">
+    /// false (il caso del gioco): i posti extra di source non entrano in destination,
+    /// e quelli di destination restano. true (da uno snapshot a un altro): i posti
+    /// extra di source sostituiscono quelli di destination.
+    /// </param>
+    public static void ReplaceFolder(string source, string destination, bool carryExtraSpots = false)
     {
         string temp = destination + TempSuffix;
         string old = destination + OldSuffix;
@@ -120,12 +171,12 @@ internal static class FileOps
 
         try
         {
-            CopyFolder(source, temp);
+            CopyFolder(source, temp, topLevel: true, carryExtraSpots);
 
             if (Directory.Exists(destination))
-                CopySteamCache(destination, temp);
+                CopyKeptFromDestination(destination, temp, carryExtraSpots);
 
-            Verify(source, temp);
+            Verify(source, temp, carryExtraSpots);
 
             if (!Directory.Exists(destination))
             {
@@ -141,8 +192,8 @@ internal static class FileOps
             {
                 // Cartella in uso (per esempio da Steam): copia diretta dalla
                 // copia già verificata.
-                MirrorFolder(temp, destination);
-                Verify(source, destination);
+                MirrorFolder(temp, destination, topLevel: true, carryExtraSpots);
+                Verify(source, destination, carryExtraSpots);
                 return;
             }
 
@@ -201,21 +252,242 @@ internal static class FileOps
         return recovered;
     }
 
-    private static void Verify(string source, string destination)
+    /// <summary>
+    /// File di folder che corrispondono al pattern (maschere separate da ";"): solo
+    /// il primo livello, o tutti i livelli se recursive. Il pattern vale sul nome
+    /// del file. Il file di Steam Cloud al primo livello e i file temporanei
+    /// (.nuovo, .vecchio) non contano. Un pattern vuoto non corrisponde a niente.
+    /// </summary>
+    public static IReadOnlyList<string> MatchedFiles(string folder, string pattern, bool recursive)
     {
-        if (!FoldersAreEqual(source, destination))
-            throw new IOException("La copia non coincide con l'originale: " + destination);
+        if (pattern == "" || !Directory.Exists(folder))
+            return [];
+
+        SearchOption option = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        var result = new List<string>();
+
+        foreach (string file in Directory.GetFiles(folder, "*", option))
+        {
+            string relative = Path.GetRelativePath(folder, file);
+            string name = Path.GetFileName(file);
+
+            if (IsSkipped(relative) || IsTemporary(name))
+                continue;
+
+            if (Matches(pattern, name))
+                result.Add(file);
+        }
+
+        return result.Order(StringComparer.Ordinal).ToList();
     }
 
     /// <summary>
-    /// Copia nella destinazione il file di Steam Cloud di source, se c'è.
+    /// Copia in destination solo i file corrispondenti (con la loro posizione
+    /// nelle sottocartelle) e controlla byte per byte ogni copia.
     /// </summary>
-    private static void CopySteamCache(string source, string destination)
+    public static void CopyMatchedVerified(string folder, string pattern, bool recursive, string destination)
+    {
+        IReadOnlyList<string> files = MatchedFiles(folder, pattern, recursive);
+        Directory.CreateDirectory(destination);
+
+        foreach (string file in files)
+        {
+            string copy = Path.Combine(destination, Path.GetRelativePath(folder, file));
+            Directory.CreateDirectory(Path.GetDirectoryName(copy)!);
+            File.Copy(file, copy, true);
+        }
+
+        foreach (string file in files)
+        {
+            string copy = Path.Combine(destination, Path.GetRelativePath(folder, file));
+
+            if (!File.Exists(copy) || !FilesAreEqual(file, copy))
+                throw new IOException("La copia non coincide con l'originale: " + copy);
+        }
+    }
+
+    /// <summary>
+    /// Rende i file corrispondenti di folder identici a quelli di source: copia
+    /// ognuno come .nuovo accanto all'originale, verifica tutte le copie, poi le
+    /// sostituisce e infine elimina i corrispondenti che source non ha. Gli altri
+    /// file di folder non vengono toccati.
+    /// </summary>
+    public static void ReplaceMatched(string source, string folder, string pattern, bool recursive)
+    {
+        Dictionary<string, string> wanted = MatchedByName(source, pattern, recursive);
+        IReadOnlyList<string> existing = MatchedFiles(folder, pattern, recursive);
+        var temps = new List<(string Temp, string Target)>();
+
+        try
+        {
+            foreach ((string name, string file) in wanted)
+            {
+                string target = Path.Combine(folder, name);
+                string temp = target + TempSuffix;
+
+                Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+                File.Copy(file, temp, true);
+                temps.Add((temp, target));
+
+                if (!FilesAreEqual(file, temp))
+                    throw new IOException("La copia non coincide con l'originale: " + temp);
+            }
+        }
+        catch
+        {
+            foreach ((string temp, _) in temps)
+                TryDeleteFile(temp);
+
+            throw;
+        }
+
+        foreach ((string temp, string target) in temps)
+            File.Move(temp, target, true);
+
+        foreach (string file in existing)
+        {
+            string relative = Path.GetRelativePath(folder, file);
+
+            if (!wanted.ContainsKey(relative))
+                File.Delete(file);
+        }
+    }
+
+    /// <summary>
+    /// true se i file corrispondenti di folder sono gli stessi (nomi e contenuto)
+    /// di quelli di snapshot.
+    /// </summary>
+    public static bool MatchedEqual(string folder, string pattern, bool recursive, string snapshot)
+    {
+        Dictionary<string, string> mine = MatchedByName(folder, pattern, recursive);
+        Dictionary<string, string> theirs = MatchedByName(snapshot, pattern, recursive);
+
+        if (mine.Count != theirs.Count)
+            return false;
+
+        foreach ((string name, string file) in mine)
+        {
+            if (!theirs.TryGetValue(name, out string? other) || !FilesAreEqual(file, other))
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Rimette a posto i file .nuovo lasciati da una ReplaceMatched interrotta:
+    /// l'originale non viene mai tolto prima della sostituzione, quindi basta
+    /// eliminare la copia. Se ne trova, ritorna true.
+    /// </summary>
+    public static bool RecoverInterruptedMatched(string folder, string pattern, bool recursive)
+    {
+        if (!Directory.Exists(folder))
+            return false;
+
+        SearchOption option = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        bool recovered = false;
+
+        foreach (string temp in Directory.GetFiles(folder, "*" + TempSuffix, option))
+        {
+            string original = temp[..^TempSuffix.Length];
+
+            if (!Matches(pattern, Path.GetFileName(original)))
+                continue;
+
+            File.Delete(temp);
+            recovered = true;
+        }
+
+        return recovered;
+    }
+
+    /// <summary>
+    /// I file corrispondenti di folder, con il nome relativo (chiave) e il percorso.
+    /// </summary>
+    private static Dictionary<string, string> MatchedByName(string folder, string pattern, bool recursive)
+    {
+        var result = new Dictionary<string, string>(NameComparer());
+
+        foreach (string file in MatchedFiles(folder, pattern, recursive))
+            result[Path.GetRelativePath(folder, file)] = file;
+
+        return result;
+    }
+
+    /// <summary>
+    /// Confronto dei nomi relativi: senza maiuscole su Windows.
+    /// </summary>
+    private static StringComparer NameComparer() =>
+        OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+
+    /// <summary>
+    /// true se il nome corrisponde a una delle maschere del pattern. Senza maiuscole su Windows.
+    /// </summary>
+    private static bool Matches(string pattern, string name) =>
+        pattern.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Any(mask => Glob.IsMatch(mask, name, OperatingSystem.IsWindows()));
+
+    /// <summary>
+    /// true se il percorso relativo non è un file da confrontare: il file di Steam
+    /// Cloud al primo livello, o qualcosa dentro i posti extra.
+    /// </summary>
+    private static bool IsSkipped(string relative) =>
+        string.Equals(relative, SteamCacheFile, StringComparison.OrdinalIgnoreCase)
+        || IsExtraSpots(relative.Split(Path.DirectorySeparatorChar)[0], topLevel: true);
+
+    /// <summary>
+    /// true se il nome è la cartella dei posti extra, al primo livello.
+    /// </summary>
+    private static bool IsExtraSpots(string name, bool topLevel) =>
+        topLevel && string.Equals(name, ExtraSpotsFolder, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// true se il nome è un file temporaneo di una sostituzione (.nuovo o .vecchio).
+    /// </summary>
+    private static bool IsTemporary(string name) =>
+        name.EndsWith(TempSuffix, StringComparison.Ordinal) || name.EndsWith(OldSuffix, StringComparison.Ordinal);
+
+    private static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (IOException)
+        {
+            // Resta un file .nuovo: RecoverInterruptedMatched lo elimina alla prossima operazione.
+        }
+    }
+
+    private static void Verify(string source, string destination, bool carryExtraSpots = false)
+    {
+        if (!FoldersAreEqual(source, destination))
+            throw new IOException("La copia non coincide con l'originale: " + destination);
+
+        string extra = Path.Combine(source, ExtraSpotsFolder);
+
+        if (carryExtraSpots && Directory.Exists(extra)
+            && !FoldersAreEqual(extra, Path.Combine(destination, ExtraSpotsFolder)))
+            throw new IOException("La copia dei posti extra non coincide: " + destination);
+    }
+
+    /// <summary>
+    /// Copia nella destinazione ciò che la sostituzione non tocca: il file di
+    /// Steam Cloud di source e, se i posti extra non si portano, la cartella dei
+    /// posti extra di source.
+    /// </summary>
+    private static void CopyKeptFromDestination(string source, string destination, bool carryExtraSpots)
     {
         string cache = Path.Combine(source, SteamCacheFile);
 
         if (File.Exists(cache))
             File.Copy(cache, Path.Combine(destination, SteamCacheFile), true);
+
+        string extra = Path.Combine(source, ExtraSpotsFolder);
+
+        if (!carryExtraSpots && Directory.Exists(extra))
+            CopyAll(extra, Path.Combine(destination, ExtraSpotsFolder));
     }
 
     /// <summary>
@@ -278,7 +550,8 @@ internal static class FileOps
 
         return !Directory
             .EnumerateFiles(path, "*", SearchOption.AllDirectories)
-            .Any(file => !string.Equals(file, cache, StringComparison.OrdinalIgnoreCase));
+            .Any(file => !string.Equals(file, cache, StringComparison.OrdinalIgnoreCase)
+                         && !IsSkipped(Path.GetRelativePath(path, file)));
     }
 
     /// <summary>
@@ -308,10 +581,10 @@ internal static class FileOps
                 return false;
         }
 
-        List<string> dirs = ListNames(Directory.GetDirectories(first), _ => true);
+        List<string> dirs = ListNames(Directory.GetDirectories(first), name => !IsExtraSpots(name, topLevel));
 
         if (!dirs.SequenceEqual(
-                ListNames(Directory.GetDirectories(second), _ => true),
+                ListNames(Directory.GetDirectories(second), name => !IsExtraSpots(name, topLevel)),
                 StringComparer.OrdinalIgnoreCase))
             return false;
 

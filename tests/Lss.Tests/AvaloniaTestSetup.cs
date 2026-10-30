@@ -21,6 +21,7 @@ public sealed class TestApp : Application
 
             AppBuilder.Configure<TestApp>()
                 .UseHeadless(new AvaloniaHeadlessPlatformOptions())
+                .UseSkia()
                 .SetupWithoutStarting();
 
             started = true;

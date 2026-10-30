@@ -1,0 +1,154 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.AdminPickerWindow"
+        x:DataType="vm:AdminPickerViewModel"
+        Title="{Binding Title}"
+        Width="460" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="{StaticResource Surface}"
+        WindowStartupLocation="CenterOwner">
+
+  <!-- Come il design (canvas "Chi sei? · PIN"). -->
+  <Window.Styles>
+    <Style Selector="Button.admin">
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="CornerRadius" Value="16" />
+      <Setter Property="Padding" Value="20,18" />
+      <Setter Property="Margin" Value="0,0,20,20" />
+      <Setter Property="MinWidth" Value="120" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.admin:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="Button.admin:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="Button.key">
+      <Setter Property="Width" Value="76" />
+      <Setter Property="Height" Value="64" />
+      <Setter Property="Margin" Value="6" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Background" Value="#2C2C30" />
+      <Setter Property="FontSize" Value="26" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.key:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#38383D" />
+    </Style>
+    <Style Selector="Button.key.erase">
+      <Setter Property="Background" Value="{StaticResource SurfaceSelected}" />
+      <Setter Property="FontSize" Value="22" />
+    </Style>
+    <Style Selector="Button.plain">
+      <Setter Property="Height" Value="48" />
+      <Setter Property="Padding" Value="22,0" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Background" Value="#2C2C30" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.plain:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#38383D" />
+    </Style>
+  </Window.Styles>
+
+  <Panel Margin="32">
+
+    <!-- Chi sei: si scelgono gli amministratori -->
+    <StackPanel Spacing="22" IsVisible="{Binding !PadOpen}">
+      <StackPanel Spacing="8">
+        <TextBlock Text="{Binding OnlyAdminText}" FontSize="16" LineHeight="24" Foreground="{StaticResource TextSecondary}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <ItemsControl ItemsSource="{Binding Tiles}" Margin="0,0,-20,-20">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:PersonTile">
+            <Button Classes="admin" Tag="{Binding}" Click="Tile_Click" AutomationProperties.Name="{Binding Person.Name}">
+              <StackPanel Spacing="10" HorizontalAlignment="Center">
+                <Border Width="76" Height="76" CornerRadius="38" Background="{Binding Brush}" HorizontalAlignment="Center">
+                  <TextBlock Text="{Binding Initial}" FontSize="34" FontWeight="Bold" Foreground="White"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="{Binding Person.Name}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                <TextBlock Text="{loc:Str AdminWithPin}" FontSize="12" Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center" IsVisible="{Binding Person.HasPin}" />
+                <TextBlock Text="{loc:Str AdminWithoutPin}" FontSize="12" Foreground="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center" IsVisible="{Binding !Person.HasPin}" />
+              </StackPanel>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+    </StackPanel>
+
+    <!-- PIN dell'amministratore scelto: tastierino -->
+    <StackPanel Spacing="22" IsVisible="{Binding PadOpen}" HorizontalAlignment="Center">
+      <StackPanel Spacing="6" HorizontalAlignment="Center">
+        <TextBlock Text="{Binding Pad.Title}" FontSize="24" FontWeight="ExtraBold" HorizontalAlignment="Center" />
+        <TextBlock Text="{Binding Pad.Prompt}" FontSize="15" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
+      </StackPanel>
+
+      <ItemsControl ItemsSource="{Binding Pad.DotFilled}" HorizontalAlignment="Center"
+                    AutomationProperties.Name="{Binding Pad.Dots}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Horizontal" Spacing="18" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:Boolean">
+            <Panel Width="18" Height="18">
+              <Ellipse Fill="{StaticResource Text}" IsVisible="{Binding}" />
+              <Ellipse Stroke="#5A5A60" StrokeThickness="2" IsVisible="{Binding Converter={x:Static BoolConverters.Not}}" />
+            </Panel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <TextBlock Text="{Binding Pad.WrongText}" IsVisible="{Binding Pad.IsWrong}" FontSize="15"
+                 Foreground="{StaticResource Error}" HorizontalAlignment="Center" />
+      <TextBlock Text="{Binding Pad.WaitText}" FontSize="15" Foreground="{StaticResource Error}" HorizontalAlignment="Center"
+                 TextWrapping="Wrap" TextAlignment="Center"
+                 IsVisible="{Binding Pad.WaitText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+      <UniformGrid Columns="3" Rows="4" HorizontalAlignment="Center" Margin="-6">
+        <Button Classes="key" Tag="1" Click="Digit_Click" Content="1" />
+        <Button Classes="key" Tag="2" Click="Digit_Click" Content="2" />
+        <Button Classes="key" Tag="3" Click="Digit_Click" Content="3" />
+        <Button Classes="key" Tag="4" Click="Digit_Click" Content="4" />
+        <Button Classes="key" Tag="5" Click="Digit_Click" Content="5" />
+        <Button Classes="key" Tag="6" Click="Digit_Click" Content="6" />
+        <Button Classes="key" Tag="7" Click="Digit_Click" Content="7" />
+        <Button Classes="key" Tag="8" Click="Digit_Click" Content="8" />
+        <Button Classes="key" Tag="9" Click="Digit_Click" Content="9" />
+        <Border Width="76" Height="64" Margin="6" />
+        <Button Classes="key" Tag="0" Click="Digit_Click" Content="0" />
+        <Button Classes="key erase" Click="Back_Click" Content="⌫" AutomationProperties.Name="Cancella una cifra" />
+      </UniformGrid>
+
+      <Button Classes="plain" Content="{Binding CancelText}" HorizontalAlignment="Center" Click="CancelPin_Click" />
+    </StackPanel>
+
+  </Panel>
+
+</Window>

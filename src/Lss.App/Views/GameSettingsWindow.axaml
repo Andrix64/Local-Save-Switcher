@@ -1,0 +1,90 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.GameSettingsWindow"
+        x:DataType="vm:GameSettingsViewModel"
+        Title="{Binding Title}"
+        Width="520" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="24,16,24,20">
+
+    <TextBlock Classes="sectionLabel" Text="{Binding CaptionGame}" Margin="4,4,0,8" />
+    <Border Classes="panel">
+      <StackPanel>
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <TextBlock Classes="settingTitle" Text="{Binding LaunchText}" />
+            <TextBlock Classes="settingHint" Text="{Binding LaunchHint}" />
+          </StackPanel>
+          <ToggleSwitch Grid.Column="1" IsChecked="{Binding LaunchGame, Mode=TwoWay}" />
+        </Grid>
+        <Border Classes="divider" />
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <TextBlock Classes="settingTitle" Text="{Binding SaveOnExitText}" />
+            <TextBlock Classes="settingHint" Text="{Binding SaveOnExitHint}" />
+          </StackPanel>
+          <ToggleSwitch Grid.Column="1" IsChecked="{Binding SaveOnExit, Mode=TwoWay}" />
+        </Grid>
+        <Border Classes="divider" />
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <TextBlock Classes="settingTitle" Text="{Binding ShareText}" />
+            <TextBlock Classes="settingHint" Text="{Binding ShareHint}" />
+          </StackPanel>
+          <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShareOptions, Mode=TwoWay}" />
+        </Grid>
+      </StackPanel>
+    </Border>
+
+    <!-- File uguali in tutte le partite -->
+    <TextBlock Classes="sectionLabel" Text="{Binding SharedFilesCaption}" />
+    <Border Classes="panel">
+      <StackPanel Margin="0,12">
+        <ItemsControl ItemsSource="{Binding SharedFiles}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SharedFileItemViewModel">
+              <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                <TextBlock Grid.Column="0" Text="{Binding Path}" Classes="small" VerticalAlignment="Center"
+                           TextWrapping="Wrap" />
+                <Button Grid.Column="1" Classes="link" Content="{loc:Str RemoveSharedFile}"
+                        Command="{Binding RemoveCommand}" Margin="12,0,0,0" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Classes="secondary" Content="{Binding AddSharedFileText}" Command="{Binding AddSharedFileCommand}"
+                HorizontalAlignment="Left" />
+      </StackPanel>
+    </Border>
+
+    <!-- Copie automatiche -->
+    <TextBlock Classes="sectionLabel" Text="{Binding CaptionCopies}" />
+    <Border Classes="panel">
+      <Grid Classes="row" ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+          <TextBlock Classes="settingTitle" Text="{Binding KeepText}" />
+          <TextBlock Classes="settingHint" Text="{Binding KeepHint}" />
+        </StackPanel>
+        <NumericUpDown Grid.Column="1" Value="{Binding KeepCopies, Mode=TwoWay}" Minimum="0" Maximum="999"
+                       Width="110" Margin="16,0,0,0" VerticalAlignment="Center" />
+      </Grid>
+    </Border>
+
+    <!-- Cartelle che non sono salvataggi (di questo gioco) -->
+    <TextBlock Classes="sectionLabel" Text="{Binding CaptionFolders}" />
+    <Border Classes="panel" Padding="0">
+      <Button Classes="navrow" Command="{Binding OpenIgnoredFoldersCommand}">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="settingTitle" Text="{Binding IgnoredFoldersText}" VerticalAlignment="Center" />
+          <Path Grid.Column="1" Classes="chevron" Data="M9 6 L15 12 L9 18" />
+        </Grid>
+      </Button>
+    </Border>
+  </StackPanel>
+
+</Window>

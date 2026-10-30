@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.RemovePlayerWindow"
+        x:DataType="vm:RemovePlayerViewModel"
+        Title="Local Save Switcher"
+        Width="500" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <!-- Come il design (canvas "Rimuovi giocatore"): una domanda sola. -->
+  <StackPanel Margin="28,24" Spacing="16">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <Border Width="40" Height="40" CornerRadius="20" Background="{Binding Brush}">
+        <TextBlock Text="{Binding Initial}" FontSize="18" FontWeight="Bold" Foreground="White"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <TextBlock Text="{Binding Title}" FontSize="19" FontWeight="Bold" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <TextBlock Text="{Binding Question}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+
+    <StackPanel Spacing="10">
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <RadioButton GroupName="Removal" Content="{loc:Str RemovePlayerGiveTo}" IsChecked="{Binding GiveAway}"
+                     VerticalAlignment="Center" />
+        <ComboBox ItemsSource="{Binding Others}" SelectedItem="{Binding SelectedOther}" IsEnabled="{Binding GiveAway}"
+                  MinWidth="160" VerticalAlignment="Center">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:PersonTile">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Width="20" Height="20" CornerRadius="10" Background="{Binding Brush}">
+                  <TextBlock Text="{Binding Initial}" FontSize="10" FontWeight="Bold" Foreground="White"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="{Binding Person.Name}" VerticalAlignment="Center" />
+              </StackPanel>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+      </StackPanel>
+      <RadioButton GroupName="Removal" IsChecked="{Binding DeleteThem}">
+        <TextBlock Text="{loc:Str RemovePlayerDelete}" TextWrapping="Wrap" />
+      </RadioButton>
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+      <Button Classes="danger" Content="{Binding Verb}" Click="Remove_Click" />
+    </StackPanel>
+  </StackPanel>
+
+</Window>

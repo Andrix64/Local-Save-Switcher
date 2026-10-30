@@ -19,14 +19,14 @@ public sealed class RecoveryTests : IDisposable
         TestFolder.Write(Path.Combine(Game + ".vecchio", "remote", "slot"), "prima");
         TestFolder.Write(Path.Combine(Game + ".nuovo", "remote", "slot"), "dopo");
 
-        Assert.Empty(SaveManager.FindAccounts(UserData, "870780"));
+        Assert.Empty(SteamProvider.FindAccounts(UserData, "870780"));
 
         SaveManager.RecoverGameFolders(UserData, "870780");
 
         Assert.Equal("prima", File.ReadAllText(Path.Combine(Game, "remote", "slot")));
         Assert.False(Directory.Exists(Game + ".vecchio"));
         Assert.False(Directory.Exists(Game + ".nuovo"));
-        Assert.Single(SaveManager.FindAccounts(UserData, "870780"));
+        Assert.Single(SteamProvider.FindAccounts(UserData, "870780"));
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class RecoveryTests : IDisposable
     public void InterruptedProfileSwap_IsRecoveredAtStartup()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
 
         // Spegnimento durante "Salva progressi": il profilo è rimasto come .vecchio.
@@ -75,7 +75,7 @@ public sealed class RecoveryTests : IDisposable
     public void InterruptedCaseOnlyRename_IsRecoveredAtStartup()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
 
         // Spegnimento a metà di Mario -> MARIO: resta solo il nome intermedio.
         string profile = Path.Combine(manager.ProfilesPath, "Profilo_Mario");
@@ -97,7 +97,7 @@ public sealed class RecoveryTests : IDisposable
         Assert.True(manager.ActivateProfile("Profilo_Manuale").Success);
         Assert.False(Directory.Exists(Path.Combine(Game, "remote")));
 
-        SteamAccount account = Assert.Single(SaveManager.FindAccounts(UserData, "870780"));
+        GameAccount account = Assert.Single(SteamProvider.FindAccounts(UserData, "870780"));
         Assert.Equal("111", account.Id);
         Assert.Null(account.LastSaved);
     }
@@ -107,7 +107,7 @@ public sealed class RecoveryTests : IDisposable
     {
         TestFolder.Write(Path.Combine(Game, "remotecache.vdf"), "cache");
 
-        Assert.Null(Assert.Single(SaveManager.FindAccounts(UserData, "870780")).LastSaved);
+        Assert.Null(Assert.Single(SteamProvider.FindAccounts(UserData, "870780")).LastSaved);
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public sealed class RecoveryTests : IDisposable
         TestFolder.Write(Path.Combine(UserData, "222", "7", "remote", "sharedconfig.vdf"), "x");
         TestFolder.Write(Path.Combine(UserData, "222", "814380", "remotecache.vdf"), "x");
 
-        SteamAccount account = Assert.Single(SaveManager.FindAccountsWithGames(UserData));
+        GameAccount account = Assert.Single(SteamProvider.FindAccountsWithGames(UserData));
         Assert.Equal("111", account.Id);
     }
 
@@ -131,10 +131,10 @@ public sealed class RecoveryTests : IDisposable
         TestFolder.Write(Path.Combine(UserData, "222", "7", "remote", "sharedconfig.vdf"), "x");
         TestFolder.Write(Path.Combine(UserData, "222", "config", "localconfig.vdf"), "x");
 
-        Assert.Empty(SaveManager.FindAccountsWithGames(UserData));
+        Assert.Empty(SteamProvider.FindAccountsWithGames(UserData));
 
         // L'account 222 ha solo cartelle di Steam: non conta.
-        SteamAccount account = Assert.Single(SaveManager.FindAccountsWithAnyGame(UserData));
+        GameAccount account = Assert.Single(SteamProvider.FindAccountsWithAnyGame(UserData));
         Assert.Equal("111", account.Id);
     }
 

@@ -48,5 +48,4 @@ public partial class HistoryWindow : Window
         ViewModel.Stop();
     }
 
-    private void Close_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => Close(null);
 }

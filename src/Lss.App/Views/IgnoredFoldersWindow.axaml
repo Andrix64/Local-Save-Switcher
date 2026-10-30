@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.IgnoredFoldersWindow"
+        x:DataType="vm:IgnoredFoldersViewModel"
+        Title="{Binding Title}"
+        Width="520" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="22,20" Spacing="12">
+
+    <TextBlock Text="{Binding EmptyText}" IsVisible="{Binding IsEmpty}" TextWrapping="Wrap" />
+
+    <ScrollViewer MaxHeight="420" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding !IsEmpty}">
+      <ItemsControl ItemsSource="{Binding Items}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:IgnoredFolderItem">
+            <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}"
+                    BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,8">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="2">
+                  <TextBlock Text="{Binding Folder}" TextWrapping="Wrap" />
+                  <TextBlock Classes="small" Foreground="{StaticResource TextMuted}"
+                             Text="{Binding Scope}" />
+                  <TextBlock Classes="small" Foreground="{StaticResource TextMuted}"
+                             Text="{Binding DateText}" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="link" Content="{loc:Str IgnoredRemove}"
+                        Command="{Binding RemoveCommand}" VerticalAlignment="Center" Margin="10,0,0,0" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+  </StackPanel>
+
+</Window>

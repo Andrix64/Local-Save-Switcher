@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Scegli la modalità</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #0F0F10; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="height: 76px; box-sizing: border-box; padding: 0 28px; background: #0A0A0B; display: flex; align-items: center; gap: 14px">
+    <div style="width: 4px; height: 36px; background: #E0261B"></div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 22px; font-weight: 800">LSS</div>
+      <div style="font-size: 11px; font-weight: 600; color: #96969C; letter-spacing: 0.5px">LOCAL SAVE SWITCHER · v2.0.0</div>
+    </div>
+  </header>
+  <main style="flex: 1; box-sizing: border-box; padding: 48px 72px; display: flex; flex-direction: column; gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <h1 style="margin: 0; font-size: 30px; font-weight: 800">Come vuoi usare LSS?</h1>
+      <p style="margin: 0; font-size: 16px; color: #A8A8AE">Puoi cambiare in ogni momento dalle impostazioni.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px">
+      <button style="display: flex; flex-direction: column; gap: 22px; text-align: left; padding: 32px; border-radius: 18px; border: 2px solid #E0261B; background: #19191B; color: #F2F2F2; font-family: inherit; cursor: pointer">
+        <div style="display: flex; gap: 12px" aria-hidden="true">
+          <div style="width: 56px; height: 56px; border-radius: 28px; background: #C2410C; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #FFFFFF">A</div>
+          <div style="width: 56px; height: 56px; border-radius: 28px; background: #1D6FD0; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #FFFFFF">C</div>
+          <div style="width: 56px; height: 56px; border-radius: 28px; background: #2F7D3B; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #FFFFFF">L</div>
+        </div>
+        <div style="font-size: 24px; font-weight: 800">Semplice</div>
+        <div style="font-size: 16px; line-height: 1.55; color: #A8A8AE">Scegli chi gioca e clicca su un gioco. Ognuno ritrova le sue partite. Adatta a tutti, anche ai bambini.</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #D6D6DA">
+          <span>✓ Un giocatore, un clic, si gioca</span>
+          <span>✓ Salva da solo quando chiudi il gioco</span>
+          <span>✓ Nessun pulsante che cancella</span>
+        </div>
+      </button>
+      <button style="display: flex; flex-direction: column; gap: 22px; text-align: left; padding: 32px; border-radius: 18px; border: 2px solid #2E2E33; background: #19191B; color: #F2F2F2; font-family: inherit; cursor: pointer">
+        <div style="display: flex; flex-direction: column; gap: 8px" aria-hidden="true">
+          <div style="height: 14px; width: 220px; border-radius: 4px; background: #2C2C30"></div>
+          <div style="height: 14px; width: 170px; border-radius: 4px; background: #2C2C30"></div>
+          <div style="height: 14px; width: 200px; border-radius: 4px; background: #2C2C30"></div>
+        </div>
+        <div style="font-size: 24px; font-weight: 800">Avanzata</div>
+        <div style="font-size: 16px; line-height: 1.55; color: #A8A8AE">Tutte le partite, i punti salvati, la cronologia, le cartelle dei salvataggi e tutte le opzioni.</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #D6D6DA">
+          <span>✓ Più partite per gioco, con note</span>
+          <span>✓ Punti salvati e copie automatiche</span>
+          <span>✓ Esporta e importa tra computer</span>
+        </div>
+      </button>
+    </div>
+    <div style="display: flex; justify-content: flex-end">
+      <button style="height: 48px; padding: 0 32px; border-radius: 10px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Continua con Semplice</button>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

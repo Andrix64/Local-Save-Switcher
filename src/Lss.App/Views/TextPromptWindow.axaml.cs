@@ -22,5 +22,4 @@ public partial class TextPromptWindow : Window
 
     private void Confirm_Click(object? sender, RoutedEventArgs e) => Close(ViewModel.Result);
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(null);
 }

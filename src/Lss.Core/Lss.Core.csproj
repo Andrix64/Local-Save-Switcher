@@ -11,6 +11,11 @@
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <!-- Come in Lss.App: una dll bloccata da Smart App Control passa ricompilando (hash diverso). -->
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Genera la classe Strings dai testi, senza bisogno di Visual Studio. -->
     <EmbeddedResource Update="Strings.resx"

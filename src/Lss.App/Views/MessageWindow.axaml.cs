@@ -28,8 +28,11 @@ public partial class MessageWindow : Window
 
         copyText = (heading != "" ? heading + Environment.NewLine + Environment.NewLine : "") + text;
 
-        HeadingText.Text = heading;
-        HeadingText.IsVisible = heading != "";
+        // Il titolo del messaggio sta nell'intestazione della finestra (il telaio dei popup).
+        if (heading != "")
+            Title = heading;
+
+        HeadingText.IsVisible = false;
         BodyText.Text = text;
         ShowKind(kind);
     }
@@ -47,14 +50,32 @@ public partial class MessageWindow : Window
     }
 
     /// <summary>
-    /// Conferma con un verbo: "Annulla" a sinistra, il verbo a destra. Il
-    /// verbo è il pulsante principale (Invio), Esc annulla.
+    /// Conferma con un verbo sul pulsante (si annulla con la X o Esc). Il
+    /// verbo è il pulsante principale (Invio).
     /// </summary>
     public static MessageWindow Confirm(string heading, string text, string verb, bool destructive, InfoKind kind)
     {
         var window = new MessageWindow(heading, text, kind);
-        window.AddButton(Strings.Cancel, "secondary", result: false, isCancel: true);
         window.AddButton(verb, destructive ? "danger" : "primary", result: true, isDefault: true);
+        return window;
+    }
+
+    /// <summary>
+    /// Scelta tra più azioni: la prima è il pulsante principale, le altre secondarie.
+    /// Il risultato è l'indice dell'azione; la X o Esc danno -1.
+    /// </summary>
+    public static MessageWindow Choose(string heading, string text, IReadOnlyList<string> options, InfoKind kind)
+    {
+        var window = new MessageWindow(heading, text, kind);
+        window.ButtonRow.Orientation = Avalonia.Layout.Orientation.Vertical;
+        window.ButtonRow.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+
+        for (int index = 0; index < options.Count; index++)
+            window.AddButton(options[index], index == 0 ? "primary" : "secondary", result: index, isDefault: index == 0);
+
+        foreach (Control button in window.ButtonRow.Children)
+            button.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+
         return window;
     }
 
@@ -70,7 +91,7 @@ public partial class MessageWindow : Window
         }
     }
 
-    private void AddButton(string label, string style, bool result, bool isDefault = false, bool isCancel = false)
+    private void AddButton(string label, string style, object result, bool isDefault = false, bool isCancel = false)
     {
         var button = new Button
         {

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Di chi sono i salvataggi?</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #0F0F10; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; align-items: center; justify-content: center">
+  <div role="dialog" aria-labelledby="whose-title" style="width: 760px; box-sizing: border-box; padding: 44px; border-radius: 20px; background: #19191B; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; gap: 20px; align-items: center">
+      <div style="width: 64px; height: 96px; flex: none; border-radius: 8px; background: #5A4A22"></div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <h1 id="whose-title" style="margin: 0; font-size: 28px; font-weight: 800; line-height: 1.2">C'è già una partita di The Witcher 3 su questo computer. Di chi è?</h1>
+        <p style="margin: 0; font-size: 16px; color: #A8A8AE">LSS la tiene da parte per quella persona. Chiede solo questa volta.</p>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 22px 12px; border-radius: 16px; border: 1px solid #2E2E33; background: #232326; color: #F2F2F2; font-family: inherit; cursor: pointer">
+        <div style="width: 72px; height: 72px; border-radius: 36px; background: #C2410C; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: #FFFFFF">A</div>
+        <span style="font-size: 18px; font-weight: 600">Andrea</span>
+      </button>
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 22px 12px; border-radius: 16px; border: 1px solid #2E2E33; background: #232326; color: #F2F2F2; font-family: inherit; cursor: pointer">
+        <div style="width: 72px; height: 72px; border-radius: 36px; background: #1D6FD0; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: #FFFFFF">C</div>
+        <span style="font-size: 18px; font-weight: 600">Clara</span>
+      </button>
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 22px 12px; border-radius: 16px; border: 1px solid #2E2E33; background: #232326; color: #F2F2F2; font-family: inherit; cursor: pointer">
+        <div style="width: 72px; height: 72px; border-radius: 36px; background: #2F7D3B; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: #FFFFFF">L</div>
+        <span style="font-size: 18px; font-weight: 600">Luca</span>
+      </button>
+    </div>
+    <button style="height: 56px; border-radius: 12px; border: 1px solid #3A3A40; background: transparent; color: #F2F2F2; font-family: inherit; font-size: 17px; font-weight: 600; cursor: pointer">Non lo so: tienila da parte, Andrea inizia una partita nuova</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

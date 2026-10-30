@@ -4,17 +4,13 @@ What's missing, in order of priority. Bugs are in
 [KNOWN_BUGS.md](KNOWN_BUGS.md); what's already done is in the
 [CHANGELOG](../CHANGELOG.md).
 
-## Known limits of 1.0
+## Known limits
 
 - **The Windows exe is not code-signed.** SignPath Foundation refused the free
   signing (2026-10-25) and paid signing is not planned. SmartScreen warns the
   first time; with Smart App Control on, Windows may refuse to start LSS. See
   the README and [DEVELOPMENT.md](DEVELOPMENT.md#code-signing).
-- **Linux with a real Steam library.** The packages install and start on
-  Ubuntu, Debian, Fedora, Arch and the Steam Deck, and the Deck's games list
-  is right. Not checked yet: a playthrough switch, a game started and stopped
-  from LSS, and Steam as Flatpak or Snap. On the Deck every game saves outside
-  `userdata`, so LSS can't manage any of them there yet (see "After 1.0").
+- **Linux beyond the Steam Deck.** Checked on the Steam Deck. Not checked on other distributions with a real library: Steam as Flatpak or Snap, Heroic, and a game started and stopped from LSS.
 
 ## Manual checks with the real game
 
@@ -38,19 +34,24 @@ Still to do, because they need actions inside the game or a choice on Steam:
   back to the point, switching playthrough and back: each playthrough must
   find its own saved points.
 
-## After 1.0
+## Later
 
 - [ ] **Flathub**: manifest with `org.freedesktop.Platform`, `--filesystem`
   for the Steam folders, `--socket=wayland`, `--socket=fallback-x11`. Process
   detection works only through `registry.vdf` inside the sandbox.
 - [ ] **AUR** package `lss-bin`.
-- [ ] **Games that save outside `userdata`** (for example in Documents, in the
-  game folder or, on Linux and the Steam Deck, inside the Proton prefix):
-  today LSS lists them as *Other games* and doesn't manage them. This is the
-  most important change for 2.0, with other launchers.
 - [ ] **macOS.**
 - [ ] **Desktop shortcut "Play <playthrough>".** One click loads the playthrough
   and starts the game without opening the app. To be checked with Smart App
   Control.
 - [ ] **More languages.** Just a `Strings.<code>.resx` with the same keys (see
   [DEVELOPMENT.md](DEVELOPMENT.md#languages)).
+- [ ] **Saves in the Windows registry.**
+- [ ] **More launchers as real providers**: Lutris (`pga.db` is SQLite and would
+  need a package), EA app, Ubisoft Connect, Battle.net, itch.io. Today they
+  work as games added by hand.
+- [ ] **A person tied to a launcher account** (families with one Steam account
+  per person).
+- [ ] **A shared place for save configurations** made by LSS users (for
+  example a folder in the repository with one `.lss-config.json` per game and
+  system), still downloaded and imported by hand: LSS keeps no network access.

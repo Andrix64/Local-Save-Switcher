@@ -1,0 +1,132 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.PlayersWindow"
+        x:DataType="vm:PlayersViewModel"
+        Title="{loc:Str PlayersTitle}"
+        Width="800" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <!-- Come il design (canvas "Giocatori"): una tabella, le azioni rare nel menu ⋯. -->
+  <Window.Styles>
+    <Style Selector="TextBlock.columnHeader">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Bold" />
+      <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+      <Setter Property="LetterSpacing" Value="0.5" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.swatch">
+      <Setter Property="Width" Value="22" />
+      <Setter Property="Height" Value="22" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0,0,2,0" />
+      <Setter Property="CornerRadius" Value="11" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.swatch:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource TextMuted}" />
+    </Style>
+    <Style Selector="Button.swatch.selected /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{StaticResource Text}" />
+    </Style>
+  </Window.Styles>
+
+  <StackPanel Margin="28,24" Spacing="14">
+
+    <Grid ColumnDefinitions="*,Auto">
+      <Button Grid.Column="1" Classes="primary" Click="Add_Click">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <TextBlock Text="+" />
+          <TextBlock Text="{loc:Str AddPlayer}" />
+        </StackPanel>
+      </Button>
+    </Grid>
+
+    <TextBlock Text="{loc:Str PlayersHint}" FontSize="13" LineHeight="20" Foreground="{StaticResource TextSecondary}"
+               TextWrapping="Wrap" />
+
+    <Border BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
+      <StackPanel>
+        <Border Background="{StaticResource Surface}" Padding="14,8">
+          <Grid ColumnDefinitions="34,*,100,120,196,40" ColumnSpacing="12">
+            <TextBlock Grid.Column="1" Classes="columnHeader" Text="{loc:Str PlayersColName}" />
+            <TextBlock Grid.Column="2" Classes="columnHeader" Text="{loc:Str PlayersColAdmin}" />
+            <TextBlock Grid.Column="3" Classes="columnHeader" Text="{loc:Str PlayersColPin}" />
+            <TextBlock Grid.Column="4" Classes="columnHeader" Text="{loc:Str PlayersColColour}" />
+          </Grid>
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding Rows}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:PlayerRow">
+              <Border BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="14,10">
+                <Grid ColumnDefinitions="34,*,100,120,196,40" ColumnSpacing="12">
+                  <Border Width="30" Height="30" CornerRadius="15" Background="{Binding Brush}">
+                    <TextBlock Text="{Binding Initial}" FontWeight="Bold" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="{Binding Person.Name}" FontSize="14" FontWeight="SemiBold"
+                             VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <CheckBox Grid.Column="2" Content="{Binding RoleText}" IsChecked="{Binding Person.IsAdmin}"
+                            ToolTip.Tip="{loc:Str PlayerAdminTooltip}" Tag="{Binding}" Click="Admin_Click"
+                            VerticalAlignment="Center" />
+                  <Button Grid.Column="3" Classes="link" Content="{Binding PinActionText}" Tag="{Binding}"
+                          Click="Pin_Click" VerticalAlignment="Center" />
+                  <ItemsControl Grid.Column="4" ItemsSource="{Binding Swatches}" VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:ColourSwatch">
+                        <Button Classes="swatch" Classes.selected="{Binding Selected}" Tag="{Binding Color}"
+                                Click="Colour_Click" ToolTip.Tip="{Binding Color}" AutomationProperties.Name="{Binding Color}">
+                          <Ellipse Width="14" Height="14" Fill="{Binding Brush}" />
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <Button Grid.Column="5" Classes="more" Tag="{Binding}" VerticalAlignment="Center" Height="28" Width="36" Padding="0"
+                          HorizontalContentAlignment="Center"
+                          AutomationProperties.Name="{Binding Person.Name}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                      <Ellipse />
+                      <Ellipse />
+                      <Ellipse />
+                    </StackPanel>
+                    <Button.Flyout>
+                      <MenuFlyout>
+                        <MenuItem Header="{loc:Str RenameMenu}" Tag="{Binding}" Click="Rename_Click" />
+                        <MenuItem Header="{loc:Str MoveUp}" Tag="{Binding}" Click="Up_Click" />
+                        <MenuItem Header="{loc:Str MoveDown}" Tag="{Binding}" Click="Down_Click" />
+                        <MenuItem Header="{loc:Str PinRemoveMenu}" Tag="{Binding}" Click="RemovePin_Click"
+                                  IsVisible="{Binding CanRemovePin}" />
+                        <Separator />
+                        <MenuItem Header="{loc:Str RemovePlayerMenu}" Tag="{Binding}" Click="Remove_Click" />
+                      </MenuFlyout>
+                    </Button.Flyout>
+                  </Button>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+
+    <TextBlock Text="{Binding Message}" IsVisible="{Binding HasMessage}"
+               Foreground="{StaticResource Error}" TextWrapping="Wrap" />
+
+
+  </StackPanel>
+
+</Window>

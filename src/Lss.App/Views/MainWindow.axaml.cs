@@ -10,15 +10,76 @@ namespace Lss.App.Views;
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow() => InitializeComponent();
+    public MainWindow()
+    {
+        InitializeComponent();
+
+        // I titoli dei launcher stanno nella lista ma non si selezionano né ricevono il focus.
+        GamesList.ContainerPrepared += (_, e) =>
+        {
+            if (e.Container.DataContext is SidebarHeader)
+            {
+                e.Container.Focusable = false;
+                e.Container.IsHitTestVisible = false;
+            }
+        };
+    }
 
     private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
+
+    // Stondata solo quando la finestra è libera: a schermo intero o ingrandita gli angoli sono quelli dello schermo.
+    protected override void OnPropertyChanged(Avalonia.AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == WindowStateProperty && Frame != null)
+        {
+            bool free = WindowState == WindowState.Normal;
+            Frame.CornerRadius = new Avalonia.CornerRadius(free ? 20 : 0);
+            Frame.BorderThickness = new Avalonia.Thickness(free ? 2 : 0);
+            Classes.Set("free", free);
+        }
+    }
+
+    private void Grip_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        if (sender is Border { Tag: string edge } && Enum.TryParse(edge, out WindowEdge windowEdge)
+            && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+            BeginResizeDrag(windowEdge, e);
+    }
+
+    // Senza barra del titolo di sistema l'intestazione sposta la finestra.
+    private void Header_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e) =>
+        WindowDrag.Begin((Control)sender!, e);
 
     protected override void OnOpened(EventArgs e)
     {
         base.OnOpened(e);
+        ViewModel.AttachWindow(new WindowControl(this));
+        WindowFit.Apply(this);
         ViewModel.Monitor.Start();
         _ = ViewModel.OnOpenedAsync();
+    }
+
+    // F11 entra e esce dallo schermo intero (modalità semplice); Esc ne esce. I dialoghi hanno le loro finestre:
+    // con uno aperto i tasti non arrivano qui.
+    protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Handled || !ViewModel.IsSimple)
+            return;
+
+        if (e.Key == Avalonia.Input.Key.F11)
+        {
+            ViewModel.FullScreen.Toggle();
+            e.Handled = true;
+        }
+        else if (e.Key == Avalonia.Input.Key.Escape && ViewModel.FullScreen.IsFullScreen)
+        {
+            ViewModel.FullScreen.Leave();
+            e.Handled = true;
+        }
     }
 
     // Non interrompere una copia a metà.

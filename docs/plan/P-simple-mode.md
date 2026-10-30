@@ -64,7 +64,9 @@ last used per provider). A player is **not** tied to a launcher account
 - There is always at least one player. The last player can't be removed.
 - There is always at least one **admin**. The last admin can't be removed
   or made a user. The first player (P1) is an admin.
-- An admin **may** set a 4-digit PIN (P4a); it is **never required**. Admin
+- An admin **must** have a 4-digit PIN (P4a, made mandatory later): a user needs
+  one to become an admin, an admin can't lose it, and an admin without one
+  (older data) is asked to set it the first time an admin is needed. Admin
   rights and the PIN are a guard against children and mistakes, not real
   security: anyone who can edit the data folder can remove a PIN.
 - Removing a player: their playthroughs are **given to another player**
@@ -246,9 +248,14 @@ internal static class SimplePlay
    - the game has **no playthroughs at all** and its folders have saves
      (`!GameSavesAreEmpty()`) → `WhoseSavesAsync`: a player P →
      `AdoptGameSaves(UniqueName(P.Name), P)` (P's favourite); null →
-     `AdoptGameSaves(UniqueName(Strings.SavesBeforeLss), player)` and
-     **not** favourite. If the adopted saves are not the current player's,
-     continue with step 5;
+     `AdoptGameSaves(UniqueName(Strings.SavesBeforeLss), player)` (the
+     player's, aside: the favourite rule makes it theirs, see step 5).
+     Then step 5 always runs for the current player, unless the adopted
+     saves were the current player's own: then they are the favourite and
+     nothing else is created. Decided on 2026-10-25 by the plan's author, because the
+     "Rules" say that a player with a playthrough always has a favourite:
+     the new playthrough is then the favourite of the current player
+     (`SetFavourite` explicitly), and the "Before LSS" one stays aside;
    - otherwise → step 5.
 5. New playthrough: `CreateProfile(UniqueName(player.Name), copyCurrentSaves: false, player)`,
    favourite, `ActivateProfile`.
@@ -285,7 +292,7 @@ Tests: setting round trip, existing `lss.ini` without the key →
 
 Commit: `Simple and advanced mode`
 
-## P4a — Optional PIN for admins
+## P4a — PIN for admins (optional at first, mandatory now)
 
 - `Person` gets `bool HasPin`. `persone.ini` stores
   `<id>.Pin=<salt base64>:<hash base64>`: PBKDF2-SHA256 with
@@ -347,6 +354,16 @@ Commit: `Optional PIN for admins`
 Read `GameView.axaml`, `GameViewModel.cs`, `PlaythroughViewModel.cs`,
 `PlaythroughCardView.axaml`, `NewPlaythroughViewModel.cs` first.
 
+- The **save folders** block of the game (the main folder line, the other
+  spots, **Add another folder…**, **Export save configuration…**) is
+  **closed by default**: a header `SaveFoldersCount` ("Save folders ({0})" /
+  "Cartelle dei salvataggi ({0})", `{0}` = number of spots) that opens it.
+  Open or closed is kept for every game while the app runs (a static value,
+  not saved). The line about pending suggestions (N11) stays visible below
+  it even when it is closed. Asked by Andrix (2026-10-25): the long paths
+  took too much space above the playthroughs. `tools/UiScreenshots` opens it
+  for `19-game-spots`. Test: closed at start, opening it in one game keeps
+  it open in another.
 - The list of playthroughs of a game is **grouped by player**, in the
   `People` order: header with the player's coloured circle and name; inside,
   the favourite first, then the others by last save. Players without
@@ -399,6 +416,61 @@ give to another player, new playthrough with player, remove player giving
 the playthroughs away, remove player deleting them, last player refused.
 
 Commit: `Advanced mode: playthroughs grouped by player`
+
+## P5a — Deleted playthroughs: kept until deleted for good
+
+Asked by Andrix (2026-10-25). Read `SaveManager.Playthroughs.cs`
+(`GetDeletedProfiles`, `RecoverDeletedProfile`), `SaveManager.cs`
+(`DeleteProfile`, `PruneBackups`), `DeletedWindow.axaml(.cs)` and its view
+model first.
+
+1. **Not pruned any more.** A deleted playthrough is a backup with the
+   `Eliminato_` prefix (`BackupKind.Delete`), so `PruneBackups` deletes it
+   with the other old backups after `BackupsToKeep` newer ones, without
+   telling anyone. `PruneBackups` must skip every `BackupKind.Delete`
+   backup, and they don't count towards `BackupsToKeep`. Test: with
+   `BackupsToKeep = 2`, a deleted playthrough and five newer backups → the
+   deleted playthrough is still there after the pruning, and two other
+   backups are kept.
+2. **Delete for good.** `SaveManager`:
+
+   ```csharp
+   /// <summary>Elimina per sempre una partita eliminata (non si può annullare).</summary>
+   public Result PurgeDeletedProfile(Snapshot deleted);
+   ```
+
+   Same checks as `RecoverDeletedProfileCore` (kind `Delete`, inside
+   `BackupPath`, exists), then `Directory.Delete` + `DeleteBackupInfo`,
+   through `Finish` (log line `Elimina per sempre <name>`). Test: the folder
+   and its info file are gone, a folder outside `BackupPath` is refused,
+   other backups untouched.
+3. **Interface** (`DeletedWindow`, advanced mode, so only admins): each row
+   shows the name, the **player** it belonged to (P2: circle and name; "—"
+   when the owner doesn't exist any more), when it was deleted and the play
+   time; buttons **Recover** (as today) and **Delete for good…** (danger
+   style). The confirmation is destructive (`ConfirmAsync(…, destructive:
+   true)`, verb `PurgeVerb`): `PurgeText` names the playthrough and says it
+   can't be undone. At the bottom, when there are at least two,
+   **Delete all for good…** with its own confirmation (`PurgeAllText`, with
+   the number). The intro text of the window changes from "kept" to
+   `DeletedIntro`. Follow the design canvas (board "Popup · Partite
+   eliminate").
+
+| Key | English |
+|---|---|
+| `DeletedIntro` | Deleted playthroughs stay here until you recover them or delete them for good. |
+| `PurgeButton` | Delete for good… |
+| `PurgeAllButton` | Delete all for good… |
+| `PurgeTitle` | Delete for good? |
+| `PurgeText` | "{0}" will be deleted for good. This can't be undone. |
+| `PurgeAllText` | {0} deleted playthroughs will be deleted for good. This can't be undone. |
+| `PurgeVerb` | Delete for good |
+| `Purged` | Playthrough deleted for good. |
+
+Tests on the view model (FakeDialogService): purge asks and deletes; cancel
+deletes nothing; purge all with two items; the window shows the owner.
+
+Commit: `Deleted playthroughs: kept until deleted for good`
 
 ## P6 — Simple view: players and games
 

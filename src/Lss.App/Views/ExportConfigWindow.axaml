@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:Lss.App.Localization"
+        xmlns:vm="using:Lss.App.ViewModels"
+        x:Class="Lss.App.Views.ExportConfigWindow"
+        x:DataType="vm:ExportConfigViewModel"
+        Title="{Binding Title}"
+        Width="540" SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+  <StackPanel Margin="22,20" Spacing="12">
+
+    <TextBlock Text="{Binding IntroText}" TextWrapping="Wrap" />
+
+    <TextBlock Classes="small" Text="{Binding LauncherText}" IsVisible="{Binding HasLauncherText}"
+               Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+
+    <!-- I posti come saranno scritti nel file -->
+    <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
+            CornerRadius="6" Padding="12,10" IsVisible="{Binding HasSpots}">
+      <TextBlock Text="{Binding SpotsText}" TextWrapping="Wrap" FontFamily="Consolas, Menlo, monospace" />
+    </Border>
+
+    <TextBlock Classes="small" Text="{Binding SkippedText}" IsVisible="{Binding HasSkipped}"
+               Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+
+    <TextBlock Classes="caption" Text="{Binding NotesCaption}" />
+    <TextBox Text="{Binding Notes, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+      <Button Classes="primary" Content="{Binding SaveText}" IsDefault="True" MinWidth="110"
+              Command="{Binding SaveCommand}" />
+    </StackPanel>
+
+  </StackPanel>
+
+</Window>

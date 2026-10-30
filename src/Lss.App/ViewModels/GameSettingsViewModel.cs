@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lss.App.Services;
+using Lss.App.Views;
 
 namespace Lss.App.ViewModels;
 
@@ -20,15 +21,18 @@ public sealed class SharedFileItemViewModel
 }
 
 /// <summary>
-/// Impostazioni della partita e dell'app (SettingsForm in WinForms), con i
-/// file condivisi tra le partite.
+/// Impostazioni di un gioco (R8): avviare il gioco, salvare alla chiusura, opzioni condivise tra le
+/// partite, quante copie tenere e le cartelle ignorate per questo gioco. Quelle di LSS stanno in
+/// LssSettingsViewModel.
 /// </summary>
-public partial class SettingsViewModel : ObservableObject
+public partial class GameSettingsViewModel : ObservableObject
 {
     private readonly SaveManager manager;
     private readonly IDialogService dialogs;
+    private bool ready;
+    private bool reverting;
 
-    public SettingsViewModel(SaveManager manager, IDialogService dialogs)
+    internal GameSettingsViewModel(SaveManager manager, IDialogService dialogs)
     {
         this.manager = manager;
         this.dialogs = dialogs;
@@ -41,9 +45,12 @@ public partial class SettingsViewModel : ObservableObject
 
         foreach (string file in manager.SharedFiles)
             SharedFiles.Add(new SharedFileItemViewModel(file, Remove));
+
+        ready = true;
     }
 
-    public string Title => Strings.SettingsTitle;
+    /// <summary>"Impostazioni di {gioco}".</summary>
+    public string Title => Loc.F(Strings.GameSettingsTitle, manager.Game.Name);
 
     public string LaunchText => Loc.F(Strings.SettingLaunch, manager.Game.Name);
 
@@ -67,22 +74,11 @@ public partial class SettingsViewModel : ObservableObject
 
     public string KeepHint => Strings.SettingKeepCopiesHint;
 
-    public string DataFolderText => Loc.F(Strings.SettingDataFolder, AppData.Root);
-
-    public string OpenFolderText => Strings.OpenFolder;
-
-    public string AboutText => Loc.F(Strings.SettingAbout,
-        manager.AccountName == "" ? "—" : manager.AccountName, Program.Version);
-
     public string CaptionGame => Strings.CaptionGame;
 
     public string CaptionCopies => Strings.CaptionCopies;
 
-    public string CaptionData => Strings.CaptionData;
-
-    public string SaveText => Strings.SaveButton;
-
-    public string CancelText => Strings.Cancel;
+    public string CaptionFolders => Strings.CaptionFolders;
 
     [ObservableProperty]
     private bool launchGame;
@@ -98,8 +94,43 @@ public partial class SettingsViewModel : ObservableObject
 
     public ObservableCollection<SharedFileItemViewModel> SharedFiles { get; } = [];
 
+    /// <summary>true se almeno una modifica è stata salvata: chi apre la finestra aggiorna le schede.</summary>
+    public bool Saved { get; private set; }
+
+    // Ogni modifica vale subito (nessun Salva): si scrive lo stato del gioco a ogni cambiamento.
+    partial void OnLaunchGameChanged(bool value) => ApplyNow();
+
+    partial void OnSaveOnExitChanged(bool value) => ApplyNow();
+
+    partial void OnShareOptionsChanged(bool value) => ApplyNow();
+
+    // Meno copie da tenere elimina quelle in più: se non si conferma, il numero torna com'era.
+    partial void OnKeepCopiesChanged(decimal oldValue, decimal newValue)
+    {
+        if (!ready || reverting)
+            return;
+
+        _ = ApplyKeepAsync(oldValue);
+    }
+
+    private async Task ApplyKeepAsync(decimal previous)
+    {
+        if (await TrySaveAsync())
+            return;
+
+        reverting = true;
+        KeepCopies = previous;
+        reverting = false;
+    }
+
+    private void ApplyNow()
+    {
+        if (ready && !reverting)
+            _ = TrySaveAsync();
+    }
+
     /// <summary>
-    /// Salva le impostazioni. Prima chiede conferma se si eliminano copie.
+    /// Salva le impostazioni (a ogni modifica). Prima chiede conferma se si eliminano copie.
     /// true se sono state salvate.
     /// </summary>
     public async Task<bool> TrySaveAsync()
@@ -122,6 +153,7 @@ public partial class SettingsViewModel : ObservableObject
             return false;
         }
 
+        Saved = true;
         return true;
     }
 
@@ -151,16 +183,27 @@ public partial class SettingsViewModel : ObservableObject
             return;
 
         SharedFiles.Add(new SharedFileItemViewModel(relative, Remove));
+        ApplyNow();
     }
 
+    public string IgnoredFoldersText => Strings.IgnoredFoldersLink;
+
+    /// <summary>
+    /// Le cartelle che non sono salvataggi di questo gioco: si tolgono da lì (quelle di tutti i giochi
+    /// stanno nelle impostazioni di LSS).
+    /// </summary>
     [RelayCommand]
-    private async Task OpenFolderAsync()
+    private async Task OpenIgnoredFoldersAsync()
     {
-        string folder = Path.GetDirectoryName(manager.ProfilesPath)!;
+        string dataFolder = Path.GetDirectoryName(manager.ProfilesPath)!;
 
-        if (!await dialogs.OpenFolderAsync(folder))
-            await dialogs.InformAsync(Strings.TitleOperationFailed, Loc.F(Strings.CannotOpenFolder, folder), InfoKind.Warning);
+        await dialogs.ShowAsync<bool>(new IgnoredFoldersWindow(
+            new IgnoredFoldersViewModel(dataFolder, manager.Game.Name, IgnoredScope.Game)));
     }
 
-    private void Remove(SharedFileItemViewModel item) => SharedFiles.Remove(item);
+    private void Remove(SharedFileItemViewModel item)
+    {
+        SharedFiles.Remove(item);
+        ApplyNow();
+    }
 }

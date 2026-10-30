@@ -31,6 +31,8 @@ Avvia il gioco almeno una volta.</value></data>
 I suoi punti salvati non sono stati spostati: {0}
 Sono ancora in:
 {1}</value></data>
+  <data name="BackupsNotMoved" xml:space="preserve"><value>
+Alcune copie automatiche (cronologia) non sono passate al nuovo nome: {0}</value></data>
   <data name="RenamedStateNotSaved" xml:space="preserve"><value>Partita rinominata, ma lo stato non è stato salvato: {0}</value></data>
   <data name="ProfileRenamed" xml:space="preserve"><value>Partita rinominata.</value></data>
   <data name="CannotDeleteActive" xml:space="preserve"><value>Non si può eliminare la partita che è nel gioco.
@@ -96,7 +98,10 @@ NON avviare il gioco. Il backup è in:
   <data name="TitleOperationFailed" xml:space="preserve"><value>Operazione non riuscita</value></data>
   <data name="CannotOpenFolder" xml:space="preserve"><value>Impossibile aprire la cartella: {0}</value></data>
   <data name="ProfileNameHint" xml:space="preserve"><value>Lettere, cifre, spazi, _ e - (massimo 50 caratteri).</value></data>
-  <data name="CopyCurrentSaves" xml:space="preserve"><value>Copia dei salvataggi attuali del gioco</value></data>
+  <data name="NewCopyOf" xml:space="preserve"><value>Copia di una partita esistente</value></data>
+  <data name="NewImportFrom" xml:space="preserve"><value>Importa da un file</value></data>
+  <data name="NewChooseFile" xml:space="preserve"><value>Scegli il file…</value></data>
+  <data name="NewNoFile" xml:space="preserve"><value>Nessun file scelto</value></data>
   <data name="EmptyProfileOption" xml:space="preserve"><value>Vuota: un nuovo gioco dall&apos;inizio</value></data>
   <data name="ActivateNow" xml:space="preserve"><value>Giocala subito</value></data>
   <data name="Create" xml:space="preserve"><value>Crea</value></data>
@@ -111,9 +116,10 @@ NON avviare il gioco. Il backup è in:
   <data name="Exit" xml:space="preserve"><value>Esci</value></data>
   <data name="AccountIntro" xml:space="preserve"><value>Su questo PC ci sono più account Steam con {0}.
 Quale vuoi usare? Ogni account ha le sue partite.</value></data>
-  <data name="CaptionSteamAccount" xml:space="preserve"><value>ACCOUNT STEAM</value></data>
+  <data name="CaptionLauncherAccount" xml:space="preserve"><value>ACCOUNT {0}</value></data>
   <data name="AccountNoSaves" xml:space="preserve"><value>nessun salvataggio</value></data>
   <data name="AccountLastSaved" xml:space="preserve"><value>ultimo salvataggio {0}</value></data>
+  <data name="WindowMinimize" xml:space="preserve"><value>Riduci a icona</value></data>
   <data name="Close" xml:space="preserve"><value>Chiudi</value></data>
   <data name="CannotReadList" xml:space="preserve"><value>Impossibile leggere l&apos;elenco: {0}</value></data>
   <data name="Delete" xml:space="preserve"><value>Elimina</value></data>
@@ -149,7 +155,6 @@ a:
 
 L&apos;app continua a usare la vecchia cartella. Non è andato perso nulla.</value></data>
   <data name="IgnoredProfileFolders" xml:space="preserve"><value>Cartelle ignorate in Profili (nome non valido: usa lettere, cifre, spazi, _ e -): {0}</value></data>
-  <data name="NoteTooLong" xml:space="preserve"><value>La nota può essere lunga al massimo {0} caratteri.</value></data>
   <data name="NoteSaved" xml:space="preserve"><value>Nota salvata.</value></data>
   <data name="DescActivate" xml:space="preserve"><value>Prima di passare a «{0}»</value></data>
   <data name="DescSave" xml:space="preserve"><value>Prima di salvare i progressi</value></data>
@@ -252,7 +257,6 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="HistoryHeading" xml:space="preserve"><value>Cronologia di «{0}»</value></data>
   <data name="HistoryIntro" xml:space="preserve"><value>Scegli un momento e torna lì. Prima di tornare indietro, la situazione attuale viene copiata.</value></data>
   <data name="HistoryTitle" xml:space="preserve"><value>Cronologia</value></data>
-  <data name="ImportButton" xml:space="preserve"><value>Importa...</value></data>
   <data name="ImportTitle" xml:space="preserve"><value>Importa partita</value></data>
   <data name="Imported" xml:space="preserve"><value>Partita «{0}» importata.</value></data>
   <data name="InGameNow" xml:space="preserve"><value>NEL GIOCO ADESSO</value></data>
@@ -287,7 +291,7 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SavedOnExit" xml:space="preserve"><value>Progressi di «{0}» salvati alla chiusura del gioco.</value></data>
   <data name="SavedToday" xml:space="preserve"><value>salvata oggi alle {0}</value></data>
   <data name="SavedYesterday" xml:space="preserve"><value>salvata ieri alle {0}</value></data>
-  <data name="SettingAbout" xml:space="preserve"><value>Account Steam: {0}  ·  Versione {1}  ·  Licenza MIT</value></data>
+  <data name="SettingAbout" xml:space="preserve"><value>Account: {0}  ·  Versione {1}  ·  Licenza MIT</value></data>
   <data name="SettingDataFolder" xml:space="preserve"><value>Partite e copie sono in {0}</value></data>
   <data name="SettingKeepCopies" xml:space="preserve"><value>Copie automatiche da tenere</value></data>
   <data name="SettingKeepCopiesHint" xml:space="preserve"><value>0 = tutte</value></data>
@@ -297,8 +301,17 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="SettingSaveOnExitHint" xml:space="preserve"><value>Appena esci dal gioco, la partita in uso viene aggiornata, con una copia automatica. Solo se l&apos;app è aperta.</value></data>
   <data name="SettingSharePreferences" xml:space="preserve"><value>Stesse opzioni del gioco per tutte le partite</value></data>
   <data name="SettingSharePreferencesHint" xml:space="preserve"><value>Comandi, audio e sottotitoli restano uguali quando cambi partita, anche in una partita nuova.</value></data>
+  <data name="CurrentPlaythrough" xml:space="preserve"><value>ATTUALE</value></data>
+  <data name="CaptionPlayers" xml:space="preserve"><value>GIOCATORI</value></data>
+  <data name="CaptionFolders" xml:space="preserve"><value>CARTELLE</value></data>
+  <data name="SettingMode" xml:space="preserve"><value>Modalità</value></data>
+  <data name="SettingModeHint" xml:space="preserve"><value>Semplice: chi gioca sceglie il gioco. Avanzata: controllo completo.</value></data>
   <data name="SettingsButton" xml:space="preserve"><value>Impostazioni</value></data>
   <data name="SettingsTitle" xml:space="preserve"><value>Impostazioni</value></data>
+  <data name="GameSettingsTitle" xml:space="preserve"><value>Impostazioni di {0}</value></data>
+  <data name="GameSettingsButton" xml:space="preserve"><value>Impostazioni del gioco</value></data>
+  <data name="GameSettingsMenu" xml:space="preserve"><value>Impostazioni del gioco…</value></data>
+  <data name="IgnoredFoldersAllLink" xml:space="preserve"><value>Cartelle che non sono salvataggi, per tutti i giochi…</value></data>
   <data name="StartAnyway" xml:space="preserve"><value>Avvia comunque</value></data>
   <data name="StartingWith" xml:space="preserve"><value>Avvio {0} con «{1}»...</value></data>
   <data name="Undo" xml:space="preserve"><value>Annulla</value></data>
@@ -306,18 +319,290 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="ZipFileType" xml:space="preserve"><value>Partita di {0}</value></data>
   <data name="UnknownGameName" xml:space="preserve"><value>App {0}</value></data>
   <data name="GameNotSupported" xml:space="preserve"><value>{0} non tiene i salvataggi nella cartella userdata di Steam: LSS non può gestirlo.</value></data>
+  <data name="SaveFolderNoLongerSafe" xml:space="preserve"><value>La cartella dei salvataggi di {0} non si può più usare in sicurezza: {1}</value></data>
+  <data name="SafetyMissing" xml:space="preserve"><value>la cartella non esiste.</value></data>
+  <data name="SafetyEmpty" xml:space="preserve"><value>la cartella è vuota.</value></data>
+  <data name="SafetyProtected" xml:space="preserve"><value>è una cartella di sistema, di un launcher o del gioco, non dei salvataggi.</value></data>
+  <data name="SafetyTooBig" xml:space="preserve"><value>la cartella è troppo grande per dei salvataggi (oltre 2 GB o 20.000 file).</value></data>
+  <data name="SafetyInsideLss" xml:space="preserve"><value>la cartella è dentro i dati di LSS.</value></data>
+  <data name="SafetyUnreadable" xml:space="preserve"><value>la cartella non si legge.</value></data>
+  <data name="SafetyBadPattern" xml:space="preserve"><value>il pattern dei file è troppo generico o indica file di programmi o di gioco.</value></data>
+  <data name="ReasonBeforeAddingSpot" xml:space="preserve"><value>Prima di aggiungere una cartella dei salvataggi</value></data>
+  <data name="SpotAdded" xml:space="preserve"><value>Cartella dei salvataggi aggiunta.</value></data>
+  <data name="SpotRemoved" xml:space="preserve"><value>Cartella dei salvataggi tolta. Le copie nelle partite restano.</value></data>
+  <data name="SpotNotFound" xml:space="preserve"><value>LSS non ha aggiunto questa cartella dei salvataggi.</value></data>
+  <data name="SpotBadName" xml:space="preserve"><value>LSS non può usare una cartella il cui percorso contiene "|".</value></data>
+  <data name="ImportSpotsSkipped" xml:space="preserve"><value>Alcuni salvataggi non sono stati importati, perché questo gioco qui non usa queste cartelle: {0}</value></data>
+  <data name="SaveFoldersCaption" xml:space="preserve"><value>Cartelle dei salvataggi</value></data>
+  <data name="SpotFiles" xml:space="preserve"><value>{0} (solo {1})</value></data>
+  <data name="AddSpot" xml:space="preserve"><value>Aggiungi un'altra cartella…</value></data>
+  <data name="AddSpotText" xml:space="preserve"><value>LSS cambierà anche questa cartella:&#10;{0}&#10;I suoi file ora appartengono alla partita "{1}". E le altre partite?</value></data>
+  <data name="AddSpotCopy" xml:space="preserve"><value>Dai loro una copia di questi file</value></data>
+  <data name="AddSpotEmpty" xml:space="preserve"><value>Falla partire vuota per loro</value></data>
+  <data name="RemoveSpot" xml:space="preserve"><value>Togli dalle cartelle dei salvataggi</value></data>
+  <data name="RemoveSpotText" xml:space="preserve"><value>LSS smetterà di cambiare questa cartella. I suoi file restano dove sono, e le copie nelle partite restano.</value></data>
+  <data name="LearnUseFolders" xml:space="preserve"><value>Usa queste cartelle</value></data>
+  <data name="SwitchInterruptedTitle" xml:space="preserve"><value>Cambio dei salvataggi interrotto</value></data>
+  <data name="SwitchInterruptedRestored" xml:space="preserve"><value>L'ultimo cambio di {0} è stato interrotto (forse il computer si è spento). LSS ha rimesso i salvataggi come erano prima.</value></data>
+  <data name="SupportNotFound" xml:space="preserve"><value>Nessuna cartella dei salvataggi: avvia il gioco e salva almeno una volta.</value></data>
+  <data name="SupportUnsure" xml:space="preserve"><value>Questo gioco salva in troppi posti per LSS. Puoi scegliere tu le cartelle.</value></data>
+  <data name="SupportUnsafe" xml:space="preserve"><value>La cartella dei salvataggi trovata non si può usare in sicurezza: {0}</value></data>
+  <data name="FindSaveFolder" xml:space="preserve"><value>Trova la cartella dei salvataggi…</value></data>
+  <data name="ChooseSaveFolder" xml:space="preserve"><value>Scelgo io la cartella…</value></data>
+  <data name="ChooseSaveFolderTitle" xml:space="preserve"><value>Cartella dei salvataggi di {0}</value></data>
+  <data name="UseThisFolderText" xml:space="preserve"><value>Quando cambi partita, LSS sostituisce tutto il contenuto di questa cartella con i file della partita:
+{0}
+Usala solo se contiene solo i salvataggi di {1}.</value></data>
+  <data name="UseThisFolder" xml:space="preserve"><value>Usa questa cartella</value></data>
+  <data name="UseAutomaticFolder" xml:space="preserve"><value>Usa la cartella automatica</value></data>
+  <data name="SaveFolderFromSteam" xml:space="preserve"><value>Salvataggi: {0} (Steam)</value></data>
+  <data name="SaveFolderFromLauncher" xml:space="preserve"><value>Salvataggi: {0} (da {1})</value></data>
+  <data name="SaveFolderChosen" xml:space="preserve"><value>Salvataggi: {0} (scelta da te)</value></data>
+  <data name="SaveFolderLearned" xml:space="preserve"><value>Salvataggi: {0} (trovata da LSS)</value></data>
+  <data name="SaveFolderMenu" xml:space="preserve"><value>Opzioni della cartella dei salvataggi</value></data>
   <data name="ImportOtherGame" xml:space="preserve"><value>Questa partita è di {0}, non di {1}.</value></data>
-  <data name="GamesCaption" xml:space="preserve"><value>GIOCHI</value></data>
   <data name="OtherGamesCaption" xml:space="preserve"><value>Altri giochi</value></data>
-  <data name="SupportSavesElsewhere" xml:space="preserve"><value>I salvataggi sono fuori dalla cartella userdata di Steam: per ora non è supportato.</value></data>
+  <data name="SupportSavesElsewhere" xml:space="preserve"><value>I salvataggi non sono nella cartella userdata di Steam e LSS non sa dove sono: puoi scegliere tu la cartella.</value></data>
   <data name="SupportNoSaves" xml:space="preserve"><value>Ancora nessun salvataggio: avvia il gioco una volta.</value></data>
-  <data name="NoSupportedGames" xml:space="preserve"><value>Nessun gioco di questo account tiene i salvataggi nella cartella userdata di Steam, quindi per ora LSS non può gestirli. Molti giochi, soprattutto quelli che girano con Proton, salvano in altre cartelle: li trovi in Altri giochi, con il motivo.</value></data>
+  <data name="NoSupportedGames" xml:space="preserve"><value>LSS non ha ancora trovato nessuna cartella dei salvataggi che può usare. In Altri giochi vedi il motivo per ogni gioco, e LSS può aiutarti a trovare la cartella.</value></data>
   <data name="OnlyUserdataNotice" xml:space="preserve"><value>LSS copia solo i file di {0} nella cartella userdata di Steam. Se il gioco salva anche altrove, quei file non cambiano tra le partite.</value></data>
   <data name="NoAccountWithGames" xml:space="preserve"><value>Nessun account Steam su questo PC ha giochi con i salvataggi nella cartella userdata.</value></data>
   <data name="AppSubtitle" xml:space="preserve"><value>LOCAL SAVE SWITCHER</value></data>
-  <data name="AccountIntroAny" xml:space="preserve"><value>Più account Steam su questo PC hanno salvataggi di giochi. Scegli quello da gestire.</value></data>
+  <data name="AccountIntroAny" xml:space="preserve"><value>Più account {0} su questo PC hanno salvataggi di giochi. Scegli quello da gestire.</value></data>
   <data name="SharedFilesCaption" xml:space="preserve"><value>FILE UGUALI IN TUTTE LE PARTITE</value></data>
   <data name="AddSharedFile" xml:space="preserve"><value>Aggiungi file...</value></data>
   <data name="RemoveSharedFile" xml:space="preserve"><value>Rimuovi</value></data>
   <data name="SharedFileOutside" xml:space="preserve"><value>Scegli un file dentro la cartella dei salvataggi del gioco.</value></data>
+  <data name="LearnTitle" xml:space="preserve"><value>Trova i salvataggi di {0}</value></data>
+  <data name="LearnIntroText" xml:space="preserve"><value>LSS non sa ancora dove {0} tiene i salvataggi. Scopriamolo insieme:
+1. Avvia il gioco.
+2. Salva nel gioco (o gioca finché salva da solo).
+3. Esci dal gioco.
+LSS guarda quali file sono cambiati sul disco.</value></data>
+  <data name="LearnStart" xml:space="preserve"><value>Avvia il gioco</value></data>
+  <data name="LearnStartedByHand" xml:space="preserve"><value>Ho avviato il gioco</value></data>
+  <data name="LearnStartByHandText" xml:space="preserve"><value>Avvia tu {0} adesso, poi premi il pulsante.</value></data>
+  <data name="LearnCloseFirst" xml:space="preserve"><value>{0} è aperto. Chiudi prima il gioco, poi avvia di nuovo da qui.</value></data>
+  <data name="LearnPlayingText" xml:space="preserve"><value>Gioca, salva, poi esci da {0}.</value></data>
+  <data name="LearnPressWhenDone" xml:space="preserve"><value>Quando hai chiuso il gioco, premi il pulsante.</value></data>
+  <data name="LearnQuitDone" xml:space="preserve"><value>Ho chiuso il gioco</value></data>
+  <data name="LearnLooking" xml:space="preserve"><value>Cerco i file cambiati… {0}</value></data>
+  <data name="LearnFilesChanged" xml:space="preserve"><value>{0} file cambiati</value></data>
+  <data name="LearnUseFolder" xml:space="preserve"><value>Usa questa cartella</value></data>
+  <data name="LearnTryAgain" xml:space="preserve"><value>Riprova</value></data>
+  <data name="LearnLookElsewhere" xml:space="preserve"><value>Cerca in un'altra cartella…</value></data>
+  <data name="LearnNothingFound" xml:space="preserve"><value>LSS non ha visto nessun file che sembra un salvataggio. Hai salvato prima di uscire? Puoi riprovare o scegliere tu la cartella.</value></data>
+  <data name="LearnPartial" xml:space="preserve"><value>La ricerca ci ha messo troppo ed è stata fermata presto: la lista può essere incompleta.</value></data>
+  <data name="LearnRecommended" xml:space="preserve"><value>Consigliata</value></data>
+  <data name="LearnUnlikely" xml:space="preserve"><value>Poco probabile</value></data>
+  <data name="ReasonGameName" xml:space="preserve"><value>Il nome contiene "{0}"</value></data>
+  <data name="ReasonGameOwned" xml:space="preserve"><value>Fa parte del gioco (la sua cartella o la cartella Proton/Wine)</value></data>
+  <data name="ReasonSaveLikeFile" xml:space="preserve"><value>File che sembrano salvataggi ({0})</value></data>
+  <data name="ReasonChangedFiles" xml:space="preserve"><value>{0} file cambiati mentre giocavi</value></data>
+  <data name="ReasonSaveLikePath" xml:space="preserve"><value>Ha un nome tipico per i salvataggi ("{0}")</value></data>
+  <data name="ReasonOnlySettings" xml:space="preserve"><value>Sono cambiati solo file di impostazioni</value></data>
+  <data name="ReasonOtherProgram" xml:space="preserve"><value>Sembra di un altro programma</value></data>
+  <data name="NotSaveFolder" xml:space="preserve"><value>Non è una cartella di salvataggi…</value></data>
+  <data name="NotSaveFolderText" xml:space="preserve"><value>LSS non proporrà più questa cartella:
+{0}</value></data>
+  <data name="IgnoreForGame" xml:space="preserve"><value>Solo per {0}</value></data>
+  <data name="IgnoreForAll" xml:space="preserve"><value>Per tutti i giochi</value></data>
+  <data name="IgnoredToast" xml:space="preserve"><value>LSS non proporrà più questa cartella.</value></data>
+  <data name="IgnoreUndo" xml:space="preserve"><value>Annulla</value></data>
+  <data name="IgnoreCurrentFolder" xml:space="preserve"><value>È la cartella dei salvataggi di {0}: prima toglila dalle sue cartelle dei salvataggi.</value></data>
+  <data name="IgnoredFoldersTitle" xml:space="preserve"><value>Cartelle che non sono salvataggi</value></data>
+  <data name="IgnoredFoldersEmpty" xml:space="preserve"><value>Nessuna cartella: LSS può proporre tutto quello che trova.</value></data>
+  <data name="IgnoredScopeAll" xml:space="preserve"><value>tutti i giochi</value></data>
+  <data name="IgnoredRemove" xml:space="preserve"><value>Proponila di nuovo</value></data>
+  <data name="IgnoredFoldersLink" xml:space="preserve"><value>Cartelle che non sono salvataggi…</value></data>
+  <data name="LearnFolderChanged" xml:space="preserve"><value>Le partite di {0} sono state fatte con un'altra cartella. Usare comunque la nuova cartella?</value></data>
+  <data name="ExportConfig" xml:space="preserve"><value>Esporta configurazione dei salvataggi…</value></data>
+  <data name="ImportConfig" xml:space="preserve"><value>Importa configurazione dei salvataggi…</value></data>
+  <data name="ConfigPreviewTitle" xml:space="preserve"><value>Configurazione dei salvataggi di {0}</value></data>
+  <data name="ConfigPreviewText" xml:space="preserve"><value>Queste cartelle saranno nel file, scritte perché funzionino su un altro computer. Non ci sono il nome utente né i salvataggi.</value></data>
+  <data name="ConfigSpotSkipped" xml:space="preserve"><value>Non esportata (non in una cartella standard): {0}</value></data>
+  <data name="ConfigFromLauncher" xml:space="preserve"><value>{0} conosce già queste cartelle: questo file serve solo dove non le conosce.</value></data>
+  <data name="ConfigNotes" xml:space="preserve"><value>Note (facoltative)</value></data>
+  <data name="ImportConfigTitle" xml:space="preserve"><value>Importa configurazione dei salvataggi</value></data>
+  <data name="LookAfterPlayingHint" xml:space="preserve"><value>Dopo una partita LSS guarda i file cambiati e propone le cartelle che possono essere salvataggi. Propone soltanto: non cambia nulla senza la tua scelta.</value></data>
+  <data name="ImportConfigNow" xml:space="preserve"><value>Importa</value></data>
+  <data name="ConfigMadeOn" xml:space="preserve"><value>Fatta su {0}</value></data>
+  <data name="ConfigWindowsInPrefix" xml:space="preserve"><value>Fatta su Windows: qui le cartelle sono dentro la cartella Proton/Wine del gioco.</value></data>
+  <data name="ConfigFound" xml:space="preserve"><value>trovata</value></data>
+  <data name="ConfigNotYet" xml:space="preserve"><value>non ancora qui: sarà usata quando il gioco la crea</value></data>
+  <data name="ConfigRefused" xml:space="preserve"><value>rifiutata: {0}</value></data>
+  <data name="ConfigNotForThisSystem" xml:space="preserve"><value>non per questo sistema</value></data>
+  <data name="ConfigNoGame" xml:space="preserve"><value>{0} non è su questo computer.</value></data>
+  <data name="ConfigInvalid" xml:space="preserve"><value>Questo file non è una configurazione dei salvataggi valida: {0}</value></data>
+  <data name="ConfigTooNew" xml:space="preserve"><value>Questo file è stato fatto da un LSS più recente. Aggiorna LSS per importarlo.</value></data>
+  <data name="ConfigImported" xml:space="preserve"><value>Cartelle dei salvataggi importate per {0} gioco/i.</value></data>
+  <data name="SaveFolderImported" xml:space="preserve"><value>Salvataggi: {0} (importati)</value></data>
+  <data name="LookAfterPlaying" xml:space="preserve"><value>Cerca altre cartelle dei salvataggi dopo una partita</value></data>
+  <data name="SuggestionsFound" xml:space="preserve"><value>LSS ha trovato file di {0} che possono essere salvataggi, in una cartella che non cambia ancora.</value></data>
+  <data name="SuggestionsLook" xml:space="preserve"><value>Guarda</value></data>
+  <data name="SuggestionsPending" xml:space="preserve"><value>{0} possibili cartelle dei salvataggi da controllare</value></data>
+  <data name="SuggestionsTitle" xml:space="preserve"><value>Possibili cartelle dei salvataggi di {0}</value></data>
+  <data name="SuggestionAdd" xml:space="preserve"><value>Aggiungi alle cartelle dei salvataggi</value></data>
+  <data name="SuggestionNotSaves" xml:space="preserve"><value>Non sono salvataggi…</value></data>
+  <data name="SuggestionLater" xml:space="preserve"><value>Più tardi</value></data>
+  <data name="SaveFolderFoundForOther" xml:space="preserve"><value>LSS ha trovato dove salva {0}.</value></data>
+  <data name="EpicItemMissing" xml:space="preserve"><value>Epic Games Launcher non elenca più questo gioco.</value></data>
+  <data name="LaunchFailedVia" xml:space="preserve"><value>Non siamo riusciti ad avviare {0} tramite {1}: {2}</value></data>
+  <data name="CloudOnGeneric" xml:space="preserve"><value>{0} conserva una copia dei salvataggi online (salvataggi nel cloud). Potrebbe rimettere i salvataggi di un&apos;altra partita: disattivalo per questo gioco in {1}.</value></data>
+  <data name="CloudBarTitleGeneric" xml:space="preserve"><value>Il cloud dei salvataggi è attivo per {0}</value></data>
+  <data name="CloudConfirmHeadingGeneric" xml:space="preserve"><value>Il cloud dei salvataggi potrebbe mescolare le partite</value></data>
+  <data name="CloudBarGeneric" xml:space="preserve"><value>{0} conserva una copia dei salvataggi online. Disattivalo per questo gioco in {1}.</value></data>
+  <data name="GogExeMissing" xml:space="preserve"><value>GOG non dice quale programma avvia questo gioco.</value></data>
+  <data name="ProgramNotStarted" xml:space="preserve"><value>Il programma non si è avviato.</value></data>
+  <data name="StartFromHeroic" xml:space="preserve"><value>Avvia il gioco da Heroic: LSS per ora non può avviarlo da qui.</value></data>
+  <data name="ManualProviderName" xml:space="preserve"><value>Questo computer</value></data>
+  <data name="ManualCannotStart" xml:space="preserve"><value>LSS non può avviare questo gioco da qui: il programma non è indicato, o è un programma Windows su Linux.</value></data>
+  <data name="AddGameButton" xml:space="preserve"><value>Aggiungi un gioco…</value></data>
+  <data name="AddGamePickProgram" xml:space="preserve"><value>Scegli il programma che avvia il gioco</value></data>
+  <data name="AddGameTitle" xml:space="preserve"><value>Aggiungi un gioco</value></data>
+  <data name="AddGameCaption" xml:space="preserve"><value>NOME DEL GIOCO</value></data>
+  <data name="AddGameHint" xml:space="preserve"><value>Come sarà mostrato in LSS.</value></data>
+  <data name="AddGameConfirm" xml:space="preserve"><value>Aggiungi</value></data>
+  <data name="PlayerNameTaken" xml:space="preserve"><value>Esiste già un giocatore con questo nome.</value></data>
+  <data name="PlayerNotFound" xml:space="preserve"><value>Giocatore non trovato.</value></data>
+  <data name="PlayerColorInvalid" xml:space="preserve"><value>Scegli uno dei colori.</value></data>
+  <data name="PlayersNotSaved" xml:space="preserve"><value>Non è stato possibile salvare i giocatori.</value></data>
+  <data name="LastPlayer" xml:space="preserve"><value>Deve restare almeno un giocatore.</value></data>
+  <data name="LastAdmin" xml:space="preserve"><value>Deve restare almeno un amministratore.</value></data>
+  <data name="AdminNeedsPin" xml:space="preserve"><value>Un amministratore deve avere un PIN.</value></data>
+  <data name="PlayerDefaultName" xml:space="preserve"><value>Giocatore 1</value></data>
+  <data name="NotYourPlaythrough" xml:space="preserve"><value>Questa partita appartiene a un altro giocatore.</value></data>
+  <data name="SimpleCloseGame" xml:space="preserve"><value>{0} è già aperto. Chiudilo prima.</value></data>
+  <data name="SavesBeforeLss" xml:space="preserve"><value>Prima di LSS</value></data>
+  <data name="ModeTitle" xml:space="preserve"><value>Come vuoi usare LSS?</value></data>
+  <data name="ModeHint" xml:space="preserve"><value>Puoi cambiare in ogni momento dalle impostazioni.</value></data>
+  <data name="ModeSimpleTitle" xml:space="preserve"><value>Semplice</value></data>
+  <data name="ModeSimpleText" xml:space="preserve"><value>Scegli chi gioca e clicca su un gioco. Ognuno ritrova le sue partite. Adatta a tutti, anche ai bambini.</value></data>
+  <data name="ModeSimplePoint1" xml:space="preserve"><value>Un giocatore, un clic, si gioca</value></data>
+  <data name="ModeSimplePoint2" xml:space="preserve"><value>Salva da solo quando chiudi il gioco</value></data>
+  <data name="ModeSimplePoint3" xml:space="preserve"><value>Nessun pulsante che cancella</value></data>
+  <data name="ModeAdvancedPoint1" xml:space="preserve"><value>Più partite per gioco, con note</value></data>
+  <data name="ModeAdvancedPoint2" xml:space="preserve"><value>Punti salvati e copie automatiche</value></data>
+  <data name="ModeAdvancedPoint3" xml:space="preserve"><value>Esporta e importa tra computer</value></data>
+  <data name="ModeContinue" xml:space="preserve"><value>Continua con {0}</value></data>
+  <data name="ModeAdvancedTitle" xml:space="preserve"><value>Avanzata</value></data>
+  <data name="ModeAdvancedText" xml:space="preserve"><value>Tutte le partite, i punti salvati, la cronologia, le cartelle dei salvataggi e tutte le opzioni.</value></data>
+  <data name="AdminPickerTitle" xml:space="preserve"><value>Chi sei?</value></data>
+  <data name="AdminOnlyText" xml:space="preserve"><value>Solo un admin può farlo.</value></data>
+  <data name="AdminPickerCancel" xml:space="preserve"><value>Annulla</value></data>
+  <data name="PinTitle" xml:space="preserve"><value>PIN di {0}</value></data>
+  <data name="PinPrompt" xml:space="preserve"><value>Inserisci il PIN</value></data>
+  <data name="AdminWithPin" xml:space="preserve"><value>con PIN</value></data>
+  <data name="AdminWithoutPin" xml:space="preserve"><value>senza PIN</value></data>
+  <data name="PinWrong" xml:space="preserve"><value>PIN sbagliato</value></data>
+  <data name="PinWait" xml:space="preserve"><value>Troppi tentativi. Aspetta {0} secondi.</value></data>
+  <data name="PinFormat" xml:space="preserve"><value>Il PIN è di 4 cifre.</value></data>
+  <data name="SetPin" xml:space="preserve"><value>Imposta PIN…</value></data>
+  <data name="ChangePin" xml:space="preserve"><value>Cambia PIN…</value></data>
+  <data name="RemovePin" xml:space="preserve"><value>Togli PIN</value></data>
+  <data name="PinNew" xml:space="preserve"><value>Nuovo PIN</value></data>
+  <data name="PinRepeat" xml:space="preserve"><value>Ripeti il nuovo PIN</value></data>
+  <data name="PinMismatch" xml:space="preserve"><value>I due PIN sono diversi.</value></data>
+  <data name="PinOptional" xml:space="preserve"><value>Facoltativo. Con un PIN, solo tu puoi usare i tuoi diritti di admin.</value></data>
+  <data name="GiveToBusy" xml:space="preserve"><value>Cambio il giocatore...</value></data>
+  <data name="SaveFoldersCount" xml:space="preserve"><value>Cartelle dei salvataggi ({0})</value></data>
+  <data name="PlaythroughCountOne" xml:space="preserve"><value>1 partita</value></data>
+  <data name="PlaythroughCount" xml:space="preserve"><value>{0} partite</value></data>
+  <data name="FavouriteTooltip" xml:space="preserve"><value>Preferita: quella usata nella modalità semplice</value></data>
+  <data name="CloudAllowSimple" xml:space="preserve"><value>Consenti anche in modalità semplice</value></data>
+  <data name="CloudAllowedSimple" xml:space="preserve"><value>Consentito in modalità semplice anche con le copie online attive.</value></data>
+  <data name="CloudAllowUndo" xml:space="preserve"><value>Annulla</value></data>
+  <data name="CancelChoice" xml:space="preserve"><value>Annulla</value></data>
+  <data name="GiveToMenu" xml:space="preserve"><value>Dai a…</value></data>
+  <data name="GiveToPick" xml:space="preserve"><value>A chi va "{0}"?</value></data>
+  <data name="NoOtherPlayer" xml:space="preserve"><value>Non c'è un altro giocatore a cui darla. Aggiungine prima uno.</value></data>
+  <data name="PlaythroughPlayer" xml:space="preserve"><value>Giocatore</value></data>
+  <data name="RemovePlayerText" xml:space="preserve"><value>Cosa succede alle partite di {0}?</value></data>
+  <data name="PlayersButton" xml:space="preserve"><value>Giocatori…</value></data>
+  <data name="PlayersTitle" xml:space="preserve"><value>Giocatori</value></data>
+  <data name="AddPlayer" xml:space="preserve"><value>Aggiungi giocatore</value></data>
+  <data name="RemovePlayer" xml:space="preserve"><value>Togli</value></data>
+  <data name="PlayerAdmin" xml:space="preserve"><value>Admin</value></data>
+  <data name="PlayerAdminTooltip" xml:space="preserve"><value>Gli admin possono aprire la modalità avanzata, aggiungere giocatori e giochi, e consentire i giochi con il cloud.</value></data>
+  <data name="DeletedIntro" xml:space="preserve"><value>Le partite eliminate restano qui finché non le recuperi o le elimini per sempre.</value></data>
+  <data name="PurgeButton" xml:space="preserve"><value>Elimina per sempre…</value></data>
+  <data name="PurgeAllButton" xml:space="preserve"><value>Elimina tutte per sempre…</value></data>
+  <data name="PurgeTitle" xml:space="preserve"><value>Eliminare per sempre?</value></data>
+  <data name="PurgeText" xml:space="preserve"><value>"{0}" sarà eliminata per sempre. Non si può annullare.</value></data>
+  <data name="PurgeAllText" xml:space="preserve"><value>{0} partite eliminate saranno eliminate per sempre. Non si può annullare.</value></data>
+  <data name="PurgeVerb" xml:space="preserve"><value>Elimina per sempre</value></data>
+  <data name="Purged" xml:space="preserve"><value>Partita eliminata per sempre.</value></data>
+  <data name="DeletedPlayTime" xml:space="preserve"><value>tempo di gioco {0}</value></data>
+  <data name="PlayerNameCaption" xml:space="preserve"><value>Nome del giocatore</value></data>
+  <data name="SimpleLastPlay" xml:space="preserve"><value>Ultima partita: {0}</value></data>
+  <data name="SimpleNeedsSetup" xml:space="preserve"><value>Da preparare</value></data>
+  <data name="SimpleNeedsSetupOnce" xml:space="preserve"><value>Da preparare una volta</value></data>
+  <data name="SimpleCloudLabel" xml:space="preserve"><value>Chiedi a un admin</value></data>
+  <data name="FullScreenOn" xml:space="preserve"><value>Schermo intero</value></data>
+  <data name="FullScreenOff" xml:space="preserve"><value>Esci dallo schermo intero</value></data>
+  <data name="SwitchToSimple" xml:space="preserve"><value>Modalità semplice</value></data>
+  <data name="SwitchToAdvanced" xml:space="preserve"><value>Modalità avanzata</value></data>
+  <data name="SimpleWhoIsPlaying" xml:space="preserve"><value>Chi gioca?</value></data>
+  <data name="SimpleTapName" xml:space="preserve"><value>Tocca il tuo nome per vedere i tuoi giochi.</value></data>
+  <data name="SimpleWhatToPlay" xml:space="preserve"><value>A cosa giochi oggi?</value></data>
+  <data name="SimpleAddGameAny" xml:space="preserve"><value>Qualsiasi gioco del PC</value></data>
+  <data name="SimpleHaveFunTitle" xml:space="preserve"><value>Buon divertimento, {0}!</value></data>
+  <data name="SimpleHaveFunBody" xml:space="preserve"><value>Quando chiudi {0}, LSS salva la tua partita da solo. Non devi fare niente.</value></data>
+  <data name="SimpleGameOpen" xml:space="preserve"><value>{0} è aperto</value></data>
+  <data name="SimpleCantDetect" xml:space="preserve"><value>LSS non riesce a vedere quando chiudi questo gioco: quando hai finito, premi qui.</value></data>
+  <data name="SimpleChangePlayer" xml:space="preserve"><value>Cambia giocatore</value></data>
+  <data name="SimpleAddPlayer" xml:space="preserve"><value>Aggiungi giocatore</value></data>
+  <data name="SimpleAddGame" xml:space="preserve"><value>Aggiungi un gioco</value></data>
+  <data name="SimplePlaying" xml:space="preserve"><value>In gioco</value></data>
+  <data name="SimpleMyGames" xml:space="preserve"><value>Le mie partite</value></data>
+  <data name="SimpleMyGamesTitle" xml:space="preserve"><value>Le tue partite di {0}</value></data>
+  <data name="SimpleMyGamesHint" xml:space="preserve"><value>{0} · tocca una partita per giocarla</value></data>
+  <data name="SimpleFavourite" xml:space="preserve"><value>Quella che giochi</value></data>
+  <data name="SimpleNewGame" xml:space="preserve"><value>Inizia una partita nuova</value></data>
+  <data name="SimpleHaveFun" xml:space="preserve"><value>Buon divertimento, {0}! Quando chiudi {1}, LSS salva la tua partita.</value></data>
+  <data name="SimpleStartYourself" xml:space="preserve"><value>Ora avvia {0} come al solito. Quando hai finito, torna qui.</value></data>
+  <data name="SimpleFinished" xml:space="preserve"><value>Ho finito di giocare</value></data>
+  <data name="SimpleSaved" xml:space="preserve"><value>{0} salvato per {1}</value></data>
+  <data name="SimpleCloudBlocked" xml:space="preserve"><value>{0} tiene una copia dei salvataggi online e potrebbe riportare la partita di un altro. Chiedi a un admin ({1}) di spegnere i salvataggi online o di consentire questo gioco.</value></data>
+  <data name="SimpleAdminHere" xml:space="preserve"><value>C'è un admin</value></data>
+  <data name="SimpleCloudAdminText" xml:space="preserve"><value>I salvataggi online sono attivi per {0}: il launcher potrebbe riportare i salvataggi di un altro giocatore. Spegnerli è più sicuro.</value></data>
+  <data name="SimpleCloudAllow" xml:space="preserve"><value>Consenti questo gioco</value></data>
+  <data name="SimpleCloudOnce" xml:space="preserve"><value>Gioca solo questa volta</value></data>
+  <data name="SimpleWhoseSaves" xml:space="preserve"><value>C'è già una partita salvata di {0} su questo computer. Di chi è?</value></data>
+  <data name="SimpleDontKnow" xml:space="preserve"><value>Non lo so: tienila da parte e inizia una partita nuova</value></data>
+  <data name="SimpleWhoseSavesHint" xml:space="preserve"><value>LSS la tiene da parte per quella persona. Chiede solo questa volta.</value></data>
+  <data name="SimpleAskForHelp" xml:space="preserve"><value>Chiedi a chi ha installato LSS di guardarla.</value></data>
+  <data name="SimpleNothingSaved" xml:space="preserve"><value>Sembra che tu non abbia salvato nel gioco, quindi non c'è niente da conservare.</value></data>
+  <data name="SimpleNothingSavedWarning" xml:space="preserve"><value>SE HAI SALVATO, CHIAMA UN AMMINISTRATORE: I TUOI PROGRESSI NON VENGONO SALVATI.</value></data>
+  <data name="SteamOpenHeading" xml:space="preserve"><value>Steam è aperto</value></data>
+  <data name="SteamOpenText" xml:space="preserve"><value>Steam tiene in memoria il suo elenco dei salvataggi. Se cambi partita con Steam aperto, {0} può non trovare i salvataggi o dire che non riesce a ripristinarli. Chiudi prima Steam: LSS lo riavvia insieme al gioco.</value></data>
+  <data name="SteamCloseAndContinue" xml:space="preserve"><value>Chiudi Steam e continua</value></data>
+  <data name="SteamCloseFailed" xml:space="preserve"><value>LSS non è riuscito a chiudere Steam. Chiudilo tu (menu Steam, Esci) e riprova.</value></data>
+  <data name="SteamDeckText" xml:space="preserve"><value>Sei in Gaming Mode: Steam si spegne e riparte da solo. LSS può chiudersi insieme a Steam; se succede, riaprilo dalla libreria e scegli di nuovo la partita.</value></data>
+  <data name="SimpleNotStarted" xml:space="preserve"><value>Il gioco non è partito</value></data>
+  <data name="SimpleNotStartedDone" xml:space="preserve"><value>Va bene, non è stato salvato niente.</value></data>
+  <data name="PinCurrent" xml:space="preserve"><value>PIN attuale</value></data>
+  <data name="PinAgain" xml:space="preserve"><value>Ripeti il nuovo PIN</value></data>
+  <data name="PinDigits" xml:space="preserve"><value>4 cifre</value></data>
+  <data name="PinSave" xml:space="preserve"><value>Salva il PIN</value></data>
+  <data name="PinSetHint" xml:space="preserve"><value>Facoltativo. Con un PIN, solo tu puoi giocare con il tuo nome; se sei admin, anche i permessi di admin. Se lo dimentichi, un admin può toglierlo.</value></data>
+  <data name="PinSetMenu" xml:space="preserve"><value>Imposta PIN…</value></data>
+  <data name="PinChangeMenu" xml:space="preserve"><value>Cambia PIN…</value></data>
+  <data name="PinRemoveMenu" xml:space="preserve"><value>Togli il PIN</value></data>
+  <data name="PlayerUser" xml:space="preserve"><value>Utente</value></data>
+  <data name="PlayersHint" xml:space="preserve"><value>Gli admin possono aprire la modalità avanzata, aggiungere giocatori e giochi e consentire i giochi con i salvataggi nel cloud. Il PIN è facoltativo.</value></data>
+  <data name="PlayersColName" xml:space="preserve"><value>NOME</value></data>
+  <data name="PlayersColAdmin" xml:space="preserve"><value>ADMIN</value></data>
+  <data name="PlayersColPin" xml:space="preserve"><value>PIN</value></data>
+  <data name="PlayersColColour" xml:space="preserve"><value>COLORE</value></data>
+  <data name="MoveUp" xml:space="preserve"><value>Sposta su</value></data>
+  <data name="MoveDown" xml:space="preserve"><value>Sposta giù</value></data>
+  <data name="RemovePlayerMenu" xml:space="preserve"><value>Rimuovi…</value></data>
+  <data name="SimpleCloudBlockedHeading" xml:space="preserve"><value>{0} ha bisogno di un admin</value></data>
+  <data name="SimpleCloudAdminHeading" xml:space="preserve"><value>Salvataggi online attivi</value></data>
+  <data name="RemovePlayerTitle" xml:space="preserve"><value>Rimuovere {0}?</value></data>
+  <data name="RemovePlayerGiveTo" xml:space="preserve"><value>Dalle a:</value></data>
+  <data name="RemovePlayerDelete" xml:space="preserve"><value>Eliminale (si possono recuperare dalle partite eliminate)</value></data>
+  <data name="RemovePlayerVerb" xml:space="preserve"><value>Rimuovi {0}</value></data>
+  <data name="NewProfileTitleFor" xml:space="preserve"><value>Nuova partita di {0}</value></data>
 </root>

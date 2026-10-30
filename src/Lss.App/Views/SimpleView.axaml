@@ -1,0 +1,323 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:Lss.App.Localization"
+             xmlns:vm="using:Lss.App.ViewModels"
+             xmlns:ctl="using:Lss.App.Controls"
+             xmlns:views="using:Lss.App.Views"
+             x:Class="Lss.App.Views.SimpleView"
+             x:DataType="vm:SimpleViewModel">
+
+  <!-- Come il design (canvas "Semplice · ..."): intestazione scura alta 72, poi la pagina. -->
+  <UserControl.Styles>
+    <!-- Pulsanti "piatti": nessuno sfondo, nessun bordo, solo il contenuto disegnato qui -->
+    <Style Selector="Button.flat">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.flat:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.flat:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.flat:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.flat:pointerover Shape.hoverRing">
+      <Setter Property="Stroke" Value="{StaticResource TextSecondary}" />
+    </Style>
+    <Style Selector="Button.gear">
+      <Setter Property="Width" Value="48" />
+      <Setter Property="Height" Value="48" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.gear:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Surface}" />
+    </Style>
+    <Style Selector="TextBlock.chip">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="72,*" Background="{StaticResource Background}">
+
+    <!-- Intestazione -->
+    <Border Grid.Row="0" Classes="topbar" Background="{StaticResource Header}" Padding="16,0,24,0" PointerPressed="Header_PointerPressed">
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Pagina "Chi gioca?": barretta rossa e LSS -->
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center" IsVisible="{Binding !OnGamesPage}">
+          <Border Width="4" Height="32" Background="{StaticResource Accent}" />
+          <TextBlock Text="LSS" FontSize="26" FontWeight="ExtraBold" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Pagina dei giochi: ‹ giocatore · Cambia giocatore -->
+        <Button Grid.Column="0" Classes="flat" Command="{Binding GoBackCommand}" IsVisible="{Binding OnGamesPage}"
+                IsEnabled="{Binding !IsPlaying}" VerticalAlignment="Center"
+                AutomationProperties.Name="{loc:Str SimpleChangePlayer}">
+          <Border Height="52" CornerRadius="26" Background="{StaticResource Surface}" Padding="8,0,18,0">
+            <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+              <Path Data="M15 18 L9 12 L15 6" Stroke="{StaticResource Text}" StrokeThickness="2"
+                    StrokeLineCap="Round" StrokeJoin="Round" Width="22" Height="22" Stretch="None"
+                    VerticalAlignment="Center" Margin="4,0,0,0" />
+              <Border Width="38" Height="38" CornerRadius="19" Background="{Binding CurrentTile.Brush}">
+                <TextBlock Text="{Binding CurrentTile.Initial}" FontSize="18" FontWeight="Bold" Foreground="White"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <TextBlock Text="{Binding CurrentName}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="·" FontSize="14" Foreground="{StaticResource TextMuted}" />
+                <TextBlock Text="{loc:Str SimpleChangePlayer}" FontSize="14" Foreground="{StaticResource TextMuted}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+        </Button>
+
+        <!-- Impostazioni (il passaggio ad Avanzata sta lì) -->
+        <Button Grid.Column="1" Classes="iconbtn" Width="44" Height="44" Margin="8,0,0,0" Command="{Binding OpenSettingsCommand}" IsVisible="{Binding ShowSettings}"
+                VerticalAlignment="Center"
+                ToolTip.Tip="{loc:Str SettingsButton}" AutomationProperties.Name="{loc:Str SettingsButton}">
+          <Path Width="24" Height="24" Data="{StaticResource GearIcon}" />
+        </Button>
+
+        <!-- Riduci, schermo intero, chiudi: a destra come da standard -->
+        <views:WindowButtons Grid.Column="3" />
+      </Grid>
+    </Border>
+
+    <!-- Pagina "Chi gioca?" -->
+    <Grid Grid.Row="1" IsVisible="{Binding !OnGamesPage}">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="56">
+        <TextBlock Text="{loc:Str SimpleWhoIsPlaying}" FontSize="44" FontWeight="ExtraBold" HorizontalAlignment="Center" />
+
+        <StackPanel Orientation="Horizontal" Spacing="48" HorizontalAlignment="Center">
+          <ItemsControl ItemsSource="{Binding Players}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="48" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:PersonTile">
+                <Button Classes="flat" Tag="{Binding}" Click="Player_Click"
+                        AutomationProperties.Name="{Binding Person.Name}">
+                  <StackPanel Spacing="16" HorizontalAlignment="Center">
+                    <Grid Width="140" Height="140">
+                      <Border Width="140" Height="140" CornerRadius="70" Background="{Binding Brush}">
+                        <TextBlock Text="{Binding Initial}" FontSize="60" FontWeight="Bold" Foreground="White"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      </Border>
+                      <!-- Scudo: amministratore -->
+                      <Border Width="40" Height="40" CornerRadius="20" Background="{StaticResource Background}"
+                              BorderBrush="{StaticResource Background}" BorderThickness="3"
+                              HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2,2"
+                              IsVisible="{Binding Person.IsAdmin}"
+                              ToolTip.Tip="{loc:Str PlayerAdmin}" AutomationProperties.Name="{loc:Str PlayerAdmin}">
+                        <Path Data="M12 3 L20 6 V12 C20 16.5 16.6 20.3 12 21 C7.4 20.3 4 16.5 4 12 V6 Z"
+                              Stroke="{StaticResource Warning}" StrokeThickness="2" StrokeJoin="Round"
+                              Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      </Border>
+                    </Grid>
+                    <TextBlock Text="{Binding Person.Name}" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <!-- Aggiungi giocatore (chiede un admin) -->
+          <Button Classes="flat" Command="{Binding AddPlayerCommand}" Foreground="{StaticResource TextSecondary}">
+            <StackPanel Spacing="16" HorizontalAlignment="Center">
+              <Grid Width="140" Height="140">
+                <Ellipse Classes="hoverRing" Width="136" Height="136" Stroke="#3A3A40" StrokeThickness="2"
+                         StrokeDashArray="3,2" />
+                <Path Data="M12 5 V19 M5 12 H19" Stroke="{StaticResource TextSecondary}" StrokeThickness="1.8"
+                      StrokeLineCap="Round" Width="44" Height="44" Stretch="Uniform"
+                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Grid>
+              <TextBlock Text="{loc:Str SimpleAddPlayer}" FontSize="22" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+
+        <TextBlock Text="{loc:Str SimpleTapName}" FontSize="17" Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center" />
+      </StackPanel>
+    </Grid>
+
+    <!-- Pagina dei giochi del giocatore -->
+    <Grid Grid.Row="1" IsVisible="{Binding OnGamesPage}">
+
+      <ScrollViewer HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding !IsPlaying}">
+        <StackPanel Margin="56,36,56,90" Spacing="28">
+          <TextBlock Text="{loc:Str SimpleWhatToPlay}" FontSize="32" FontWeight="ExtraBold" />
+
+          <ItemsControl ItemsSource="{Binding Tiles}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.DataTemplates>
+              <DataTemplate x:DataType="vm:SimpleGameTile">
+                <Grid Width="170" Margin="0,0,28,28" Opacity="{Binding Opacity}">
+                  <StackPanel Spacing="10">
+                    <Button Classes="flat" Tag="{Binding}" Click="Game_Click" IsEnabled="{Binding !Running}"
+                            Width="170" AutomationProperties.Name="{Binding Name}">
+                      <Border Width="170" Height="252" CornerRadius="14" ClipToBounds="True" Background="{Binding TileBrush}">
+                        <Grid>
+                          <Image Source="{Binding Cover}" IsVisible="{Binding HasCover}" Stretch="UniformToFill" />
+                          <StackPanel IsVisible="{Binding !HasCover}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Margin="0,0,0,40">
+                            <Image Source="{Binding Item.Icon}" IsVisible="{Binding Item.HasIcon}" Width="64" Height="64" />
+                            <Border Width="64" Height="64" CornerRadius="14" Background="#33FFFFFF" IsVisible="{Binding !Item.HasIcon}">
+                              <TextBlock Text="{Binding Item.Initial}" FontSize="30" FontWeight="ExtraBold" Foreground="White"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                          </StackPanel>
+                          <TextBlock Text="{Binding Name}" IsVisible="{Binding !HasCover}" FontSize="22" FontWeight="ExtraBold"
+                                     Foreground="White" TextWrapping="Wrap" LineHeight="25"
+                                     VerticalAlignment="Bottom" Margin="16,16,62,16" />
+                          <!-- Da preparare: bordo tratteggiato -->
+                          <Rectangle RadiusX="14" RadiusY="14" Stroke="#5A5A60" StrokeThickness="2" StrokeDashArray="3,2"
+                                     IsVisible="{Binding ShowSetupBadge}" />
+                          <!-- Launcher e, sotto, l'etichetta (in gioco, da preparare o cloud): in alto a sinistra -->
+                          <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Spacing="6">
+                            <Border CornerRadius="6" Background="#BF0A0A0B" Padding="8,4" HorizontalAlignment="Left">
+                              <TextBlock Classes="chip" Text="{Binding LauncherChip}" Foreground="#D6D6DA" FontWeight="SemiBold" />
+                            </Border>
+                            <Border CornerRadius="6" Background="{StaticResource Accent}" Padding="8,4"
+                                    HorizontalAlignment="Left" IsVisible="{Binding ShowRunningBadge}">
+                              <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="White" />
+                            </Border>
+                            <Border CornerRadius="6" Background="#2A2110" Padding="8,4"
+                                    HorizontalAlignment="Left" IsVisible="{Binding ShowSetupBadge}">
+                              <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="{StaticResource Warning}" />
+                            </Border>
+                            <Border CornerRadius="6" Background="#1B2230" Padding="8,4"
+                                    HorizontalAlignment="Left" IsVisible="{Binding ShowCloudBadge}">
+                              <TextBlock Classes="chip" Text="{Binding BadgeText}" Foreground="#7FB0F0" />
+                            </Border>
+                          </StackPanel>
+                        </Grid>
+                      </Border>
+                    </Button>
+                    <StackPanel Spacing="4">
+                      <ctl:MarqueeText Text="{Binding Name}" Foreground="{StaticResource Text}" FontSize="16"
+                                       FontWeight="SemiBold" />
+                      <TextBlock Text="{Binding SubText}" FontSize="13" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </StackPanel>
+
+                  <!-- ⋯ menu sopra la copertina in basso a destra: Le mie partite e Impostazioni del gioco -->
+                  <Button Classes="flat" Width="44" Height="44" HorizontalAlignment="Right" VerticalAlignment="Top"
+                          Margin="0,198,10,0" AutomationProperties.Name="{loc:Str GameSettingsMenu}">
+                    <Border Width="44" Height="44" CornerRadius="22" Background="#D10A0A0B">
+                      <TextBlock Text="···" FontSize="20" FontWeight="Bold" Foreground="{StaticResource Text}"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-4,0,0" />
+                    </Border>
+                    <Button.Flyout>
+                      <MenuFlyout>
+                        <MenuItem Header="{loc:Str SimpleMyGames}" Tag="{Binding}" Click="MyGames_Click" IsVisible="{Binding Ready}" />
+                        <MenuItem Header="{loc:Str GameSettingsMenu}" Tag="{Binding}" Click="GameSettings_Click" />
+                      </MenuFlyout>
+                    </Button.Flyout>
+                  </Button>
+
+                </Grid>
+              </DataTemplate>
+
+              <!-- Aggiungi un gioco (chiede un admin) -->
+              <DataTemplate x:DataType="vm:SimpleAddGameTile">
+                <Button Classes="flat" Click="AddGame_Click" Width="170" Margin="0,0,28,28" VerticalAlignment="Top">
+                  <StackPanel Spacing="10">
+                    <Grid Width="170" Height="252">
+                      <Rectangle Classes="hoverRing" RadiusX="14" RadiusY="14" Stroke="#3A3A40" StrokeThickness="2"
+                                 StrokeDashArray="3,2" />
+                      <Path Data="M12 5 V19 M5 12 H19" Stroke="{StaticResource TextSecondary}" StrokeThickness="1.8"
+                            StrokeLineCap="Round" Width="40" Height="40" Stretch="Uniform"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="{loc:Str SimpleAddGame}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}" />
+                      <TextBlock Text="{loc:Str SimpleAddGameAny}" FontSize="13" Foreground="{StaticResource TextMuted}" />
+                    </StackPanel>
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.DataTemplates>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Messaggio dopo il salvataggio, in basso al centro -->
+      <Border IsVisible="{Binding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+              HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,28"
+              CornerRadius="12" Background="{StaticResource SuccessBack}" BorderBrush="{StaticResource SuccessBorder}"
+              BorderThickness="1" Padding="20,14">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Path Data="M5 12 L10 17 L20 7" Stroke="{StaticResource Success}" StrokeThickness="2.2"
+                StrokeLineCap="Round" StrokeJoin="Round" Width="20" Height="20" Stretch="Uniform" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding Message}" FontSize="16" VerticalAlignment="Center" />
+        </StackPanel>
+      </Border>
+
+      <!-- In gioco: la scheda al centro -->
+      <Border IsVisible="{Binding IsPlaying}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="880"
+              Margin="24" Padding="48" CornerRadius="20" Background="{StaticResource Surface}"
+              BorderBrush="{StaticResource Border}" BorderThickness="1">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="48">
+          <Border Width="200" Height="300" CornerRadius="14" ClipToBounds="True"
+                  Background="{Binding PlayingTile.TileBrush}" VerticalAlignment="Center">
+            <Grid>
+              <Image Source="{Binding PlayingTile.Cover}" IsVisible="{Binding PlayingTile.HasCover}" Stretch="UniformToFill" />
+              <StackPanel IsVisible="{Binding !PlayingTile.HasCover}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                          Margin="0,0,0,60">
+                <Image Source="{Binding PlayingTile.Item.Icon}" IsVisible="{Binding PlayingTile.Item.HasIcon}" Width="64" Height="64" />
+                <Border Width="64" Height="64" CornerRadius="14" Background="#33FFFFFF" IsVisible="{Binding !PlayingTile.Item.HasIcon}">
+                  <TextBlock Text="{Binding PlayingTile.Item.Initial}" FontSize="30" FontWeight="ExtraBold" Foreground="White"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+              </StackPanel>
+              <TextBlock Text="{Binding PlayingTile.Name}" IsVisible="{Binding !PlayingTile.HasCover}" FontSize="26"
+                         FontWeight="ExtraBold" Foreground="White" TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="18" />
+            </Grid>
+          </Border>
+
+          <StackPanel Grid.Column="1" Spacing="20" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <Ellipse Width="10" Height="10" Fill="{StaticResource Success}" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding PlayingOpenText}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Success}" />
+            </StackPanel>
+            <TextBlock Text="{Binding PlayingTitle}" FontSize="40" FontWeight="ExtraBold" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding PlayingBody}" FontSize="20" LineHeight="30" Foreground="{StaticResource TextSecondary}"
+                       TextWrapping="Wrap" />
+            <TextBlock Text="{Binding StartYourselfText}" FontSize="17" Foreground="{StaticResource TextSecondary}"
+                       TextWrapping="Wrap" IsVisible="{Binding ShowStartYourself}" />
+            <StackPanel Spacing="12" Margin="0,8,0,0" IsVisible="{Binding ShowFinishButton}">
+              <TextBlock Text="{loc:Str SimpleCantDetect}" FontSize="15" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+              <Button Classes="primary" Command="{Binding FinishPlayingCommand}" Height="52" Padding="28,0"
+                      CornerRadius="12" FontSize="18" HorizontalAlignment="Left">
+                <TextBlock Text="{Binding FinishText}" FontSize="18" FontWeight="Bold" />
+              </Button>
+            </StackPanel>
+            <!-- Il gioco non si è aperto: smette di aspettare, senza salvare -->
+            <Button Classes="secondary" Command="{Binding GameNotStartedCommand}" Height="44" Padding="22,0"
+                    HorizontalAlignment="Left" Margin="0,8,0,0">
+              <TextBlock Text="{Binding NotStartedText}" FontSize="15" FontWeight="SemiBold" />
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+
+</UserControl>

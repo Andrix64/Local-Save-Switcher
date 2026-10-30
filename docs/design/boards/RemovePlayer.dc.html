@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Rimuovi giocatore</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center">
+  <div role="dialog" aria-labelledby="rp-title" style="width: 540px; box-sizing: border-box; padding: 24px 28px; border-radius: 12px; background: #0F0F10; border: 1px solid #7A2A24; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <div style="width: 40px; height: 40px; border-radius: 20px; background: #2F7D3B; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700">L</div>
+      <h1 id="rp-title" style="margin: 0; font-size: 19px; font-weight: 700">Rimuovere Luca?</h1>
+    </div>
+    <p style="margin: 0; color: #D6D6DA; font-size: 14px; line-height: 1.5">Luca ha 5 partite in 3 giochi. E le sue partite?</p>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <label style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 8px; background: #19191B; border: 1px solid #E0261B">
+        <span style="width: 16px; height: 16px; border-radius: 8px; border: 2px solid #E0261B; box-sizing: border-box; display: flex; align-items: center; justify-content: center"><span style="width: 6px; height: 6px; border-radius: 3px; background: #E0261B"></span></span>
+        <span style="flex: 1">Dalle a:</span>
+        <span style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid #3A3A40">
+          <span style="width: 20px; height: 20px; border-radius: 10px; background: #1D6FD0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">C</span>Clara <span aria-hidden="true" style="color: #96969C">⌄</span>
+        </span>
+      </label>
+      <label style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; background: #19191B; border: 1px solid #2E2E33">
+        <span style="width: 16px; height: 16px; border-radius: 8px; border: 2px solid #5A5A60; box-sizing: border-box; margin-top: 1px"></span>
+        <span style="line-height: 1.45">Eliminale (si possono recuperare dalle partite eliminate)</span>
+      </label>
+    </div>
+    <div style="display: flex; justify-content: flex-end; gap: 8px">
+      <button style="height: 34px; padding: 0 16px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Annulla</button>
+      <button style="height: 34px; padding: 0 18px; border-radius: 6px; border: 0; background: #B3261E; color: #FFFFFF; font-family: inherit; font-weight: 700">Rimuovi Luca</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

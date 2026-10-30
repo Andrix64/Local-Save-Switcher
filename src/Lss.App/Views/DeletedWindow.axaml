@@ -3,12 +3,13 @@
         xmlns:vm="using:Lss.App.ViewModels"
         x:Class="Lss.App.Views.DeletedWindow"
         x:DataType="vm:DeletedViewModel"
-        Title="{Binding Title}"
-        Width="600" Height="470"
-        MinWidth="520" MinHeight="400"
+        Title="{Binding Heading}"
+        Width="760" Height="470"
+        MinWidth="560" MinHeight="360"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
 
+  <!-- Come il design (canvas "Partite eliminate"): ogni riga ha Recupera ed Elimina per sempre. -->
   <Window.Styles>
     <Style Selector="TextBlock.ok">
       <Setter Property="Foreground" Value="{StaticResource Success}" />
@@ -19,40 +20,79 @@
     <Style Selector="TextBlock.warn">
       <Setter Property="Foreground" Value="{StaticResource Warning}" />
     </Style>
+    <Style Selector="ListBox.rows ListBoxItem">
+      <Setter Property="Padding" Value="14,12" />
+      <Setter Property="BorderBrush" Value="{StaticResource Border}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <Style Selector="Button.small">
+      <Setter Property="Height" Value="30" />
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.purge">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="#7A2A24" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="#FFB4AD" />
+    </Style>
+    <Style Selector="Button.purge:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#2A1412" />
+      <Setter Property="BorderBrush" Value="#7A2A24" />
+      <Setter Property="Foreground" Value="#FFB4AD" />
+    </Style>
   </Window.Styles>
 
-  <DockPanel Margin="20,18,20,16">
+  <DockPanel Margin="28,24">
 
-    <!-- Chiudi, recupera, apri la cartella e l'esito dell'ultima operazione -->
-    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="0,14,0,0">
-      <TextBlock Grid.Column="0" Text="{Binding Status}" Classes="small" TextWrapping="Wrap"
+    <!-- Elimina tutte a sinistra; apri la cartella e chiudi a destra. Sopra, l'esito dell'ultima operazione. -->
+    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,14,0,0">
+      <TextBlock Text="{Binding Status}" Classes="small" TextWrapping="Wrap"
                  Classes.ok="{Binding StatusIsSuccess}" Classes.bad="{Binding StatusIsError}"
-                 Classes.warn="{Binding StatusIsWarning}" VerticalAlignment="Center" />
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <Button Classes="primary" Content="{Binding RecoverText}" Command="{Binding RecoverCommand}"
-                IsEnabled="{Binding CanUse}" MinWidth="120" />
-        <Button Classes="secondary" Content="{Binding OpenFolderText}" Command="{Binding OpenFolderCommand}"
-                IsEnabled="{Binding CanUse}" />
-        <Button Classes="secondary" Content="{Binding CloseText}" IsCancel="True" MinWidth="100"
-                Click="Close_Click" />
-      </StackPanel>
-    </Grid>
+                 Classes.warn="{Binding StatusIsWarning}" />
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Button Classes="link" Content="{Binding PurgeAllText}" Command="{Binding PurgeAllCommand}"
+                IsVisible="{Binding ShowPurgeAll}" IsEnabled="{Binding !Busy}" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+          <Button Classes="secondary" Content="{Binding OpenFolderText}" Command="{Binding OpenFolderCommand}"
+                  IsEnabled="{Binding CanUse}" />
+        </StackPanel>
+      </Grid>
+    </StackPanel>
 
-    <TextBlock DockPanel.Dock="Top" Classes="caption" Text="{Binding Caption}" Margin="2,0,0,8" />
+    <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,14">
+      <TextBlock Text="{Binding Intro}" Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" />
+    </StackPanel>
 
-    <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1"
-            CornerRadius="10" Padding="6">
+    <Border BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="8" ClipToBounds="True">
       <Grid>
         <TextBlock Text="{Binding EmptyText}" Foreground="{StaticResource TextMuted}"
                    HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding ShowEmpty}" />
-        <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" IsVisible="{Binding ListVisible}"
-                 Background="Transparent" BorderThickness="0" DoubleTapped="List_DoubleTapped">
+        <ListBox Classes="rows" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}"
+                 IsVisible="{Binding ListVisible}" Background="Transparent" BorderThickness="0"
+                 DoubleTapped="List_DoubleTapped">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="vm:DeletedItemViewModel">
-              <StackPanel Margin="6,4" Spacing="2">
-                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
-                <TextBlock Classes="small" Text="{Binding Details}" />
-              </StackPanel>
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Border Width="28" Height="28" CornerRadius="14" Background="{Binding CircleBrush}"
+                        ToolTip.Tip="{Binding OwnerText}" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding CircleInitial}" FontSize="12" FontWeight="Bold" Foreground="White"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="{Binding Line}" FontSize="12" Foreground="{StaticResource TextMuted}"
+                             TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <Button Classes="secondary small" Content="{Binding $parent[Window].((vm:DeletedViewModel)DataContext).RecoverText}"
+                          Tag="{Binding}" Click="Recover_Click"
+                          IsEnabled="{Binding !$parent[Window].((vm:DeletedViewModel)DataContext).Busy}" />
+                  <Button Classes="small purge" Content="{Binding $parent[Window].((vm:DeletedViewModel)DataContext).PurgeText}"
+                          Tag="{Binding}" Click="Purge_Click"
+                          IsEnabled="{Binding !$parent[Window].((vm:DeletedViewModel)DataContext).Busy}" />
+                </StackPanel>
+              </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
         </ListBox>

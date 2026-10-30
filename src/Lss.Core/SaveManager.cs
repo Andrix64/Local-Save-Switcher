@@ -31,18 +31,6 @@ public enum CloudState
 }
 
 /// <summary>
-/// Account Steam con i salvataggi di Control.
-/// </summary>
-/// <param name="Id">Nome della cartella in userdata (ID dell'account).</param>
-/// <param name="Name">Nome Steam, o "" se non si riesce a leggerlo.</param>
-/// <param name="Folder">Cartella userdata\ID.</param>
-/// <param name="LastSaved">Data del salvataggio più recente, se c'è.</param>
-public sealed record SteamAccount(string Id, string Name, string Folder, DateTime? LastSaved)
-{
-    public string DisplayName => Name != "" ? Name : Loc.F(Strings.AccountFallbackName, Id);
-}
-
-/// <summary>
 /// Logica dei profili di salvataggio, senza input/output di console.
 /// </summary>
 public sealed partial class SaveManager
@@ -53,16 +41,16 @@ public sealed partial class SaveManager
     private const string SavestateDateFormat = "yyyy-MM-dd_HH-mm-ss";
 
     // Prefissi dei nomi dei backup, letti da BackupReasonText.
-    private const string ActivateBackupPrefix = "Prima_di_";
-    private const string SaveBackupPrefix = "Prima_salvataggio_";
-    private const string RestoreBackupName = "Prima_ripristino";
-    private const string DeletedBackupPrefix = "Eliminato_";
+    internal const string ActivateBackupPrefix = "Prima_di_";
+    internal const string SaveBackupPrefix = "Prima_salvataggio_";
+    internal const string RestoreBackupName = "Prima_ripristino";
+    internal const string DeletedBackupPrefix = "Eliminato_";
 
     // Nome intermedio di una rinomina solo di maiuscole.
     private const string RenameSuffix = ".rinomina";
 
     public string SavePath { get; }
-    public GameInfo Game { get; }
+    public GameInfo Game { get; private set; }
     public string ProfilesPath { get; }
     public string BackupPath { get; }
     public string SavestatePath { get; }
@@ -73,19 +61,63 @@ public sealed partial class SaveManager
     /// </summary>
     public string AccountName { get; }
 
+    /// <summary>
+    /// Account del gioco: la cartella sopra SavePath.
+    /// </summary>
+    public GameAccount Account { get; }
+
+    /// <summary>
+    /// Nome del launcher che gestisce il gioco (marchio: Steam, Epic...).
+    /// </summary>
+    public string LauncherName => provider.DisplayName;
+
+    /// <summary>
+    /// Launcher che gestisce il gioco (Steam).
+    /// </summary>
+    private readonly IGameProvider provider;
+
+    /// <summary>
+    /// I posti dei salvataggi del gioco: si cambiano e si salvano tutti insieme.
+    /// SavePath è il posto 1.
+    /// </summary>
+    private SaveSet saves;
+
+    // Journal del cambio di salvataggi, nella cartella dati del gioco.
+    private readonly string switchJournal;
+
+    // Cartella dati del gioco (per un account): qui stanno posti.json e cambio.ini.
+    private readonly string dataFolder;
+
+    /// <summary>
+    /// true se all'apertura è stato rimesso a posto un cambio di salvataggi
+    /// interrotto (per esempio dallo spegnimento del computer).
+    /// </summary>
+    public bool SwitchInterruptedRestored { get; private set; }
+
     /// <param name="savePath">Cartella dei salvataggi del gioco (…\870780).</param>
     /// <param name="basePath">Cartella dei dati del gioco per un account (…\LSS\IDAccount\AppID).</param>
     /// <param name="game">Gioco gestito; se manca è Control con savePath.</param>
-    internal SaveManager(string savePath, string basePath, string accountName = "", GameInfo? game = null)
+    /// <param name="provider">Launcher del gioco; se manca è Steam.</param>
+    /// <param name="account">Account del gioco; se manca si ricava da savePath (solo Control, in userdata).</param>
+    internal SaveManager(string savePath, string basePath, string accountName = "", GameInfo? game = null,
+        IGameProvider? provider = null, GameAccount? account = null)
     {
         Game = game ?? GameInfo.Control(savePath);
+        this.provider = provider ?? new SteamProvider(Platform.Current);
+
+        // Una cartella dei salvataggi fuori da userdata non sta sotto l'account: va preso quello dato.
+        string accountFolder = Path.GetDirectoryName(savePath) ?? "";
+        Account = account ?? new GameAccount(this.provider.Id, Path.GetFileName(accountFolder), accountName, accountFolder, null);
         SavePath = savePath;
+        saves = new SaveSet(Game.Spots.Count > 0 ? Game.Spots : GameInfo.SpotsOf(savePath, SaveSource.Userdata));
+        switchJournal = Path.Combine(basePath, "cambio.ini");
+        dataFolder = basePath;
         AccountName = accountName;
         ProfilesPath = Path.Combine(basePath, "Profili");
         BackupPath = Path.Combine(basePath, "Backup");
         SavestatePath = Path.Combine(basePath, "Savestate");
         InfoPath = Path.Combine(basePath, "Info");
-        State = new AppState(Path.Combine(basePath, "stato.ini"));
+        State = new AppState(Path.Combine(basePath, "stato.json"));
 
         Directory.CreateDirectory(ProfilesPath);
         Directory.CreateDirectory(BackupPath);
@@ -105,14 +137,15 @@ public sealed partial class SaveManager
     /// o null se l'utente annulla. In quel caso il messaggio del risultato è vuoto.
     /// </param>
     public static Result<SaveManager> Initialize(
-        Func<IReadOnlyList<SteamAccount>, string?, SteamAccount?> chooseAccount)
+        Func<IReadOnlyList<GameAccount>, string?, GameAccount?> chooseAccount)
     {
-        string steam = Platform.Current.FindSteamRoots().FirstOrDefault() ?? "";
+        var steamProvider = new SteamProvider(Platform.Current);
+        string steam = steamProvider.FindRoot() ?? "";
 
         if (steam == "")
             return Result<SaveManager>.Fail(Strings.SteamNotFound);
 
-        string userData = Path.Combine(steam, "userdata");
+        string userData = SteamProvider.UserDataFolder(steam);
 
         if (!Directory.Exists(userData))
             return Result<SaveManager>.Fail(Strings.UserDataNotFound);
@@ -121,7 +154,7 @@ public sealed partial class SaveManager
         // 870780.vecchio farebbe sparire l'account.
         RecoverGameFolders(userData, GameInfo.ControlAppId);
 
-        IReadOnlyList<SteamAccount> accounts = FindAccounts(userData, GameInfo.ControlAppId);
+        IReadOnlyList<GameAccount> accounts = SteamProvider.FindAccounts(userData, GameInfo.ControlAppId);
 
         if (accounts.Count == 0)
         {
@@ -130,10 +163,10 @@ public sealed partial class SaveManager
         }
 
         string appData = AppData.Root;
-        var settings = new AppSettings(Path.Combine(appData, "lss.ini"));
+        var settings = new AppSettings(AppSettings.FileIn(appData));
         settings.Load();
 
-        SteamAccount? account = accounts[0];
+        GameAccount? account = accounts[0];
 
         if (accounts.Count > 1)
         {
@@ -142,7 +175,7 @@ public sealed partial class SaveManager
             if (account == null)
                 return Result<SaveManager>.Fail("");
 
-            settings.LastAccount = account.Id;
+            settings.LastAccount = account.Key;
             settings.Save();
         }
 
@@ -152,14 +185,23 @@ public sealed partial class SaveManager
 
             // Dalle librerie di Steam, se Control è installato: con la cartella
             // di installazione il gioco aperto si riconosce anche dai processi.
-            GameInfo game = SteamLibrary.FindGames(steam, account.Folder)
-                .FirstOrDefault(g => g.AppId == GameInfo.ControlAppId) ?? GameInfo.Control(savePath);
+            GameInfo game = steamProvider.FindGames(account)
+                .FirstOrDefault(g => g.Id == GameInfo.ControlAppId) ?? GameInfo.Control(savePath);
 
-            return Result<SaveManager>.Ok(new SaveManager(
+            var manager = new SaveManager(
                 savePath,
-                Path.Combine(appData, account.Id, GameInfo.ControlAppId),
+                Path.Combine(appData, account.Provider, account.Id, GameInfo.ControlAppId),
                 account.Name,
-                game));
+                game,
+                new SteamProvider(Platform.Current),
+                account)
+            {
+                Players = LoadPeople(appData)
+            };
+
+            manager.AssignExistingPlaythroughs();
+
+            return Result<SaveManager>.Ok(manager);
         }
         catch (Exception ex)
         {
@@ -168,24 +210,92 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
+    /// Le persone di LSS, da persone.ini in dataRoot. Se il file manca, ne crea una.
+    /// </summary>
+    private static People LoadPeople(string dataRoot)
+    {
+        var people = new People(dataRoot);
+        people.Load();
+        return people;
+    }
+
+    /// <summary>
     /// Manager per un gioco di un account: dati in dataRoot/IDAccount/AppID.
     /// </summary>
-    public static Result<SaveManager> Open(string dataRoot, SteamAccount account, GameInfo game)
+    public static Result<SaveManager> Open(string dataRoot, GameAccount account, GameInfo game, IGameProvider? provider = null)
     {
         if (game.Support != SupportState.Supported)
             return Result<SaveManager>.Fail(Loc.F(Strings.GameNotSupported, game.Name));
 
         try
         {
-            return Result<SaveManager>.Ok(new SaveManager(
+            if (game.Source != SaveSource.Userdata)
+            {
+                RecoverSaveFolder(game.SaveFolder);
+
+                // Il controllo si ripete ad ogni apertura: la cartella può essere cambiata da quando è stata trovata.
+                IGameProvider launcher = provider ?? new SteamProvider(Platform.Current);
+                SaveContext context = SaveLookup.ContextFor(launcher, account, game, Platform.Current.GetKnownFolders());
+                IReadOnlyList<string> launchers = launcher.LauncherFolders(account);
+
+                // Ogni posto, non solo il primo: una cartella può essere cambiata da quando è stata trovata.
+                foreach (SaveSpot spot in game.Spots)
+                {
+                    SafetyProblem problem = SaveLocator.CheckSpot(spot, context, launchers, dataRoot);
+
+                    if (problem != SafetyProblem.None)
+                    {
+                        return Result<SaveManager>.Fail(Loc.F(Strings.SaveFolderNoLongerSafe, game.Name,
+                            SaveFolderSafety.Describe(problem)));
+                    }
+                }
+            }
+
+            var manager = new SaveManager(
                 game.SaveFolder,
-                Path.Combine(dataRoot, account.Id, game.AppId),
+                Path.Combine(dataRoot, account.Provider, account.Id, game.Id),
                 account.Name,
-                game));
+                game,
+                provider,
+                account)
+            {
+                Players = LoadPeople(dataRoot)
+            };
+
+            manager.RecoverInterruptedSwitch();
+            manager.AssignExistingPlaythroughs();
+
+            return Result<SaveManager>.Ok(manager);
         }
         catch (Exception ex)
         {
             return Result<SaveManager>.Fail(Loc.F(Strings.InitError, ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Rimette a posto un cambio di salvataggi interrotto, se cambio.ini c'è,
+    /// e segna che è successo (l'interfaccia lo dice una volta).
+    /// </summary>
+    private void RecoverInterruptedSwitch()
+    {
+        SwitchInterruptedRestored = saves.RecoverInterrupted(switchJournal, null);
+    }
+
+    /// <summary>
+    /// Rimette a posto una cartella dei salvataggi lasciata a metà da una
+    /// sostituzione interrotta. Un errore si registra e basta.
+    /// </summary>
+    private static void RecoverSaveFolder(string saveFolder)
+    {
+        try
+        {
+            if (FileOps.RecoverInterruptedReplace(saveFolder))
+                Log.Write("Recuperata una sostituzione interrotta: " + saveFolder);
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Recupero di " + saveFolder, ex);
         }
     }
 
@@ -294,156 +404,9 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
-    /// Account in userdata che hanno la cartella di Control, dal più usato di
-    /// recente. Basta la cartella 870780: dopo aver attivato un profilo vuoto o
-    /// creato a mano può mancare la sottocartella remote, e l'account non deve
-    /// sparire per questo.
-    /// </summary>
-    internal static IReadOnlyList<SteamAccount> FindAccounts(string userData, string appId)
-    {
-        var accounts = new List<SteamAccount>();
-
-        foreach (string dir in Directory.GetDirectories(userData))
-        {
-            string game = Path.Combine(dir, appId);
-
-            if (!Directory.Exists(game))
-                continue;
-
-            DateTime? lastSaved = null;
-
-            try
-            {
-                foreach (string file in Directory.EnumerateFiles(game, "*", SearchOption.AllDirectories))
-                {
-                    // Il file di Steam Cloud non è un salvataggio.
-                    if (Path.GetFileName(file).Equals("remotecache.vdf", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    DateTime time = File.GetLastWriteTime(file);
-
-                    if (lastSaved == null || time > lastSaved)
-                        lastSaved = time;
-                }
-            }
-            catch
-            {
-                // Cartella non leggibile: nessuna data.
-            }
-
-            accounts.Add(new SteamAccount(Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
-        }
-
-        return accounts.OrderByDescending(a => a.LastSaved ?? DateTime.MinValue).ToList();
-    }
-
-    /// <summary>
-    /// Account in userdata che hanno almeno un gioco con salvataggi in
-    /// userdata (SupportState.Supported), dal più usato di recente.
-    /// </summary>
-    internal static IReadOnlyList<SteamAccount> FindAccountsWithGames(string userData)
-    {
-        var accounts = new List<SteamAccount>();
-
-        foreach (string dir in Directory.GetDirectories(userData))
-        {
-            if (!IsNumeric(Path.GetFileName(dir)))
-                continue;
-
-            List<string> games = Directory.GetDirectories(dir)
-                .Where(game => IsNumeric(Path.GetFileName(game)) &&
-                               !SteamLibrary.SystemApps.Contains(Path.GetFileName(game)))
-                .Where(game => SteamLibrary.GetSupport(game) == SupportState.Supported)
-                .ToList();
-
-            if (games.Count == 0)
-                continue;
-
-            DateTime? lastSaved = null;
-
-            try
-            {
-                foreach (string file in games.SelectMany(SaveFilesOf))
-                {
-                    DateTime time = File.GetLastWriteTime(file);
-
-                    if (lastSaved == null || time > lastSaved)
-                        lastSaved = time;
-                }
-            }
-            catch
-            {
-                // Cartella non leggibile: nessuna data.
-            }
-
-            accounts.Add(new SteamAccount(Path.GetFileName(dir), ReadPersonaName(dir), dir, lastSaved));
-        }
-
-        return accounts.OrderByDescending(a => a.LastSaved ?? DateTime.MinValue).ToList();
-    }
-
-    /// <summary>
-    /// Account in userdata con almeno la cartella di un gioco, anche se nessuno
-    /// è gestibile (per esempio con i salvataggi nel prefisso di Proton): così
-    /// l'app si apre lo stesso e mostra i giochi con il motivo.
-    /// </summary>
-    internal static IReadOnlyList<SteamAccount> FindAccountsWithAnyGame(string userData)
-    {
-        var accounts = new List<SteamAccount>();
-
-        foreach (string dir in Directory.GetDirectories(userData))
-        {
-            if (!IsNumeric(Path.GetFileName(dir)))
-                continue;
-
-            bool hasGame = Directory.GetDirectories(dir)
-                .Any(game => IsNumeric(Path.GetFileName(game)) &&
-                             !SteamLibrary.SystemApps.Contains(Path.GetFileName(game)));
-
-            if (hasGame)
-                accounts.Add(new SteamAccount(Path.GetFileName(dir), ReadPersonaName(dir), dir, null));
-        }
-
-        return accounts;
-    }
-
-    /// <summary>
-    /// I file di salvataggio di una cartella di gioco: tutti tranne
-    /// remotecache.vdf al primo livello (il file di Steam Cloud).
-    /// </summary>
-    private static IEnumerable<string> SaveFilesOf(string game)
-    {
-        string cache = Path.Combine(game, "remotecache.vdf");
-
-        return Directory.EnumerateFiles(game, "*", SearchOption.AllDirectories)
-            .Where(file => !file.Equals(cache, StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <summary>
     /// true se il nome è fatto solo di cifre, come le cartelle degli account e dei giochi.
     /// </summary>
     internal static bool IsNumeric(string name) => name.Length > 0 && name.All(char.IsAsciiDigit);
-
-    /// <summary>
-    /// Nome Steam dell'account, letto da config\localconfig.vdf.
-    /// </summary>
-    private static string ReadPersonaName(string accountFolder)
-    {
-        try
-        {
-            string config = Path.Combine(accountFolder, "config", "localconfig.vdf");
-
-            if (!File.Exists(config))
-                return "";
-
-            Match match = Regex.Match(File.ReadAllText(config), "\"PersonaName\"\\s+\"([^\"]*)\"");
-            return match.Success ? match.Groups[1].Value : "";
-        }
-        catch
-        {
-            return "";
-        }
-    }
 
     public void ReloadState()
     {
@@ -451,8 +414,8 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
-    /// Data salvata in stato.ini mostrata nel formato della lingua di Windows.
-    /// In stato.ini è sempre gg/MM/aaaa; un valore illeggibile viene mostrato com'è.
+    /// Data salvata in stato.json mostrata nel formato della lingua di Windows.
+    /// In stato.json è sempre gg/MM/aaaa; un valore illeggibile viene mostrato com'è.
     /// </summary>
     public static string FormatStoredDate(string stored)
     {
@@ -470,29 +433,10 @@ public sealed partial class SaveManager
     /// non è disattivato esplicitamente, quindi senza impostazione vale Enabled.
     /// L'impostazione generale "Abilita Steam Cloud" non viene letta.
     /// </summary>
-    public CloudState GetCloudState()
-    {
-        try
-        {
-            string? account = Path.GetDirectoryName(SavePath);
+    public CloudState GetCloudState() => provider.GetCloudState(Account, Game);
 
-            if (account == null)
-                return CloudState.Unknown;
-
-            string config = Path.Combine(account, "7", "remote", "sharedconfig.vdf");
-
-            if (!File.Exists(config))
-                return CloudState.Enabled;
-
-            string? value = Vdf.Find(Vdf.Parse(File.ReadAllText(config)), "apps", Game.AppId, "cloudenabled");
-
-            return value == "0" ? CloudState.Disabled : CloudState.Enabled;
-        }
-        catch
-        {
-            return CloudState.Unknown;
-        }
-    }
+    /// <summary>true se il launcher del gioco è aperto.</summary>
+    public bool IsLauncherRunning() => provider.IsLauncherRunning();
 
     // PROFILI
 
@@ -585,7 +529,7 @@ public sealed partial class SaveManager
     /// </summary>
     public bool GameSavesAreEmpty()
     {
-        return FileOps.HasNoSaveFiles(SavePath);
+        return saves.GameIsEmpty();
     }
 
     /// <summary>
@@ -599,9 +543,7 @@ public sealed partial class SaveManager
 
         try
         {
-            return !FileOps.FoldersAreEqual(
-                SavePath,
-                Path.Combine(ProfilesPath, State.ActiveProfile));
+            return !saves.GameEquals(Path.Combine(ProfilesPath, State.ActiveProfile));
         }
         catch
         {
@@ -613,18 +555,26 @@ public sealed partial class SaveManager
     /// <summary>
     /// Crea un profilo. Non lo attiva: per farlo chiamare ActivateProfile.
     /// </summary>
-    public Result CreateProfile(string name, bool copyCurrentSaves)
+    public Result CreateProfile(string name, bool copyCurrentSaves, string ownerId)
     {
         string operation = "Crea profilo " + ProfileFolderName(name) +
                            (copyCurrentSaves ? " (copia dei salvataggi)" : " (vuoto)");
 
-        return Finish(operation, CreateProfileCore(name, copyCurrentSaves));
+        Result result = CreateProfileCore(name, copyCurrentSaves, ownerId);
+
+        if (result.Success)
+            RepairFavourites();
+
+        return Finish(operation, result);
     }
 
-    private Result CreateProfileCore(string name, bool copyCurrentSaves)
+    private Result CreateProfileCore(string name, bool copyCurrentSaves, string ownerId)
     {
         if (!IsValidName(name))
             return Result.Fail(Strings.InvalidName);
+
+        if (!OwnerIsKnown(ownerId))
+            return Result.Fail(Strings.PlayerNotFound);
 
         string profileName = ProfileFolderName(name);
         string profile = Path.Combine(ProfilesPath, profileName);
@@ -637,6 +587,8 @@ public sealed partial class SaveManager
             try
             {
                 Directory.CreateDirectory(Path.Combine(profile, "remote"));
+                saves.CreateEmptySnapshot(profile);
+                WriteOwner(profileName, ownerId);
                 return Result.Ok(Strings.EmptyProfileCreated);
             }
             catch (Exception ex)
@@ -654,7 +606,7 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, backup);
+            saves.CopyGameTo(backup);
             // Senza partita nel gioco, i salvataggi copiati diventano proprio questa partita.
             WriteBackupInfo(backup, HasActiveProfile ? State.ActiveProfile : profileName, BackupKind.Create, profileName);
         }
@@ -665,7 +617,8 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, profile);
+            saves.CopyGameTo(profile);
+            WriteOwner(profileName, ownerId);
         }
         catch (Exception ex)
         {
@@ -678,13 +631,72 @@ public sealed partial class SaveManager
     }
 
     /// <summary>
+    /// Crea un profilo copiando un'altra partita già esistente (non i salvataggi del gioco). Se la sorgente è
+    /// la partita in gioco, la copia parte dai salvataggi del gioco, che sono quelli aggiornati.
+    /// </summary>
+    public Result CreateProfileFrom(string name, string sourceProfile, string ownerId)
+    {
+        if (HasActiveProfile && string.Equals(sourceProfile, State.ActiveProfile, StringComparison.OrdinalIgnoreCase))
+            return CreateProfile(name, copyCurrentSaves: true, ownerId);
+
+        string operation = "Crea profilo " + ProfileFolderName(name) + " (copia di " + sourceProfile + ")";
+        Result result = CreateProfileFromCore(name, sourceProfile, ownerId);
+
+        if (result.Success)
+            RepairFavourites();
+
+        return Finish(operation, result);
+    }
+
+    private Result CreateProfileFromCore(string name, string sourceProfile, string ownerId)
+    {
+        if (!IsValidName(name))
+            return Result.Fail(Strings.InvalidName);
+
+        if (!OwnerIsKnown(ownerId))
+            return Result.Fail(Strings.PlayerNotFound);
+
+        string profileName = ProfileFolderName(name);
+        string profile = Path.Combine(ProfilesPath, profileName);
+        string source = Path.Combine(ProfilesPath, sourceProfile);
+
+        if (ProfileExists(profileName))
+            return Result.Fail(Strings.ProfileExists);
+
+        if (!Directory.Exists(source))
+            return Result.Fail(Strings.ProfileNotFound);
+
+        try
+        {
+            FileOps.CopyFolderVerified(source, profile);
+            WriteOwner(profileName, ownerId);
+            return Result.Ok(Strings.ProfileCreated);
+        }
+        catch (Exception ex)
+        {
+            // Un profilo copiato a metà comparirebbe nella lista e bloccherebbe il nome.
+            TryDeleteFolder(profile);
+            return Result.Fail(Loc.F(Strings.CopyFailed, ex.Message));
+        }
+    }
+
+    /// <summary>
     /// Rinomina un profilo e la cartella dei suoi savestate. Se è il profilo
     /// attivo, aggiorna anche lo stato.
     /// </summary>
     public Result RenameProfile(string profileName, string newName)
     {
-        return Log.Write($"Rinomina {profileName} in {ProfileFolderName(newName)}",
-            RenameProfileCore(profileName, newName));
+        Result result = RenameProfileCore(profileName, newName);
+        string newProfileName = ProfileFolderName(newName);
+
+        // Partita rinominata (anche solo nelle maiuscole): la preferita segue il nuovo nome.
+        bool renamed = ProfileExists(newProfileName) &&
+                       (!ProfileExists(profileName) || string.Equals(profileName, newProfileName, StringComparison.OrdinalIgnoreCase));
+
+        if (renamed)
+            RepairFavourites(profileName, newProfileName);
+
+        return Log.Write($"Rinomina {profileName} in {newProfileName}", result);
     }
 
     private Result RenameProfileCore(string profileName, string newName)
@@ -735,6 +747,9 @@ public sealed partial class SaveManager
 
         MoveInfo(profileName, newProfileName, caseOnly);
 
+        // Le copie automatiche appartengono a una partita per nome: passano al nuovo.
+        savestateError += MoveBackupOwner(profileName, newProfileName);
+
         if (State.ActiveProfile == profileName)
         {
             State.ActiveProfile = newProfileName;
@@ -753,6 +768,33 @@ public sealed partial class SaveManager
         return savestateError == ""
             ? Result.Ok(Strings.ProfileRenamed)
             : Result.Fail(Strings.ProfileRenamed + savestateError);
+    }
+
+    /// <summary>
+    /// Scrive il nuovo nome come proprietario delle copie automatiche della partita
+    /// (nel loro file .ini, che una copia senza file riceve). Le copie delle partite
+    /// eliminate con quel nome sono di un'altra partita e non si toccano. Ritorna il
+    /// testo da aggiungere al risultato, "" se è andato tutto bene.
+    /// </summary>
+    private string MoveBackupOwner(string oldName, string newName)
+    {
+        var failed = new List<string>();
+
+        try
+        {
+            foreach (Snapshot backup in GetBackupsOf(oldName))
+            {
+                if (!WriteBackupInfo(backup.Path, newName, backup.Kind, backup.Detail))
+                    failed.Add(Path.GetFileName(backup.Path));
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Copie automatiche di " + oldName + " non passate a " + newName, ex);
+            failed.Add(ex.Message);
+        }
+
+        return failed.Count == 0 ? "" : Loc.F(Strings.BackupsNotMoved, string.Join(", ", failed));
     }
 
     private static void MoveFolder(string source, string destination, bool caseOnly)
@@ -775,7 +817,13 @@ public sealed partial class SaveManager
     /// </summary>
     public Result DeleteProfile(string profileName)
     {
-        return Finish("Elimina " + profileName, DeleteProfileCore(profileName));
+        Result result = DeleteProfileCore(profileName);
+
+        // Eliminata (anche se restano i savestate): la preferita passa a un'altra partita.
+        if (!ProfileExists(profileName))
+            RepairFavourites();
+
+        return Finish("Elimina " + profileName, result);
     }
 
     private Result DeleteProfileCore(string profileName)
@@ -855,7 +903,12 @@ public sealed partial class SaveManager
     /// </summary>
     public Result ActivateProfile(string profileName)
     {
-        return Finish("Attiva " + profileName, ActivateProfileCore(profileName));
+        Result result = ActivateProfileCore(profileName);
+
+        if (result.Success)
+            MarkPlayed(profileName, DateTime.Now);
+
+        return Finish("Attiva " + profileName, result);
     }
 
     private Result ActivateProfileCore(string profileName)
@@ -922,7 +975,9 @@ public sealed partial class SaveManager
         if (IsGameRunning())
             return Result.Fail(Loc.F(Strings.CloseGameFirst, Game.Name));
 
-        if (!allowEmptySaves && GameSavesAreEmpty())
+        // Come nella 1.0: con la cartella principale vuota non si salva, anche se un
+        // altro posto ha file (per esempio solo le impostazioni), per non svuotare la partita.
+        if (!allowEmptySaves && (GameSavesAreEmpty() || saves.PrimaryIsEmpty()))
         {
             return Result.Fail(Strings.GameSavesEmptyWouldClear);
         }
@@ -944,13 +999,13 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.ReplaceFolder(SavePath, profile);
+            saves.ReplaceSnapshotFromGame(profile);
         }
         catch (Exception ex)
         {
             try
             {
-                FileOps.ReplaceFolder(backup, profile);
+                FileOps.ReplaceFolder(backup, profile, carryExtraSpots: true);
 
                 return Result.Fail(
                     Loc.F(Strings.SaveFailedProfileRestored, ex.Message),
@@ -993,7 +1048,7 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, backup);
+            saves.CopyGameTo(backup);
             WriteBackupInfo(backup, owner, kind, detail);
         }
         catch (Exception ex)
@@ -1003,13 +1058,13 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.ReplaceFolder(source, SavePath);
+            saves.ReplaceGameFrom(source, backup, switchJournal);
         }
         catch (Exception ex)
         {
             try
             {
-                FileOps.ReplaceFolder(backup, SavePath);
+                saves.ReplaceGameFrom(backup, backup, switchJournal);
 
                 return Result.Fail(
                     Loc.F(Strings.ReplaceFailedRestored, ex.Message),
@@ -1121,7 +1176,7 @@ public sealed partial class SaveManager
 
         try
         {
-            FileOps.CopyFolderVerified(SavePath, path);
+            saves.CopyGameTo(path);
         }
         catch (Exception ex)
         {
@@ -1209,9 +1264,13 @@ public sealed partial class SaveManager
         if (reason.StartsWith(SaveBackupPrefix))
             return Loc.F(Strings.ReasonBeforeSaving, ProfileDisplayName(reason[SaveBackupPrefix.Length..]));
 
+        // V1Compat: motivo dei backup della 1.0
+        if (V1Compat.OldBackupReasonText(reason) is { } oldText)
+            return oldText;
+
         return reason switch
         {
-            "Prima_salvataggio" => Strings.ReasonBeforeSavingOld,
+            "Prima_nuovo_posto" => Strings.ReasonBeforeAddingSpot,
             "Prima_creazione" => Strings.ReasonBeforeCreating,
             RestoreBackupName => Strings.ReasonBeforeRestoring,
             _ => reason.Replace('_', ' ')
@@ -1289,7 +1348,8 @@ public sealed partial class SaveManager
 
         try
         {
-            foreach (Snapshot backup in GetBackups().Skip(State.BackupsToKeep))
+            // Le partite eliminate non si contano e non si eliminano: restano finché non si eliminano per sempre.
+            foreach (Snapshot backup in GetBackups().Where(b => b.Kind != BackupKind.Delete).Skip(State.BackupsToKeep))
             {
                 try
                 {
@@ -1324,9 +1384,9 @@ public sealed partial class SaveManager
 
     // CONTROLLI
 
-    public bool IsGameRunning() => Platform.Current.IsGameRunning(Game);
+    public bool IsGameRunning() => provider.IsGameRunning(Game);
 
-    public static bool IsSteamRunning() => Platform.Current.IsSteamRunning();
+    public static bool IsSteamRunning() => new SteamProvider(Platform.Current).IsLauncherRunning();
 
     /// <summary>
     /// Nome di una partita: lettere (anche accentate), cifre, spazi, _ e -,

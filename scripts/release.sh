@@ -2,35 +2,64 @@
 # Crea i pacchetti Linux di rilascio in dist/ con la loro impronta SHA-256.
 # È l'equivalente Linux di scripts/release.ps1 (che fa lo zip per Windows).
 #
-# Uso: bash scripts/release.sh [--skip-tests] [--allow-dirty]
+# Uso: bash scripts/release.sh [--skip-tests] [--allow-dirty] [--only FORMATI]
 #   --skip-tests   non esegue i test (solo per prove veloci)
 #   --allow-dirty  crea i pacchetti anche con modifiche non committate
+#   --only FORMATI crea solo i formati indicati, separati da virgola:
+#                  targz, deb, rpm, appimage (default: tutti).
+#                  Esempio: --only appimage
 #
 # La versione si legge da <Version> in src/Lss.App/Lss.App.csproj.
 set -euo pipefail
 
 skip_tests=0
 allow_dirty=0
-for arg in "$@"; do
-    case "$arg" in
+only="targz,deb,rpm,appimage"
+while [ $# -gt 0 ]; do
+    case "$1" in
         --skip-tests) skip_tests=1 ;;
         --allow-dirty) allow_dirty=1 ;;
-        *) echo "Opzione sconosciuta: $arg" >&2; exit 2 ;;
+        --only)
+            if [ $# -lt 2 ]; then
+                echo "--only richiede un elenco di formati (targz, deb, rpm, appimage)." >&2
+                exit 2
+            fi
+            only="$2"
+            shift
+            ;;
+        --only=*) only="${1#--only=}" ;;
+        *) echo "Opzione sconosciuta: $1" >&2; exit 2 ;;
+    esac
+    shift
+done
+
+for format in ${only//,/ }; do
+    case "$format" in
+        targz|deb|rpm|appimage) ;;
+        *) echo "Formato sconosciuto: $format (validi: targz, deb, rpm, appimage)." >&2; exit 2 ;;
     esac
 done
+
+# Vero se il formato è tra quelli richiesti con --only.
+wants() {
+    case ",$only," in
+        *",$1,"*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 # nfpm legge i percorsi di nfpm.yaml dalla cartella corrente.
 cd "$root"
 
 # deb e rpm si creano con nfpm: meglio saperlo prima di pubblicare.
-if ! command -v nfpm >/dev/null 2>&1; then
+if { wants deb || wants rpm; } && ! command -v nfpm >/dev/null 2>&1; then
     echo "nfpm non trovato (https://nfpm.goreleaser.com): serve per creare deb e rpm." >&2
     exit 1
 fi
 
 # appimagetool usa il comando file (manca per esempio nell'immagine Docker dell'SDK .NET).
-if ! command -v file >/dev/null 2>&1; then
+if wants appimage && ! command -v file >/dev/null 2>&1; then
     echo "Comando file non trovato: serve ad appimagetool (Debian/Ubuntu: apt install file)." >&2
     exit 1
 fi
@@ -72,8 +101,12 @@ if [ ! -f "$publish_dir/LSS" ]; then
     exit 1
 fi
 
-# Contenuto del tar.gz: l'exe, l'installer, il file desktop, i metadati e le icone.
 mkdir -p "$dist"
+# File creati in dist/ (si aggiungono sotto, uno per formato richiesto).
+artifacts=()
+
+if wants targz; then
+# Contenuto del tar.gz: l'exe, l'installer, il file desktop, i metadati e le icone.
 stage="$dist/$name"
 rm -rf "$stage"
 mkdir -p "$stage"
@@ -140,17 +173,24 @@ chmod +x "$stage/LSS" "$stage/install.sh"
 
 tar -C "$dist" -czf "$dist/$name.tar.gz" "$name"
 rm -rf "$stage"
+artifacts+=("$name.tar.gz")
+fi
 
-# File creati in dist/ (l'AppImage si aggiunge sotto).
-artifacts=("$name.tar.gz")
+if wants deb; then
+    echo "== deb"
+    VERSION="$version" nfpm package --config packaging/linux/nfpm.yaml --packager deb \
+        --target "$dist/lss_${version}_amd64.deb"
+    artifacts+=("lss_${version}_amd64.deb")
+fi
 
-echo "== deb e rpm"
-VERSION="$version" nfpm package --config packaging/linux/nfpm.yaml --packager deb \
-    --target "$dist/lss_${version}_amd64.deb"
-VERSION="$version" nfpm package --config packaging/linux/nfpm.yaml --packager rpm \
-    --target "$dist/lss-${version}-1.x86_64.rpm"
-artifacts+=("lss_${version}_amd64.deb" "lss-${version}-1.x86_64.rpm")
+if wants rpm; then
+    echo "== rpm"
+    VERSION="$version" nfpm package --config packaging/linux/nfpm.yaml --packager rpm \
+        --target "$dist/lss-${version}-1.x86_64.rpm"
+    artifacts+=("lss-${version}-1.x86_64.rpm")
+fi
 
+if wants appimage; then
 # AppImage: un solo file eseguibile su quasi ogni distribuzione.
 tool="$dist/tools/appimagetool-$appimagetool_version-x86_64.AppImage"
 if [ ! -f "$tool" ]; then
@@ -189,6 +229,7 @@ appimage="LSS-$version-x86_64.AppImage"
 ARCH=x86_64 "$tool" --appimage-extract-and-run "$appdir" "$dist/$appimage"
 rm -rf "$appdir"
 artifacts+=("$appimage")
+fi
 
 echo "== SHA-256"
 for file in "${artifacts[@]}"; do

@@ -14,7 +14,7 @@ public sealed class ProfileTests : IDisposable
     {
         SaveManager manager = folder.CreateManager("A1");
 
-        Result result = manager.CreateProfile("Mario", copyCurrentSaves: true);
+        Result result = manager.CreateProfile("Mario", copyCurrentSaves: true, TestFolder.Owner);
 
         Assert.True(result.Success, result.Message);
         Assert.Equal("A1", File.ReadAllText(ProfileFile(manager, "Profilo_Mario")));
@@ -29,15 +29,15 @@ public sealed class ProfileTests : IDisposable
     {
         SaveManager manager = folder.CreateManager();
 
-        Assert.False(manager.CreateProfile(name, copyCurrentSaves: false).Success);
+        Assert.False(manager.CreateProfile(name, copyCurrentSaves: false, TestFolder.Owner).Success);
     }
 
     [Fact]
     public void ActivateProfile_ReplacesGameSavesAndKeepsSteamCache()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", true);
-        manager.CreateProfile("Luigi", false);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
+        manager.CreateProfile("Luigi", false, TestFolder.Owner);
 
         Result result = manager.ActivateProfile("Profilo_Luigi");
 
@@ -52,7 +52,7 @@ public sealed class ProfileTests : IDisposable
     public void SaveProgress_CopiesGameSavesIntoActiveProfile()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         TestFolder.Write(folder.SaveFile, "A2");
 
@@ -70,7 +70,7 @@ public sealed class ProfileTests : IDisposable
     public void SaveProgress_RefusesEmptyGameSavesUnlessAllowed()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         File.Delete(folder.SaveFile);
 
@@ -85,7 +85,7 @@ public sealed class ProfileTests : IDisposable
     public void RenameProfile_UpdatesActiveProfileAndMovesSavestates()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         manager.CreateSavestate("Boss");
 
@@ -104,7 +104,7 @@ public sealed class ProfileTests : IDisposable
     public void RenameProfile_AllowsChangingOnlyTheCase()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
 
         Assert.True(manager.RenameProfile("Profilo_Mario", "MARIO").Success);
         Assert.Contains("Profilo_MARIO", manager.GetProfiles());
@@ -114,8 +114,8 @@ public sealed class ProfileTests : IDisposable
     public void RenameProfile_RejectsExistingName()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", true);
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
 
         Assert.False(manager.RenameProfile("Profilo_Mario", "Luigi").Success);
         Assert.True(manager.ProfileExists("Profilo_Mario"));
@@ -125,7 +125,7 @@ public sealed class ProfileTests : IDisposable
     public void DeleteProfile_RefusesActiveProfile()
     {
         SaveManager manager = folder.CreateManager();
-        manager.CreateProfile("Mario", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
 
         Assert.False(manager.DeleteProfile("Profilo_Mario").Success);
@@ -136,8 +136,8 @@ public sealed class ProfileTests : IDisposable
     public void DeleteProfile_MovesProfileToBackupsAndDeletesSavestates()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", true);
-        manager.CreateProfile("Luigi", true);
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
         manager.ActivateProfile("Profilo_Mario");
         manager.CreateSavestate("Boss");
         manager.ActivateProfile("Profilo_Luigi");
@@ -157,9 +157,9 @@ public sealed class ProfileTests : IDisposable
     public void NamesDifferingOnlyByCaseAreTheSamePlaythrough()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", false);
+        manager.CreateProfile("Mario", false, TestFolder.Owner);
 
-        Result result = manager.CreateProfile("mario", false);
+        Result result = manager.CreateProfile("mario", false, TestFolder.Owner);
 
         Assert.False(result.Success);
         Assert.Equal(Strings.ProfileExists, result.Message);
@@ -170,11 +170,11 @@ public sealed class ProfileTests : IDisposable
     public void ImportedNameGetsTheFreeNameIgnoringCase()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", false);
+        manager.CreateProfile("Mario", false, TestFolder.Owner);
 
         Assert.Equal("mario 2", manager.UniqueName("mario"));
 
-        manager.CreateProfile("mario 2", false);
+        manager.CreateProfile("mario 2", false, TestFolder.Owner);
 
         Assert.Equal("mario 3", manager.UniqueName("mario"));
     }
@@ -183,7 +183,7 @@ public sealed class ProfileTests : IDisposable
     public void RenameToOtherCaseKeepsNoteAndSavestates()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", false);
+        manager.CreateProfile("Mario", false, TestFolder.Owner);
         manager.SetNote("Profilo_Mario", "Missione");
         TestFolder.Write(Path.Combine(manager.SavestatePath, "Profilo_Mario", "punto1", "slot.sav"), "p");
 
@@ -198,8 +198,8 @@ public sealed class ProfileTests : IDisposable
     public void RenameToAnotherPlaythroughsNameIsRefusedIgnoringCase()
     {
         SaveManager manager = folder.CreateManager("A1");
-        manager.CreateProfile("Mario", false);
-        manager.CreateProfile("Luigi", false);
+        manager.CreateProfile("Mario", false, TestFolder.Owner);
+        manager.CreateProfile("Luigi", false, TestFolder.Owner);
 
         Result result = manager.RenameProfile("Profilo_Luigi", "MARIO");
 

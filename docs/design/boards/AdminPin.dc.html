@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Chi sei? PIN dell'admin</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; display: flex; align-items: center; justify-content: center; gap: 40px">
+  <div role="dialog" aria-labelledby="who-title" style="width: 420px; box-sizing: border-box; padding: 32px; border-radius: 20px; background: #19191B; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h1 id="who-title" style="margin: 0; font-size: 28px; font-weight: 800">Chi sei?</h1>
+      <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #A8A8AE">Solo un admin può farlo. Alan Wake 2 tiene una copia dei salvataggi online e potrebbe riportare la partita di un altro.</p>
+    </div>
+    <div style="display: flex; gap: 20px">
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 20px; border-radius: 16px; border: 2px solid #E0261B; background: #232326; color: #F2F2F2; font-family: inherit; cursor: pointer">
+        <div style="width: 76px; height: 76px; border-radius: 38px; background: #C2410C; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; color: #FFFFFF">A</div>
+        <span style="font-size: 18px; font-weight: 600">Andrea</span>
+        <span style="font-size: 12px; color: #96969C">con PIN</span>
+      </button>
+      <button style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 20px; border-radius: 16px; border: 2px solid transparent; background: #232326; color: #F2F2F2; font-family: inherit; cursor: pointer">
+        <div style="width: 76px; height: 76px; border-radius: 38px; background: #6D3FB0; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; color: #FFFFFF">M</div>
+        <span style="font-size: 18px; font-weight: 600">Mamma</span>
+        <span style="font-size: 12px; color: #96969C">senza PIN</span>
+      </button>
+    </div>
+    <a href="Games.dc.html" style="align-self: flex-start; height: 48px; display: flex; align-items: center; padding: 0 22px; border-radius: 12px; background: #2C2C30; color: #F2F2F2; font-size: 16px; font-weight: 600">Annulla</a>
+  </div>
+  <div role="dialog" aria-labelledby="pin-title" style="width: 400px; box-sizing: border-box; padding: 32px; border-radius: 20px; background: #19191B; border: 1px solid #2E2E33; display: flex; flex-direction: column; align-items: center; gap: 22px">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+      <h2 id="pin-title" style="margin: 0; font-size: 24px; font-weight: 800">PIN di Andrea</h2>
+      <p style="margin: 0; font-size: 15px; color: #A8A8AE">Inserisci il PIN</p>
+    </div>
+    <div aria-label="2 cifre inserite su 4" style="display: flex; gap: 18px">
+      <div style="width: 18px; height: 18px; border-radius: 9px; background: #F2F2F2"></div>
+      <div style="width: 18px; height: 18px; border-radius: 9px; background: #F2F2F2"></div>
+      <div style="width: 18px; height: 18px; border-radius: 9px; border: 2px solid #5A5A60; box-sizing: border-box"></div>
+      <div style="width: 18px; height: 18px; border-radius: 9px; border: 2px solid #5A5A60; box-sizing: border-box"></div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+      <sc-for list="{{keys}}" as="k" hint-placeholder-count="12">
+        <button aria-label="{{k.label}}" style="width: 76px; height: 64px; border-radius: 14px; border: 0; background: {{k.back}}; color: #F2F2F2; font-family: inherit; font-size: 26px; font-weight: 600; cursor: pointer">{{k.text}}</button>
+      </sc-for>
+    </div>
+    <a href="Playing.dc.html" style="font-size: 14px; color: #96969C">(nel prototipo: tocca qui per continuare)</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const d = (n) => ({ text: String(n), label: String(n), back: '#2C2C30' });
+    return {
+      keys: [d(1), d(2), d(3), d(4), d(5), d(6), d(7), d(8), d(9),
+        { text: '', label: 'Vuoto', back: 'transparent' }, d(0), { text: '⌫', label: 'Cancella una cifra', back: '#232326' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

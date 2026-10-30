@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Nuova partita</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center">
+  <div role="dialog" aria-labelledby="np-title" style="width: 520px; box-sizing: border-box; padding: 24px 28px; border-radius: 12px; background: #0F0F10; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 16px">
+    <h1 id="np-title" style="margin: 0; font-size: 19px; font-weight: 700">Nuova partita di Terraria</h1>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="np-name" style="font-size: 12px; font-weight: 700; color: #A8A8AE">Nome</label>
+      <input id="np-name" value="Mondo corrotto" readonly style="height: 36px; box-sizing: border-box; padding: 0 12px; border-radius: 6px; border: 1px solid #E0261B; background: #19191B; color: #F2F2F2; font-family: inherit; font-size: 14px">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span id="np-player" style="font-size: 12px; font-weight: 700; color: #A8A8AE">Giocatore</span>
+      <div role="radiogroup" aria-labelledby="np-player" style="display: flex; gap: 8px; flex-wrap: wrap">
+        <sc-for list="{{people}}" as="p" hint-placeholder-count="4">
+          <button role="radio" aria-checked="{{p.checked}}" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px 0 6px; border-radius: 18px; border: 2px solid {{p.border}}; background: #19191B; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600">
+            <span style="width: 24px; height: 24px; border-radius: 12px; background: {{p.color}}; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #FFFFFF">{{p.initial}}</span>{{p.name}}
+          </button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; font-weight: 700; color: #A8A8AE">Con quali salvataggi parte</span>
+      <label style="display: flex; gap: 10px; align-items: flex-start"><span style="width: 16px; height: 16px; border-radius: 8px; border: 2px solid #E0261B; box-sizing: border-box; display: flex; align-items: center; justify-content: center; margin-top: 1px"><span style="width: 6px; height: 6px; border-radius: 3px; background: #E0261B"></span></span><span>Da zero: il gioco parte senza salvataggi</span></label>
+      <label style="display: flex; gap: 10px; align-items: flex-start"><span style="width: 16px; height: 16px; border-radius: 8px; border: 2px solid #5A5A60; box-sizing: border-box; margin-top: 1px"></span><span>Una copia dei salvataggi di adesso</span></label>
+    </div>
+    <div style="font-size: 12px; color: #96969C">È la prima partita di Clara per Terraria: diventa la sua preferita ★.</div>
+    <div style="display: flex; justify-content: flex-end; gap: 8px">
+      <button style="height: 34px; padding: 0 16px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Annulla</button>
+      <button style="height: 34px; padding: 0 18px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 700">Crea</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = (name, color, checked) => ({ name, color, initial: name.charAt(0), checked, border: checked ? '#E0261B' : '#2E2E33' });
+    return { people: [p('Andrea', '#C2410C', false), p('Mamma', '#6D3FB0', false), p('Clara', '#1D6FD0', true), p('Luca', '#2F7D3B', false)] };
+  }
+}
+</script>
+</body>
+</html>

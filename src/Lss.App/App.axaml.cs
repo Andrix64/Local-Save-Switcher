@@ -11,7 +11,11 @@ namespace Lss.App;
 
 public partial class App : Application
 {
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+        PopupChrome.Register();
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -61,12 +65,19 @@ public partial class App : Application
         // Compatibilità con Control Save Manager (vedi LegacyMigration).
         (LegacyMigration.MoveResult moved, string moveDetail) = LegacyMigration.Run();
 
+        // Cartelle degli account sotto steam\ (dalle beta): prima di leggere i dati.
+        V1Compat.MoveBetaLayout(AppData.Root); // V1Compat: cartelle dati della 1.0 e delle beta
+        V1Compat.ConvertAppFiles(AppData.Root); // V1Compat: impostazioni .ini della 1.0 in JSON
+        V1Compat.ConvertGameFiles(AppData.Root); // V1Compat: file .ini dei giochi della 1.0 in JSON
+
         Log.Write("Avvio versione " + Program.Version);
 
         if (LegacyMigration.Notice(moved, moveDetail) is (string text, bool isWarning))
             await ShowStandaloneAsync(text, isWarning ? InfoKind.Warning : InfoKind.Info);
 
-        string? steam = Platform.Current.FindSteamRoots().FirstOrDefault();
+        // Steam resta obbligatorio: i suoi controlli di cartella sono qui, prima degli altri launcher.
+        var steamProvider = new SteamProvider(Platform.Current);
+        string? steam = steamProvider.FindRoot();
 
         if (steam == null)
         {
@@ -75,7 +86,7 @@ public partial class App : Application
             return;
         }
 
-        string userData = Path.Combine(steam, "userdata");
+        string userData = SteamProvider.UserDataFolder(steam);
 
         if (!Directory.Exists(userData))
         {
@@ -87,47 +98,75 @@ public partial class App : Application
         // Prima di cercare gli account: una cartella rimasta come 870780.vecchio le farebbe sparire.
         SaveManager.RecoverAllGameFolders(userData);
 
-        IReadOnlyList<SteamAccount> accounts = SaveManager.FindAccountsWithGames(userData);
+        var settings = new AppSettings(AppSettings.FileIn(AppData.Root));
+        settings.Load();
 
-        // Nessun gioco gestibile (per esempio tutti con i salvataggi in Proton):
-        // la finestra si apre lo stesso e mostra i giochi con il motivo.
-        if (accounts.Count == 0)
-            accounts = SaveManager.FindAccountsWithAnyGame(userData);
-
-        if (accounts.Count == 0)
+        // Primo avvio (non c'era lss.json, nemmeno da convertire): semplice o avanzata.
+        if (settings.FirstStart)
         {
-            await ShowStandaloneAsync(Strings.NoAccountWithGames, InfoKind.Warning);
+            var modeWindow = new ModeChoiceWindow();
+            await ShowStandaloneAsync(modeWindow);
+
+            settings.Mode = modeWindow.Chosen ?? AppSettings.AdvancedMode;
+            settings.Save();
+        }
+
+        // Un account per launcher si usa senza domande; con più account dello
+        // stesso launcher si chiede quale usare. Annullare salta quel launcher.
+        var launchers = new List<LauncherGames>();
+        bool cancelled = false;
+
+        foreach (IGameProvider provider in Providers.All(Platform.Current))
+        {
+            // Nessun gioco gestibile (per esempio tutti con i salvataggi in Proton):
+            // la finestra si apre lo stesso e mostra i giochi con il motivo.
+            IReadOnlyList<GameAccount> accounts = provider.FindAccounts();
+
+            if (accounts.Count == 0)
+                continue;
+
+            GameAccount? account = accounts[0];
+
+            if (accounts.Count > 1)
+            {
+                var accountWindow = new AccountWindow(accounts, settings.LastAccount, provider.DisplayName);
+                await ShowStandaloneAsync(accountWindow);
+
+                account = accountWindow.Chosen;
+                cancelled |= account == null;
+
+                if (account == null)
+                    continue;
+
+                settings.LastAccount = account.Key;
+                settings.Save();
+            }
+
+            launchers.Add(new LauncherGames(provider, account, provider.FindGames(account)));
+        }
+
+        if (launchers.Count == 0)
+        {
+            // Uscita come prima: senza un account scelto, l'app si chiude in silenzio.
+            if (!cancelled)
+                await ShowStandaloneAsync(Strings.NoAccountWithGames, InfoKind.Warning);
+
             desktop.Shutdown();
             return;
         }
 
-        var settings = new AppSettings(Path.Combine(AppData.Root, "lss.ini"));
-        settings.Load();
-
-        SteamAccount account = accounts[0];
-
-        if (accounts.Count > 1)
-        {
-            var accountWindow = new AccountWindow(accounts, settings.LastAccount);
-            await ShowStandaloneAsync(accountWindow);
-
-            if (accountWindow.Chosen == null)
-            {
-                desktop.Shutdown();
-                return;
-            }
-
-            account = accountWindow.Chosen;
-            settings.LastAccount = account.Id;
-            settings.Save();
-        }
-
-        IReadOnlyList<GameInfo> games = SteamLibrary.FindGames(steam, account.Folder);
+        // Le persone di LSS: una lista sola, condivisa da tutti i giochi.
+        var people = new People(AppData.Root);
+        people.Load();
 
         var window = new MainWindow
         {
-            DataContext = new MainWindowViewModel(account, games, settings, new DialogService(() => desktop.MainWindow)),
+            DataContext = new MainWindowViewModel(launchers, settings, new DialogService(() => desktop.MainWindow), people),
         };
+
+        // La modalità semplice parte sempre a schermo intero (come una console); si esce con il pulsante o Esc.
+        if (settings.Mode == AppSettings.SimpleMode)
+            window.WindowState = WindowState.FullScreen;
 
         window.Closed += (_, _) => desktop.Shutdown();
         desktop.MainWindow = window;
@@ -149,6 +188,7 @@ public partial class App : Application
 
         var closed = new TaskCompletionSource();
         window.Closed += (_, _) => closed.TrySetResult();
+        window.Opened += (_, _) => WindowFit.Apply(window);
         window.Show();
 
         await closed.Task;

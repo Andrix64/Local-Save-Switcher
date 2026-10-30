@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Trova i salvataggi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center">
+  <div role="dialog" aria-labelledby="learn-title" style="width: 860px; height: 720px; box-sizing: border-box; padding: 26px 30px; border-radius: 12px; background: #0F0F10; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 16px">
+    <h1 id="learn-title" style="margin: 0; font-size: 21px; font-weight: 700">Trova i salvataggi di Hollow Knight</h1>
+    <ol aria-label="Passaggi" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{steps}}" as="st" hint-placeholder-count="4">
+        <li style="display: flex; flex-direction: column; gap: 6px">
+          <div style="height: 4px; border-radius: 2px; background: {{st.bar}}"></div>
+          <span style="font-size: 12px; font-weight: 600; color: {{st.text}}">{{st.label}}</span>
+        </li>
+      </sc-for>
+    </ol>
+    <p style="margin: 0; color: #A8A8AE; font-size: 14px">Mentre giocavi sono cambiati file in queste cartelle. Spunta quelle che contengono i salvataggi: LSS le cambierà tutte insieme.</p>
+    <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+      <sc-for list="{{candidates}}" as="c" hint-placeholder-count="2">
+        <div style="display: flex; gap: 14px; padding: 14px 16px; border-radius: 8px; background: #19191B; border: 1px solid {{c.border}}">
+          <input type="checkbox" id="{{c.id}}" checked="{{c.checked}}" style="width: 18px; height: 18px; margin: 2px 0 0; accent-color: #E0261B">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <label for="{{c.id}}" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #F2F2F2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{c.path}}</label>
+              <span style="padding: 2px 8px; border-radius: 4px; background: {{c.tagBack}}; color: {{c.tagText}}; font-size: 11px; font-weight: 700">{{c.tag}}</span>
+            </div>
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px">
+              <sc-for list="{{c.reasons}}" as="r" hint-placeholder-count="3">
+                <li style="display: flex; gap: 8px; color: #D6D6DA"><span style="width: 14px; font-weight: 700; color: {{r.color}}" aria-hidden="true">{{r.mark}}</span><span>{{r.text}}</span></li>
+              </sc-for>
+            </ul>
+            <div style="display: flex; align-items: center; gap: 12px">
+              <div style="flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #96969C">{{c.files}}</div>
+              <sc-if value="{{c.ignoreOpen}}" hint-placeholder-val="{{false}}">
+                <span style="font-size: 12px; color: #A8A8AE">Non proporla più:</span>
+                <button style="height: 28px; padding: 0 10px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 12px; font-weight: 600">Solo per Hollow Knight</button>
+                <button style="height: 28px; padding: 0 10px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 12px; font-weight: 600">Per tutti i giochi</button>
+              </sc-if>
+              <sc-if value="{{c.ignoreClosed}}" hint-placeholder-val="{{true}}">
+                <button style="height: 28px; padding: 0 4px; border: 0; background: transparent; color: #FF8076; font-family: inherit; font-size: 12px; font-weight: 600">Non è una cartella di salvataggi…</button>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; padding-top: 4px">
+      <button style="height: 34px; padding: 0 12px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Riprova</button>
+      <button style="height: 34px; padding: 0 12px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Scelgo io la cartella…</button>
+      <button style="height: 34px; padding: 0 12px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Cerca anche in un'altra cartella…</button>
+      <div style="flex: 1"></div>
+      <button style="height: 34px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; color: #A8A8AE; font-family: inherit; font-weight: 600">Annulla</button>
+      <button style="height: 34px; padding: 0 16px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 700">Usa queste cartelle</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = (text) => ({ mark: '✓', color: '#4CC38A', text });
+    const no = (text) => ({ mark: '✗', color: '#FF5C5C', text });
+    const step = (label, state) => ({ label, bar: state === 'done' ? '#7A2A24' : state === 'now' ? '#E0261B' : '#2E2E33', text: state === 'next' ? '#5A5A60' : '#F2F2F2' });
+    return {
+      steps: [step('1  Avvia il gioco', 'done'), step('2  Gioca, salva, esci', 'done'), step('3  LSS cerca', 'done'), step('4  Scegli', 'now')],
+      candidates: [
+        { id: 'c1', checked: true, ignoreOpen: false, ignoreClosed: true, border: '#E0261B', path: 'C:\\Users\\andrea\\AppData\\LocalLow\\Team Cherry\\Hollow Knight', tag: 'CONSIGLIATA', tagBack: '#3E1816', tagText: '#FF8076',
+          reasons: [ok('Il nome contiene "Hollow Knight"'), ok('3 file cambiati mentre giocavi'), ok('File che sembrano salvataggi (user1.dat)')],
+          files: 'user1.dat · user1.dat.bak · shared.dat' },
+        { id: 'c2', checked: false, ignoreOpen: false, ignoreClosed: true, border: '#2E2E33', path: 'C:\\Users\\andrea\\Documents\\My Games\\Hollow Knight\\Screenshots', tag: 'POSSIBILE', tagBack: '#2A2110', tagText: '#F5B83D',
+          reasons: [ok('Il nome contiene "Hollow Knight"'), ok('Ha un nome tipico delle cartelle dei salvataggi ("My Games")'), no('Nessun file che sembri un salvataggio')],
+          files: 'shot_0412.png' },
+        { id: 'c3', checked: false, ignoreOpen: true, ignoreClosed: false, border: '#2E2E33', path: 'C:\\Users\\andrea\\AppData\\Local\\Discord\\Cache', tag: 'POCO PROBABILE', tagBack: '#232326', tagText: '#A8A8AE',
+          reasons: [no('Sembra di un altro programma')],
+          files: 'data_1 · data_3 · f_000a21' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Cartelle trovate dopo la partita</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FF8076;text-decoration:none}a:hover{color:#FFB4AD}
+</style>
+</helmet>
+<div style="width: 1200px; height: 780px; box-sizing: border-box; background: #070708; color: #F2F2F2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 32px">
+  <div role="dialog" aria-labelledby="sugg-title" style="width: 560px; box-sizing: border-box; padding: 26px 28px; border-radius: 12px; background: #0F0F10; border: 1px solid #2E2E33; display: flex; flex-direction: column; gap: 16px">
+    <h1 id="sugg-title" style="margin: 0; font-size: 19px; font-weight: 700">Possibili cartelle dei salvataggi di Terraria</h1>
+    <p style="margin: 0; color: #A8A8AE; font-size: 14px; line-height: 1.5">Dopo la partita di oggi alle 16:52 sono cambiati file di Terraria fuori dalle cartelle che LSS cambia.</p>
+    <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 8px; background: #19191B; border: 1px solid #2E2E33">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; word-break: break-all">C:\Users\andrea\Documents\My Games\Terraria\ModLoader\Players</div>
+      <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; color: #D6D6DA">
+        <li style="display: flex; gap: 8px"><span style="width: 14px; font-weight: 700; color: #4CC38A" aria-hidden="true">✓</span>Il nome contiene "Terraria"</li>
+        <li style="display: flex; gap: 8px"><span style="width: 14px; font-weight: 700; color: #4CC38A" aria-hidden="true">✓</span>2 file cambiati mentre giocavi</li>
+        <li style="display: flex; gap: 8px"><span style="width: 14px; font-weight: 700; color: #4CC38A" aria-hidden="true">✓</span>File che sembrano salvataggi (Andrea.plr)</li>
+      </ul>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #96969C">Andrea.plr · Andrea.plr.bak</div>
+      <div style="display: flex; gap: 8px; padding-top: 4px">
+        <button style="height: 32px; padding: 0 14px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-weight: 700">Aggiungi alle cartelle</button>
+        <button style="height: 32px; padding: 0 12px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-weight: 600">Non sono salvataggi…</button>
+        <button style="height: 32px; padding: 0 12px; border-radius: 6px; border: 0; background: transparent; color: #A8A8AE; font-family: inherit; font-weight: 600">Più tardi</button>
+      </div>
+    </div>
+  </div>
+  <div role="dialog" aria-labelledby="add-title" style="width: 520px; box-sizing: border-box; padding: 26px 28px; border-radius: 12px; background: #0F0F10; border: 1px solid #5C4515; display: flex; flex-direction: column; gap: 14px">
+    <h2 id="add-title" style="margin: 0; font-size: 17px; font-weight: 700">Aggiungere questa cartella?</h2>
+    <p style="margin: 0; color: #D6D6DA; font-size: 14px; line-height: 1.5">LSS cambierà anche questa cartella quando cambi partita:</p>
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #F2F2F2; padding: 10px 12px; border-radius: 6px; background: #19191B; word-break: break-all">C:\Users\andrea\Documents\My Games\Terraria\ModLoader\Players</div>
+    <p style="margin: 0; color: #D6D6DA; font-size: 14px; line-height: 1.5">I file che ci sono adesso appartengono alla partita <strong>Andrea</strong>. E per le altre partite?</p>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <button style="height: 40px; border-radius: 6px; border: 0; background: #E0261B; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 700">Dai anche a loro una copia di questi file</button>
+      <button style="height: 40px; border-radius: 6px; border: 0; background: #2C2C30; color: #F2F2F2; font-family: inherit; font-size: 13px; font-weight: 600">Per loro la cartella parte vuota</button>
+      <button style="height: 36px; border-radius: 6px; border: 0; background: transparent; color: #A8A8AE; font-family: inherit; font-size: 13px; font-weight: 600">Annulla</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
