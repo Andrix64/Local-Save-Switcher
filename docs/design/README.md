@@ -2,7 +2,7 @@
 
 The reference design of the LSS 2.0 interface (simple and advanced mode,
 every window and popup). It was drawn as an online design canvas; the
-boards are copied here so anyone working on the plan (`docs/plan/`) can
+boards are copied here so anyone working on the interface can
 read them without access to that canvas. Copied on 2026-10-25, identical to
 the published version.
 
@@ -55,5 +55,5 @@ info `#1B2230` / `#7FB0F0`, font Inter.
 The app's own screenshots (`tools/UiScreenshots`, see `docs/DEVELOPMENT.md`)
 show the implemented windows to compare with the boards.
 
-Where a task of the plan says something different from a board, the plan
-wins (for example phase R: R6, R7, R8).
+Where the app differs from a board, the app
+wins (the boards are the 2.0 starting point; fixes after the first try changed some screens).

@@ -7,7 +7,7 @@ namespace Lss;
 /// GOG, Amazon (Nile) e quelli aggiunti a mano (sideload) dalla sua cartella di
 /// configurazione. Prefissi Wine e Proton da GamesConfig; salvataggi Epic dalla
 /// cartella cloud del catalogo, salvataggi GOG dalle posizioni gogSaves.
-/// Formati non verificati su un PC con Heroic (vedi PROGRESS.md, fase O).
+/// Formati non verificati su un PC con Heroic.
 /// Avvio da LSS non attivo: l'indirizzo heroic:// non è confermato.
 /// </summary>
 public sealed class HeroicProvider(IPlatform platform) : IGameProvider
