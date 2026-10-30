@@ -76,7 +76,7 @@ hash after it. 👤 = done by Andrix, skip it. Rules in [README.md](README.md).
 - [x] H5 — Case of names (34b0517)
 - [x] H6 — Paths and permissions (f77a0cb)
 - [x] H7 — Linux tests required in CI (7217d15)
-- [ ] H8 — 👤 Real Linux check (2026-10-24, Steam Deck: Steam found, games list right, all games save outside userdata so no switch could be tried; the app now opens anyway, `27146a0`. Still open: a switch and a game run on Linux with a supported game, Flatpak/Snap Steam)
+- [x] H8 — 👤 Real Linux check (2026-10-24, Steam Deck: Steam found, games list right, all games save outside userdata so no switch could be tried; the app now opens anyway, `27146a0`. Still open: a switch and a game run on Linux with a supported game, Flatpak/Snap Steam) (2026-10-30, Andrix: done)
 
 ## Phase I — Packages ([I-packaging.md](I-packaging.md))
 
@@ -205,7 +205,7 @@ per phase (the phase file names it).
 - [x] P6 — Simple view: players and games (dc7b761)
 - [x] P7 — Simple mode: play, and the "My games" menu (3292e4a)
 - [x] P8 — Screenshots (b40ca6d)
-- [ ] P9 — 👤 Check with real people
+- [x] P9 — 👤 Check with real people (2026-10-30, Andrix: done)
 
 ### Phase R — Fixes after the first try ([R-fixes.md](R-fixes.md)), before Q
 
@@ -223,13 +223,13 @@ per phase (the phase file names it).
 - [x] R10 — JSON for the per-game files (ea4adfa; 838 tests; Linux check not run)
 - [x] R11 — A known spot suggested again as new (separators) (40bd8d5; 847 tests; no import test with foreign separators; Linux check not run)
 - [x] R12 — Screenshots, docs, Linux check (Linux on lss-ci: 847 tests, four packages built, six installs OK; ⋯ menu not captured)
-- [ ] R13 — 👤 Check on Windows and the Steam Deck (copy the data folder first)
+- [x] R13 — 👤 Check on Windows and the Steam Deck (copy the data folder first) (2026-10-30, Andrix: done)
 
 ### Phase Q — Docs and release ([Q-release.md](Q-release.md))
 
-- [ ] Q1 — Docs
-- [ ] Q2 — Version `2.0.0-beta.1`
-- [ ] Q3 — 👤 Beta, then 2.0.0
+- [x] Q1 — Docs (3bc9d6c)
+- [x] Q2 — Version `2.0.0` (5040f92; beta skipped by Andrix's choice; Linux check on lss-ci: six installs report `LSS 2.0.0`)
+- [x] Q3 — 👤 Beta skipped; `v2` merged into `main` 2026-10-30, tag `v2.0.0` by Andrix
 
 ## Notes
 
