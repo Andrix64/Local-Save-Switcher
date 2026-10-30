@@ -184,6 +184,44 @@ public sealed class PlaythroughTests : IDisposable
         Assert.Contains("\"Gioco\": \"Control\"", info);
     }
 
+    /// <summary>
+    /// Zip di "Mario" con un savestate, e un file al posto della cartella dei savestate di
+    /// "Mario 2" (il nome che prenderà l'importazione): la copia dei punti fallisce.
+    /// </summary>
+    private (SaveManager Manager, string Zip) ImportThatFailsOnSavestates(bool oldFormat)
+    {
+        SaveManager manager = TwoPlaythroughs();
+        manager.CreateSavestate("Boss");
+        string zip = Path.Combine(folder.Root, "mario.zip");
+        Assert.True(manager.ExportProfile("Profilo_Mario", zip).Success);
+
+        if (oldFormat)
+        {
+            using ZipArchive archive = ZipFile.Open(zip, ZipArchiveMode.Update);
+            archive.GetEntry("posizioni.json")!.Delete();
+        }
+
+        Directory.CreateDirectory(manager.SavestatePath);
+        File.WriteAllText(Path.Combine(manager.SavestatePath, "Profilo_Mario 2"), "occupato");
+
+        return (manager, zip);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AFailedImportLeavesNothingBehind(bool oldFormat)
+    {
+        var (manager, zip) = ImportThatFailsOnSavestates(oldFormat);
+
+        Result<string> result = manager.ImportProfile(zip, TestFolder.Owner);
+
+        Assert.False(result.Success);
+        Assert.DoesNotContain("Profilo_Mario 2", manager.GetProfiles());
+        Assert.False(Directory.Exists(Path.Combine(manager.ProfilesPath, "Profilo_Mario 2")));
+        Assert.False(File.Exists(Path.Combine(folder.Data, "Info", "Profilo_Mario 2.json")));
+    }
+
     [Fact]
     public void Export_UsesForwardSlashes()
     {

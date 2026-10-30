@@ -885,32 +885,31 @@ public sealed partial class SaveManager
             ExportSpotsData? zipSpots = JsonFile.Read<ExportSpotsData>(Path.Combine(temp, ExportSpotsFile))
                                         ?? V1Compat.ReadExportedSpots(temp);
 
-            if (zipSpots != null)
+            try
             {
-                try
-                {
+                if (zipSpots != null)
                     skipped = ImportSpots(zipSpots, saves, profile);
-                }
-                catch
-                {
-                    // Il nome è nuovo (UniqueName): la cartella a metà si può togliere.
-                    TryDeleteFolder(profile);
-                    throw;
-                }
+                else
+                    FileOps.CopyFolderVerified(saves, profile);
+
+                string savestates = Path.Combine(temp, ExportSavestatesFolder);
+
+                if (Directory.Exists(savestates))
+                    FileOps.CopyFolderVerified(savestates, Path.Combine(SavestatePath, profileName));
+
+                // Il proprietario è quello scelto qui, non il Giocatore dello zip.
+                PlaythroughInfo info = ParseInfo(exportInfo.Info) with { Owner = ownerId };
+                JsonFile.Write(InfoFile(profileName), FormatInfo(info));
             }
-            else
+            catch
             {
-                FileOps.CopyFolderVerified(saves, profile);
+                // Il nome è nuovo (UniqueName): quello che questa importazione ha creato si toglie,
+                // senza lasciare una partita a metà o senza proprietario.
+                TryDeleteFolder(profile);
+                TryDeleteFolder(Path.Combine(SavestatePath, profileName));
+                TryDeleteFile(InfoFile(profileName));
+                throw;
             }
-
-            string savestates = Path.Combine(temp, ExportSavestatesFolder);
-
-            if (Directory.Exists(savestates))
-                FileOps.CopyFolderVerified(savestates, Path.Combine(SavestatePath, profileName));
-
-            // Il proprietario è quello scelto qui, non il Giocatore dello zip.
-            PlaythroughInfo info = ParseInfo(exportInfo.Info) with { Owner = ownerId };
-            JsonFile.Write(InfoFile(profileName), FormatInfo(info));
 
             if (skipped.Count == 0)
                 return Result<string>.Ok(profileName);
