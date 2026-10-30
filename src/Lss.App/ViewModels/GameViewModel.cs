@@ -616,7 +616,23 @@ public partial class GameViewModel : ObservableObject
 
     public async Task ExportAsync(string profile)
     {
+        if (IsBusy)
+            return;
+
         string name = SaveManager.ProfileDisplayName(profile);
+        bool saveFirst = false;
+
+        // L'esportazione contiene l'ultimo stato salvato: con progressi non salvati si chiede cosa fare.
+        if (profile == Manager.State.ActiveProfile && Manager.HasUnsavedProgress())
+        {
+            int choice = await dialogs.ChooseAsync(Loc.F(Strings.ExportUnsavedHeading, name),
+                Loc.F(Strings.ExportUnsavedText, name), [Strings.ExportSaveFirst, Strings.ExportLastSaved]);
+
+            if (choice is not (0 or 1))
+                return;
+
+            saveFirst = choice == 0;
+        }
 
         string? path = await dialogs.PickZipToSaveAsync(Strings.ExportTitle, name + ".zip",
             Loc.F(Strings.ZipFileType, Manager.Game.Name));
@@ -624,8 +640,18 @@ public partial class GameViewModel : ObservableObject
         if (path == null)
             return;
 
-        Result result = await RunBusyAsync(Loc.F(Strings.BusyExporting, name),
-            () => Manager.ExportProfile(profile, path));
+        Result result = await RunBusyAsync(Loc.F(Strings.BusyExporting, name), () =>
+        {
+            if (saveFirst)
+            {
+                Result saved = Manager.SaveProgress();
+
+                if (!saved.Success)
+                    return saved;
+            }
+
+            return Manager.ExportProfile(profile, path);
+        });
 
         await ShowResult(result);
     }

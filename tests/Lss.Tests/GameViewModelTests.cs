@@ -1,4 +1,5 @@
 
+using System.IO.Compression;
 using Lss.App.ViewModels;
 
 namespace Lss.Tests;
@@ -239,5 +240,52 @@ public sealed class GameViewModelTests : IDisposable
 
         Assert.False(active.CanRename);
         Assert.True(other.CanRename);
+    }
+
+    // Esporta la partita in uso con progressi non salvati: o si salva prima, o si esporta l'ultimo stato salvato.
+    private async Task<string> ExportActiveWithChangesAsync(int choice)
+    {
+        SaveManager manager = TwoPlaythroughs();
+        var vm = new GameViewModel(manager, dialogs);
+        TestFolder.Write(folder.SaveFile, "nuovo");
+        TestSetup.Fake.SteamRunning = false;
+        dialogs.ChooseAnswer = choice;
+        dialogs.ZipToSave = Path.Combine(folder.Root, "mario.zip");
+
+        await vm.ExportAsync("Profilo_Mario");
+
+        using ZipArchive archive = ZipFile.OpenRead(dialogs.ZipToSave);
+        ZipArchiveEntry entry = archive.Entries.Single(e => e.Name == "slot.sav");
+        using var reader = new StreamReader(entry.Open());
+
+        return reader.ReadToEnd();
+    }
+
+    [Fact]
+    public async Task Export_UnsavedProgress_SaveFirstExportsTheNewContent()
+    {
+        Assert.Equal("nuovo", await ExportActiveWithChangesAsync(0));
+        Assert.Contains("Choose action: " + Loc.F(Strings.ExportUnsavedHeading, "Mario"), dialogs.Calls);
+    }
+
+    [Fact]
+    public async Task Export_UnsavedProgress_LastSavedExportsTheOldContent()
+    {
+        Assert.Equal("M", await ExportActiveWithChangesAsync(1));
+    }
+
+    [Fact]
+    public async Task Export_UnsavedProgress_CancellingExportsNothing()
+    {
+        SaveManager manager = TwoPlaythroughs();
+        var vm = new GameViewModel(manager, dialogs);
+        TestFolder.Write(folder.SaveFile, "nuovo");
+        dialogs.ChooseAnswer = -1;
+        dialogs.ZipToSave = Path.Combine(folder.Root, "mario.zip");
+
+        await vm.ExportAsync("Profilo_Mario");
+
+        Assert.False(File.Exists(dialogs.ZipToSave));
+        Assert.DoesNotContain(dialogs.Calls, call => call.StartsWith("Save:"));
     }
 }

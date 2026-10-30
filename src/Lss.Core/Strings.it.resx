@@ -238,6 +238,10 @@ La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="EditNote" xml:space="preserve"><value>Modifica nota</value></data>
   <data name="ExportMenu" xml:space="preserve"><value>Esporta in un file...</value></data>
   <data name="ExportTitle" xml:space="preserve"><value>Esporta partita</value></data>
+  <data name="ExportUnsavedHeading" xml:space="preserve"><value>«{0}» ha progressi non salvati</value></data>
+  <data name="ExportUnsavedText" xml:space="preserve"><value>I file del gioco sono più recenti dell&apos;ultimo stato salvato di «{0}». L&apos;esportazione contiene l&apos;ultimo stato salvato, a meno che tu non salvi prima.</value></data>
+  <data name="ExportSaveFirst" xml:space="preserve"><value>Salva i progressi ed esporta</value></data>
+  <data name="ExportLastSaved" xml:space="preserve"><value>Esporta l&apos;ultimo stato salvato</value></data>
   <data name="FirstPlaythroughName" xml:space="preserve"><value>Partita principale</value></data>
   <data name="FirstRunAccount" xml:space="preserve"><value>Account Steam: {0}</value></data>
   <data name="FirstRunCloudOff" xml:space="preserve"><value>Steam Cloud disattivato per {0}: va bene così</value></data>

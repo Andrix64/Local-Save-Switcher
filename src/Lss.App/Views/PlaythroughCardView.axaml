@@ -136,7 +136,8 @@
               <MenuItem Header="{loc:Str RenameMenu}" Command="{Binding RenameCommand}"
                         IsEnabled="{Binding CanRename}" />
               <MenuItem Header="{loc:Str EditNote}" Command="{Binding EditNoteCommand}" />
-              <MenuItem Header="{loc:Str ExportMenu}" Command="{Binding ExportCommand}" />
+              <MenuItem Header="{loc:Str ExportMenu}" Command="{Binding ExportCommand}"
+                        IsEnabled="{Binding CanExport}" />
               <MenuItem Header="{loc:Str GiveToMenu}" Command="{Binding GiveToMenuCommand}" />
               <Separator />
               <MenuItem Header="{loc:Str DeletePlaythroughMenu}" Command="{Binding DeleteCommand}"

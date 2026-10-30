@@ -238,6 +238,10 @@ The bar disappears as soon as the setting is off.</value></data>
   <data name="EditNote" xml:space="preserve"><value>Edit note</value></data>
   <data name="ExportMenu" xml:space="preserve"><value>Export to a file...</value></data>
   <data name="ExportTitle" xml:space="preserve"><value>Export playthrough</value></data>
+  <data name="ExportUnsavedHeading" xml:space="preserve"><value>“{0}” has unsaved progress</value></data>
+  <data name="ExportUnsavedText" xml:space="preserve"><value>The game&apos;s files are newer than the last saved state of “{0}”. The export contains the last saved state unless you save first.</value></data>
+  <data name="ExportSaveFirst" xml:space="preserve"><value>Save the progress and export</value></data>
+  <data name="ExportLastSaved" xml:space="preserve"><value>Export the last saved state</value></data>
   <data name="FirstPlaythroughName" xml:space="preserve"><value>Main playthrough</value></data>
   <data name="FirstRunAccount" xml:space="preserve"><value>Steam account: {0}</value></data>
   <data name="FirstRunCloudOff" xml:space="preserve"><value>Steam Cloud is off for {0}: good</value></data>
