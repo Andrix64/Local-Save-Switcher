@@ -534,7 +534,7 @@ Tick with the short commit hash and the test count, e.g.
 `- [x] S1 — … (abc1234; 858 tests)`. Before S1: 854 tests on `ef0dbdb`.
 
 - [x] S1 — Simple mode: one session, one save (91f4dad; 856 tests)
-- [ ] S2 — Several spots: an empty spot 1 must not block switching
+- [x] S2 — Several spots: an empty spot 1 must not block switching (80ae70f; 860 tests)
 - [ ] S3 — No rename of the playthrough in the game while the game runs
 - [ ] S4 — Deleted playthroughs take their automatic copies with them
 - [ ] S5 — The delete confirmation tells the truth
