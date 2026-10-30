@@ -855,6 +855,10 @@ public sealed partial class SaveManager
         // Nota e tempo di gioco seguono la partita nel backup, per il recupero.
         RecordDeletedInfo(profileName, backup);
 
+        // Anche le copie automatiche la seguono: il proprietario diventa il nome della cartella
+        // eliminata, che nessuna partita può avere ("" vorrebbe dire copia della 1.0).
+        string copiesError = MoveBackupOwner(profileName, Path.GetFileName(backup));
+
         string savestates = Path.Combine(SavestatePath, profileName);
 
         try
@@ -865,11 +869,13 @@ public sealed partial class SaveManager
         catch (Exception ex)
         {
             return Result.Fail(
-                Loc.F(Strings.ProfileDeletedSavestatesNot, ex.Message, savestates),
+                Loc.F(Strings.ProfileDeletedSavestatesNot, ex.Message, savestates) + copiesError,
                 backup);
         }
 
-        return Result.Ok(Strings.ProfileDeleted, backup);
+        return copiesError == ""
+            ? Result.Ok(Strings.ProfileDeleted, backup)
+            : Result.Fail(Strings.ProfileDeleted + copiesError, backup);
     }
 
     /// <summary>

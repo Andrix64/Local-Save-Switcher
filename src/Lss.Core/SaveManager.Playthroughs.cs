@@ -465,6 +465,7 @@ public sealed partial class SaveManager
 
         string name = UniqueName(ProfileDisplayName(deleted.Owner));
         string profileName = ProfileFolderName(name);
+        string deletedFolder = Path.GetFileName(deleted.Path);
 
         // Il proprietario è quello scelto ora: quello di prima può non esistere più.
         PlaythroughInfo info = ParseInfo(ReadInfoData(BackupInfoFile(deleted.Path))) with { Owner = ownerId };
@@ -489,7 +490,12 @@ public sealed partial class SaveManager
             Log.Write("Informazioni di " + profileName + " non recuperate", ex);
         }
 
-        return Result.Ok(Loc.F(Strings.Recovered, name));
+        // Le copie automatiche tornano alla partita (il proprietario era il nome della cartella eliminata).
+        string copiesError = MoveBackupOwner(deletedFolder, profileName);
+
+        return copiesError == ""
+            ? Result.Ok(Loc.F(Strings.Recovered, name))
+            : Result.Fail(Loc.F(Strings.Recovered, name) + copiesError);
     }
 
     /// <summary>
