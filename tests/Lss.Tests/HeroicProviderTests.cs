@@ -5,7 +5,7 @@ namespace Lss.Tests;
 /// <summary>
 /// HeroicProvider legge la configurazione di Heroic da una cartella Home finta
 /// dentro TestFolder. I formati dei file di Heroic non sono verificati su un PC
-/// con Heroic (vedi PROGRESS.md, fase O): i test li scrivono come li descrive il piano.
+/// con Heroic: i test li scrivono come li descriveva il piano.
 /// </summary>
 public sealed class HeroicProviderTests : IDisposable
 {

@@ -3,7 +3,7 @@ namespace Lss.Tests;
 /// <summary>
 /// GogProvider legge i giochi dal registro (FakePlatform) e le cartelle dal disco
 /// dentro TestFolder. I formati del registro di GOG non sono stati verificati su
-/// un PC con GOG (vedi PROGRESS.md, fase O).
+/// un PC con GOG.
 /// </summary>
 public sealed class GogProviderTests : IDisposable
 {

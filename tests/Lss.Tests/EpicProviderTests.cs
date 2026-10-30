@@ -6,7 +6,7 @@ namespace Lss.Tests;
 /// <summary>
 /// EpicProvider legge i manifest (*.item) e il catalogo di Epic da una
 /// ProgramData finta, dentro TestFolder. Il formato dei file è quello del
-/// launcher (non verificato su un PC con Epic: vedi PROGRESS.md, fase O).
+/// launcher (non verificato su un PC con Epic).
 /// </summary>
 public sealed class EpicProviderTests : IDisposable
 {
