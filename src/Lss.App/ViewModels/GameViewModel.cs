@@ -987,6 +987,12 @@ public partial class GameViewModel : ObservableObject
     }
 
     /// <summary>
+    /// La partita in corso è della modalità semplice: salva e conta il tempo lei,
+    /// qui alla chiusura basta aggiornare lo stato.
+    /// </summary>
+    internal bool SimpleSessionActive { get; set; }
+
+    /// <summary>
     /// Il gioco è cambiato di stato (chiamato dal monitor, ogni 2 secondi).
     /// </summary>
     public async Task OnGameState(SessionEvent e)
@@ -1002,6 +1008,12 @@ public partial class GameViewModel : ObservableObject
                 break;
 
             case SessionChange.Ended:
+                if (SimpleSessionActive)
+                {
+                    Refresh();
+                    break;
+                }
+
                 await OnGameClosedAsync(e);
                 StartLookAfterSession(e.Start);
                 break;

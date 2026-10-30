@@ -145,4 +145,36 @@ public sealed class GameViewModelTests : IDisposable
         Assert.False(added);
         Assert.DoesNotContain(vm.Manager.Game.Spots, spot => spot.Folder == extra);
     }
+
+    // Senza la ricerca di altre cartelle dopo la partita: nei test non deve guardare fuori dalla cartella temporanea.
+    private AppSettings NoLookAfter() => new(Path.Combine(folder.Root, "lss.json")) { LookAfterPlaying = false };
+
+    // Sessione della modalità semplice: tempo e salvataggio li gestisce lei, il monitor non deve ripeterli.
+    [Fact]
+    public async Task SimpleSessionEnd_IsLeftToTheSimpleMode()
+    {
+        SaveManager manager = TwoPlaythroughs();
+        var vm = new GameViewModel(manager, dialogs) { SimpleSessionActive = true, Settings = NoLookAfter() };
+        TestFolder.Write(folder.SaveFile, "cambiato");
+        DateTime end = DateTime.Now;
+
+        await vm.OnGameState(new SessionEvent(SessionChange.Ended, "Profilo_Mario", end.AddMinutes(-10), end));
+
+        Assert.Equal(TimeSpan.Zero, manager.GetInfo("Profilo_Mario").PlayTime);
+        Assert.DoesNotContain(manager.GetBackupsOf("Profilo_Mario"), b => b.Kind == BackupKind.SaveOnExit);
+    }
+
+    [Fact]
+    public async Task AdvancedSessionEnd_AddsTimeAndSavesOnce()
+    {
+        SaveManager manager = TwoPlaythroughs();
+        var vm = new GameViewModel(manager, dialogs) { Settings = NoLookAfter() };
+        TestFolder.Write(folder.SaveFile, "cambiato");
+        DateTime end = DateTime.Now;
+
+        await vm.OnGameState(new SessionEvent(SessionChange.Ended, "Profilo_Mario", end.AddMinutes(-10), end));
+
+        Assert.Equal(TimeSpan.FromMinutes(10), manager.GetInfo("Profilo_Mario").PlayTime);
+        Assert.Single(manager.GetBackupsOf("Profilo_Mario"), b => b.Kind == BackupKind.SaveOnExit);
+    }
 }

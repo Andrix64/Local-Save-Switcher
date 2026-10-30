@@ -533,7 +533,7 @@ This file can be deleted once everything is merged.
 Tick with the short commit hash and the test count, e.g.
 `- [x] S1 — … (abc1234; 858 tests)`. Before S1: 854 tests on `ef0dbdb`.
 
-- [ ] S1 — Simple mode: one session, one save
+- [x] S1 — Simple mode: one session, one save (856 tests)
 - [ ] S2 — Several spots: an empty spot 1 must not block switching
 - [ ] S3 — No rename of the playthrough in the game while the game runs
 - [ ] S4 — Deleted playthroughs take their automatic copies with them

@@ -247,29 +247,41 @@ public partial class MainWindowViewModel : ObservableObject
         if (manager == null)
             return;
 
-        PlaySession? session = await simpleFlow.StartAsync(manager, item, player, () => prepare(manager, player));
+        // Il monitor dei giochi non deve contare il tempo né salvare: lo fa questo giro.
+        GameViewModel game = GameFor(item);
+        game.SimpleSessionActive = true;
 
-        if (session == null)
-        {
-            simple.Refresh();
-            return;
-        }
-
-        // A schermo intero LSS si riduce a icona mentre gira il gioco, senza prendere il primo piano,
-        // e torna davanti (a schermo intero) a gioco chiuso e salvataggio fatto.
+        PlaySession? session;
         Result done = Result.Ok("");
 
-        await FullScreen.WhileAwayAsync(async () =>
+        try
         {
-            Task finished = simple.BeginPlaying(session);
-            await simpleFlow.WaitForEndAsync(session, finished);
+            session = await simpleFlow.StartAsync(manager, item, player, () => prepare(manager, player));
 
-            // "Il gioco non è partito": non c'è niente da salvare, né tempo da contare.
-            done = simple.PlayCancelled
-                ? Result.Ok(Strings.SimpleNotStartedDone)
-                : await simpleFlow.FinishAsync(session);
-            simple.EndPlaying();
-        });
+            if (session == null)
+            {
+                simple.Refresh();
+                return;
+            }
+
+            // A schermo intero LSS si riduce a icona mentre gira il gioco, senza prendere il primo piano,
+            // e torna davanti (a schermo intero) a gioco chiuso e salvataggio fatto.
+            await FullScreen.WhileAwayAsync(async () =>
+            {
+                Task finished = simple.BeginPlaying(session);
+                await simpleFlow.WaitForEndAsync(session, finished);
+
+                // "Il gioco non è partito": non c'è niente da salvare, né tempo da contare.
+                done = simple.PlayCancelled
+                    ? Result.Ok(Strings.SimpleNotStartedDone)
+                    : await simpleFlow.FinishAsync(session);
+                simple.EndPlaying();
+            });
+        }
+        finally
+        {
+            game.SimpleSessionActive = false;
+        }
 
         simple.Message = done.Message;
 
@@ -277,7 +289,7 @@ public partial class MainWindowViewModel : ObservableObject
             return;
 
         // Come nella modalità avanzata: dopo la partita si cercano altre cartelle dei salvataggi.
-        GameFor(item).ScanAfterSession(session.Started);
+        game.ScanAfterSession(session.Started);
     }
 
     // Senza gioco gestibile si mostra il messaggio al suo posto.
