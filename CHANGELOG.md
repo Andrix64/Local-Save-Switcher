@@ -3,6 +3,39 @@
 All notable changes, newest first. Versions follow
 [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Fixes
+
+- Simple mode: when a game closes, the play time is counted once and the
+  progress is saved once (it was both twice).
+- Simple mode no longer freezes the window while it prepares a game or saves
+  after it, and a second click on a tile while a game is being prepared does
+  nothing.
+- Simple mode: a game that takes a long time to start is still followed
+  instead of counting as finished. If LSS hasn't seen the game after two
+  minutes, the "I've finished playing" button appears.
+- Simple mode: play time counts even when the game saved nothing, and adding
+  a player with a taken name says why.
+- A new playthrough whose main save folder is empty no longer blocks
+  switching when only another save folder changed. If the playthrough had
+  saves and the game's main folder is empty, LSS asks whether to switch
+  anyway.
+- A missing main save folder (deleted to start over, or a game that never
+  ran) no longer makes the backup before a switch fail.
+- The playthrough in the game can't be renamed or exported while the game
+  runs. Exporting it with unsaved progress offers to save the progress first.
+- A deleted playthrough takes its automatic copies with it: a new playthrough
+  with the same name starts with an empty history, and recovering the deleted
+  one brings its copies back.
+- The delete confirmation says that deleted playthroughs are kept until you
+  delete them for good.
+- A failed import no longer leaves a half-imported playthrough behind.
+- Backup and point folder names no longer depend on the system calendar
+  (languages such as Thai could not find them).
+- The active playthrough can't be deleted by typing its name with different
+  capital letters.
+
 ## 2.0.0 — 2026-10-30
 
 LSS now works with **any launcher and any game**, and has a **simple mode**

@@ -545,7 +545,7 @@ Tick with the short commit hash and the test count, e.g.
 - [x] S10 — Folder names independent of the culture (157e5f2; 874 tests)
 - [x] S11 — Small fixes (add player message, play time when nothing saved, case-insensitive active check) (f2995d3; 877 tests)
 - [x] S12 — Missing main save folder: check, then decide (e30d0f0; 878 tests)
-- [ ] S13 — Linux check, changelog
+- [x] S13 — Linux check, changelog (changelog done; Linux check NOT run: lss-ci@192.168.1.3 refused the connection on port 22, 2026-10-30)
 - [ ] S14 — 👤 Check on Windows and the Steam Deck (copy the data folder first)
 
 ## Notes
