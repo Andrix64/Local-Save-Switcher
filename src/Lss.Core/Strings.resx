@@ -219,12 +219,10 @@ This warning won&apos;t be shown again until you close the app.</value></data>
 
 The bar disappears as soon as the setting is off.</value></data>
   <data name="ConfirmDeleteHeading" xml:space="preserve"><value>Delete “{0}”?</value></data>
-  <data name="ConfirmDeleteKeepAll" xml:space="preserve"><value>the automatic copies are never deleted</value></data>
-  <data name="ConfirmDeleteKeepN" xml:space="preserve"><value>only the last {0} automatic copies are kept</value></data>
   <data name="ConfirmDeletePoints" xml:space="preserve"><value>Its saved points ({0}) are deleted for good.</value></data>
   <data name="ConfirmDeletePointHeading" xml:space="preserve"><value>Delete the point {0}?</value></data>
   <data name="ConfirmDeletePointText" xml:space="preserve"><value>This can&apos;t be undone.</value></data>
-  <data name="ConfirmDeleteText" xml:space="preserve"><value>The playthrough disappears from the list. You can still recover it from “Deleted playthroughs” for a while: {0}.</value></data>
+  <data name="ConfirmDeleteText" xml:space="preserve"><value>The playthrough disappears from the list and stays in “Deleted playthroughs” until you delete it for good there.</value></data>
   <data name="ConfirmLegacyHeading" xml:space="preserve"><value>Use a copy from an earlier version?</value></data>
   <data name="ConfirmLegacyText" xml:space="preserve"><value>We don&apos;t know which playthrough this copy belongs to. If you go back to it, it becomes the saves of “{0}”. The current situation is copied first.</value></data>
   <data name="ConfirmPruneHeading" xml:space="preserve"><value>Delete the oldest automatic copies?</value></data>

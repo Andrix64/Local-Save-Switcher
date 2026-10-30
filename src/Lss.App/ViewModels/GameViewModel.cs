@@ -636,9 +636,7 @@ public partial class GameViewModel : ObservableObject
     public async Task DeleteAsync(string profile)
     {
         string name = SaveManager.ProfileDisplayName(profile);
-        string text = Loc.F(Strings.ConfirmDeleteText, Manager.State.BackupsToKeep == 0
-            ? Strings.ConfirmDeleteKeepAll
-            : Loc.F(Strings.ConfirmDeleteKeepN, Manager.State.BackupsToKeep));
+        string text = Strings.ConfirmDeleteText;
 
         int points = Manager.CountSavestates(profile);
 

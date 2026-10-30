@@ -219,12 +219,10 @@ L&apos;avviso non verrà ripetuto fino alla chiusura dell&apos;app.</value></dat
 
 La barra sparisce appena l&apos;impostazione è spenta.</value></data>
   <data name="ConfirmDeleteHeading" xml:space="preserve"><value>Eliminare «{0}»?</value></data>
-  <data name="ConfirmDeleteKeepAll" xml:space="preserve"><value>le copie automatiche non vengono mai eliminate</value></data>
-  <data name="ConfirmDeleteKeepN" xml:space="preserve"><value>si tengono solo le ultime {0} copie automatiche</value></data>
   <data name="ConfirmDeletePoints" xml:space="preserve"><value>I suoi punti salvati ({0}) vengono eliminati per sempre.</value></data>
   <data name="ConfirmDeletePointHeading" xml:space="preserve"><value>Eliminare il punto {0}?</value></data>
   <data name="ConfirmDeletePointText" xml:space="preserve"><value>Non si può annullare.</value></data>
-  <data name="ConfirmDeleteText" xml:space="preserve"><value>La partita sparisce dall&apos;elenco. Per un po&apos; potrai ancora recuperarla da «Partite eliminate»: {0}.</value></data>
+  <data name="ConfirmDeleteText" xml:space="preserve"><value>La partita sparisce dall&apos;elenco e resta in «Partite eliminate» finché non la elimini per sempre da lì.</value></data>
   <data name="ConfirmLegacyHeading" xml:space="preserve"><value>Usare una copia di una versione precedente?</value></data>
   <data name="ConfirmLegacyText" xml:space="preserve"><value>Non sappiamo a quale partita appartenga questa copia. Se torni a questa copia, diventa i salvataggi di «{0}». La situazione attuale viene copiata prima.</value></data>
   <data name="ConfirmPruneHeading" xml:space="preserve"><value>Eliminare le copie automatiche più vecchie?</value></data>
