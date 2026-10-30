@@ -9,22 +9,62 @@ to play and LSS loads its saves and starts the game. Before every switch it
 makes a copy, and you can save points for the hard parts and go back to them
 later.
 
-Today LSS works with Steam: every Steam game that keeps its saves in Steam's
-`userdata` folder. Other launchers, such as the Epic Games Launcher, are
-planned. It runs on Windows 10/11 and on Linux, and the interface is in
-English or Italian, following the system language.
+It works with **Steam, Epic Games, GOG and Heroic** games and with any other
+game you add by hand, and it finds by itself where each game keeps its saves.
+It runs on Windows 10/11 and on Linux (including the Steam Deck), and the
+interface is in English or Italian, following the system language.
+
+## Two modes
+
+- **Advanced mode** (the one above) is the full window: games on the left,
+  the playthroughs of the chosen game, saved points, history and settings.
+- **Simple mode** is made for a family or for the Steam Deck: everyone picks
+  their name, then a tile for each game, and LSS does the rest. A player can
+  have favourite games and an optional PIN; the admins set the games up and
+  manage the players.
+
+  ![Simple mode](docs/img/simple.png)
+
+A **Simple / Advanced** switch in the header moves between them. LSS asks
+which one you want the first time, and simple mode always starts full screen.
 
 ## Which games work
 
-LSS shows the games it finds in your Steam library. A game works when it has
-saves in `userdata` (the folder `<Steam>/userdata/<account>/<AppID>`). Games
-that have no saves yet are shown as *No saves yet: start the game once*. Games
-that keep their saves somewhere else are listed under **Other games** with the
-reason, and LSS doesn't manage them yet.
+| Where the game comes from | How LSS finds it |
+|---|---|
+| **Steam** (Windows, Linux, Steam Deck; native, Flatpak or Snap) | the Steam libraries; games added to Steam as non-Steam games are listed too |
+| **Epic Games Launcher** (Windows) | the launcher's own manifests |
+| **GOG** and **GOG Galaxy** (Windows) | the installed GOG games |
+| **Heroic Games Launcher** (Linux and Windows) | Heroic's own files |
+| **Any other game** | added by hand with **Add a game** (a name and, if you like, the program to start) |
 
-Some games save in `userdata` and also in another folder. LSS copies only the
-`userdata` folder, so the other files are not switched with the playthrough.
-If a game needs more files kept the same, see [Settings](#settings).
+**How the saves are found.** For each game LSS looks, in this order, at:
+
+1. Steam's `userdata` folder, when the game keeps its saves there;
+2. what the launcher itself knows: Steam Auto-Cloud rules and Epic's cloud
+   save folder, for example;
+3. the folder you chose, or one LSS learned: **Find the saves** has you play a
+   bit and then looks for the folders that changed (it only suggests; nothing
+   is used until you confirm);
+4. a folder you pick by hand.
+
+LSS never uses a list of games from the internet and never connects to
+anything.
+
+A game can keep saves in **several folders, or in loose files** (for example
+`*.sav` in a folder): add each one in the game's settings, under *Save
+folders*, and they switch together. After every session LSS looks for new save
+folders written during the game and offers them to you; the ones you refuse
+are remembered.
+
+Games that have no saves yet are shown as *No saves yet: start the game once*.
+Not supported yet: saves kept in the Windows registry. Other launchers (EA app,
+Ubisoft Connect, Battle.net, itch.io, Lutris) work as "any other game".
+
+If someone already worked out where a game saves, you can share it: in the
+game's settings, **Export save configuration** writes a `.lss-config.json`
+file and **Import save configuration** reads one (see
+[docs/SAVE_CONFIG.md](docs/SAVE_CONFIG.md)).
 
 Games that were tested are listed in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md).
 
@@ -36,7 +76,7 @@ Games that were tested are listed in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.
 2. Run it. Nothing to install: the program already contains everything it
    needs (that's why it's about 50 MB).
 
-Requirements: Windows 10 or 11, 64-bit, and Steam installed.
+Requirements: Windows 10 or 11, 64-bit, and a launcher with games (Steam, Epic Games, GOG or Heroic), or any game you add by hand.
 
 > **The exe is not digitally signed.** Signing it needs a certificate that
 > costs money every year, and LSS is a free hobby project. What this means:
@@ -59,7 +99,7 @@ Requirements: Windows 10 or 11, 64-bit, and Steam installed.
 Linux x64 only. Steam can be installed natively, as Flatpak or as Snap: all
 three are supported. Pick the file for your distribution from the
 [releases page](https://github.com/Andrix64/Local-Save-Switcher/releases),
-where `<version>` is the version in the file name, for example `1.0.0`.
+where `<version>` is the version in the file name, for example `2.0.0`.
 
 | Distribution | File | Command |
 |---|---|---|
@@ -116,12 +156,11 @@ Each playthrough has its own saves. The one with the red border and
   *Export to a file...* and *Delete playthrough...*. If you load without
   starting, an **Undo** button appears at the bottom to go straight back to
   the previous playthrough.
-- **New playthrough**: with the game's current saves, or empty to start again
-  from the beginning.
+- **New playthrough**: empty by default, to start again from the beginning; you
+  can also copy an existing playthrough or import a file exported on another
+  computer.
 
   ![New playthrough](docs/img/new-playthrough.png)
-
-- **Import...**: adds a playthrough exported on another computer.
 
 Each card shows the note, the play time, when it was last saved and the saved
 points.
@@ -145,6 +184,11 @@ current situation is copied, so you can always change your mind.
 
 ### Settings
 
+There are two settings windows: the game's (the gear next to its name) and
+LSS's (the gear in the header).
+
+Game settings:
+
 - *“Play this” also starts the game*: if you turn it off, the playthrough is
   only loaded.
 - *Save progress when you close the game*.
@@ -153,13 +197,18 @@ current situation is copied, so you can always change your mind.
 - *Files kept the same*: other files of the game that you want to share
   between all playthroughs, for example a preferences file.
 - How many automatic copies to keep (20 by default, 0 = all).
+- *Save folders*: where the game keeps its saves (see [Which games work](#which-games-work)),
+  and the folders that are not saves.
+- *Look for other save folders after playing*.
+- *Export / Import save configuration*.
 
 ![Settings](docs/img/settings.png)
 
 ## Where the files are
 
-Playthroughs, saved points, automatic copies and the operation log (`log.txt`)
-are in one folder per account and game:
+Playthroughs, saved points, automatic copies, the players and the operation log
+(`log.txt`) are in the LSS data folder, with one folder per launcher, account
+and game:
 
 - Windows: `%LOCALAPPDATA%\LSS` (usually `C:\Users\<name>\AppData\Local\LSS`).
 - Linux: `~/.local/share/LSS`.
@@ -197,10 +246,15 @@ automatic copies removes it.
 **Saves get mixed up between playthroughs.** It's almost always Steam Cloud:
 make sure it's off (see above).
 
-**My game isn't in the list.** Only games with saves in `userdata` are listed.
-Look in **Other games** for the reason. To tell us about a game, use the
+**My game isn't in the list.** Use **Add a game**, then let LSS find the saves
+(*Find the saves*) or pick the folder yourself. If the launcher's games are
+missing, check that the launcher is installed and has been opened once. To tell us about a game, use the
 [game report](https://github.com/Andrix64/Local-Save-Switcher/issues/new/choose)
 form.
+
+**I forgot a PIN.** Any player can have one. An admin removes it in LSS's
+settings, under *Players* (⋯ → *Remove PIN*). If the only admin forgot theirs,
+see [docs/KNOWN_BUGS.md](docs/KNOWN_BUGS.md#forgotten-pin).
 
 **Something went wrong.** Open a bug report from the
 [issues page](https://github.com/Andrix64/Local-Save-Switcher/issues/new/choose)

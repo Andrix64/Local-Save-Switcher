@@ -15,3 +15,17 @@ steps to reproduce it. Where the log is:
 
 The bug report form on GitHub asks for it. The manual tests to run with the
 real game are in [TODO.md](TODO.md).
+
+## Forgotten PIN
+
+Any player can have a PIN. An admin removes it in LSS's settings, under
+*Players* (⋯ → *Remove PIN*). If the only admin forgot theirs:
+
+1. Close LSS.
+2. Open the data folder: `%LOCALAPPDATA%\LSS` on Windows, `~/.local/share/LSS`
+   on Linux.
+3. Open `persone.json` with a text editor and delete the `Pin` value of that
+   player (leave it as `"Pin": ""`).
+4. Start LSS: that player has no PIN any more.
+
+Copy the file first if you are not sure.

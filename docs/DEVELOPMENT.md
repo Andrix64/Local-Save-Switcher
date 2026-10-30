@@ -366,6 +366,63 @@ Cloud" setting is not read.
 With the cloud off, the warning bar isn't shown. Steam regenerates
 `remotecache.vdf` even with the cloud off: that's normal.
 
+## Launchers and where the saves come from
+
+Each launcher is an `IGameProvider` (`src/Lss.Core/IGameProvider.cs`): it finds
+accounts and games, says whether a game is running, starts it, reports the
+cloud state and gives the **save rules** it knows. `Providers.All` lists them
+in order (Steam, Epic, GOG, Heroic, manual); if the same game is in two
+launchers the first wins (`DuplicateGames`).
+
+**Adding a provider:**
+
+1. Write a class that implements `IGameProvider` (use `ManualProvider` as the
+   smallest example). `SaveRules` returns an empty list when the launcher
+   knows nothing: the game then goes through the search on the disk.
+2. Add it to `Providers.All`, with its provider id (a short lowercase name).
+   Data goes in `<data>\<provider id>\<account>\<game>\`.
+3. Add its name to the texts if it needs one, with the same keys in
+   `Strings.resx` and `Strings.it.resx`, and tests with fake launcher files in
+   a temporary folder (see `HeroicProviderTests` and `EpicProviderTests`).
+4. Add a row to the table in the README and a launcher value in
+   [COMPATIBILITY.md](COMPATIBILITY.md).
+
+**Where each launcher's save rules come from:**
+
+| Launcher | Source |
+|---|---|
+| Steam | `appcache/appinfo.vdf` (binary VDF, `SteamAppInfo`): the `ufs` section of each app, with `savefiles` and `rootoverrides` (`SteamProvider.SaveRules`). Plus the `userdata` folder. |
+| Epic | the `CloudSaveFolder` of the game's manifest (`EpicCloudFolder.ToRule`). |
+| Heroic | Epic games: the Legendary metadata. GOG games: the `gogSaves` locations of the game's settings. |
+| GOG (Windows) | none: found by learning or chosen by hand. |
+| Manual | none. |
+
+**Root table.** A rule or a spot is a *portable path*: `{Root}/relative/path`.
+`SavePathResolver` turns it into a real folder for this system and this game
+(including its Proton or Wine prefix). The roots are `gameinstall`,
+`WinMyDocuments`, `WinAppDataRoaming`, `WinAppDataLocal`, `WinAppDataLocalLow`,
+`WinSavedGames`, `WinUserProfile`, `LinuxHome`, `LinuxXdgDataHome`,
+`LinuxXdgConfigHome` and `Absolute`; the Steam placeholders `{64BitSteamID}` and
+`{Steam3AccountID}` are replaced with the account. `SaveFolderSafety` refuses a
+folder that is a system folder, a launcher's or the game's own folder, the LSS
+data folder, or too big.
+
+**Learning weights** (`SaveFinder`). Folders written during a session are
+scored, and only the ones with at least 3 points are suggested (up to 5):
+
+| Reason | Points |
+|---|---|
+| The path contains the game's name | +6 |
+| The folder is one the game owns (`GameOwned`) | +5 |
+| A file with a name like a save (`*.sav`, `slot1`...) | +3 |
+| Changed files | +1 each, up to +3 |
+| `save` in the path | +2 (+3 for several words) |
+| Only settings files changed | −4 |
+| Looks like another program's folder | −6 |
+
+Folders that are never saves (`SaveFolderSafety`, and the ones the user
+ignored in `posti.json`) are not scored. LSS only suggests: the user confirms.
+
 ## Languages
 
 Interface texts are in `src/Lss.Core/Strings.resx` (English, the fallback
