@@ -389,7 +389,12 @@ public sealed partial class SimpleViewModel : ObservableObject
             Strings.AddPlayer);
 
         if (name != null)
-            people.Add(name);
+        {
+            Result<Person> added = people.Add(name);
+
+            if (!added.Success)
+                await dialogs.InformAsync(Strings.AddPlayer, added.Message, InfoKind.Warning);
+        }
 
         Refresh();
     }

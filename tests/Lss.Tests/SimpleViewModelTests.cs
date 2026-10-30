@@ -169,6 +169,20 @@ public sealed class SimpleViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task AddingAPlayerWithATakenNameSaysWhy()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        var dialogs = new FakeDialogService { ChosenAdmin = people.Find(TestFolder.Owner), PromptAnswer = "Clara" };
+        SimpleViewModel model = Model(manager, people, dialogs);
+
+        await model.AddPlayerCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, model.Players.Count);
+        Assert.Single(dialogs.Calls, call => call == "Inform: " + Strings.AddPlayer);
+        Assert.NotEqual("", dialogs.LastInformText);
+    }
+
+    [Fact]
     public async Task AddingAGameAsAUserWithoutAnAdminDoesNothing()
     {
         (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
