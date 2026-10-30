@@ -1181,7 +1181,7 @@ public sealed partial class SaveManager
         if (GameSavesAreEmpty())
             return Result.Fail(Strings.GameSavesEmpty);
 
-        string folder = DateTime.Now.ToString(SavestateDateFormat) + (name == "" ? "" : "_" + name);
+        string folder = DateTime.Now.ToString(SavestateDateFormat, CultureInfo.InvariantCulture) + (name == "" ? "" : "_" + name);
         string path = Path.Combine(ActiveSavestatePath, folder);
 
         if (Directory.Exists(path))
@@ -1236,7 +1236,7 @@ public sealed partial class SaveManager
 
     private string NewBackupPath(string name)
     {
-        return Path.Combine(BackupPath, name + "_" + DateTime.Now.ToString(BackupDateFormat));
+        return Path.Combine(BackupPath, name + "_" + DateTime.Now.ToString(BackupDateFormat, CultureInfo.InvariantCulture));
     }
 
     /// <summary>

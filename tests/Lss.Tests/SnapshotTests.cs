@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Lss.Tests;
 
 public sealed class SnapshotTests : IDisposable
@@ -146,5 +148,30 @@ public sealed class SnapshotTests : IDisposable
     public void BackupReasonText_IsReadable(string reason, string expected)
     {
         Assert.Equal(expected, SaveManager.BackupReasonText(reason));
+    }
+
+    // Con un calendario non gregoriano (th-TH: anno 2569) i nomi delle cartelle devono restare leggibili.
+    [Fact]
+    public void PointsAndBackupsAreFoundWithANonGregorianCulture()
+    {
+        CultureInfo previous = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("th-TH");
+            SaveManager manager = ManagerWithActiveProfile();
+            TestFolder.Write(folder.SaveFile, "A2");
+
+            Assert.True(manager.CreateSavestate("Punto").Success);
+            Assert.True(manager.SaveProgress().Success);
+
+            Snapshot point = Assert.Single(manager.GetSavestates());
+            Assert.Equal(DateTime.Now.Year, point.Date.Year);
+            Assert.Contains(manager.GetBackups(), backup => backup.Kind == BackupKind.Save && backup.Date.Year == DateTime.Now.Year);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 }

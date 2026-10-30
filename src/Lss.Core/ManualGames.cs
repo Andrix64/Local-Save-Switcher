@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace Lss;
@@ -94,7 +95,7 @@ internal static class ManualGames
     public static void Remove(string dataRoot, string id)
     {
         string source = Path.Combine(AccountFolder(dataRoot), id);
-        string target = Path.Combine(dataRoot, "manual", RemovedFolder, id + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss"));
+        string target = Path.Combine(dataRoot, "manual", RemovedFolder, id + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture));
 
         if (!Directory.Exists(source))
             return;

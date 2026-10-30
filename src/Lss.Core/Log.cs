@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Lss;
 
 /// <summary>
@@ -24,7 +26,7 @@ internal static class Log
 
     public static void Write(string message)
     {
-        string line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " +
+        string line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) + "  " +
                       message.Replace("\r", "").Replace("\n", " | ");
 
         lock (Lock)
