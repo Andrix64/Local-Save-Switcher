@@ -120,6 +120,20 @@ public sealed class ProfileTests : IDisposable
     }
 
     [Fact]
+    public void DeleteProfile_RefusesTheActiveOneWithADifferentCase()
+    {
+        SaveManager manager = folder.CreateManager();
+        manager.CreateProfile("Anna", true, TestFolder.Owner);
+        manager.ActivateProfile("Profilo_Anna");
+
+        Result result = manager.DeleteProfile("profilo_anna");
+
+        Assert.False(result.Success);
+        Assert.Equal(Strings.CannotDeleteActive, result.Message);
+        Assert.True(manager.ProfileExists("Profilo_Anna"));
+    }
+
+    [Fact]
     public void RenameProfile_AllowsChangingOnlyTheCase()
     {
         SaveManager manager = folder.CreateManager();

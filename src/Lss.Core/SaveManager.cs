@@ -833,7 +833,7 @@ public sealed partial class SaveManager
 
     private Result DeleteProfileCore(string profileName)
     {
-        if (profileName == State.ActiveProfile)
+        if (string.Equals(profileName, State.ActiveProfile, StringComparison.OrdinalIgnoreCase))
             return Result.Fail(Strings.CannotDeleteActive);
 
         string profile = Path.Combine(ProfilesPath, profileName);

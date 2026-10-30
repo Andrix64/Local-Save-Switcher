@@ -186,12 +186,14 @@ public sealed class SimplePlayFlowTests : IDisposable
     public async Task AGameThatIsNeverSeenIsWaitedForAndFlaggedOverdueOnce()
     {
         int overdue = 0;
+        var flagged = new TaskCompletionSource();
         using var cancel = new CancellationTokenSource();
 
         Task waiting = SimplePlayFlow.WaitWhileRunningAsync(() => false, TimeSpan.FromMilliseconds(1),
-            TimeSpan.FromMilliseconds(10), () => overdue++, cancel.Token);
+            TimeSpan.FromMilliseconds(10), () => { overdue++; flagged.TrySetResult(); }, cancel.Token);
 
-        await Task.Delay(300);
+        await flagged.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        await Task.Delay(50);
 
         Assert.False(waiting.IsCompleted);
         Assert.Equal(1, overdue);
