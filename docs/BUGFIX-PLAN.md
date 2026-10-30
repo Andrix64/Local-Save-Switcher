@@ -543,7 +543,7 @@ Tick with the short commit hash and the test count, e.g.
 - [x] S8 — Simple mode: file work off the UI thread (8891da4; 871 tests)
 - [x] S9 — Simple mode: a slow game start is not the end of the session (c73f329; 873 tests)
 - [x] S10 — Folder names independent of the culture (157e5f2; 874 tests)
-- [ ] S11 — Small fixes (add player message, play time when nothing saved, case-insensitive active check)
+- [x] S11 — Small fixes (add player message, play time when nothing saved, case-insensitive active check) (f2995d3; 877 tests)
 - [ ] S12 — Missing main save folder: check, then decide
 - [ ] S13 — Linux check, changelog
 - [ ] S14 — 👤 Check on Windows and the Steam Deck (copy the data folder first)
