@@ -219,4 +219,22 @@ public sealed class SimplePlayFlowTests : IDisposable
         Assert.True(checks >= 26);
         Assert.Equal(0, overdue);
     }
+
+    // Anche se non si è salvato niente la persona ha giocato: il tempo conta.
+    [Fact]
+    public async Task PlayTimeCountsEvenWhenNothingWasSaved()
+    {
+        var (manager, people, provider) = Setup();
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
+        Assert.True(manager.ActivateProfile("Profilo_Mario").Success);
+        var flow = new SimplePlayFlow(new FakeDialogService(), people);
+        PlaySession session = (await flow.StartAsync(manager, Item(provider), people.Find(TestFolder.Owner)!, Ready))!;
+        session = session with { Started = DateTime.Now.AddMinutes(-10) };
+        Directory.Delete(Path.GetDirectoryName(folder.SaveFile)!, true);
+
+        Result done = await flow.FinishAsync(session);
+
+        Assert.False(done.Success);
+        Assert.True(manager.GetInfo("Profilo_Mario").PlayTime >= TimeSpan.FromMinutes(9));
+    }
 }

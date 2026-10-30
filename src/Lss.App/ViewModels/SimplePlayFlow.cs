@@ -90,6 +90,10 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func
             // Cartella dei salvataggi vuota alla chiusura: di solito non si è salvato nel gioco, non è un guasto.
             if (saved.Message == Strings.GameSavesEmptyWouldClear)
             {
+                // Non si è salvato niente, ma la persona ha giocato: il tempo conta.
+                DateTime stop = DateTime.Now;
+                await Task.Run(() => session.Manager.AddPlayTime(session.Manager.State.ActiveProfile, session.Started, stop));
+
                 await dialogs.InformAsync(session.Item.Name,
                     Strings.SimpleNothingSaved + "\n\n" + Strings.SimpleNothingSavedWarning, InfoKind.Warning);
                 return saved;
