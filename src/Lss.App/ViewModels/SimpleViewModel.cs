@@ -271,6 +271,7 @@ public sealed partial class SimpleViewModel : ObservableObject
     {
         finishing = new TaskCompletionSource();
         PlayCancelled = false;
+        Message = "";
         Playing = session;
         return finishing.Task;
     }
@@ -302,27 +303,59 @@ public sealed partial class SimpleViewModel : ObservableObject
     /// <summary>"Le mie partite" su una copertina: si apre il menu (con il MainWindowViewModel).</summary>
     public Func<GameItemViewModel, Task>? MyGames { get; set; }
 
-    public Task OpenMyGamesAsync(SimpleGameTile tile) => MyGames?.Invoke(tile.Item) ?? Task.CompletedTask;
+    // true mentre un gioco si prepara: un secondo tocco sulla copertina non deve fare niente.
+    private bool starting;
+
+    public async Task OpenMyGamesAsync(SimpleGameTile tile)
+    {
+        if (MyGames == null || tile.Running || starting)
+            return;
+
+        starting = true;
+
+        try
+        {
+            await MyGames(tile.Item);
+        }
+        finally
+        {
+            starting = false;
+        }
+    }
 
     /// <summary>Un gioco: si gioca se è pronto, altrimenti si sistema (con un admin).</summary>
     public async Task ActivateAsync(SimpleGameTile tile)
     {
-        if (tile.Running)
+        if (tile.Running || starting)
             return;
 
-        if (!tile.Ready)
-        {
-            if (!await EnsureAdminAsync())
-                return;
+        starting = true;
+        string loading = Loc.F(Strings.BusyLoading, tile.Name);
+        Message = loading;
 
-            await setUp(tile.Item);
-        }
-        else
+        try
         {
-            await play(tile.Item);
-        }
+            if (!tile.Ready)
+            {
+                if (!await EnsureAdminAsync())
+                    return;
 
-        Refresh();
+                await setUp(tile.Item);
+            }
+            else
+            {
+                await play(tile.Item);
+            }
+
+            Refresh();
+        }
+        finally
+        {
+            if (Message == loading)
+                Message = "";
+
+            starting = false;
+        }
     }
 
     /// <summary>"Aggiungi una persona": un admin, poi il nome. La nuova persona è un utente.</summary>

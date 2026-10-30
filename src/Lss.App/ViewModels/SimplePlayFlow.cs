@@ -75,7 +75,7 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func
     internal async Task<Result> FinishAsync(PlaySession session)
     {
         // Nella modalità semplice si salva sempre alla chiusura, qualunque sia l'impostazione avanzata.
-        Result saved = session.Manager.SaveProgress(onGameExit: true);
+        Result saved = await Task.Run(() => session.Manager.SaveProgress(onGameExit: true));
 
         if (!saved.Success)
         {
@@ -91,7 +91,8 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func
             return saved;
         }
 
-        session.Manager.AddPlayTime(session.Manager.State.ActiveProfile, session.Started, DateTime.Now);
+        DateTime end = DateTime.Now;
+        await Task.Run(() => session.Manager.AddPlayTime(session.Manager.State.ActiveProfile, session.Started, end));
 
         return Result.Ok(Loc.F(Strings.SimpleSaved, session.Item.Name, session.Player.Name));
     }

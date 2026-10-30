@@ -132,6 +132,28 @@ public sealed class SimpleViewModelTests : IDisposable
         Assert.Empty(dialogs.Calls);
     }
 
+    // Un secondo tocco mentre il gioco si sta preparando non fa niente.
+    [Fact]
+    public async Task ASecondClickWhileAGameIsBeingPreparedDoesNothing()
+    {
+        (SaveManager manager, People people) = ManagerWithTwoPlayers(folder.Data);
+        var release = new TaskCompletionSource();
+        int calls = 0;
+        var model = new SimpleViewModel(people, new FakeDialogService(), [Item("Mario", SupportState.Supported)], _ => manager,
+            _ => Task.CompletedTask,
+            _ => { calls++; return release.Task; },
+            () => Task.CompletedTask);
+        model.SelectPlayer(people.Find(Second)!);
+        SimpleGameTile tile = model.Games.Single();
+
+        Task first = model.ActivateAsync(tile);
+        Task second = model.ActivateAsync(tile);
+        release.SetResult();
+        await Task.WhenAll(first, second);
+
+        Assert.Equal(1, calls);
+    }
+
     [Fact]
     public async Task AddingAPlayerNeedsAnAdminAndMakesAUser()
     {
