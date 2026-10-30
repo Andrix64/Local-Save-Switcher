@@ -541,7 +541,7 @@ Tick with the short commit hash and the test count, e.g.
 - [x] S6 — Exporting the playthrough in the game (00078a5; 868 tests)
 - [x] S7 — A failed import leaves nothing behind (8626fdd; 870 tests)
 - [x] S8 — Simple mode: file work off the UI thread (8891da4; 871 tests)
-- [ ] S9 — Simple mode: a slow game start is not the end of the session
+- [x] S9 — Simple mode: a slow game start is not the end of the session (c73f329; 873 tests)
 - [ ] S10 — Folder names independent of the culture
 - [ ] S11 — Small fixes (add player message, play time when nothing saved, case-insensitive active check)
 - [ ] S12 — Missing main save folder: check, then decide
