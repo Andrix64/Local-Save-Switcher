@@ -536,7 +536,7 @@ Tick with the short commit hash and the test count, e.g.
 - [x] S1 — Simple mode: one session, one save (91f4dad; 856 tests)
 - [x] S2 — Several spots: an empty spot 1 must not block switching (80ae70f; 860 tests)
 - [x] S3 — No rename of the playthrough in the game while the game runs (7240060; 862 tests)
-- [ ] S4 — Deleted playthroughs take their automatic copies with them
+- [x] S4 — Deleted playthroughs take their automatic copies with them (9d312bb; 865 tests)
 - [ ] S5 — The delete confirmation tells the truth
 - [ ] S6 — Exporting the playthrough in the game
 - [ ] S7 — A failed import leaves nothing behind
