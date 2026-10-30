@@ -538,7 +538,7 @@ Tick with the short commit hash and the test count, e.g.
 - [x] S3 — No rename of the playthrough in the game while the game runs (7240060; 862 tests)
 - [x] S4 — Deleted playthroughs take their automatic copies with them (9d312bb; 865 tests)
 - [x] S5 — The delete confirmation tells the truth (76aaa0d; 865 tests)
-- [ ] S6 — Exporting the playthrough in the game
+- [x] S6 — Exporting the playthrough in the game (00078a5; 868 tests)
 - [ ] S7 — A failed import leaves nothing behind
 - [ ] S8 — Simple mode: file work off the UI thread
 - [ ] S9 — Simple mode: a slow game start is not the end of the session
