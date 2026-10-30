@@ -41,6 +41,14 @@ internal sealed class SaveSet
 
             string target = SnapshotFolder(snapshot, spot);
 
+            // Cartella principale che non c'è (cancellata per ricominciare, o il gioco non è mai partito):
+            // come un gioco senza salvataggi, la copia è vuota. Il cambio poi ricrea la cartella.
+            if (spot.Id == 1 && !Directory.Exists(spot.Folder))
+            {
+                Directory.CreateDirectory(target);
+                continue;
+            }
+
             if (spot.IsWholeFolder)
                 FileOps.CopyFolderVerified(spot.Folder, target);
             else

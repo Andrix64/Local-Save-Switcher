@@ -553,5 +553,17 @@ Tick with the short commit hash and the test count, e.g.
 Anything that didn't match the plan, decisions taken with Andrix, results
 of checks. Newest first, with the date.
 
+- 2026-10-30 — S12: with a whole-folder spot 1 and the game folder deleted,
+  `ActivateProfile("Profilo_Anna")` failed only because of the backup
+  ("Backup failed… Cartella non trovata"). `SaveLocator.CheckSpot` →
+  `SaveFolderSafety.Check` returns `Missing` for a folder that doesn't exist,
+  but it runs only at detection and for spots that are not `Userdata`
+  (`SaveLocator`: `Where(spot.Source != Userdata)`); a Steam game managed
+  with the userdata folder never gets that check, and `SaveManager` itself
+  doesn't check. Fixed in `SaveSet.CopyGameTo` (empty copy for a missing
+  spot 1); the test `ActivateProfile_WorksWhenTheGameSaveFolderIsMissing`
+  stays as a regression test. Other tests: running a single test class
+  with `--filter` hangs (Avalonia dispatcher in `TestApp`, also for tests
+  that already existed): run the whole suite.
 - 2026-10-30 — Plan written from a review of `main` at `ef0dbdb`
   (854 tests green). Problems 2 and 4 reproduced with tests, not committed.

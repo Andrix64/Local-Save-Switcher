@@ -133,6 +133,20 @@ public sealed class ProfileTests : IDisposable
         Assert.True(manager.ProfileExists("Profilo_Anna"));
     }
 
+    // L'utente ha cancellato la cartella dei salvataggi del gioco per ricominciare: il cambio deve funzionare.
+    [Fact]
+    public void ActivateProfile_WorksWhenTheGameSaveFolderIsMissing()
+    {
+        SaveManager manager = folder.CreateManager("A1");
+        manager.CreateProfile("Anna", true, TestFolder.Owner);
+        Directory.Delete(folder.Game, true);
+
+        Result result = manager.ActivateProfile("Profilo_Anna");
+
+        Assert.True(result.Success, result.Message);
+        Assert.Equal("A1", File.ReadAllText(folder.SaveFile));
+    }
+
     [Fact]
     public void RenameProfile_AllowsChangingOnlyTheCase()
     {
