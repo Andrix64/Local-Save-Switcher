@@ -115,7 +115,7 @@ internal static class Program
 
         Shot(MessageWindow.Confirm(
             Loc.F(Strings.ConfirmDeleteHeading, second),
-            Loc.F(Strings.ConfirmDeleteText, Loc.F(Strings.ConfirmDeleteKeepN, 20)),
+            Strings.ConfirmDeleteText,
             Strings.DeletePlaythrough, destructive: true, InfoKind.Warning), "02-confirm-delete");
 
         Shot(MessageWindow.Inform(Strings.TitleOperationFailed, error,
