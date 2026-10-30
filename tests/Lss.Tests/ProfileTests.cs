@@ -101,6 +101,25 @@ public sealed class ProfileTests : IDisposable
     }
 
     [Fact]
+    public void RenameProfile_RefusesTheActivePlaythroughWhileTheGameRuns()
+    {
+        var provider = new FakeProvider();
+        var manager = new SaveManager(folder.Game, folder.Data, "", null, provider);
+        TestFolder.Write(folder.SaveFile, "M");
+        manager.CreateProfile("Mario", true, TestFolder.Owner);
+        manager.CreateProfile("Luigi", true, TestFolder.Owner);
+        manager.ActivateProfile("Profilo_Mario");
+        provider.Running = true;
+
+        Result active = manager.RenameProfile("profilo_mario", "Super");
+        Result other = manager.RenameProfile("Profilo_Luigi", "Bros");
+
+        Assert.False(active.Success);
+        Assert.True(manager.ProfileExists("Profilo_Mario"));
+        Assert.True(other.Success, other.Message);
+    }
+
+    [Fact]
     public void RenameProfile_AllowsChangingOnlyTheCase()
     {
         SaveManager manager = folder.CreateManager();

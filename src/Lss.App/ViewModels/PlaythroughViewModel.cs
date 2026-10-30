@@ -42,6 +42,8 @@ public partial class PlaythroughViewModel : ObservableObject
 
     public bool CanDelete => !IsActive && CanPlay;
 
+    public bool CanRename => !game.IsBusy && !(IsActive && game.GameRunning);
+
     public string AccessibleName => Name + (IsActive ? Strings.ActiveSuffix : "");
 
     public string MoreActionsName => Loc.F(Strings.MoreActionsFor, Name);
@@ -61,6 +63,7 @@ public partial class PlaythroughViewModel : ObservableObject
         OnPropertyChanged(nameof(CanPlay));
         OnPropertyChanged(nameof(ShowPlay));
         OnPropertyChanged(nameof(CanDelete));
+        OnPropertyChanged(nameof(CanRename));
     }
 
     [RelayCommand]

@@ -843,6 +843,9 @@ public partial class GameViewModel : ObservableObject
 
     public async Task RenameAsync(string profile)
     {
+        if (IsBusy || (GameRunning && profile == Manager.State.ActiveProfile))
+            return;
+
         var window = new NewPlaythroughWindow(new NewPlaythroughViewModel(
             name => Manager.ProfileExists(SaveManager.ProfileFolderName(name)),
             SaveManager.ProfileDisplayName(profile)));

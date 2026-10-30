@@ -223,4 +223,21 @@ public sealed class GameViewModelTests : IDisposable
         Assert.Contains("Confirm: " + Strings.SwitchEmptyHeading, dialogs.Calls);
         Assert.Equal("Profilo_Anna", manager.State.ActiveProfile);
     }
+
+    // Con il gioco aperto la partita in uso non si rinomina: il tempo e il salvataggio alla chiusura la cercherebbero col nome vecchio.
+    [Fact]
+    public void CanRename_IsFalseForTheActiveCardWhileTheGameRuns()
+    {
+        var vm = new GameViewModel(TwoPlaythroughs(), dialogs);
+        vm.Refresh();
+        PlaythroughViewModel active = vm.Playthroughs.Single(card => card.IsActive);
+        PlaythroughViewModel other = vm.Playthroughs.Single(card => !card.IsActive);
+        Assert.True(active.CanRename);
+
+        vm.GameRunning = true;
+        vm.UpdateState();
+
+        Assert.False(active.CanRename);
+        Assert.True(other.CanRename);
+    }
 }

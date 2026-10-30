@@ -709,6 +709,11 @@ public sealed partial class SaveManager
         if (newProfileName == profileName)
             return Result.Ok(Strings.NameUnchanged);
 
+        // Col gioco aperto la partita in uso non si rinomina: il tempo e il salvataggio alla chiusura
+        // userebbero il nome vecchio.
+        if (string.Equals(profileName, State.ActiveProfile, StringComparison.OrdinalIgnoreCase) && IsGameRunning())
+            return Result.Fail(Loc.F(Strings.CloseGameFirst, Game.Name));
+
         string source = Path.Combine(ProfilesPath, profileName);
         string destination = Path.Combine(ProfilesPath, newProfileName);
 
