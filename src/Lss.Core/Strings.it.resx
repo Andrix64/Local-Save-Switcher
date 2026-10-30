@@ -556,6 +556,7 @@ LSS guarda quali file sono cambiati sul disco.</value></data>
   <data name="SimpleHaveFunBody" xml:space="preserve"><value>Quando chiudi {0}, LSS salva la tua partita da solo. Non devi fare niente.</value></data>
   <data name="SimpleGameOpen" xml:space="preserve"><value>{0} è aperto</value></data>
   <data name="SimpleCantDetect" xml:space="preserve"><value>LSS non riesce a vedere quando chiudi questo gioco: quando hai finito, premi qui.</value></data>
+  <data name="SimpleNotSeenYet" xml:space="preserve"><value>LSS non ha ancora visto aprirsi il gioco. Se è aperto, continua a giocare; se hai finito, premi qui.</value></data>
   <data name="SimpleChangePlayer" xml:space="preserve"><value>Cambia giocatore</value></data>
   <data name="SimpleAddPlayer" xml:space="preserve"><value>Aggiungi giocatore</value></data>
   <data name="SimpleAddGame" xml:space="preserve"><value>Aggiungi un gioco</value></data>

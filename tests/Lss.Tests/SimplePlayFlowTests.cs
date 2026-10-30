@@ -180,4 +180,43 @@ public sealed class SimplePlayFlowTests : IDisposable
         Assert.Contains(Strings.SimpleNothingSavedWarning, dialogs.LastInformText);
         Assert.DoesNotContain(Strings.SimpleAskForHelp, dialogs.LastInformText);
     }
+
+    // Un gioco lento a partire non è un gioco finito: l'attesa non finisce da sola, ma avvisa.
+    [Fact]
+    public async Task AGameThatIsNeverSeenIsWaitedForAndFlaggedOverdueOnce()
+    {
+        int overdue = 0;
+        using var cancel = new CancellationTokenSource();
+
+        Task waiting = SimplePlayFlow.WaitWhileRunningAsync(() => false, TimeSpan.FromMilliseconds(1),
+            TimeSpan.FromMilliseconds(10), () => overdue++, cancel.Token);
+
+        await Task.Delay(300);
+
+        Assert.False(waiting.IsCompleted);
+        Assert.Equal(1, overdue);
+
+        cancel.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waiting);
+    }
+
+    [Fact]
+    public async Task AGameSeenAfterAWhileIsFollowedUntilItCloses()
+    {
+        int checks = 0;
+        int overdue = 0;
+
+        // Non gira per 20 controlli, poi gira per 5, poi si chiude.
+        bool IsRunning()
+        {
+            int n = Interlocked.Increment(ref checks);
+            return n is > 20 and <= 25;
+        }
+
+        await SimplePlayFlow.WaitWhileRunningAsync(IsRunning, TimeSpan.FromMilliseconds(1),
+            TimeSpan.FromMinutes(1), () => overdue++, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(10));
+
+        Assert.True(checks >= 26);
+        Assert.Equal(0, overdue);
+    }
 }

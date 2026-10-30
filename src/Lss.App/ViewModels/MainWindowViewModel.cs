@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lss.App.Services;
@@ -269,7 +270,8 @@ public partial class MainWindowViewModel : ObservableObject
             await FullScreen.WhileAwayAsync(async () =>
             {
                 Task finished = simple.BeginPlaying(session);
-                await simpleFlow.WaitForEndAsync(session, finished);
+                await simpleFlow.WaitForEndAsync(session, finished,
+                    () => Dispatcher.UIThread.Post(() => simple.StartOverdue = true));
 
                 // "Il gioco non è partito": non c'è niente da salvare, né tempo da contare.
                 done = simple.PlayCancelled

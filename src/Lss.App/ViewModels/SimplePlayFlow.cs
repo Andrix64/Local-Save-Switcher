@@ -63,12 +63,20 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func
     /// Finisce quando il gioco si chiude (se il launcher lo sa dire) o quando l'utente
     /// preme "Ho finito di giocare".
     /// </summary>
-    internal async Task WaitForEndAsync(PlaySession session, Task finishedByButton)
+    internal async Task WaitForEndAsync(PlaySession session, Task finishedByButton, Action? onStartOverdue = null)
     {
         if (session.Launched && session.CanDetect)
-            await Task.WhenAny(WaitWhileRunningAsync(session.Manager), finishedByButton);
+        {
+            using var cancel = new CancellationTokenSource();
+
+            // Chi arriva prima: gioco chiuso o pulsante. Poi l'attesa si ferma.
+            await Task.WhenAny(WaitWhileRunningAsync(session.Manager, onStartOverdue, cancel.Token), finishedByButton);
+            cancel.Cancel();
+        }
         else
+        {
             await finishedByButton;
+        }
     }
 
     /// <summary>Salva i progressi nella partita giocata e registra il tempo di gioco.</summary>
@@ -138,14 +146,38 @@ internal sealed class SimplePlayFlow(IDialogService dialogs, People people, Func
         return choice == 1;
     }
 
-    // Aspetta che il gioco parta (al massimo due minuti), poi che si chiuda.
-    private static Task WaitWhileRunningAsync(SaveManager manager) =>
+    /// <summary>Dopo tanto senza vedere il gioco si mostra "Ho finito di giocare".</summary>
+    internal static readonly TimeSpan StartOverdueAfter = TimeSpan.FromMinutes(2);
+
+    // Aspetta che il gioco parta (senza limite: un aggiornamento o un altro launcher possono
+    // metterci molto), poi che si chiuda.
+    private static Task WaitWhileRunningAsync(SaveManager manager, Action? onOverdue, CancellationToken cancel) =>
+        WaitWhileRunningAsync(manager.IsGameRunning, TimeSpan.FromSeconds(2), StartOverdueAfter, onOverdue, cancel);
+
+    /// <summary>
+    /// Aspetta che il gioco si veda in esecuzione, poi che si chiuda. Se dopo overdueAfter
+    /// non si è ancora visto chiama onOverdue (una volta) e continua ad aspettare.
+    /// </summary>
+    internal static Task WaitWhileRunningAsync(Func<bool> isRunning, TimeSpan delay, TimeSpan overdueAfter,
+        Action? onOverdue, CancellationToken cancel) =>
         Task.Run(async () =>
         {
-            for (int i = 0; i < 60 && !manager.IsGameRunning(); i++)
-                await Task.Delay(TimeSpan.FromSeconds(2));
+            TimeSpan waited = TimeSpan.Zero;
+            bool overdue = false;
 
-            while (manager.IsGameRunning())
-                await Task.Delay(TimeSpan.FromSeconds(2));
-        });
+            while (!isRunning())
+            {
+                await Task.Delay(delay, cancel);
+                waited += delay;
+
+                if (!overdue && waited >= overdueAfter)
+                {
+                    overdue = true;
+                    onOverdue?.Invoke();
+                }
+            }
+
+            while (isRunning())
+                await Task.Delay(delay, cancel);
+        }, cancel);
 }

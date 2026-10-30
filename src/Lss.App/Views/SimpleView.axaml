@@ -303,7 +303,7 @@
             <TextBlock Text="{Binding StartYourselfText}" FontSize="17" Foreground="{StaticResource TextSecondary}"
                        TextWrapping="Wrap" IsVisible="{Binding ShowStartYourself}" />
             <StackPanel Spacing="12" Margin="0,8,0,0" IsVisible="{Binding ShowFinishButton}">
-              <TextBlock Text="{loc:Str SimpleCantDetect}" FontSize="15" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding FinishHint}" FontSize="15" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" />
               <Button Classes="primary" Command="{Binding FinishPlayingCommand}" Height="52" Padding="28,0"
                       CornerRadius="12" FontSize="18" HorizontalAlignment="Left">
                 <TextBlock Text="{Binding FinishText}" FontSize="18" FontWeight="Bold" />

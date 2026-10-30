@@ -556,6 +556,7 @@ LSS will look at what changed on the disk.</value></data>
   <data name="SimpleHaveFunBody" xml:space="preserve"><value>When you close {0}, LSS saves your game by itself. You don't have to do anything.</value></data>
   <data name="SimpleGameOpen" xml:space="preserve"><value>{0} is open</value></data>
   <data name="SimpleCantDetect" xml:space="preserve"><value>LSS can't see when you close this game: when you have finished, press here.</value></data>
+  <data name="SimpleNotSeenYet" xml:space="preserve"><value>LSS hasn&apos;t seen the game open yet. If it is open, keep playing; if you have finished, press here.</value></data>
   <data name="SimpleChangePlayer" xml:space="preserve"><value>Change player</value></data>
   <data name="SimpleAddPlayer" xml:space="preserve"><value>Add player</value></data>
   <data name="SimpleAddGame" xml:space="preserve"><value>Add a game</value></data>

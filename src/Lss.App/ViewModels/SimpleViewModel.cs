@@ -235,8 +235,24 @@ public sealed partial class SimpleViewModel : ObservableObject
         ? Loc.F(Strings.SimpleStartYourself, session.Item.Name)
         : "";
 
-    /// <summary>Il pulsante "Ho finito di giocare" serve solo se il launcher non sa dire quando il gioco si chiude.</summary>
-    public bool ShowFinishButton => Playing is { CanDetect: false };
+    /// <summary>
+    /// Il pulsante "Ho finito di giocare" serve se il launcher non sa dire quando il gioco si chiude,
+    /// o se dopo un po' LSS non ha ancora visto partire il gioco.
+    /// </summary>
+    public bool ShowFinishButton => Playing is { CanDetect: false } || StartOverdue;
+
+    /// <summary>true se il gioco non si è visto partire da un po': l'utente può chiudere la sessione.</summary>
+    [ObservableProperty]
+    private bool startOverdue;
+
+    partial void OnStartOverdueChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowFinishButton));
+        OnPropertyChanged(nameof(FinishHint));
+    }
+
+    /// <summary>Il perché del pulsante: LSS non vede chiudersi il gioco, o non l'ha ancora visto partire.</summary>
+    public string FinishHint => Playing is { CanDetect: false } ? Strings.SimpleCantDetect : Strings.SimpleNotSeenYet;
 
     public string FinishText => Strings.SimpleFinished;
 
@@ -259,6 +275,7 @@ public sealed partial class SimpleViewModel : ObservableObject
         OnPropertyChanged(nameof(PlayingText));
         OnPropertyChanged(nameof(StartYourselfText));
         OnPropertyChanged(nameof(ShowFinishButton));
+        OnPropertyChanged(nameof(FinishHint));
         OnPropertyChanged(nameof(PlayingTitle));
         OnPropertyChanged(nameof(PlayingBody));
         OnPropertyChanged(nameof(PlayingOpenText));
@@ -272,6 +289,7 @@ public sealed partial class SimpleViewModel : ObservableObject
         finishing = new TaskCompletionSource();
         PlayCancelled = false;
         Message = "";
+        StartOverdue = false;
         Playing = session;
         return finishing.Task;
     }
